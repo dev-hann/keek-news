@@ -51,6 +51,7 @@ Future<void> configureDependencies() async {
     () => HtmlClientImpl(
       baseUrl: 'https://www.todayhumor.co.kr',
       encoding: 'utf-8',
+      desktop: true,
     ),
     instanceName: 'todayhumorHtmlClient',
   );
@@ -65,6 +66,7 @@ Future<void> configureDependencies() async {
     () => HtmlClientImpl(
       baseUrl: 'https://www.ppomppu.co.kr',
       encoding: 'euc-kr',
+      desktop: true,
     ),
     instanceName: 'ppomppuHtmlClient',
   );
@@ -79,6 +81,7 @@ Future<void> configureDependencies() async {
     () => HtmlClientImpl(
       baseUrl: 'https://www.dogdrip.net',
       encoding: 'utf-8',
+      desktop: true,
     ),
     instanceName: 'dogdripHtmlClient',
   );
@@ -93,6 +96,7 @@ Future<void> configureDependencies() async {
     () => HtmlClientImpl(
       baseUrl: 'https://www.fmkorea.com',
       encoding: 'utf-8',
+      desktop: true,
     ),
     instanceName: 'fmkoreaHtmlClient',
   );

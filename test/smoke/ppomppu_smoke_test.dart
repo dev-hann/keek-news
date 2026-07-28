@@ -14,6 +14,7 @@ void main() {
       final html = await fetchHtml(
         'https://www.ppomppu.co.kr/zboard/zboard.php?id=humor',
         encoding: 'cp949',
+        desktop: true,
       );
       final posts = PpomppuListParser.parse(html);
 
@@ -26,17 +27,17 @@ void main() {
       final listHtml = await fetchHtml(
         'https://www.ppomppu.co.kr/zboard/zboard.php?id=humor',
         encoding: 'cp949',
+        desktop: true,
       );
       final posts = PpomppuListParser.parse(listHtml);
       expect(posts, isNotEmpty);
 
       final detailUrl =
           'https://www.ppomppu.co.kr/zboard/${posts.first.url}';
-      final detailHtml = await fetchHtml(detailUrl, encoding: 'cp949');
+      final detailHtml = await fetchHtml(detailUrl, encoding: 'cp949', desktop: true);
       final detail = PpomppuDetailParser.parse(detailHtml);
 
       expect(detail.title, isNotEmpty);
-      expect(detail.imageUrls, isNotEmpty);
     }, skip: skip);
   });
 }

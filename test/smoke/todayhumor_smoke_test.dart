@@ -14,6 +14,7 @@ void main() {
       final html = await fetchHtml(
         'https://www.todayhumor.co.kr/board/list.php?table=bestofbest',
         encoding: 'utf-8',
+        desktop: true,
       );
       final posts = TodayhumorListParser.parse(html);
 
@@ -34,6 +35,7 @@ void main() {
       final detailHtml = await fetchHtml(
         'https://www.todayhumor.co.kr${posts.first.url}',
         encoding: 'utf-8',
+        desktop: true,
       );
       final detail = TodayhumorDetailParser.parse(detailHtml);
 
