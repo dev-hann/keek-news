@@ -1,3 +1,4 @@
+import 'package:humoruniv/domain/entities/community.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -14,6 +15,7 @@ class BoardPost {
     required this.viewCount,
     required this.thumbnailUrl,
     this.previewText,
+    this.community = CommunityId.humoruniv,
   });
   final int id;
   final String title;
@@ -26,6 +28,7 @@ class BoardPost {
   final int viewCount;
   final String thumbnailUrl;
   final String? previewText;
+  final CommunityId community;
 
   @override
   bool operator ==(Object other) =>
@@ -42,20 +45,22 @@ class BoardPost {
           commentCount == other.commentCount &&
           viewCount == other.viewCount &&
           thumbnailUrl == other.thumbnailUrl &&
-          previewText == other.previewText;
+          previewText == other.previewText &&
+          community == other.community;
 
   @override
   int get hashCode => Object.hash(
-    id,
-    title,
-    url,
-    author,
-    date,
-    recommendCount,
-    notRecommendCount,
-    commentCount,
-    viewCount,
-    thumbnailUrl,
-    previewText,
-  );
+        id,
+        title,
+        url,
+        author,
+        date,
+        recommendCount,
+        notRecommendCount,
+        commentCount,
+        viewCount,
+        thumbnailUrl,
+        previewText,
+        community,
+      );
 }

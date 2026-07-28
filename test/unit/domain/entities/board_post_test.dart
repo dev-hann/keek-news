@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:humoruniv/domain/entities/board_list_result.dart';
 import 'package:humoruniv/domain/entities/board_post.dart';
+import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/sort_option.dart';
 
 void main() {
@@ -212,6 +213,36 @@ void main() {
         viewCount: 0,
         thumbnailUrl: '',
         previewText: 'b',
+      );
+      expect(a, isNot(equals(b)));
+    });
+
+    test('should default community to humoruniv', () {
+      const post = BoardPost(
+        id: 1,
+        title: 't',
+        url: 'u',
+        author: 'a',
+        date: '2026-07-26',
+        recommendCount: 0,
+        notRecommendCount: 0,
+        commentCount: 0,
+        viewCount: 0,
+        thumbnailUrl: '',
+      );
+      expect(post.community, CommunityId.humoruniv);
+    });
+
+    test('should not be equal when community differs', () {
+      const a = BoardPost(
+        id: 1, title: 't', url: 'u', author: 'a', date: 'd',
+        recommendCount: 0, notRecommendCount: 0, commentCount: 0,
+        viewCount: 0, thumbnailUrl: '', community: CommunityId.humoruniv,
+      );
+      const b = BoardPost(
+        id: 1, title: 't', url: 'u', author: 'a', date: 'd',
+        recommendCount: 0, notRecommendCount: 0, commentCount: 0,
+        viewCount: 0, thumbnailUrl: '', community: CommunityId.ppomppu,
       );
       expect(a, isNot(equals(b)));
     });
