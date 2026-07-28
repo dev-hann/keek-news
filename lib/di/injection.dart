@@ -11,6 +11,7 @@ import 'package:humoruniv/data/datasources/github_remote_ds_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds_impl.dart';
+import 'package:humoruniv/data/datasources/ppomppu_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/todayhumor_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/image_cache_service.dart';
 import 'package:humoruniv/data/datasources/image_cache_service_impl.dart';
@@ -58,11 +59,26 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  sl.registerLazySingleton<HtmlClientImpl>(
+    () => HtmlClientImpl(
+      baseUrl: 'https://www.ppomppu.co.kr',
+      encoding: 'euc-kr',
+    ),
+    instanceName: 'ppomppuHtmlClient',
+  );
+
+  sl.registerLazySingleton<PpomppuAdapterImpl>(
+    () => PpomppuAdapterImpl(
+      htmlClient: sl<HtmlClientImpl>(instanceName: 'ppomppuHtmlClient'),
+    ),
+  );
+
   sl.registerLazySingleton<MergedFeedRepository>(
     () => MergedFeedRepositoryImpl(
       adapters: {
         CommunityId.humoruniv: sl<CommunityAdapter>(),
         CommunityId.todayhumor: sl<TodayhumorAdapterImpl>(),
+        CommunityId.ppomppu: sl<PpomppuAdapterImpl>(),
       },
     ),
   );
