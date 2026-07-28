@@ -14,8 +14,11 @@ import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/feed_item.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:humoruniv/presentation/providers/merged_feed_provider.dart';
+import 'package:humoruniv/presentation/screens/cloudflare_auth_screen.dart';
 import 'package:humoruniv/presentation/screens/image_viewer_screen.dart';
 import 'package:humoruniv/presentation/widgets/community_badge.dart';
+import 'package:humoruniv/di/injection.dart' as di;
+import 'package:humoruniv/data/datasources/cloudflare_cookie_store.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -167,9 +170,13 @@ class _PartialFailureBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final needsCloudflare = failed.contains(CommunityId.fmkorea);
+    final otherFailed = failed.difference({CommunityId.fmkorea});
+
     final names = failed
         .map((id) => Community.findById(id)?.shortName ?? id.name)
         .join(', ');
+
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: AppSpacing.p12,
@@ -183,23 +190,55 @@ class _PartialFailureBanner extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            Icons.warning_amber_rounded,
+            needsCloudflare ? Icons.shield_outlined : Icons.warning_amber_rounded,
             size: 16,
             color: Theme.of(context).colorScheme.onErrorContainer,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '$names 커뮤니티 일시적 오류',
+              needsCloudflare && otherFailed.isEmpty
+                  ? 'FM코리아 인증 필요'
+                  : '$names 커뮤니티 일시적 오류',
               style: TextStyle(
                 fontSize: 12,
                 color: Theme.of(context).colorScheme.onErrorContainer,
               ),
             ),
           ),
+          if (needsCloudflare)
+            TextButton.icon(
+              icon: const Icon(Icons.login, size: 14),
+              label: const Text('인증', style: TextStyle(fontSize: 12)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 28),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed: () => _openCloudflareAuth(context),
+            ),
         ],
       ),
     );
+  }
+
+  Future<void> _openCloudflareAuth(BuildContext context) async {
+    final result = await Navigator.of(context).push<Map<String, String>>(
+      MaterialPageRoute<Map<String, String>>(
+        builder: (_) => const CloudflareAuthScreen(
+          url: 'https://www.fmkorea.com/humorbest',
+          domain: 'fmkorea.com',
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      try {
+        final store = di.sl<CloudflareCookieStore>(instanceName: 'fmkoreaCookies');
+        await store.saveCookies(result);
+      } catch (_) {}
+    }
   }
 }
 
