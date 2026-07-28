@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/post.dart';
 
 void main() {
@@ -64,6 +65,28 @@ void main() {
       const a = Post(id: 1, title: 't', recommendCount: 0, url: 'u');
 
       expect(a, equals(a));
+    });
+
+    test('should default community to humoruniv', () {
+      const post = Post(id: 1, title: 't', recommendCount: 0, url: 'u');
+      expect(post.community, CommunityId.humoruniv);
+    });
+
+    test('should allow community to be set explicitly', () {
+      const post = Post(
+        id: 1,
+        title: 't',
+        recommendCount: 0,
+        url: 'u',
+        community: CommunityId.todayhumor,
+      );
+      expect(post.community, CommunityId.todayhumor);
+    });
+
+    test('should not be equal when community differs', () {
+      const a = Post(id: 1, title: 't', recommendCount: 0, url: 'u', community: CommunityId.humoruniv);
+      const b = Post(id: 1, title: 't', recommendCount: 0, url: 'u', community: CommunityId.todayhumor);
+      expect(a, isNot(equals(b)));
     });
   });
 }
