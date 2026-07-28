@@ -61,7 +61,7 @@ void main() {
       viewCount: 1000,
     ),
     const FeedItem(
-      community: CommunityId.todayhumor,
+      community: CommunityId.humoruniv,
       id: '2',
       title: '두 번째 글',
       url: '/u2',

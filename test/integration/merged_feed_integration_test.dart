@@ -8,6 +8,7 @@ import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/datasources/ppomppu_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/todayhumor_adapter_impl.dart';
+import 'package:humoruniv/data/models/board_post_dto.dart';
 import 'package:humoruniv/data/models/post_dto.dart';
 import 'package:humoruniv/data/parsers/main_page_parser.dart';
 import 'package:humoruniv/data/repositories/merged_feed_repository_impl.dart';
@@ -43,9 +44,28 @@ void main() {
 
     final humorunivHtml = _readFixture('main_page.html');
     final humorunivDs = _MockHumorunivRemoteDs();
-    when(
-      () => humorunivDs.fetchMainPage(),
-    ).thenAnswer((_) async => MainPageParser.parseBestPosts(humorunivHtml));
+    when(() => humorunivDs.fetchBoardList(any(), any(), any())).thenAnswer(
+      (_) async => BoardListDsResult(
+        posts: MainPageParser.parseBestPosts(humorunivHtml)
+            .map(
+              (p) => BoardPostDto(
+                id: p.id,
+                title: p.title,
+                url: p.url,
+                author: '테스터',
+                date: '26/07/28',
+                recommendCount: p.recommendCount,
+                notRecommendCount: 0,
+                commentCount: 0,
+                viewCount: 0,
+                thumbnailUrl: '',
+              ),
+            )
+            .toList(),
+        currentPage: 1,
+        totalPage: 10,
+      ),
+    );
 
     final adapters = <CommunityId, CommunityAdapter>{
       CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: humorunivDs),

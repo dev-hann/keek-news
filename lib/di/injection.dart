@@ -5,19 +5,17 @@ import 'package:humoruniv/data/datasources/apk_download_data_source.dart';
 import 'package:humoruniv/data/datasources/apk_download_data_source_impl.dart';
 import 'package:humoruniv/data/datasources/apk_installer_service.dart';
 import 'package:humoruniv/data/datasources/apk_installer_service_impl.dart';
-import 'package:humoruniv/data/datasources/cloudflare_cookie_store.dart';
 import 'package:humoruniv/data/datasources/community_adapter.dart';
 import 'package:humoruniv/data/datasources/dogdrip_adapter_impl.dart';
-import 'package:humoruniv/data/datasources/fmkorea_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds_impl.dart';
-import 'package:humoruniv/data/datasources/ppomppu_adapter_impl.dart';
-import 'package:humoruniv/data/datasources/todayhumor_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/image_cache_service.dart';
 import 'package:humoruniv/data/datasources/image_cache_service_impl.dart';
+import 'package:humoruniv/data/datasources/ppomppu_adapter_impl.dart';
+import 'package:humoruniv/data/datasources/todayhumor_adapter_impl.dart';
 import 'package:humoruniv/data/repositories/apk_install_repository_impl.dart';
 import 'package:humoruniv/data/repositories/merged_feed_repository_impl.dart';
 import 'package:humoruniv/data/repositories/post_repository_impl.dart';
@@ -41,12 +39,6 @@ final sl = GetIt.instance;
 Future<void> configureDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
-
-  final fmkoreaCookieStore = CloudflareCookieStore(prefs, 'fmkorea.com');
-  sl.registerSingleton<CloudflareCookieStore>(
-    fmkoreaCookieStore,
-    instanceName: 'fmkoreaCookies',
-  );
 
   sl.registerLazySingleton<HtmlClientImpl>(HtmlClientImpl.new);
 
@@ -103,24 +95,6 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  sl.registerLazySingleton<HtmlClientImpl>(
-    () => HtmlClientImpl(
-      baseUrl: 'https://www.fmkorea.com',
-      encoding: 'utf-8',
-      desktop: true,
-      cookieProvider: () => sl<CloudflareCookieStore>(
-        instanceName: 'fmkoreaCookies',
-      ).getCookieHeader(),
-    ),
-    instanceName: 'fmkoreaHtmlClient',
-  );
-
-  sl.registerLazySingleton<FmkoreaAdapterImpl>(
-    () => FmkoreaAdapterImpl(
-      htmlClient: sl<HtmlClientImpl>(instanceName: 'fmkoreaHtmlClient'),
-    ),
-  );
-
   sl.registerLazySingleton<MergedFeedRepository>(
     () => MergedFeedRepositoryImpl(
       adapters: {
@@ -128,7 +102,6 @@ Future<void> configureDependencies() async {
         CommunityId.todayhumor: sl<TodayhumorAdapterImpl>(),
         CommunityId.ppomppu: sl<PpomppuAdapterImpl>(),
         CommunityId.dogdrip: sl<DogdripAdapterImpl>(),
-        CommunityId.fmkorea: sl<FmkoreaAdapterImpl>(),
       },
     ),
   );

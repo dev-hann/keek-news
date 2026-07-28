@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-enum CommunityId { humoruniv, todayhumor, dogdrip, ppomppu, fmkorea }
+enum CommunityId { humoruniv, todayhumor, dogdrip, ppomppu }
 
 @immutable
 class Community {
@@ -61,12 +61,5 @@ const communities = <Community>[
     displayName: '뽐뿌',
     brandColorArgb: 0xFFFF6B00,
     iconAsset: 'assets/icons/community_ppomppu.png',
-  ),
-  Community(
-    id: CommunityId.fmkorea,
-    shortName: 'FM',
-    displayName: '에펨코리아',
-    brandColorArgb: 0xFFCC0000,
-    iconAsset: 'assets/icons/community_fmkorea.png',
   ),
 ];

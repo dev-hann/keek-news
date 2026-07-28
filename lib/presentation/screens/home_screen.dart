@@ -28,7 +28,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _controller = ScrollController();
   bool _showScrollTop = false;
-  CommunityId? _filter; // null = 전체
+  CommunityId? _filter = communities.first.id;
 
   @override
   void initState() {
@@ -65,7 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final visibleItems = _applyFilter(feedState.items);
 
     return DefaultTabController(
-      length: communities.length + 1,
+      length: communities.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('통합 유머 피드'),
@@ -81,14 +81,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             tabAlignment: TabAlignment.start,
             onTap: (i) {
               setState(() {
-                _filter = i == 0 ? null : communities[i - 1].id;
+                _filter = communities[i].id;
                 if (_controller.hasClients) _controller.jumpTo(0);
               });
             },
-            tabs: [
-              const Tab(text: '전체'),
-              ...communities.map((c) => Tab(text: c.shortName)),
-            ],
+            tabs: communities.map((c) => Tab(text: c.shortName)).toList(),
           ),
         ),
         body: RefreshIndicator(
@@ -241,10 +238,6 @@ class _MergedCard extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 12, bottom: 4),
-          child: CommunityBadge(community: item.community),
-        ),
         FeedCard(
           post: BoardPost(
             id: int.tryParse(item.id) ?? 0,

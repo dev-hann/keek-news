@@ -3,8 +3,8 @@ import 'package:humoruniv/domain/entities/community.dart';
 
 void main() {
   group('Community', () {
-    test('should expose 5 communities in the const list', () {
-      expect(communities, hasLength(5));
+    test('should expose 4 communities in the const list', () {
+      expect(communities, hasLength(4));
       final ids = communities.map((c) => c.id).toSet();
       expect(ids, containsAll(CommunityId.values));
     });

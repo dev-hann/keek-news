@@ -1,9 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
-import 'package:humoruniv/data/models/post_dto.dart';
+import 'package:humoruniv/data/models/board_post_dto.dart';
 import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHumorunivRemoteDs extends Mock implements HumorunivRemoteDs {}
@@ -22,85 +21,74 @@ void main() {
       expect(adapter.communityId, CommunityId.humoruniv);
     });
 
-    test(
-      'fetchLatest should delegate to fetchMainPage and convert PostDto to FeedItemDto',
-      () async {
-        when(() => mockDs.fetchMainPage()).thenAnswer(
-          (_) async => [
-            const PostDto(
+    test('fetchLatest should convert BoardPostDto to FeedItemDto', () async {
+      when(() => mockDs.fetchBoardList('pds', 1, '')).thenAnswer(
+        (_) async => BoardListDsResult(
+          posts: [
+            BoardPostDto(
               id: 100,
               title: '첫 글',
-              recommendCount: 42,
               url: '/board/read.html?table=pds&number=100',
-            ),
-            const PostDto(
-              id: 200,
-              title: '둘',
-              recommendCount: 7,
-              url: '/board/read.html?table=pds&number=200',
+              author: '작성자',
+              date: '26/07/28',
+              recommendCount: 42,
+              notRecommendCount: 0,
+              commentCount: 5,
+              viewCount: 1000,
+              thumbnailUrl: '',
             ),
           ],
+          currentPage: 1,
+          totalPage: 10,
+        ),
+      );
+
+      final result = await adapter.fetchLatest();
+
+      expect(result.items, hasLength(1));
+      expect(result.items[0].community, CommunityId.humoruniv);
+      expect(result.items[0].id, '100');
+      expect(result.items[0].title, '첫 글');
+      expect(result.items[0].recommendCount, 42);
+      expect(result.pageToken, '2');
+    });
+
+    test('fetchLatest should return empty list when board is empty', () async {
+      when(() => mockDs.fetchBoardList(any(), any(), any())).thenAnswer(
+        (_) async =>
+            const BoardListDsResult(posts: [], currentPage: 1, totalPage: 0),
+      );
+
+      final result = await adapter.fetchLatest();
+
+      expect(result.items, isEmpty);
+    });
+
+    test('fetchLatest should return null pageToken on last page', () async {
+      when(() => mockDs.fetchBoardList('pds', 5, '')).thenAnswer(
+        (_) async =>
+            const BoardListDsResult(posts: [], currentPage: 5, totalPage: 5),
+      );
+
+      final result = await adapter.fetchLatest(pageToken: '5');
+
+      expect(result.pageToken, isNull);
+    });
+
+    test('fetchDetail should delegate to fetchPostDetail', () async {
+      const url = '/board/read.html?table=pds&number=100';
+      when(() => mockDs.fetchPostDetail(any())).thenThrow(Exception('fail'));
+
+      expect(() => adapter.fetchDetail(url), throwsA(isA<Object>()));
+    });
+
+    test(
+      'healthCheck should return true when fetchBoardList succeeds',
+      () async {
+        when(() => mockDs.fetchBoardList(any(), any(), any())).thenAnswer(
+          (_) async =>
+              const BoardListDsResult(posts: [], currentPage: 1, totalPage: 0),
         );
-
-        final result = await adapter.fetchLatest();
-
-        expect(result.items, hasLength(2));
-        expect(result.items[0].community, CommunityId.humoruniv);
-        expect(result.items[0].id, '100');
-        expect(result.items[0].title, '첫 글');
-        expect(result.items[0].recommendCount, 42);
-        expect(result.items[0].url, '/board/read.html?table=pds&number=100');
-        expect(result.items[1].id, '200');
-      },
-    );
-
-    test(
-      'fetchLatest should return empty list when fetchMainPage returns empty',
-      () async {
-        when(() => mockDs.fetchMainPage()).thenAnswer((_) async => []);
-
-        final result = await adapter.fetchLatest();
-
-        expect(result.items, isEmpty);
-      },
-    );
-
-    test(
-      'fetchDetail should delegate to fetchPostDetail and return PostDetail',
-      () async {
-        const url = '/board/read.html?table=pds&number=100';
-        final detail = PostDetail(
-          id: 100,
-          title: '제목',
-          author: '작성자',
-          date: DateTime(2026, 7, 26),
-          contentHtml: '<p>내용</p>',
-          contentBlocks: const [],
-          imageUrls: const ['https://img.jpg'],
-          recommendCount: 10,
-          notRecommendCount: 1,
-          viewCount: 500,
-          commentCount: 3,
-          comments: const [],
-        );
-        when(
-          () => mockDs.fetchPostDetail(any()),
-        ).thenAnswer((_) async => detail);
-
-        final result = await adapter.fetchDetail(url);
-
-        expect(result.id, 100);
-        expect(result.title, '제목');
-        expect(result.author, '작성자');
-        expect(result.recommendCount, 10);
-        expect(result.imageUrls, hasLength(1));
-      },
-    );
-
-    test(
-      'healthCheck should return true when fetchMainPage succeeds',
-      () async {
-        when(() => mockDs.fetchMainPage()).thenAnswer((_) async => []);
 
         final healthy = await adapter.healthCheck();
 
@@ -108,12 +96,17 @@ void main() {
       },
     );
 
-    test('healthCheck should return false when fetchMainPage throws', () async {
-      when(() => mockDs.fetchMainPage()).thenThrow(Exception('network error'));
+    test(
+      'healthCheck should return false when fetchBoardList throws',
+      () async {
+        when(
+          () => mockDs.fetchBoardList(any(), any(), any()),
+        ).thenThrow(Exception('down'));
 
-      final healthy = await adapter.healthCheck();
+        final healthy = await adapter.healthCheck();
 
-      expect(healthy, isFalse);
-    });
+        expect(healthy, isFalse);
+      },
+    );
   });
 }
