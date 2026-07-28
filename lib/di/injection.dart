@@ -14,14 +14,18 @@ import 'package:humoruniv/data/datasources/humoruniv_remote_ds_impl.dart';
 import 'package:humoruniv/data/datasources/image_cache_service.dart';
 import 'package:humoruniv/data/datasources/image_cache_service_impl.dart';
 import 'package:humoruniv/data/repositories/apk_install_repository_impl.dart';
+import 'package:humoruniv/data/repositories/merged_feed_repository_impl.dart';
 import 'package:humoruniv/data/repositories/post_repository_impl.dart';
 import 'package:humoruniv/data/repositories/update_repository_impl.dart';
+import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/repositories/apk_install_repository.dart';
+import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
 import 'package:humoruniv/domain/repositories/post_repository.dart';
 import 'package:humoruniv/domain/repositories/update_repository.dart';
 import 'package:humoruniv/domain/usecases/check_for_update.dart';
 import 'package:humoruniv/domain/usecases/get_best_posts.dart';
 import 'package:humoruniv/domain/usecases/get_board_posts.dart';
+import 'package:humoruniv/domain/usecases/get_merged_feed.dart';
 import 'package:humoruniv/domain/usecases/get_post_detail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -37,6 +41,18 @@ Future<void> configureDependencies() async {
 
   sl.registerLazySingleton<CommunityAdapter>(
     () => HumorunivAdapterImpl(remoteDs: sl<HumorunivRemoteDs>()),
+  );
+
+  sl.registerLazySingleton<MergedFeedRepository>(
+    () => MergedFeedRepositoryImpl(
+      adapters: {
+        CommunityId.humoruniv: sl<CommunityAdapter>(),
+      },
+    ),
+  );
+
+  sl.registerLazySingleton(
+    () => GetMergedFeed(repository: sl<MergedFeedRepository>()),
   );
 
   sl.registerLazySingleton<PostRepository>(

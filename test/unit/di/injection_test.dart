@@ -4,14 +4,17 @@ import 'package:humoruniv/data/datasources/community_adapter.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds.dart';
 import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
+import 'package:humoruniv/data/repositories/merged_feed_repository_impl.dart';
 import 'package:humoruniv/data/repositories/post_repository_impl.dart';
 import 'package:humoruniv/data/repositories/update_repository_impl.dart';
 import 'package:humoruniv/di/injection.dart' as di;
+import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
 import 'package:humoruniv/domain/repositories/post_repository.dart';
 import 'package:humoruniv/domain/repositories/update_repository.dart';
 import 'package:humoruniv/domain/usecases/check_for_update.dart';
 import 'package:humoruniv/domain/usecases/get_best_posts.dart';
 import 'package:humoruniv/domain/usecases/get_board_posts.dart';
+import 'package:humoruniv/domain/usecases/get_merged_feed.dart';
 import 'package:humoruniv/domain/usecases/get_post_detail.dart';
 
 import '../../helpers/package_info_helper.dart';
@@ -53,6 +56,25 @@ void main() {
 
       final adapter = di.sl<CommunityAdapter>();
       expect(adapter, isA<HumorunivAdapterImpl>());
+    });
+
+    test('should register MergedFeedRepository', () async {
+      await di.configureDependencies();
+
+      expect(di.sl.isRegistered<MergedFeedRepository>(), isTrue);
+    });
+
+    test('MergedFeedRepository should be MergedFeedRepositoryImpl', () async {
+      await di.configureDependencies();
+
+      final repo = di.sl<MergedFeedRepository>();
+      expect(repo, isA<MergedFeedRepositoryImpl>());
+    });
+
+    test('should register GetMergedFeed use case', () async {
+      await di.configureDependencies();
+
+      expect(di.sl.isRegistered<GetMergedFeed>(), isTrue);
     });
 
     test('should register PostRepository', () async {
