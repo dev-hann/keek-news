@@ -1,16 +1,110 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:humoruniv/core/errors/failures.dart';
 import 'package:humoruniv/di/injection.dart';
 import 'package:humoruniv/domain/entities/community.dart';
+import 'package:humoruniv/domain/entities/feed_item.dart';
 import 'package:humoruniv/domain/entities/merged_feed.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
 import 'package:humoruniv/domain/usecases/get_merged_feed.dart';
+import 'package:humoruniv/presentation/providers/community_settings_provider.dart';
+
+class MergedFeedState {
+  const MergedFeedState({
+    this.items = const [],
+    this.cursor,
+    this.isLoading = false,
+    this.isLoadingMore = false,
+    this.error,
+    this.hasMore = true,
+  });
+
+  final List<FeedItem> items;
+  final MergedCursor? cursor;
+  final bool isLoading;
+  final bool isLoadingMore;
+  final String? error;
+  final bool hasMore;
+
+  MergedFeedState copyWith({
+    List<FeedItem>? items,
+    MergedCursor? cursor,
+    bool? isLoading,
+    bool? isLoadingMore,
+    String? error,
+    bool? hasMore,
+  }) {
+    return MergedFeedState(
+      items: items ?? this.items,
+      cursor: cursor ?? this.cursor,
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      error: error,
+      hasMore: hasMore ?? this.hasMore,
+    );
+  }
+}
+
+class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
+  MergedFeedNotifier(this._readSettings) : super(const MergedFeedState(isLoading: true));
+
+  final CommunitySettings Function() _readSettings;
+
+  Future<void> fetch() async {
+    state = const MergedFeedState(isLoading: true);
+    final settings = _readSettings();
+    final result = await sl<GetMergedFeed>()(
+      MergedFeedParams(enabled: settings.enabled, maxRatioPerSource: settings.maxRatio),
+    );
+    result.fold(
+      (f) => state = MergedFeedState(error: f.message),
+      (page) => state = MergedFeedState(
+        items: page.items,
+        cursor: page.next,
+        hasMore: page.next != null,
+      ),
+    );
+  }
+
+  Future<void> fetchNextPage() async {
+    if (state.isLoadingMore || !state.hasMore || state.cursor == null) return;
+
+    state = state.copyWith(isLoadingMore: true);
+    final settings = _readSettings();
+    final result = await sl<GetMergedFeed>()(
+      MergedFeedParams(
+        cursor: state.cursor,
+        enabled: settings.enabled,
+        maxRatioPerSource: settings.maxRatio,
+      ),
+    );
+
+    result.fold(
+      (f) => state = state.copyWith(isLoadingMore: false),
+      (page) {
+        final existingIds = state.items.map((e) => '${e.community}:${e.id}').toSet();
+        final newItems = page.items
+            .where((e) => !existingIds.contains('${e.community}:${e.id}'))
+            .toList();
+        state = MergedFeedState(
+          items: [...state.items, ...newItems],
+          cursor: page.next,
+          hasMore: page.next != null,
+        );
+      },
+    );
+  }
+}
 
 final mergedFeedProvider =
-    FutureProvider.autoDispose<Either<Failure, MergedPage>>((ref) {
-  return sl<GetMergedFeed>()(const MergedFeedParams());
+    StateNotifierProvider.autoDispose<MergedFeedNotifier, MergedFeedState>((ref) {
+  final notifier = MergedFeedNotifier(
+    () => ref.read(communitySettingsProvider),
+  );
+  notifier.fetch();
+  return notifier;
 });
 
 final mergedDetailProvider = FutureProvider.autoDispose

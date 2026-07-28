@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:humoruniv/core/errors/failures.dart';
 import 'package:humoruniv/core/network/html_client.dart';
 import 'package:humoruniv/data/datasources/community_adapter.dart';
+import 'package:humoruniv/data/parsers/dogdrip_detail_parser.dart';
 import 'package:humoruniv/data/parsers/dogdrip_list_parser.dart';
 import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
@@ -39,7 +40,17 @@ class DogdripAdapterImpl implements CommunityAdapter {
 
   @override
   Future<PostDetail> fetchDetail(String id) async {
-    throw UnimplementedError('DogdripAdapterImpl.fetchDetail not yet implemented');
+    try {
+      final html = await htmlClient.get('/$id');
+      return DogdripDetailParser.parse(html);
+    } on ServerFailure {
+      rethrow;
+    } on NetworkFailure {
+      rethrow;
+    } catch (e) {
+      debugPrint('DogdripAdapterImpl fetchDetail error: $e');
+      throw ServerFailure(e.toString());
+    }
   }
 
   @override

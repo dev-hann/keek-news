@@ -21,6 +21,7 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
     required int perSource,
     MergedCursor? cursor,
     Set<CommunityId> enabled = const {},
+    double maxRatioPerSource = 0.4,
   }) async {
     final active = enabled.isEmpty
         ? _adapters
@@ -54,6 +55,7 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
       nextTokens: nextTokens,
       olderThan: cursor?.oldestSeen,
       maxItems: perSource * active.length,
+      maxRatioPerSource: maxRatioPerSource,
     );
 
     return Right(MergedPage(

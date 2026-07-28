@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:humoruniv/core/errors/failures.dart';
 import 'package:humoruniv/core/network/html_client.dart';
 import 'package:humoruniv/data/datasources/community_adapter.dart';
+import 'package:humoruniv/data/parsers/fmkorea_detail_parser.dart';
 import 'package:humoruniv/data/parsers/fmkorea_list_parser.dart';
 import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
@@ -37,7 +38,17 @@ class FmkoreaAdapterImpl implements CommunityAdapter {
 
   @override
   Future<PostDetail> fetchDetail(String id) async {
-    throw UnimplementedError('FmkoreaAdapterImpl.fetchDetail not yet implemented');
+    try {
+      final html = await htmlClient.get('/$id');
+      return FmkoreaDetailParser.parse(html);
+    } on ServerFailure {
+      rethrow;
+    } on NetworkFailure {
+      rethrow;
+    } catch (e) {
+      debugPrint('FmkoreaAdapterImpl fetchDetail error: $e');
+      throw ServerFailure(e.toString());
+    }
   }
 
   @override

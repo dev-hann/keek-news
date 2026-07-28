@@ -2,22 +2,23 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:humoruniv/data/datasources/image_cache_service.dart';
 import 'package:humoruniv/di/injection.dart' as di;
 import 'package:humoruniv/domain/entities/app_release.dart';
-import 'package:humoruniv/domain/entities/merged_feed.dart';
 import 'package:humoruniv/domain/repositories/apk_install_repository.dart';
+import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
 import 'package:humoruniv/domain/repositories/update_repository.dart';
-import 'package:humoruniv/data/datasources/image_cache_service.dart';
 import 'package:humoruniv/domain/usecases/check_for_update.dart';
-import 'package:humoruniv/presentation/providers/merged_feed_provider.dart';
+import 'package:humoruniv/domain/usecases/get_merged_feed.dart';
 import 'package:humoruniv/presentation/providers/shared_preferences_provider.dart';
 import 'package:humoruniv/presentation/screens/home_screen.dart';
 import 'package:humoruniv/presentation/screens/settings_screen.dart';
-import 'package:go_router/go_router.dart';
 import 'package:humoruniv/routes/app_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../helpers/merged_feed_helper.dart';
 import '../../helpers/package_info_helper.dart';
 
 class MockUpdateRepository extends Mock implements UpdateRepository {}
@@ -30,10 +31,12 @@ void main() {
   late MockUpdateRepository mockUpdateRepo;
   late MockApkInstallRepository mockApkRepo;
   late FakeImageCacheService fakeCacheService;
+  late MockMergedFeedRepository mockMergedRepo;
   late SharedPreferences prefs;
 
   setUpAll(() async {
     await setupPackageInfoMock();
+    registerMergedFeedFallbacks();
   });
 
   setUp(() async {
@@ -42,6 +45,8 @@ void main() {
     mockUpdateRepo = MockUpdateRepository();
     mockApkRepo = MockApkInstallRepository();
     fakeCacheService = FakeImageCacheService();
+    mockMergedRepo = MockMergedFeedRepository();
+    setupMergedFeedMocks(mockMergedRepo);
     when(() => fakeCacheService.getSizeBytes()).thenAnswer((_) async => 0);
     await di.configureDependencies();
     if (di.sl.isRegistered<UpdateRepository>()) {
@@ -56,21 +61,28 @@ void main() {
     if (di.sl.isRegistered<ImageCacheService>()) {
       di.sl.unregister<ImageCacheService>();
     }
+    if (di.sl.isRegistered<MergedFeedRepository>()) {
+      di.sl.unregister<MergedFeedRepository>();
+    }
+    if (di.sl.isRegistered<GetMergedFeed>()) {
+      di.sl.unregister<GetMergedFeed>();
+    }
     di.sl.registerLazySingleton<UpdateRepository>(() => mockUpdateRepo);
     di.sl.registerLazySingleton(
       () => CheckForUpdate(repository: mockUpdateRepo, currentVersion: '1.0.0'),
     );
     di.sl.registerLazySingleton<ApkInstallRepository>(() => mockApkRepo);
     di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
+    di.sl.registerLazySingleton<MergedFeedRepository>(() => mockMergedRepo);
+    di.sl.registerLazySingleton(
+      () => GetMergedFeed(repository: mockMergedRepo),
+    );
   });
 
   tearDown(di.sl.reset);
 
   List<Override> testOverrides() => [
         sharedPreferencesProvider.overrideWithValue(prefs),
-        mergedFeedProvider.overrideWith(
-          (ref) async => const Right(MergedPage(items: [])),
-        ),
       ];
 
   group('appRouter', () {

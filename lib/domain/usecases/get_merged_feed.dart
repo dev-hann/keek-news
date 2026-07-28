@@ -9,11 +9,13 @@ class MergedFeedParams {
     this.perSource = 20,
     this.cursor,
     this.enabled = const {},
+    this.maxRatioPerSource = 0.4,
   });
 
   final int perSource;
   final MergedCursor? cursor;
   final Set<CommunityId> enabled;
+  final double maxRatioPerSource;
 }
 
 class GetMergedFeed {
@@ -25,6 +27,7 @@ class GetMergedFeed {
       perSource: params.perSource,
       cursor: params.cursor,
       enabled: params.enabled,
+      maxRatioPerSource: params.maxRatioPerSource,
     );
   }
 }

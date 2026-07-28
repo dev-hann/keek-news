@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:humoruniv/core/themes/app_spacing.dart';
+import 'package:humoruniv/core/widgets/atoms/loading_indicator.dart';
 import 'package:humoruniv/core/widgets/atoms/scroll_to_top_button.dart';
 import 'package:humoruniv/core/widgets/molecules/feed_card.dart';
 import 'package:humoruniv/core/widgets/states/empty_state_view.dart';
 import 'package:humoruniv/core/widgets/states/error_state_view.dart';
 import 'package:humoruniv/core/widgets/states/skeleton_feed_card.dart';
+import 'package:humoruniv/core/themes/app_spacing.dart';
 import 'package:humoruniv/domain/entities/board_post.dart';
 import 'package:humoruniv/domain/entities/feed_item.dart';
-import 'package:humoruniv/domain/entities/merged_feed.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:humoruniv/presentation/providers/merged_feed_provider.dart';
 import 'package:humoruniv/presentation/screens/image_viewer_screen.dart';
@@ -41,8 +41,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _onScroll() {
     if (!_controller.hasClients) return;
-    final pos = _controller.position.pixels;
-    final shouldShow = pos > 600.0;
+    final pos = _controller.position;
+    if (pos.pixels >= pos.maxScrollExtent * 0.9) {
+      ref.read(mergedFeedProvider.notifier).fetchNextPage();
+    }
+    final shouldShow = pos.pixels > 600.0;
     if (shouldShow != _showScrollTop) {
       setState(() => _showScrollTop = shouldShow);
     }
@@ -50,7 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final feedAsync = ref.watch(mergedFeedProvider);
+    final feedState = ref.watch(mergedFeedProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,45 +67,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(mergedFeedProvider),
-        child: feedAsync.when(
-          loading: _buildLoading,
-          error: (_, __) => _buildError(),
-          data: (either) => either.fold(
-            (_) => _buildError(),
-            _buildFeed,
+        onRefresh: () async => ref.read(mergedFeedProvider.notifier).fetch(),
+        child: _buildBody(feedState),
+      ),
+    );
+  }
+
+  Widget _buildBody(MergedFeedState state) {
+    if (state.isLoading) {
+      return ListView.builder(
+        itemCount: 4,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemBuilder: (_, __) => const Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.p12),
+          child: SkeletonFeedCard(),
+        ),
+      );
+    }
+    if (state.error != null) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          const SizedBox(height: 120),
+          ErrorStateView(
+            message: '게시글을 불러올 수 없습니다.',
+            onRetry: () => ref.read(mergedFeedProvider.notifier).fetch(),
           ),
-        ),
-      ),
-    );
+        ],
+      );
+    }
+    return _buildFeed(state);
   }
 
-  Widget _buildLoading() {
-    return ListView.builder(
-      itemCount: 4,
-      physics: const AlwaysScrollableScrollPhysics(),
-      itemBuilder: (_, __) => const Padding(
-        padding: EdgeInsets.only(bottom: AppSpacing.p12),
-        child: SkeletonFeedCard(),
-      ),
-    );
-  }
-
-  Widget _buildError() {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      children: [
-        const SizedBox(height: 120),
-        ErrorStateView(
-          message: '게시글을 불러올 수 없습니다.',
-          onRetry: () => ref.invalidate(mergedFeedProvider),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFeed(MergedPage page) {
-    if (page.items.isEmpty) {
+  Widget _buildFeed(MergedFeedState feedState) {
+    if (feedState.items.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: const [
@@ -112,16 +110,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
+    final extra = (feedState.hasMore || feedState.isLoadingMore) ? 1 : 0;
+
     return Stack(
       children: [
         ListView.builder(
           controller: _controller,
           physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: page.items.length,
-          itemBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.p12),
-            child: _MergedCard(item: page.items[index]),
-          ),
+          itemCount: feedState.items.length + extra,
+          itemBuilder: (context, index) {
+            if (index == feedState.items.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: LoadingIndicator(),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.p12),
+              child: _MergedCard(item: feedState.items[index]),
+            );
+          },
         ),
         Positioned(
           right: AppSpacing.p16,
@@ -130,7 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             visible: _showScrollTop,
             onTap: () {
               if (_controller.hasClients) _controller.jumpTo(0);
-              ref.invalidate(mergedFeedProvider);
+              ref.read(mergedFeedProvider.notifier).fetch();
             },
           ),
         ),
