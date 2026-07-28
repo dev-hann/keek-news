@@ -6,6 +6,8 @@ import 'package:humoruniv/data/datasources/apk_download_data_source_impl.dart';
 import 'package:humoruniv/data/datasources/apk_installer_service.dart';
 import 'package:humoruniv/data/datasources/apk_installer_service_impl.dart';
 import 'package:humoruniv/data/datasources/community_adapter.dart';
+import 'package:humoruniv/data/datasources/dogdrip_adapter_impl.dart';
+import 'package:humoruniv/data/datasources/fmkorea_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
@@ -73,12 +75,42 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  sl.registerLazySingleton<HtmlClientImpl>(
+    () => HtmlClientImpl(
+      baseUrl: 'https://www.dogdrip.net',
+      encoding: 'utf-8',
+    ),
+    instanceName: 'dogdripHtmlClient',
+  );
+
+  sl.registerLazySingleton<DogdripAdapterImpl>(
+    () => DogdripAdapterImpl(
+      htmlClient: sl<HtmlClientImpl>(instanceName: 'dogdripHtmlClient'),
+    ),
+  );
+
+  sl.registerLazySingleton<HtmlClientImpl>(
+    () => HtmlClientImpl(
+      baseUrl: 'https://www.fmkorea.com',
+      encoding: 'utf-8',
+    ),
+    instanceName: 'fmkoreaHtmlClient',
+  );
+
+  sl.registerLazySingleton<FmkoreaAdapterImpl>(
+    () => FmkoreaAdapterImpl(
+      htmlClient: sl<HtmlClientImpl>(instanceName: 'fmkoreaHtmlClient'),
+    ),
+  );
+
   sl.registerLazySingleton<MergedFeedRepository>(
     () => MergedFeedRepositoryImpl(
       adapters: {
         CommunityId.humoruniv: sl<CommunityAdapter>(),
         CommunityId.todayhumor: sl<TodayhumorAdapterImpl>(),
         CommunityId.ppomppu: sl<PpomppuAdapterImpl>(),
+        CommunityId.dogdrip: sl<DogdripAdapterImpl>(),
+        CommunityId.fmkorea: sl<FmkoreaAdapterImpl>(),
       },
     ),
   );
