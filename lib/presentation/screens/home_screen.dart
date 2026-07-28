@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:humoruniv/core/themes/app_spacing.dart';
 import 'package:humoruniv/core/widgets/atoms/loading_indicator.dart';
 import 'package:humoruniv/core/widgets/atoms/scroll_to_top_button.dart';
 import 'package:humoruniv/core/widgets/molecules/feed_card.dart';
 import 'package:humoruniv/core/widgets/states/empty_state_view.dart';
 import 'package:humoruniv/core/widgets/states/error_state_view.dart';
 import 'package:humoruniv/core/widgets/states/skeleton_feed_card.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
 import 'package:humoruniv/domain/entities/board_post.dart';
+import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/feed_item.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:humoruniv/presentation/providers/merged_feed_provider.dart';
@@ -100,7 +101,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildFeed(MergedFeedState feedState) {
-    if (feedState.items.isEmpty) {
+    if (feedState.items.isEmpty && feedState.failedSources.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: const [
@@ -111,25 +112,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     final extra = (feedState.hasMore || feedState.isLoadingMore) ? 1 : 0;
+    final hasBanner = feedState.failedSources.isNotEmpty;
 
     return Stack(
       children: [
-        ListView.builder(
+        CustomScrollView(
           controller: _controller,
           physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: feedState.items.length + extra,
-          itemBuilder: (context, index) {
-            if (index == feedState.items.length) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: LoadingIndicator(),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.p12),
-              child: _MergedCard(item: feedState.items[index]),
-            );
-          },
+          slivers: [
+            if (hasBanner)
+              SliverToBoxAdapter(
+                child: _PartialFailureBanner(
+                  failed: feedState.failedSources,
+                ),
+              ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index == feedState.items.length) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: LoadingIndicator(),
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.p12),
+                    child: _MergedCard(item: feedState.items[index]),
+                  );
+                },
+                childCount: feedState.items.length + extra,
+              ),
+            ),
+          ],
         ),
         Positioned(
           right: AppSpacing.p16,
@@ -143,6 +157,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PartialFailureBanner extends StatelessWidget {
+  const _PartialFailureBanner({required this.failed});
+  final Set<CommunityId> failed;
+
+  @override
+  Widget build(BuildContext context) {
+    final names = failed
+        .map((id) => Community.findById(id)?.shortName ?? id.name)
+        .join(', ');
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.p12,
+        vertical: AppSpacing.p4,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            size: 16,
+            color: Theme.of(context).colorScheme.onErrorContainer,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '$names 커뮤니티 일시적 오류',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onErrorContainer,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

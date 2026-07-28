@@ -1,13 +1,20 @@
 import 'dart:io';
 
-const _baseUrl = 'https://m.humoruniv.com';
 const _mobileUA =
     'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36';
 
-Future<String> fetchHtml(String path) async {
+Future<String> fetchHtml(
+  String pathOrUrl, {
+  String baseUrl = 'https://m.humoruniv.com',
+  String encoding = 'cp949',
+}) async {
+  final fullUrl = pathOrUrl.startsWith('http')
+      ? pathOrUrl
+      : '$baseUrl$pathOrUrl';
+
   final client = HttpClient();
   try {
-    final request = await client.getUrl(Uri.parse('$_baseUrl$path'));
+    final request = await client.getUrl(Uri.parse(fullUrl));
     request.headers.set('User-Agent', _mobileUA);
     final response = await request.close();
     final bytes = await response.fold<List<int>>(
@@ -15,18 +22,19 @@ Future<String> fetchHtml(String path) async {
       (acc, chunk) => acc..addAll(chunk),
     );
 
+    if (encoding == 'utf-8' || encoding == 'utf8') {
+      return String.fromCharCodes(bytes);
+    }
+
     final tempFile = File(
       '${Directory.systemTemp.path}/smoke_${DateTime.now().millisecondsSinceEpoch}.html',
     );
     await tempFile.writeAsBytes(bytes);
 
-    final result = await Process.run('iconv', [
-      '-f',
-      'cp949',
-      '-t',
-      'utf-8',
-      tempFile.path,
-    ]);
+    final result = await Process.run(
+      'iconv',
+      ['-f', encoding, '-t', 'utf-8', tempFile.path],
+    );
     await tempFile.delete();
 
     if (result.exitCode != 0) {

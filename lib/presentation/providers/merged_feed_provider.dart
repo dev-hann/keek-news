@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:humoruniv/core/errors/failures.dart';
 import 'package:humoruniv/di/injection.dart';
@@ -19,6 +18,7 @@ class MergedFeedState {
     this.isLoadingMore = false,
     this.error,
     this.hasMore = true,
+    this.failedSources = const {},
   });
 
   final List<FeedItem> items;
@@ -27,6 +27,7 @@ class MergedFeedState {
   final bool isLoadingMore;
   final String? error;
   final bool hasMore;
+  final Set<CommunityId> failedSources;
 
   MergedFeedState copyWith({
     List<FeedItem>? items,
@@ -35,6 +36,7 @@ class MergedFeedState {
     bool? isLoadingMore,
     String? error,
     bool? hasMore,
+    Set<CommunityId>? failedSources,
   }) {
     return MergedFeedState(
       items: items ?? this.items,
@@ -43,29 +45,27 @@ class MergedFeedState {
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       error: error,
       hasMore: hasMore ?? this.hasMore,
+      failedSources: failedSources ?? this.failedSources,
     );
   }
 }
 
 class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
-  MergedFeedNotifier(this._readSettings) : super(const MergedFeedState(isLoading: true));
+  MergedFeedNotifier(this._readSettings)
+      : super(const MergedFeedState(isLoading: true));
 
   final CommunitySettings Function() _readSettings;
 
   Future<void> fetch() async {
-    state = const MergedFeedState(isLoading: true);
     final settings = _readSettings();
+    state = MergedFeedState(isLoading: true);
     final result = await sl<GetMergedFeed>()(
-      MergedFeedParams(enabled: settings.enabled, maxRatioPerSource: settings.maxRatio),
-    );
-    result.fold(
-      (f) => state = MergedFeedState(error: f.message),
-      (page) => state = MergedFeedState(
-        items: page.items,
-        cursor: page.next,
-        hasMore: page.next != null,
+      MergedFeedParams(
+        enabled: settings.enabled,
+        maxRatioPerSource: settings.maxRatio,
       ),
     );
+    _applyResult(result);
   }
 
   Future<void> fetchNextPage() async {
@@ -82,24 +82,40 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
     );
 
     result.fold(
-      (f) => state = state.copyWith(isLoadingMore: false),
+      (_) => state = state.copyWith(isLoadingMore: false),
       (page) {
-        final existingIds = state.items.map((e) => '${e.community}:${e.id}').toSet();
+        final existingIds = state.items
+            .map((e) => '${e.community}:${e.id}')
+            .toSet();
         final newItems = page.items
-            .where((e) => !existingIds.contains('${e.community}:${e.id}'))
+            .where(
+                (e) => !existingIds.contains('${e.community}:${e.id}'))
             .toList();
         state = MergedFeedState(
           items: [...state.items, ...newItems],
-          cursor: page.next,
+          cursor: page.next ?? state.cursor,
           hasMore: page.next != null,
+          failedSources: page.failedSources,
         );
       },
     );
   }
+
+  void _applyResult(Either<Failure, MergedPage> result) {
+    result.fold(
+      (f) => state = MergedFeedState(error: f.message),
+      (page) => state = MergedFeedState(
+        items: page.items,
+        cursor: page.next,
+        hasMore: page.next != null,
+        failedSources: page.failedSources,
+      ),
+    );
+  }
 }
 
-final mergedFeedProvider =
-    StateNotifierProvider.autoDispose<MergedFeedNotifier, MergedFeedState>((ref) {
+final mergedFeedProvider = StateNotifierProvider.autoDispose<
+    MergedFeedNotifier, MergedFeedState>((ref) {
   final notifier = MergedFeedNotifier(
     () => ref.read(communitySettingsProvider),
   );
@@ -108,8 +124,8 @@ final mergedFeedProvider =
 });
 
 final mergedDetailProvider = FutureProvider.autoDispose
-    .family<Either<Failure, PostDetail>, ({CommunityId community, String id})>(
-        (ref, key) {
+    .family<Either<Failure, PostDetail>,
+        ({CommunityId community, String id})>((ref, key) {
   return sl<MergedFeedRepository>().fetchDetail(
     community: key.community,
     id: key.id,
