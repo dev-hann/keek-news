@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang='ko'>
+<head>
+
+<link rel="apple-touch-icon" href="/images/iphone_home.png" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta name="viewport" content="user-scalable=yes,initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />            <!-- Google tag (gtag.js) -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-BRGJX9L834"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'G-BRGJX9L834');
+            </script>
+<title>오늘의유머</title>
+<link rel='stylesheet' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>
+<link rel='stylesheet' href='/css/default.css?93237458282223340'>
+<link id='css_mode' rel='stylesheet' href='/css/light.css?558233843'>
+
+<link rel='stylesheet' href='/css/tab_button.css?6'>
+<link rel='stylesheet' href='/css/tmn_switch.css?3'>	
+<script src='https://kit.fontawesome.com/f8aac0a0fa.js' crossorigin='anonymous'></script>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css'>
+<style>
+*{-webkit-tap-highlight-color:rgba(0,0,0,0.3);}
+</style>
+<script>
+function login(){
+	location.href='/member/login.php';
+}
+
+function logout(){
+	if(!confirm('로그아웃하시겠습니까?')){
+		 return;
+	 }
+	location.href='http://m.todayhumor.co.kr/member/logout.php';
+}
+
+var white_css_version = '558233843';
+var dark_css_version = '110234233290';
+
+dark_css = '/css/dark.css?' + 110234233290;
+light_css = '/css/light.css?' + 558233843;
+
+</script>
+</head>
+
+
+
+
+
+
+<body class="home_body">
+
+
+<!-- header -->
+<div id='header' class='cf'>
+	
+
+
+
+<div class='logo_div_container'>	
+	<a href='/' target='_top' class='top_logo'></a>
+	<div class='top_icons'>
+		<div class='textsize_container'>
+			<span class='textsize_btn textsize_minus'>가</span>
+			<span class='textsize_btn textsize_plus'>가</span>
+			<!-- 클릭 시 현재 크기를 기본값 대비 퍼센트로 잠깐 표시 후 사라짐 -->
+			<div class='textsize_pct' id='textsize_pct'></div>
+		</div>
+		<div class='darkmode_switch_container'>
+		  <input type='checkbox' class='darkmode_switch_checkbox' id='darkmode_switch_checkbox' >
+			<label for='darkmode_switch_checkbox' class='darkmode_swtich_label'>	    
+		 		<i class='fas fa-moon fa-lg dark_mode_switch_moon'></i>
+				<i class='fas fa-sun fa-lg dark_mode_switch_sun'></i>
+				<div class='darkmode_switch_ball'></div>
+			</label>
+		</div>		
+		<a href='/control_panel_m.php' class='top_btn_control_panel'></a>
+		<a href='#' class='sprt_img top_btn_login' onclick='login()'></a> 
+		
+	</div>
+</div>
+
+
+
+<!--
+    <div id='logoDiv'>
+            <h1><a href='/' target='_top'></a></h1>
+        <div class='sub_sibling'>
+            <h2>
+                <a href='/control_panel_m.php' class='top_btn_control_panel'></a>
+            </h2>
+            <h2>
+            	<a href='#' class='sprt_img top_btn_login' onclick='login()'></a>          
+            </h2>
+        </div>
+    </div>    
+-->
+
+    <div id='top_best_menu_div'>
+     	<ul>
+        	<li>
+            	<a href='/list.php?table=bestofbest' class='on' >베오베</a>
+            </li>
+        	<li>
+            	<a href='/list.php?table=humorbest'>베스트</a>
+            </li>
+        	<li>
+            	<a href='/list.php?table=todaybest'>베스트30</a>
+            </li>
+            
+
+            <!--
+        	<li>
+            	<a href='/best_sort.php?best_sort=humorbest_sort'> 게시판별베스트 </a>
+            </li>
+            -->
+        	<li>
+            	<a href='/list.php?table=total'>최신글</a>
+            </li>
+        	
+
+        </ul>   
+    </div>    
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--모바일 특별공지-->
+
+
+
+
+	<!--ADSENSE_INDEX_TOP-->
+	<div style='text-align: center;padding:10px 0 5px 0;background-color:#e5e5e5' class='ad_box_div'>
+		<script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'></script>
+		<!-- [오유모바일320X100]홈페이지 최상단 -->
+		<ins class='adsbygoogle'
+				style='display:inline-block;width:320px;height:100px'
+				data-ad-client='ca-pub-2455872584413600'
+				data-ad-slot='4217814999'></ins>
+		<script>
+				(adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+	
+
+
+<div class='favoritesContainer'>
+	<div id='favoriteTitle' class='favoriteTitle cf'>
+		<div style='font-size: 12px'>게시판 즐겨찾기</div>
+		<div id='favoriteEditBtn' class='favoriteEditBtn' onclick='favoriteEditBtnClicked()'>편집</div>
+	</div>
+	<div id='favoriteDiv' class='favoriteDiv cf'>
+	<div id='favoriteDescDiv' class='favoriteDescDiv cf'>드래그 앤 드롭으로<br> 즐겨찾기 아이콘 위치 수정이 가능합니다.</div>
+		<ul></ul>
+	</div>
+</div>
+
+
+
+
+
+<div class='index_page_separator_div'>게시판</div>
+	
+
+<div style=''>
+	
+<!-- <div class="homeMenu">
+	<a href="list.php?table=winter2018"><div class="menu_box" style='height:56px'><div class="home_icon03 home_icon_winter2018"></div></div></a>
+</div>		
+ -->	
+</div>
+<div class="homeMenu">
+	<a href="list.php?table=bestofbest"><div class="menu_box"><div class="home_icon01 home_icon_bestofbest"></div>베스트오브<br>베스트</div></a>
+	<a href="list.php?table=todaybest"><div class="menu_box"><div class="home_icon01 home_icon_todaybest"></div>베스트30</div></a>
+	<a href="list.php?table=humorbest"><div class="menu_box"><div class="home_icon01 home_icon_humorbest"></div>베스트<br>게시물</div></a>
+	<!-- <a href="best_sort.php?best_sort=humorbest_sort"><div class="menu_box"><div class="home_icon01 home_icon_best_sort"></div>게시판별<br>베스트</div></a> -->
+	<a href="list.php?table=total"><div class="menu_box"><div class="home_icon01 home_icon_total"></div>최신글</div></a>
+	<!-- <a href="list.php?table=humorstory"><div class="menu_box"><div class="home_icon01 home_icon_humorstory"></div>유머글</div></a> -->
+	
+	<!-- <a href="list.php?table=corona19"><div class="menu_box"><div class="home_icon03 home_icon_corona19"></div>코로나19</div></a> -->
+	<a href="list.php?table=humordata"><div class="menu_box"><div class="home_icon01 home_icon_humordata"></div>유머자료</div></a>
+	<a href="list.php?table=lovestory"><div class="menu_box"><div class="home_icon01 home_icon_lovestory"></div>좋은글</div></a>
+	<a href="list.php?table=sewol"><div class="menu_box"><div class="home_icon01 home_icon_sewol"></div>세월호</div></a>
+	<a href="list.php?table=sisa"><div class="menu_box"><div class="home_icon01 home_icon_sisa"></div>시사</div></a>
+	<!-- <a href="list.php?table=sisaarch"><div class="menu_box"><div class="home_icon01 home_icon_sisaarch"></div>시사<br>아카이브</div></a> -->
+	<a href="list.php?table=economy"><div class="menu_box"><div class="home_icon01 home_icon_economy"></div>경제</div></a>
+	<a href="list.php?table=society"><div class="menu_box"><div class="home_icon01 home_icon_society"></div>사회면</div></a>
+	<a href="list.php?table=freeboard"><div class="menu_box"><div class="home_icon01 home_icon_freeboard"></div>자유<br>게시판</div></a>	
+	<a href="list.php?table=science"><div class="menu_box"><div class="home_icon01 home_icon_science"></div>과학</div></a>
+	<a href="list.php?table=jisik"><div class="menu_box"><div class="home_icon01 home_icon_jisik"></div>지식인</div></a>
+	<a href="list.php?table=jobinfo"><div class="menu_box"><div class="home_icon01 home_icon_jobinfo"></div>취업정보</div></a>
+	<a href="list.php?table=gomin"><div class="menu_box"><div class="home_icon01 home_icon_gomin"></div>고민</div></a>
+	<a href="list.php?table=love"><div class="menu_box"><div class="home_icon01 home_icon_love"></div>연애</div></a>
+	<a href="list.php?table=wedlock"><div class="menu_box"><div class="home_icon01 home_icon_wedlock"></div>결혼생활</div></a>
+	<a href="list.php?table=menbung"><div class="menu_box"><div class="home_icon01 home_icon_menbung"></div>멘붕</div></a>
+	<a href="list.php?table=soda"><div class="menu_box"><div class="home_icon01 home_icon_soda"></div>사이다</div></a>
+	<a href="list.php?table=dream"><div class="menu_box"><div class="home_icon01 home_icon_dream"></div>꿈</div></a>
+	<a href="list.php?table=baby"><div class="menu_box"><div class="home_icon01 home_icon_baby"></div>육아</div></a>
+	<a href="list.php?table=diet"><div class="menu_box"><div class="home_icon01 home_icon_diet"></div>다이어트</div></a>
+	<a href="list.php?table=animal"><div class="menu_box"><div class="home_icon01 home_icon_animal"></div>동물</div></a>
+	<a href="list.php?table=plant"><div class="menu_box"><div class="home_icon01 home_icon_plant"></div>식물</div></a>
+    <a href="list.php?table=cook"><div class="menu_box"><div class="home_icon02 home_icon_cook"></div>요리</div></a>
+	<a href="list.php?table=coffee"><div class="menu_box"><div class="home_icon02 home_icon_coffee"></div>커피&amp;차</div></a>	
+	<a href="list.php?table=phil"><div class="menu_box"><div class="home_icon01 home_icon_phil"></div>철학</div></a>
+	<a href="list.php?table=psy"><div class="menu_box"><div class="home_icon01 home_icon_psy"></div>심리학</div></a>	
+	<a href="list.php?table=art"><div class="menu_box"><div class="home_icon01 home_icon_art"></div>예술</div></a>
+	<a href="list.php?table=law"><div class="menu_box"><div class="home_icon01 home_icon_law"></div>법</div></a>
+	<a href="list.php?table=history"><div class="menu_box"><div class="home_icon01 home_icon_history"></div>역사</div></a>
+	<a href="list.php?table=docu"><div class="menu_box"><div class="home_icon01 home_icon_docu"></div>다큐멘터리</div></a>
+	<a href="list.php?table=fashion"><div class="menu_box"><div class="home_icon01 home_icon_fashion"></div>패션</div></a>
+	<a href="list.php?table=selfshot"><div class="menu_box"><div class="home_icon01 home_icon_selfshot"></div>패션착샷</div></a>
+	<a href="list.php?table=beauty"><div class="menu_box"><div class="home_icon01 home_icon_beauty"></div>뷰티</div></a>
+	<a href="list.php?table=interior"><div class="menu_box"><div class="home_icon01 home_icon_interior"></div>인테리어</div></a>
+	<a href="list.php?table=diy"><div class="menu_box"><div class="home_icon01 home_icon_diy"></div>DIY</div></a>	
+	<a href="list.php?table=tvent"><div class="menu_box"><div class="home_icon01 home_icon_tvent"></div>예능</div></a>
+	<!-- <a href="list.php?table=muhan"><div class="menu_box"><div class="home_icon01 home_icon_muhan"></div>무한도전</div></a> -->
+	<a href="list.php?table=thegenius"><div class="menu_box"><div class="home_icon01 home_icon_thegenius"></div>더지니어스</div></a>
+	<a href="list.php?table=animation"><div class="menu_box"><div class="home_icon01 home_icon_animation"></div>애니메이션</div></a>
+	<a href="list.php?table=comics"><div class="menu_box"><div class="home_icon01 home_icon_comics"></div>만화</div></a>
+	<a href="list.php?table=pony"><div class="menu_box"><div class="home_icon01 home_icon_pony"></div>포니</div></a>
+	<a href="list.php?table=military"><div class="menu_box"><div class="home_icon01 home_icon_military"></div>군대</div></a>
+    <a href="list.php?table=military2"><div class="menu_box"><div class="home_icon02 home_icon_military2"></div>밀리터리</div></a>
+	<a href="list.php?table=fukushima"><div class="menu_box"><div class="home_icon01 home_icon_fukushima"></div>원전사고</div></a>
+	<a href="list.php?table=computer"><div class="menu_box"><div class="home_icon01 home_icon_computer"></div>컴퓨터</div></a>
+	<a href="list.php?table=it"><div class="menu_box"><div class="home_icon01 home_icon_it"></div>IT</div></a>
+	<a href="list.php?table=programmer"><div class="menu_box"><div class="home_icon02 home_icon_programmer"></div>프로그래머</div></a>
+	<a href="list.php?table=movie"><div class="menu_box"><div class="home_icon02 home_icon_movie"></div>영화</div></a>
+	<a href="list.php?table=drama"><div class="menu_box"><div class="home_icon02 home_icon_drama"></div>드라마</div></a>
+	<a href="list.php?table=mid"><div class="menu_box"><div class="home_icon02 home_icon_mid"></div>외국드라마</div></a>
+	<a href="list.php?table=star"><div class="menu_box"><div class="home_icon02 home_icon_star"></div>연예</div></a>
+	<a href="list.php?table=music"><div class="menu_box"><div class="home_icon02 home_icon_music"></div>음악</div></a>
+	<a href="list.php?table=findmusic"><div class="menu_box"><div class="home_icon02 home_icon_findmusic"></div>음악찾기</div></a>
+	<a href="list.php?table=instrument"><div class="menu_box"><div class="home_icon02 home_icon_instrument"></div>악기</div></a>
+	<a href="list.php?table=sound"><div class="menu_box"><div class="home_icon02 home_icon_sound"></div>음향기기</div></a>
+	<a href="list.php?table=sports"><div class="menu_box"><div class="home_icon02 home_icon_sports"></div>스포츠</div></a>
+	<a href="list.php?table=baseball"><div class="menu_box"><div class="home_icon02 home_icon_baseball"></div>야구</div></a>
+	<a href="javascript:show_baseball_team_div()"><div class="menu_box"><div class="home_icon_sports_team home_icon_baseballteam"></div>야구팀</div></a>
+
+	<span id="baseball_team_div" style='display: none'>
+			<a href="list.php?table=bbnexen">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbnexen"></div>넥센<br>히어로즈
+				</div>
+			</a>
+
+			<a href="list.php?table=bbdoosan">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbdoosan"></div>두산베어스
+				</div>
+			</a>
+
+			<a href="list.php?table=bblotte">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bblotte"></div>롯데<br>자이언츠
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bbsamsung">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbsamsung"></div>삼성<br>라이온즈
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bbhanwha">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbhanwha"></div>한화이글스
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bbkia">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbkia"></div>기아<br>타이거스
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bblg">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bblg"></div>LG트윈스
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bbnc">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbnc"></div>NC다이노스
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bbsk">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbsk"></div>SK와이번스
+				</div>
+			</a>
+	        
+	        
+	        <a href="list.php?table=bbsk">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbkt"></div>KT위즈
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bbmlb">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbmlb"></div>메이저리그
+				</div>
+			</a>
+
+
+			<a href="list.php?table=bbnpb">
+				<div class="menu_box">
+					<div class="home_icon_sports_team home_icon_bbnpb"></div>일본프로<br>야구리그
+				</div>
+			</a>
+	</span>
+
+	<a href="list.php?table=soccer"><div class="menu_box"><div class="home_icon02 home_icon_soccer"></div>축구</div></a>
+	<a href="list.php?table=basketball"><div class="menu_box"><div class="home_icon02 home_icon_basketball"></div>농구</div></a>
+	<a href="list.php?table=baduk"><div class="menu_box"><div class="home_icon02 home_icon_baduk"></div>바둑</div></a>
+	<a href="list.php?table=oekaki"><div class="menu_box"><div class="home_icon02 home_icon_oekaki"></div>그림판</div></a>
+    <a href="list.php?table=toy"><div class="menu_box"><div class="home_icon02 home_icon_toy"></div>장난감</div></a>
+	<a href="list.php?table=panic"><div class="menu_box"><div class="home_icon02 home_icon_panic"></div>공포</div></a>
+	<a href="list.php?table=mystery"><div class="menu_box"><div class="home_icon02 home_icon_mystery"></div>미스테리</div></a>	
+	<a href="list.php?table=soju"><div class="menu_box"><div class="home_icon02 home_icon_soju"></div>술한잔<br>했어요</div></a>
+	<a href="list.php?table=car"><div class="menu_box"><div class="home_icon02 home_icon_car"></div>자동차</div></a>
+	<a href="list.php?table=bicycle2"><div class="menu_box"><div class="home_icon02 home_icon_bicycle2"></div>자전거</div></a>
+	<a href="list.php?table=motorcycle"><div class="menu_box"><div class="home_icon02 home_icon_motorcycle"></div>바이크</div></a>
+	<a href="list.php?table=rivfishing"><div class="menu_box"><div class="home_icon02 home_icon_rivfishing"></div>민물낚시</div></a>
+	<a href="list.php?table=seafishing"><div class="menu_box"><div class="home_icon02 home_icon_seafishing"></div>바다낚시</div></a>	
+	<a href="list.php?table=readers"><div class="menu_box"><div class="home_icon02 home_icon_readers"></div>책</div></a>
+	<a href="list.php?table=deca"><div class="menu_box"><div class="home_icon02 home_icon_deca"></div>사진</div></a>
+	<a href="list.php?table=photolec"><div class="menu_box"><div class="home_icon02 home_icon_photolec"></div>사진강좌</div></a>
+	<a href="list.php?table=camera"><div class="menu_box"><div class="home_icon02 home_icon_camera"></div>카메라</div></a>
+	<a href="list.php?table=travel"><div class="menu_box"><div class="home_icon02 home_icon_travel"></div>여행</div></a>
+	<a href="list.php?table=overseabuy"><div class="menu_box"><div class="home_icon02 home_icon_overseabuy"></div>해외직구</div></a>
+	<a href="list.php?table=outstudy"><div class="menu_box"><div class="home_icon02 home_icon_outstudy"></div>유학</div></a>
+	<a href="list.php?table=emigration"><div class="menu_box"><div class="home_icon02 home_icon_emigration"></div>이민</div></a>
+	<a href="list.php?table=today"><div class="menu_box"><div class="home_icon02 home_icon_today"></div>오늘<br>있잖아요</div></a>
+	<a href="list.php?table=voca"><div class="menu_box"><div class="home_icon02 home_icon_voca"></div>단어장</div></a>
+	<a href="list.php?table=smartphone"><div class="menu_box"><div class="home_icon02 home_icon_smartphone"></div>스마트폰</div></a>
+	<a href="list.php?table=iphone"><div class="menu_box"><div class="home_icon02 home_icon_iphone"></div>애플</div></a>
+	<a href="list.php?table=android"><div class="menu_box"><div class="home_icon02 home_icon_android"></div>안드로이드</div></a>
+	<div style="clear:both"></div>
+</div>
+
+
+<!--게임 아이콘 -->
+<div class='index_page_separator_div' >게임게시판</div>
+
+<div class="homeMenu">
+	<a href="list.php?table=gametalk"><div class="menu_box"><div class="home_icon_game home_icon_gametalk"></div>게임토론방</div></a>
+	<a href="list.php?table=xbox"><div class="menu_box"><div class="home_icon_game home_icon_xbox"></div>엑스박스</div></a>
+	<a href="list.php?table=ps"><div class="menu_box"><div class="home_icon_game home_icon_ps"></div>플레이<br>스테이션</div></a>
+	<a href="list.php?table=nintendo"><div class="menu_box"><div class="home_icon_game home_icon_nintendo"></div>닌텐도</div></a>
+	<a href="list.php?table=mobilegame"><div class="menu_box"><div class="home_icon_game home_icon_mobilegame"></div>모바일게임</div></a>
+
+
+
+	<a href="list.php?table=starcraft"><div class="menu_box"><div class="home_icon_game home_icon_starcraft"></div>스타1</div></a>
+	<a href="list.php?table=starcraft2"><div class="menu_box"><div class="home_icon_game home_icon_starcraft2"></div>스타2</div></a>
+	<a href="list.php?table=wow"><div class="menu_box"><div class="home_icon_game home_icon_wow"></div>WOW</div></a>
+	<a href="list.php?table=warcraft"><div class="menu_box"><div class="home_icon_game home_icon_warcraft"></div>워3</div></a>
+	<a href="list.php?table=diablo2"><div class="menu_box"><div class="home_icon_game home_icon_diablo2"></div>디아블로2</div></a>
+	<a href="list.php?table=diablo3"><div class="menu_box"><div class="home_icon_game home_icon_diablo3"></div>디아블로3</div></a>
+	<a href="list.php?table=dungeon"><div class="menu_box"><div class="home_icon_game home_icon_dungeon"></div>던전</div></a>
+	<a href="list.php?table=aion"><div class="menu_box"><div class="home_icon_game home_icon_aion"></div>아이온</div></a>
+	<a href="list.php?table=mabinogi"><div class="menu_box"><div class="home_icon_game home_icon_mabinogi"></div>마비노기</div></a>
+	<a href="list.php?table=mabi"><div class="menu_box"><div class="home_icon_game home_icon_mabi"></div>마비노기<br>영웅전</div></a>
+	<a href="list.php?table=suddenattack"><div class="menu_box"><div class="home_icon_game home_icon_suddenattack"></div>서든어택</div></a>
+	<a href="list.php?table=fifa3"><div class="menu_box"><div class="home_icon_game home_icon_fifa2"></div>피파온라인3</div></a>
+	<a href="list.php?table=minecraft"><div class="menu_box"><div class="home_icon_game home_icon_minecraft"></div>마인<br>크래프트</div></a>
+	<a href="list.php?table=specialforce"><div class="menu_box"><div class="home_icon_game home_icon_specialforce"></div>스페셜포스</div></a>
+	<a href="list.php?table=civil"><div class="menu_box"><div class="home_icon_game home_icon_civil"></div>문명</div></a>
+	<a href="list.php?table=cyphers"><div class="menu_box"><div class="home_icon_game home_icon_cyphers"></div>사이퍼즈</div></a>
+	<a href="list.php?table=lol"><div class="menu_box"><div class="home_icon_game home_icon_lol"></div>LOL</div></a>
+	<a href="list.php?table=bf3"><div class="menu_box"><div class="home_icon_game home_icon_bf3"></div>배틀필드</div></a>
+	<a href="list.php?table=bns"><div class="menu_box"><div class="home_icon_game home_icon_bns"></div>블레이드앤<br>소울</div></a>
+	<a href="list.php?table=actozma"><div class="menu_box"><div class="home_icon_game home_icon_actozma"></div>밀리언아서</div></a>
+	<a href="list.php?table=wtank"><div class="menu_box"><div class="home_icon_game home_icon_wtank"></div>월드오브<br>탱크</div></a>
+	<a href="list.php?table=gta5"><div class="menu_box"><div class="home_icon_game home_icon_gta5"></div>gta5</div></a>
+	<a href="list.php?table=hstone"><div class="menu_box"><div class="home_icon_game home_icon_hstone"></div>하스스톤</div></a>
+	<a href="list.php?table=blacksand"><div class="menu_box"><div class="home_icon_game home_icon_black"></div>검은사막</div></a>
+	<a href="list.php?table=heroes"><div class="menu_box"><div class="home_icon_game home_icon_heroes"></div>히어로즈<br>오브더스톰</div></a>
+	<a href="list.php?table=dota2"><div class="menu_box"><div class="home_icon_game home_icon_dota2"></div>도타2</div></a>
+	<a href="list.php?table=maple1"><div class="menu_box"><div class="home_icon_game home_icon_maple1"></div>메이플<br>스토리1</div></a>
+	<a href="list.php?table=maple2"><div class="menu_box"><div class="home_icon_game home_icon_maple2"></div>메이플<br>스토리2</div></a>
+	<a href="list.php?table=overwatch"><div class="menu_box"><div class="home_icon_game home_icon_overwatch"></div>오버워치</div></a>
+	<a href="list.php?table=overgroup"><div class="menu_box"><div class="home_icon_game home_icon_overgroup"></div>오버워치<br>그룹모집</div></a>
+	<a href="list.php?table=pokemongo"><div class="menu_box"><div class="home_icon_game home_icon_pokemongo"></div>포켓몬고</div></a>
+	<a href="list.php?table=ffantasy14"><div class="menu_box"><div class="home_icon_game home_icon_ffantasy14"></div>파이널판타지14</div></a>
+	<a href="list.php?table=battlegrnd"><div class="menu_box"><div class="home_icon_game home_icon_battlegrnd"></div>배틀그라운드</div></a>
+</div><!--homeMenu-->
+
+
+<!--footer-->
+
+<div style="margin:10 0 10;text-align:center">
+	<!--ADSENSE_INDEX_BOTTOM-->
+	<div style='text-align: center; padding:10px 0 5px 0;background-color:#e5e5e5' class='ad_box_div'>
+		<script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js'></script>
+		<!-- [오유모바일]홈페이지 최하단 -->
+		<ins class='adsbygoogle'
+				style='display:inline-block;width:320px;height:100px'
+				data-ad-client='ca-pub-2455872584413600'
+				data-ad-slot='8328315397'></ins>
+		<script>
+				(adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
+	</div>
+
+
+<!--데이터절약모드-->
+<div class='cf footer_switch_div_container'>
+    <div class='datasave_switch_title_div'>데이터절약모드</div>
+    
+    <div id='datasave_switch_div' style='display:inline-block;'>
+        <input id="switch_datasave" class="cmn-toggle cmn-toggle-round" type="checkbox" style='' checked>
+        <label for="switch_datasave"></label>
+    </div>
+
+<!--     <div class='darkmode_switch_title_div'>다크모드</div>
+    
+    <div id='darkmode_switch_div' style='display:inline-block;'>
+        <input id="switch_darkmode" class="cmn-toggle cmn-toggle-round" type="checkbox" style=''>
+        <label for="switch_darkmode"></label>
+    </div>
+ -->
+</div>
+
+
+
+<div class="bottom_button_div">
+	<div class='cf'>
+		<div class="go_back_btn" onclick='javascript:history.go(-1)'>◀뒤로가기</div>
+		<div class="pc_version" onclick="location.href='http://www.todayhumor.co.kr/go_pc_version.php?url=http%3A%2F%2Fwww.todayhumor.co.kr%2F%3Fpcok%3D1'">PC버전</div>
+		<div class="go_to_top_btn" onclick="javascript:go_to_top()">맨위로▲</div>
+	</div>
+</div>
+
+
+
+<div class="sprt_img" id="slideTop" ></div>
+
+
+<!-- <script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-1318628-2");
+pageTracker._trackPageview();
+} catch(err) {}
+</script> -->
+
+
+<div class='bottom_menu_div' >
+	<a href='/list.php?table=announce'><span><font color='white'>공지</font></span></a>
+	<a href='/list.php?table=ou'><span><font color='white'>운영</font></span></a>
+	<!--<a href='/list.php?table=askboard'><span><font color='white'>게시판요청</font></span></a>-->
+	<a href='/list.php?table=databox'><span><font color='white'>자료창고</font></span></a> 
+	<a href='//todayhumor.co.kr/member/youth_protect.php'><span><font color='white'>청소년보호</font></span></a> 
+
+</div>
+
+<script src="//www.todayhumor.co.kr/board/js/jquery1.11.1.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script src="/js/jquery.ui.touch-punch.min.js"></script>
+<script src="//www.todayhumor.co.kr/board/js/js.cookie.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="//www.todayhumor.co.kr/board/js/mojs_1.0.3.min.js"></script>
+<script src='//www.todayhumor.co.kr/board/js/common.js?405'></script>
+<script src="/js/default.js?754981370" charset="utf-8"></script>
+<script>
+$(function(){
+	$("#btn_copyMemberUrl").click(function(e){
+		e.preventDefault();
+		prompt("아래 주소를 복사해주세요.", $(this).attr("href"));
+	});
+});
+	
+
+</script>
+
+
+<script type='text/javascript'>
+        function setCookie(name, value, seconds, domain) {
+            var expires = '';
+            if (seconds) {
+                var date = new Date();
+                date.setTime(date.getTime() + (seconds*1000)); // 초를 밀리초로 변환
+                expires = '; expires=' + date.toUTCString();
+            }
+            var domainPart = domain ? '; domain=' + domain : '';
+            document.cookie = name + '=' + value + expires + domainPart + '; path=/';
+        }
+
+        setCookie('__dvst__', '20260728', 86400, '.todayhumor.co.kr');
+    </script>
+
+
+
+
+
+
+
+
+<script src='js/index.js?43122498'></script>
+
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2241d7ddbd5c10a',t:'MTc4NTI0NDEzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

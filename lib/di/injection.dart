@@ -11,6 +11,7 @@ import 'package:humoruniv/data/datasources/github_remote_ds_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds_impl.dart';
+import 'package:humoruniv/data/datasources/todayhumor_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/image_cache_service.dart';
 import 'package:humoruniv/data/datasources/image_cache_service_impl.dart';
 import 'package:humoruniv/data/repositories/apk_install_repository_impl.dart';
@@ -43,10 +44,25 @@ Future<void> configureDependencies() async {
     () => HumorunivAdapterImpl(remoteDs: sl<HumorunivRemoteDs>()),
   );
 
+  sl.registerLazySingleton<HtmlClientImpl>(
+    () => HtmlClientImpl(
+      baseUrl: 'https://www.todayhumor.co.kr',
+      encoding: 'utf-8',
+    ),
+    instanceName: 'todayhumorHtmlClient',
+  );
+
+  sl.registerLazySingleton<TodayhumorAdapterImpl>(
+    () => TodayhumorAdapterImpl(
+      htmlClient: sl<HtmlClientImpl>(instanceName: 'todayhumorHtmlClient'),
+    ),
+  );
+
   sl.registerLazySingleton<MergedFeedRepository>(
     () => MergedFeedRepositoryImpl(
       adapters: {
         CommunityId.humoruniv: sl<CommunityAdapter>(),
+        CommunityId.todayhumor: sl<TodayhumorAdapterImpl>(),
       },
     ),
   );

@@ -5,6 +5,7 @@ import 'package:humoruniv/data/datasources/community_adapter.dart';
 import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/feed_item.dart';
 import 'package:humoruniv/domain/entities/merged_feed.dart';
+import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
 import 'package:humoruniv/domain/services/feed_merger.dart';
 
@@ -60,6 +61,23 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
       next: page.next,
       failedSources: failed,
     ));
+  }
+
+  @override
+  Future<Either<Failure, PostDetail>> fetchDetail({
+    required CommunityId community,
+    required String id,
+  }) async {
+    final adapter = _adapters[community];
+    if (adapter == null) {
+      return Left(ServerFailure('No adapter for $community'));
+    }
+    try {
+      final detail = await adapter.fetchDetail(id);
+      return Right(detail);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
 
   Future<_FetchOutcome> _fetchOne(

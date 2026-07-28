@@ -1,0 +1,69 @@
+import 'package:flutter/foundation.dart';
+import 'package:humoruniv/core/errors/failures.dart';
+import 'package:humoruniv/core/network/html_client.dart';
+import 'package:humoruniv/data/datasources/community_adapter.dart';
+import 'package:humoruniv/data/models/feed_item_dto.dart';
+import 'package:humoruniv/data/parsers/todayhumor_detail_parser.dart';
+import 'package:humoruniv/data/parsers/todayhumor_list_parser.dart';
+import 'package:humoruniv/domain/entities/community.dart';
+import 'package:humoruniv/domain/entities/post_detail.dart';
+
+class TodayhumorAdapterImpl implements CommunityAdapter {
+  TodayhumorAdapterImpl({required this.htmlClient});
+
+  final HtmlClient htmlClient;
+
+  @override
+  CommunityId get communityId => CommunityId.todayhumor;
+
+  @override
+  Future<FeedListResult> fetchLatest({String? pageToken}) async {
+    try {
+      final page = pageToken ?? '1';
+      final html = await htmlClient.get(
+        '/board/list.php?table=bestofbest&page=$page',
+      );
+      final items = TodayhumorListParser.parse(html);
+      final nextPage = (int.tryParse(page) ?? 0) + 1;
+      return FeedListResult(
+        items: items,
+        pageToken: items.length >= 10 ? '$nextPage' : null,
+      );
+    } on ServerFailure {
+      rethrow;
+    } on NetworkFailure {
+      rethrow;
+    } catch (e) {
+      debugPrint('TodayhumorAdapterImpl fetchLatest error: $e');
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<PostDetail> fetchDetail(String id) async {
+    try {
+      final html = await htmlClient.get(
+        '/board/view.php?table=bestofbest&no=$id',
+      );
+      return TodayhumorDetailParser.parse(html);
+    } on ServerFailure {
+      rethrow;
+    } on NetworkFailure {
+      rethrow;
+    } catch (e) {
+      debugPrint('TodayhumorAdapterImpl fetchDetail error: $e');
+      throw ServerFailure(e.toString());
+    }
+  }
+
+  @override
+  Future<bool> healthCheck() async {
+    try {
+      await htmlClient.get('/board/list.php?table=bestofbest&page=1');
+      return true;
+    } catch (e) {
+      debugPrint('TodayhumorAdapterImpl healthCheck failed: $e');
+      return false;
+    }
+  }
+}
