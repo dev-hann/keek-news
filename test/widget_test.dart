@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:humoruniv/domain/entities/app_release.dart';
-import 'package:humoruniv/domain/entities/merged_feed.dart';
 import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
 import 'package:humoruniv/domain/repositories/update_repository.dart';
 import 'package:humoruniv/domain/usecases/check_for_update.dart';

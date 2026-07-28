@@ -4,8 +4,6 @@ import 'package:humoruniv/data/datasources/community_adapter.dart';
 import 'package:humoruniv/data/models/feed_item_dto.dart';
 import 'package:humoruniv/data/repositories/merged_feed_repository_impl.dart';
 import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/feed_item.dart';
-import 'package:dartz/dartz.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockCommunityAdapter extends Mock implements CommunityAdapter {}

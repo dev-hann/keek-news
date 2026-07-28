@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:humoruniv/core/errors/failures.dart';
 import 'package:humoruniv/core/network/html_client.dart';
 import 'package:humoruniv/data/datasources/community_adapter.dart';
-import 'package:humoruniv/data/models/feed_item_dto.dart';
 import 'package:humoruniv/data/parsers/todayhumor_detail_parser.dart';
 import 'package:humoruniv/data/parsers/todayhumor_list_parser.dart';
 import 'package:humoruniv/domain/entities/community.dart';

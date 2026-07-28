@@ -1,7 +1,6 @@
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 
-import 'package:humoruniv/domain/entities/comment.dart';
 import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/content_block.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
@@ -117,7 +116,7 @@ class FmkoreaDetailParser {
 
       if (imgs.isEmpty && videos.isEmpty && div.text.trim().isNotEmpty) {
         final text = div.text.trim();
-        if (text.isNotEmpty && !blocks.any((b) => b is TextBlock && (b as TextBlock).text == text)) {
+        if (text.isNotEmpty && !blocks.any((b) => b is TextBlock && b.text == text)) {
           blocks.add(TextBlock(text));
         }
       }

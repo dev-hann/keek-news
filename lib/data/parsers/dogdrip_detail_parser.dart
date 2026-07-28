@@ -17,6 +17,7 @@ class DogdripDetailParser {
     final contentHtml = contentEl?.innerHtml ?? '';
     final imageUrls = _extractImages(contentEl);
     final contentBlocks = _buildBlocks(contentEl);
+    final comments = _extractComments(doc);
 
     return PostDetail(
       id: id,
@@ -29,10 +30,65 @@ class DogdripDetailParser {
       recommendCount: 0,
       notRecommendCount: 0,
       viewCount: 0,
-      commentCount: 0,
-      comments: const [],
+      commentCount: comments.length,
+      comments: comments,
       community: CommunityId.dogdrip,
     );
+  }
+
+  static List<Comment> _extractComments(dom.Document doc) {
+    final items = doc.querySelectorAll('div.comment-item');
+    return items.map(_parseComment).whereType<Comment>().toList();
+  }
+
+  static Comment? _parseComment(dom.Element item) {
+    final idStr = item.id.replaceAll('comment_', '');
+    final id = int.tryParse(idStr) ?? 0;
+
+    final authorEl = item.querySelector('a[class*="member_"]');
+    final author = authorEl?.text.trim() ?? '';
+
+    final contentEl = item.querySelector('.rhymix_content, .xe_content');
+    final content = contentEl?.text.trim() ?? '';
+
+    final timeText = item.querySelector('.text-muted')?.text ?? '';
+    final date = _parseRelativeTime(timeText) ?? DateTime.now();
+
+    final countEl = item.querySelector('.fa-thumbs-up');
+    var recommendCount = 0;
+    if (countEl != null) {
+      final countSpan = countEl.parent?.querySelector('.count');
+      recommendCount = int.tryParse(countSpan?.text.trim() ?? '') ?? 0;
+    }
+
+    if (content.isEmpty && author.isEmpty) return null;
+
+    return Comment(
+      id: id,
+      author: author,
+      content: content,
+      date: date,
+      recommendCount: recommendCount,
+      isBest: false,
+      replies: const [],
+    );
+  }
+
+  static DateTime? _parseRelativeTime(String text) {
+    final now = DateTime.now();
+    var match = RegExp(r'(\d+)\s*분\s*전').firstMatch(text);
+    if (match != null) {
+      return now.subtract(Duration(minutes: int.parse(match.group(1)!)));
+    }
+    match = RegExp(r'(\d+)\s*시간\s*전').firstMatch(text);
+    if (match != null) {
+      return now.subtract(Duration(hours: int.parse(match.group(1)!)));
+    }
+    match = RegExp(r'(\d+)\s*일\s*전').firstMatch(text);
+    if (match != null) {
+      return now.subtract(Duration(days: int.parse(match.group(1)!)));
+    }
+    return null;
   }
 
   static int _extractId(dom.Document doc) {
@@ -54,8 +110,7 @@ class DogdripDetailParser {
   }
 
   static dom.Element? _findContent(dom.Document doc) {
-    return doc.querySelector('.rhymix_content') ??
-        doc.querySelector('.xe_content');
+    return doc.querySelector('div[class*="document_"]');
   }
 
   static List<String> _extractImages(dom.Element? content) {
