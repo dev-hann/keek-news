@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:humoruniv/domain/entities/comment.dart';
+import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/content_block.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
 
@@ -196,6 +197,24 @@ void main() {
       );
 
       expect(a, isNot(equals(b)));
+    });
+
+    test('should default community to humoruniv', () {
+      final detail = PostDetail(
+        id: 1,
+        title: 't',
+        author: 'a',
+        date: DateTime(2026, 7, 26),
+        contentHtml: '',
+        contentBlocks: const [],
+        imageUrls: const [],
+        recommendCount: 0,
+        notRecommendCount: 0,
+        viewCount: 0,
+        commentCount: 0,
+        comments: const [],
+      );
+      expect(detail.community, CommunityId.humoruniv);
     });
   });
 

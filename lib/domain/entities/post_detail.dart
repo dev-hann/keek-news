@@ -1,4 +1,5 @@
 import 'package:humoruniv/domain/entities/comment.dart';
+import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/content_block.dart';
 import 'package:meta/meta.dart';
 
@@ -17,6 +18,7 @@ class PostDetail {
     required this.viewCount,
     required this.commentCount,
     required this.comments,
+    this.community = CommunityId.humoruniv,
   });
   final int id;
   final String title;
@@ -30,6 +32,7 @@ class PostDetail {
   final int viewCount;
   final int commentCount;
   final List<Comment> comments;
+  final CommunityId community;
 
   @override
   bool operator ==(Object other) =>
@@ -44,18 +47,20 @@ class PostDetail {
           recommendCount == other.recommendCount &&
           notRecommendCount == other.notRecommendCount &&
           viewCount == other.viewCount &&
-          commentCount == other.commentCount;
+          commentCount == other.commentCount &&
+          community == other.community;
 
   @override
   int get hashCode => Object.hash(
-    id,
-    title,
-    author,
-    date,
-    contentHtml,
-    recommendCount,
-    notRecommendCount,
-    viewCount,
-    commentCount,
-  );
+        id,
+        title,
+        author,
+        date,
+        contentHtml,
+        recommendCount,
+        notRecommendCount,
+        viewCount,
+        commentCount,
+        community,
+      );
 }
