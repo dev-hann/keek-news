@@ -10,7 +10,6 @@ class CommunitySettings {
       CommunityId.todayhumor,
       CommunityId.ppomppu,
       CommunityId.dogdrip,
-      CommunityId.fmkorea,
     },
     this.maxRatio = 0.4,
   });
