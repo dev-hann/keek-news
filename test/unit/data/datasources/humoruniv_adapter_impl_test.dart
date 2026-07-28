@@ -1,11 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/datasources/community_adapter.dart';
 import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/models/post_dto.dart';
-import 'package:humoruniv/domain/entities/comment.dart';
 import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:mocktail/mocktail.dart';
 
