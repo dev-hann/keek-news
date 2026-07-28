@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,7 +26,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _controller = ScrollController();
-  bool _showScrollTop = false;
+  final ValueNotifier<bool> _showScrollTop = ValueNotifier(false);
+  bool _isLoadingMore = false;
   int _tabIndex = 0;
 
   @override
@@ -36,23 +38,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onScroll);
     _controller.dispose();
+    _showScrollTop.dispose();
     super.dispose();
   }
 
   void _onScroll() {
     if (!_controller.hasClients) return;
     final pos = _controller.position;
-    if (pos.maxScrollExtent > 0 && pos.pixels >= pos.maxScrollExtent * 0.85) {
-      ref.read(mergedFeedProvider.notifier).fetchNextPage();
-    }
+
     final shouldShow = pos.pixels > 600;
-    if (shouldShow != _showScrollTop) {
-      setState(() => _showScrollTop = shouldShow);
+    if (shouldShow != _showScrollTop.value) {
+      _showScrollTop.value = shouldShow;
     }
+
+    if (_isLoadingMore) return;
+    if (pos.maxScrollExtent <= 0) return;
+    if (pos.pixels < pos.maxScrollExtent * 0.85) return;
+
+    _isLoadingMore = true;
+    Future.microtask(() {
+      ref.read(mergedFeedProvider.notifier).fetchNextPage().whenComplete(() {
+        _isLoadingMore = false;
+      });
+    });
   }
 
   void _switchTab(int index) {
+    if (index == _tabIndex) return;
     setState(() => _tabIndex = index);
     if (_controller.hasClients) _controller.jumpTo(0);
   }
@@ -66,7 +80,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final feedState = ref.watch(mergedFeedProvider);
     final visibleItems = _filterItems(feedState.items);
-    final selectedCommunity = communities[_tabIndex].id;
 
     return Scaffold(
       appBar: AppBar(
@@ -90,6 +103,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: ValueListenableBuilder<bool>(
+        valueListenable: _showScrollTop,
+        builder: (context, show, _) => ScrollToTopButton(
+          visible: show,
+          onTap: () {
+            if (_controller.hasClients)
+              _controller.animateTo(
+                0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+              );
+          },
+        ),
       ),
     );
   }
@@ -122,36 +149,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final extra = (state.hasMore || state.isLoadingMore) ? 1 : 0;
 
-    return Stack(
-      children: [
-        ListView.builder(
-          controller: _controller,
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: visibleItems.length + extra,
-          itemBuilder: (context, index) {
-            if (index == visibleItems.length) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: LoadingIndicator(),
-              );
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.p12),
-              child: _FeedCard(item: visibleItems[index]),
-            );
-          },
-        ),
-        Positioned(
-          right: AppSpacing.p16,
-          bottom: AppSpacing.p16 + MediaQuery.paddingOf(context).bottom,
-          child: ScrollToTopButton(
-            visible: _showScrollTop,
-            onTap: () {
-              if (_controller.hasClients) _controller.jumpTo(0);
-            },
-          ),
-        ),
-      ],
+    return ListView.builder(
+      controller: _controller,
+      physics: const AlwaysScrollableScrollPhysics(),
+      addAutomaticKeepAlives: true,
+      addRepaintBoundaries: true,
+      itemCount: visibleItems.length + extra,
+      itemBuilder: (context, index) {
+        if (index == visibleItems.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: LoadingIndicator(),
+          );
+        }
+        return RepaintBoundary(child: _FeedCard(item: visibleItems[index]));
+      },
     );
   }
 
@@ -230,40 +242,46 @@ class _FeedCard extends ConsumerWidget {
     final asyncDetail = ref.watch(
       mergedDetailProvider((community: item.community, id: item.id)),
     );
+
     final detail = asyncDetail.whenOrNull(
       data: (either) => either.fold((_) => null, (d) => d),
     );
     final hasImages = detail != null && detail.imageUrls.isNotEmpty;
     final hasComments = detail != null && detail.comments.isNotEmpty;
 
-    return FeedCard(
-      post: BoardPost(
-        id: int.tryParse(item.id) ?? 0,
-        title: item.title,
-        url: item.url,
-        author: item.author ?? '',
-        date: item.publishedAt?.toIso8601String() ?? '',
-        recommendCount: item.recommendCount,
-        notRecommendCount: 0,
-        commentCount: item.commentCount,
-        viewCount: item.viewCount,
-        thumbnailUrl: item.thumbnailUrl ?? '',
-        community: item.community,
-      ),
-      detail: detail,
-      detailLoading: asyncDetail.isLoading,
-      onImageTap: !hasImages
-          ? null
-          : (i) => Navigator.of(context).push<void>(
-              MaterialPageRoute<void>(
-                builder: (_) => ImageViewerScreen(
-                  imageUrls: detail.imageUrls,
-                  initialIndex: i,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.p12),
+      child: FeedCard(
+        post: BoardPost(
+          id: int.tryParse(item.id) ?? 0,
+          title: item.title,
+          url: item.url,
+          author: item.author ?? '',
+          date: item.publishedAt?.toIso8601String() ?? '',
+          recommendCount: item.recommendCount,
+          notRecommendCount: 0,
+          commentCount: item.commentCount,
+          viewCount: item.viewCount,
+          thumbnailUrl: item.thumbnailUrl ?? '',
+          community: item.community,
+        ),
+        detail: detail,
+        detailLoading: asyncDetail.isLoading,
+        onImageTap: !hasImages
+            ? null
+            : (i) => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => ImageViewerScreen(
+                    imageUrls: detail.imageUrls,
+                    initialIndex: i,
+                  ),
+                  fullscreenDialog: true,
                 ),
-                fullscreenDialog: true,
               ),
-            ),
-      onCommentsTap: !hasComments ? null : () => _showComments(context, detail),
+        onCommentsTap: !hasComments
+            ? null
+            : () => _showComments(context, detail),
+      ),
     );
   }
 
