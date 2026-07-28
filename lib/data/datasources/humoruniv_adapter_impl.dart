@@ -48,7 +48,8 @@ class HumorunivAdapterImpl implements CommunityAdapter {
 
   @override
   Future<PostDetail> fetchDetail(String id) async {
-    return remoteDs.fetchPostDetail(id);
+    final url = '/board/read.html?table=pds&number=$id';
+    return remoteDs.fetchPostDetail(url);
   }
 
   @override

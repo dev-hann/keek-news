@@ -177,7 +177,7 @@ void main() {
 
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     final title = (appBar.title! as Text).data;
-    expect(title, '통합 유머 피드');
+    expect(title, '웃긴대학');
   });
 
   testWidgets('should display settings gear action', (tester) async {

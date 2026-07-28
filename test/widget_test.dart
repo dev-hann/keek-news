@@ -74,7 +74,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('통합 유머 피드'), findsOneWidget);
+    expect(find.text('웃긴대학'), findsOneWidget);
     expect(find.byType(HomeScreen), findsOneWidget);
   });
 }

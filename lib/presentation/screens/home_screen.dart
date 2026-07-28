@@ -10,13 +10,11 @@ import 'package:humoruniv/core/widgets/states/empty_state_view.dart';
 import 'package:humoruniv/core/widgets/states/error_state_view.dart';
 import 'package:humoruniv/core/widgets/states/skeleton_feed_card.dart';
 import 'package:humoruniv/domain/entities/board_post.dart';
-import 'package:humoruniv/domain/entities/comment.dart';
 import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/feed_item.dart';
 import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:humoruniv/presentation/providers/merged_feed_provider.dart';
 import 'package:humoruniv/presentation/screens/image_viewer_screen.dart';
-import 'package:humoruniv/presentation/widgets/community_badge.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -28,7 +26,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController _controller = ScrollController();
   bool _showScrollTop = false;
-  CommunityId? _filter = communities.first.id;
+  int _tabIndex = 0;
 
   @override
   void initState() {
@@ -45,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void _onScroll() {
     if (!_controller.hasClients) return;
     final pos = _controller.position;
-    if (pos.pixels >= pos.maxScrollExtent * 0.85) {
+    if (pos.maxScrollExtent > 0 && pos.pixels >= pos.maxScrollExtent * 0.85) {
       ref.read(mergedFeedProvider.notifier).fetchNextPage();
     }
     final shouldShow = pos.pixels > 600;
@@ -54,44 +52,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  List<FeedItem> _applyFilter(List<FeedItem> items) {
-    if (_filter == null) return items;
-    return items.where((e) => e.community == _filter).toList();
+  void _switchTab(int index) {
+    setState(() => _tabIndex = index);
+    if (_controller.hasClients) _controller.jumpTo(0);
+  }
+
+  List<FeedItem> _filterItems(List<FeedItem> items) {
+    final selected = communities[_tabIndex].id;
+    return items.where((e) => e.community == selected).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final feedState = ref.watch(mergedFeedProvider);
-    final visibleItems = _applyFilter(feedState.items);
+    final visibleItems = _filterItems(feedState.items);
+    final selectedCommunity = communities[_tabIndex].id;
 
-    return DefaultTabController(
-      length: communities.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('통합 유머 피드'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              tooltip: '설정',
-              onPressed: () => context.push('/settings'),
-            ),
-          ],
-          bottom: TabBar(
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            onTap: (i) {
-              setState(() {
-                _filter = communities[i].id;
-                if (_controller.hasClients) _controller.jumpTo(0);
-              });
-            },
-            tabs: communities.map((c) => Tab(text: c.shortName)).toList(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(communities[_tabIndex].displayName),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: '설정',
+            onPressed: () => context.push('/settings'),
           ),
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async => ref.read(mergedFeedProvider.notifier).fetch(),
-          child: _buildBody(feedState, visibleItems),
-        ),
+        ],
+      ),
+      body: Column(
+        children: [
+          _CommunityTabBar(selectedIndex: _tabIndex, onChanged: _switchTab),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async =>
+                  ref.read(mergedFeedProvider.notifier).fetch(),
+              child: _buildBody(feedState, visibleItems),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -122,23 +120,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    final extra = (state.hasMore || state.isLoadingMore) && _filter == null
-        ? 1
-        : 0;
-    final hasBanner = state.failedSources.isNotEmpty && _filter == null;
+    final extra = (state.hasMore || state.isLoadingMore) ? 1 : 0;
 
     return Stack(
       children: [
         ListView.builder(
           controller: _controller,
           physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: visibleItems.length + (hasBanner ? 1 : 0) + extra,
+          itemCount: visibleItems.length + extra,
           itemBuilder: (context, index) {
-            if (hasBanner && index == 0) {
-              return _PartialFailureBanner(failed: state.failedSources);
-            }
-            final itemIndex = hasBanner ? index - 1 : index;
-            if (itemIndex == visibleItems.length) {
+            if (index == visibleItems.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: LoadingIndicator(),
@@ -146,7 +137,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             }
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.p12),
-              child: _MergedCard(item: visibleItems[itemIndex]),
+              child: _FeedCard(item: visibleItems[index]),
             );
           },
         ),
@@ -157,7 +148,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             visible: _showScrollTop,
             onTap: () {
               if (_controller.hasClients) _controller.jumpTo(0);
-              ref.read(mergedFeedProvider.notifier).fetch();
             },
           ),
         ),
@@ -177,51 +167,62 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _PartialFailureBanner extends StatelessWidget {
-  const _PartialFailureBanner({required this.failed});
-  final Set<CommunityId> failed;
+class _CommunityTabBar extends StatelessWidget {
+  const _CommunityTabBar({
+    required this.selectedIndex,
+    required this.onChanged,
+  });
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final names = failed
-        .map((id) => Community.findById(id)?.shortName ?? id.name)
-        .join(', ');
-
+    final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.p12,
-        vertical: AppSpacing.p4,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            size: 16,
-            color: Theme.of(context).colorScheme.onErrorContainer,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '$names 커뮤니티 일시적 오류',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onErrorContainer,
+      height: 44,
+      color: theme.colorScheme.surfaceContainer,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: communities.length,
+        itemBuilder: (context, index) {
+          final c = communities[index];
+          final selected = index == selectedIndex;
+          return GestureDetector(
+            onTap: () => onChanged(index),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    width: 2,
+                    color: selected
+                        ? Color(c.brandColorArgb)
+                        : Colors.transparent,
+                  ),
+                ),
+              ),
+              child: Text(
+                c.shortName,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  color: selected
+                      ? Color(c.brandColorArgb)
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 }
 
-class _MergedCard extends ConsumerWidget {
-  const _MergedCard({required this.item});
+class _FeedCard extends ConsumerWidget {
+  const _FeedCard({required this.item});
   final FeedItem item;
 
   @override
@@ -235,42 +236,34 @@ class _MergedCard extends ConsumerWidget {
     final hasImages = detail != null && detail.imageUrls.isNotEmpty;
     final hasComments = detail != null && detail.comments.isNotEmpty;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FeedCard(
-          post: BoardPost(
-            id: int.tryParse(item.id) ?? 0,
-            title: item.title,
-            url: item.url,
-            author: item.author ?? '',
-            date: item.publishedAt?.toIso8601String() ?? '',
-            recommendCount: item.recommendCount,
-            notRecommendCount: 0,
-            commentCount: item.commentCount,
-            viewCount: item.viewCount,
-            thumbnailUrl: item.thumbnailUrl ?? '',
-            previewText: item.previewText,
-            community: item.community,
-          ),
-          detail: detail,
-          detailLoading: asyncDetail.isLoading,
-          onImageTap: !hasImages
-              ? null
-              : (i) => Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) => ImageViewerScreen(
-                      imageUrls: detail.imageUrls,
-                      initialIndex: i,
-                    ),
-                    fullscreenDialog: true,
-                  ),
+    return FeedCard(
+      post: BoardPost(
+        id: int.tryParse(item.id) ?? 0,
+        title: item.title,
+        url: item.url,
+        author: item.author ?? '',
+        date: item.publishedAt?.toIso8601String() ?? '',
+        recommendCount: item.recommendCount,
+        notRecommendCount: 0,
+        commentCount: item.commentCount,
+        viewCount: item.viewCount,
+        thumbnailUrl: item.thumbnailUrl ?? '',
+        community: item.community,
+      ),
+      detail: detail,
+      detailLoading: asyncDetail.isLoading,
+      onImageTap: !hasImages
+          ? null
+          : (i) => Navigator.of(context).push<void>(
+              MaterialPageRoute<void>(
+                builder: (_) => ImageViewerScreen(
+                  imageUrls: detail.imageUrls,
+                  initialIndex: i,
                 ),
-          onCommentsTap: !hasComments
-              ? null
-              : () => _showComments(context, detail),
-        ),
-      ],
+                fullscreenDialog: true,
+              ),
+            ),
+      onCommentsTap: !hasComments ? null : () => _showComments(context, detail),
     );
   }
 

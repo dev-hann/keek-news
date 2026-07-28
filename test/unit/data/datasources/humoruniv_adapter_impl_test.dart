@@ -3,6 +3,7 @@ import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/models/board_post_dto.dart';
 import 'package:humoruniv/domain/entities/community.dart';
+import 'package:humoruniv/domain/entities/post_detail.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHumorunivRemoteDs extends Mock implements HumorunivRemoteDs {}
@@ -75,11 +76,29 @@ void main() {
       expect(result.pageToken, isNull);
     });
 
-    test('fetchDetail should delegate to fetchPostDetail', () async {
-      const url = '/board/read.html?table=pds&number=100';
-      when(() => mockDs.fetchPostDetail(any())).thenThrow(Exception('fail'));
+    test('fetchDetail should construct correct URL from id', () async {
+      const id = '1419304';
+      const expectedUrl = '/board/read.html?table=pds&number=1419304';
+      when(() => mockDs.fetchPostDetail(expectedUrl)).thenAnswer(
+        (_) async => PostDetail(
+          id: 1419304,
+          title: 'test',
+          author: 'a',
+          date: DateTime(2026, 7, 28),
+          contentHtml: '',
+          contentBlocks: const [],
+          imageUrls: const [],
+          recommendCount: 0,
+          notRecommendCount: 0,
+          viewCount: 0,
+          commentCount: 0,
+          comments: const [],
+        ),
+      );
 
-      expect(() => adapter.fetchDetail(url), throwsA(isA<Object>()));
+      await adapter.fetchDetail(id);
+
+      verify(() => mockDs.fetchPostDetail(expectedUrl)).called(1);
     });
 
     test(
