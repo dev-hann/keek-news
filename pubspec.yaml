@@ -1,7 +1,7 @@
 name: humoruniv
 description: "Unofficial Flutter app for humoruniv.com"
 publish_to: 'none'
-version: 1.12.0+22
+version: 2.0.0+23
 
 environment:
   sdk: ^3.11.5
