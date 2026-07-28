@@ -18,6 +18,7 @@ class HtmlClientImpl implements HtmlClient {
     String baseUrl = 'https://m.humoruniv.com',
     String encoding = 'euc-kr',
     bool desktop = false,
+    this.cookieProvider,
   })  : _dio = dio ??
             Dio(
               BaseOptions(
@@ -32,10 +33,20 @@ class HtmlClientImpl implements HtmlClient {
 
   final Dio _dio;
   final String _encoding;
+  final String? Function()? cookieProvider;
 
   @override
   Future<String> get(String path) async {
-    final response = await _dio.get<List<int>>(path);
+    final headers = <String, dynamic>{};
+    final cookie = cookieProvider?.call();
+    if (cookie != null && cookie.isNotEmpty) {
+      headers['Cookie'] = cookie;
+    }
+
+    final response = await _dio.get<List<int>>(
+      path,
+      options: headers.isNotEmpty ? Options(headers: headers) : null,
+    );
     final bytes = response.data ?? <int>[];
 
     final decoded = await CharsetConverter.decode(

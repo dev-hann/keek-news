@@ -16,11 +16,13 @@ import 'package:humoruniv/domain/usecases/get_best_posts.dart';
 import 'package:humoruniv/domain/usecases/get_board_posts.dart';
 import 'package:humoruniv/domain/usecases/get_merged_feed.dart';
 import 'package:humoruniv/domain/usecases/get_post_detail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/package_info_helper.dart';
 
 void main() {
   setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
     await setupPackageInfoMock();
   });
 

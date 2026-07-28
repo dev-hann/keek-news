@@ -4,11 +4,14 @@ import 'package:humoruniv/core/widgets/molecules/dark_mode_selector.dart';
 import 'package:humoruniv/core/widgets/molecules/settings_group.dart';
 import 'package:humoruniv/core/widgets/molecules/settings_tile.dart';
 import 'package:humoruniv/core/widgets/molecules/update_banner.dart';
+import 'package:humoruniv/data/datasources/cloudflare_cookie_store.dart';
+import 'package:humoruniv/di/injection.dart' as di;
 import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/presentation/providers/cache_management_provider.dart';
 import 'package:humoruniv/presentation/providers/community_settings_provider.dart';
 import 'package:humoruniv/presentation/providers/theme_provider.dart';
 import 'package:humoruniv/presentation/providers/update_provider.dart';
+import 'package:humoruniv/presentation/screens/cloudflare_auth_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -153,6 +156,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   );
                 }),
+                FutureBuilder<bool>(
+                  future: _isFmkoreaAuthenticated(),
+                  builder: (context, snapshot) {
+                    final authed = snapshot.data ?? false;
+                    return SettingsTile(
+                      leading: Icon(
+                        authed ? Icons.check_circle : Icons.shield_outlined,
+                        color: authed ? Colors.green : Colors.orange,
+                      ),
+                      title: 'FM코리아 Cloudflare 인증',
+                      subtitle: authed ? '인증됨' : '미인증 — 탭하여 인증',
+                      onTap: () => _authFmkorea(context),
+                    );
+                  },
+                ),
                 SettingsTile(
                   leading: const Icon(Icons.balance_outlined),
                   title: '한 커뮤니티 최대 비율',
@@ -184,6 +202,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  Future<bool> _isFmkoreaAuthenticated() async {
+    try {
+      final store = di.sl<CloudflareCookieStore>(
+        instanceName: 'fmkoreaCookies',
+      );
+      return store.hasValidCookies;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _authFmkorea(BuildContext context) async {
+    final result = await Navigator.of(context).push<Map<String, String>>(
+      MaterialPageRoute<Map<String, String>>(
+        builder: (_) => const CloudflareAuthScreen(
+          url: 'https://www.fmkorea.com/humorbest',
+          domain: 'fmkorea.com',
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+
+    if (result != null && result.isNotEmpty && mounted) {
+      final store = di.sl<CloudflareCookieStore>(
+        instanceName: 'fmkoreaCookies',
+      );
+      await store.saveCookies(result);
+      setState(() {});
+      _snackbar('FM코리아 인증이 완료되었습니다.');
+    }
   }
 
   void _confirmClearCache(BuildContext context) {
