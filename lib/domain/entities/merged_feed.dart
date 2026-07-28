@@ -5,10 +5,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class MergedCursor {
-  const MergedCursor({
-    required this.oldestSeen,
-    required this.perSourceTokens,
-  });
+  const MergedCursor({required this.oldestSeen, required this.perSourceTokens});
 
   final DateTime oldestSeen;
   final Map<CommunityId, String?> perSourceTokens;

@@ -11,10 +11,7 @@ class FmkoreaListParser {
     final doc = html_parser.parse(htmlString);
     final rows = doc.querySelectorAll('li');
 
-    return rows
-        .map(_parseRow)
-        .whereType<FeedItemDto>()
-        .toList();
+    return rows.map(_parseRow).whereType<FeedItemDto>().toList();
   }
 
   static FeedItemDto? _parseRow(dom.Element row) {
@@ -37,8 +34,9 @@ class FmkoreaListParser {
     final commentSpan = row.querySelector('span.comment_count');
     final commentText = commentSpan?.text ?? '';
     final commentMatch = RegExp(r'\[(\d+)\]').firstMatch(commentText);
-    final commentCount =
-        commentMatch != null ? int.parse(commentMatch.group(1)!) : 0;
+    final commentCount = commentMatch != null
+        ? int.parse(commentMatch.group(1)!)
+        : 0;
 
     final regdateSpan = row.querySelector('span.regdate');
     if (regdateSpan == null) return null;

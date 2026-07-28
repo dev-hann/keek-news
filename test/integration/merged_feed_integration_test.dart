@@ -37,25 +37,23 @@ void main() {
   late MergedFeedRepositoryImpl repo;
 
   setUpAll(() {
-    registerFallbackValue(PostDto(
-      id: 0,
-      title: '',
-      recommendCount: 0,
-      url: '',
-    ));
+    registerFallbackValue(
+      PostDto(id: 0, title: '', recommendCount: 0, url: ''),
+    );
 
     final humorunivHtml = _readFixture('main_page.html');
     final humorunivDs = _MockHumorunivRemoteDs();
-    when(() => humorunivDs.fetchMainPage())
-        .thenAnswer((_) async => MainPageParser.parseBestPosts(humorunivHtml));
+    when(
+      () => humorunivDs.fetchMainPage(),
+    ).thenAnswer((_) async => MainPageParser.parseBestPosts(humorunivHtml));
 
     final adapters = <CommunityId, CommunityAdapter>{
-      CommunityId.humoruniv:
-          HumorunivAdapterImpl(remoteDs: humorunivDs),
+      CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: humorunivDs),
       CommunityId.todayhumor: TodayhumorAdapterImpl(
         htmlClient: FixtureHtmlClient({
-          'list.php?table=bestofbest':
-              _readFixture('todayhumor/list_bestofbest_pc.html'),
+          'list.php?table=bestofbest': _readFixture(
+            'todayhumor/list_bestofbest_pc.html',
+          ),
           'view.php': _readFixture('todayhumor/detail_483503.html'),
         }),
       ),
@@ -137,8 +135,7 @@ void main() {
           id: thItem.id,
         );
         expect(detailResult.isRight(), isTrue);
-        final detail =
-            detailResult.getOrElse(() => throw StateError(''));
+        final detail = detailResult.getOrElse(() => throw StateError(''));
         expect(detail.title, isNotEmpty);
         expect(detail.community, CommunityId.todayhumor);
       }
@@ -158,18 +155,16 @@ void main() {
 
     test('should isolate adapter failures', () async {
       final failingDs = _MockHumorunivRemoteDs();
-      when(() => failingDs.fetchMainPage())
-          .thenThrow(Exception('network down'));
+      when(
+        () => failingDs.fetchMainPage(),
+      ).thenThrow(Exception('network down'));
 
       final failRepo = MergedFeedRepositoryImpl(
         adapters: {
-          CommunityId.humoruniv:
-              HumorunivAdapterImpl(remoteDs: failingDs),
+          CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: failingDs),
           CommunityId.todayhumor: TodayhumorAdapterImpl(
             htmlClient: FixtureHtmlClient({
-              'list.php': _readFixture(
-                'todayhumor/list_bestofbest_pc.html',
-              ),
+              'list.php': _readFixture('todayhumor/list_bestofbest_pc.html'),
             }),
           ),
         },

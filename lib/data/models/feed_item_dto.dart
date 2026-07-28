@@ -29,16 +29,16 @@ class FeedItemDto {
   final String? previewText;
 
   FeedItem toEntity() => FeedItem(
-        community: community,
-        id: id,
-        title: title,
-        url: url,
-        author: author,
-        publishedAt: publishedAt,
-        recommendCount: recommendCount,
-        commentCount: commentCount,
-        viewCount: viewCount,
-        thumbnailUrl: thumbnailUrl,
-        previewText: previewText,
-      );
+    community: community,
+    id: id,
+    title: title,
+    url: url,
+    author: author,
+    publishedAt: publishedAt,
+    recommendCount: recommendCount,
+    commentCount: commentCount,
+    viewCount: viewCount,
+    thumbnailUrl: thumbnailUrl,
+    previewText: previewText,
+  );
 }

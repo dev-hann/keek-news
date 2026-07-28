@@ -73,7 +73,9 @@ class FmkoreaDetailParser {
   }
 
   static dom.Element? _findContent(dom.Document doc) {
-    final candidates = doc.querySelectorAll('[class*="document_"][class*="xe_content"]');
+    final candidates = doc.querySelectorAll(
+      '[class*="document_"][class*="xe_content"]',
+    );
     for (final el in candidates) {
       if (el.innerHtml.length > 50) return el;
     }
@@ -116,7 +118,8 @@ class FmkoreaDetailParser {
 
       if (imgs.isEmpty && videos.isEmpty && div.text.trim().isNotEmpty) {
         final text = div.text.trim();
-        if (text.isNotEmpty && !blocks.any((b) => b is TextBlock && b.text == text)) {
+        if (text.isNotEmpty &&
+            !blocks.any((b) => b is TextBlock && b.text == text)) {
           blocks.add(TextBlock(text));
         }
       }
@@ -141,7 +144,8 @@ class FmkoreaDetailParser {
     return [
       int.tryParse(voteMatch?.group(1) ?? voteMatch2?.group(1) ?? '') ?? 0,
       int.tryParse(viewMatch?.group(1) ?? viewMatch2?.group(1) ?? '') ?? 0,
-      int.tryParse(commentMatch?.group(1) ?? commentMatch2?.group(1) ?? '') ?? 0,
+      int.tryParse(commentMatch?.group(1) ?? commentMatch2?.group(1) ?? '') ??
+          0,
     ];
   }
 }

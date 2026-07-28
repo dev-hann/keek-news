@@ -52,7 +52,7 @@ class MergedFeedState {
 
 class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
   MergedFeedNotifier(this._readSettings)
-      : super(const MergedFeedState(isLoading: true));
+    : super(const MergedFeedState(isLoading: true));
 
   final CommunitySettings Function() _readSettings;
 
@@ -81,24 +81,20 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
       ),
     );
 
-    result.fold(
-      (_) => state = state.copyWith(isLoadingMore: false),
-      (page) {
-        final existingIds = state.items
-            .map((e) => '${e.community}:${e.id}')
-            .toSet();
-        final newItems = page.items
-            .where(
-                (e) => !existingIds.contains('${e.community}:${e.id}'))
-            .toList();
-        state = MergedFeedState(
-          items: [...state.items, ...newItems],
-          cursor: page.next ?? state.cursor,
-          hasMore: page.next != null,
-          failedSources: page.failedSources,
-        );
-      },
-    );
+    result.fold((_) => state = state.copyWith(isLoadingMore: false), (page) {
+      final existingIds = state.items
+          .map((e) => '${e.community}:${e.id}')
+          .toSet();
+      final newItems = page.items
+          .where((e) => !existingIds.contains('${e.community}:${e.id}'))
+          .toList();
+      state = MergedFeedState(
+        items: [...state.items, ...newItems],
+        cursor: page.next ?? state.cursor,
+        hasMore: page.next != null,
+        failedSources: page.failedSources,
+      );
+    });
   }
 
   void _applyResult(Either<Failure, MergedPage> result) {
@@ -114,20 +110,24 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
   }
 }
 
-final mergedFeedProvider = StateNotifierProvider.autoDispose<
-    MergedFeedNotifier, MergedFeedState>((ref) {
-  final notifier = MergedFeedNotifier(
-    () => ref.read(communitySettingsProvider),
-  );
-  notifier.fetch();
-  return notifier;
-});
+final mergedFeedProvider =
+    StateNotifierProvider.autoDispose<MergedFeedNotifier, MergedFeedState>((
+      ref,
+    ) {
+      final notifier = MergedFeedNotifier(
+        () => ref.read(communitySettingsProvider),
+      );
+      notifier.fetch();
+      return notifier;
+    });
 
 final mergedDetailProvider = FutureProvider.autoDispose
-    .family<Either<Failure, PostDetail>,
-        ({CommunityId community, String id})>((ref, key) {
-  return sl<MergedFeedRepository>().fetchDetail(
-    community: key.community,
-    id: key.id,
-  );
-});
+    .family<Either<Failure, PostDetail>, ({CommunityId community, String id})>((
+      ref,
+      key,
+    ) {
+      return sl<MergedFeedRepository>().fetchDetail(
+        community: key.community,
+        id: key.id,
+      );
+    });

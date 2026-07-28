@@ -52,15 +52,15 @@ class PostDetail {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        title,
-        author,
-        date,
-        contentHtml,
-        recommendCount,
-        notRecommendCount,
-        viewCount,
-        commentCount,
-        community,
-      );
+    id,
+    title,
+    author,
+    date,
+    contentHtml,
+    recommendCount,
+    notRecommendCount,
+    viewCount,
+    commentCount,
+    community,
+  );
 }

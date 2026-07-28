@@ -19,9 +19,7 @@ class DogdripAdapterImpl implements CommunityAdapter {
   Future<FeedListResult> fetchLatest({String? pageToken}) async {
     try {
       final page = pageToken ?? '1';
-      final html = await htmlClient.get(
-        '/index.php?mid=dogdrip&page=$page',
-      );
+      final html = await htmlClient.get('/index.php?mid=dogdrip&page=$page');
       final items = DogdripListParser.parse(html);
       final nextPage = (int.tryParse(page) ?? 0) + 1;
       return FeedListResult(

@@ -48,16 +48,16 @@ class FeedItem {
 
   @override
   int get hashCode => Object.hash(
-        community,
-        id,
-        title,
-        url,
-        author,
-        publishedAt,
-        recommendCount,
-        commentCount,
-        viewCount,
-        thumbnailUrl,
-        previewText,
-      );
+    community,
+    id,
+    title,
+    url,
+    author,
+    publishedAt,
+    recommendCount,
+    commentCount,
+    viewCount,
+    thumbnailUrl,
+    previewText,
+  );
 }

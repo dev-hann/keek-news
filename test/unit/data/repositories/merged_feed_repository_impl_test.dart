@@ -14,34 +14,42 @@ void main() {
   late MergedFeedRepositoryImpl repo;
 
   FeedItemDto dto(CommunityId c, String id, DateTime ts) => FeedItemDto(
-        community: c,
-        id: id,
-        title: '$c-$id',
-        url: 'url-$id',
-        publishedAt: ts,
-      );
+    community: c,
+    id: id,
+    title: '$c-$id',
+    url: 'url-$id',
+    publishedAt: ts,
+  );
 
   setUp(() {
     huAdapter = MockCommunityAdapter();
     thAdapter = MockCommunityAdapter();
     when(() => huAdapter.communityId).thenReturn(CommunityId.humoruniv);
     when(() => thAdapter.communityId).thenReturn(CommunityId.todayhumor);
-    repo = MergedFeedRepositoryImpl(adapters: {
-      CommunityId.humoruniv: huAdapter,
-      CommunityId.todayhumor: thAdapter,
-    });
+    repo = MergedFeedRepositoryImpl(
+      adapters: {
+        CommunityId.humoruniv: huAdapter,
+        CommunityId.todayhumor: thAdapter,
+      },
+    );
   });
 
   group('MergedFeedRepositoryImpl', () {
     test('should call fetchLatest on all adapters', () async {
-      when(() => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10)),
-              ]));
-      when(() => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.todayhumor, '1', DateTime(2026, 7, 26, 12)),
-              ]));
+      when(
+        () => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer(
+        (_) async => FeedListResult(
+          items: [dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10))],
+        ),
+      );
+      when(
+        () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer(
+        (_) async => FeedListResult(
+          items: [dto(CommunityId.todayhumor, '1', DateTime(2026, 7, 26, 12))],
+        ),
+      );
 
       final result = await repo.fetchMerged(perSource: 10);
 
@@ -50,43 +58,63 @@ void main() {
       expect(result.isRight(), isTrue);
     });
 
-    test('should return merged items sorted by publishedAt descending', () async {
-      when(() => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10)),
-              ]));
-      when(() => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.todayhumor, '1', DateTime(2026, 7, 26, 12)),
-              ]));
+    test(
+      'should return merged items sorted by publishedAt descending',
+      () async {
+        when(
+          () => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+        ).thenAnswer(
+          (_) async => FeedListResult(
+            items: [dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10))],
+          ),
+        );
+        when(
+          () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+        ).thenAnswer(
+          (_) async => FeedListResult(
+            items: [
+              dto(CommunityId.todayhumor, '1', DateTime(2026, 7, 26, 12)),
+            ],
+          ),
+        );
 
-      final result = await repo.fetchMerged(perSource: 10);
+        final result = await repo.fetchMerged(perSource: 10);
 
-      final page = result.getOrElse(() => throw StateError('expected Right'));
-      expect(page.items.first.community, CommunityId.todayhumor);
-      expect(page.items.last.community, CommunityId.humoruniv);
-    });
+        final page = result.getOrElse(() => throw StateError('expected Right'));
+        expect(page.items.first.community, CommunityId.todayhumor);
+        expect(page.items.last.community, CommunityId.humoruniv);
+      },
+    );
 
-    test('should skip failed adapter and include it in failedSources', () async {
-      when(() => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10)),
-              ]));
-      when(() => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenThrow(Exception('network error'));
+    test(
+      'should skip failed adapter and include it in failedSources',
+      () async {
+        when(
+          () => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+        ).thenAnswer(
+          (_) async => FeedListResult(
+            items: [dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10))],
+          ),
+        );
+        when(
+          () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+        ).thenThrow(Exception('network error'));
 
-      final result = await repo.fetchMerged(perSource: 10);
+        final result = await repo.fetchMerged(perSource: 10);
 
-      final page = result.getOrElse(() => throw StateError('expected Right'));
-      expect(page.items, hasLength(1));
-      expect(page.failedSources, contains(CommunityId.todayhumor));
-    });
+        final page = result.getOrElse(() => throw StateError('expected Right'));
+        expect(page.items, hasLength(1));
+        expect(page.failedSources, contains(CommunityId.todayhumor));
+      },
+    );
 
     test('should return Left when all adapters fail', () async {
-      when(() => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenThrow(Exception('down'));
-      when(() => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenThrow(Exception('down'));
+      when(
+        () => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenThrow(Exception('down'));
+      when(
+        () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenThrow(Exception('down'));
 
       final result = await repo.fetchMerged(perSource: 10);
 
@@ -95,14 +123,22 @@ void main() {
     });
 
     test('should pass cursor tokens to adapters', () async {
-      when(() => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10)),
-              ], pageToken: 'page3'));
-      when(() => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.todayhumor, '1', DateTime(2026, 7, 26, 12)),
-              ], pageToken: 'page2'));
+      when(
+        () => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer(
+        (_) async => FeedListResult(
+          items: [dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10))],
+          pageToken: 'page3',
+        ),
+      );
+      when(
+        () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer(
+        (_) async => FeedListResult(
+          items: [dto(CommunityId.todayhumor, '1', DateTime(2026, 7, 26, 12))],
+          pageToken: 'page2',
+        ),
+      );
 
       final first = await repo.fetchMerged(perSource: 10);
       final page = first.getOrElse(() => throw StateError(''));
@@ -113,18 +149,20 @@ void main() {
     });
 
     test('should filter to enabled communities only', () async {
-      when(() => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')))
-          .thenAnswer((_) async => FeedListResult(items: [
-                dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10)),
-              ]));
-
-      await repo.fetchMerged(
-        perSource: 10,
-        enabled: {CommunityId.humoruniv},
+      when(
+        () => huAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer(
+        (_) async => FeedListResult(
+          items: [dto(CommunityId.humoruniv, '1', DateTime(2026, 7, 26, 10))],
+        ),
       );
 
+      await repo.fetchMerged(perSource: 10, enabled: {CommunityId.humoruniv});
+
       verify(() => huAdapter.fetchLatest(pageToken: null)).called(1);
-      verifyNever(() => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')));
+      verifyNever(
+        () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
+      );
     });
   });
 }

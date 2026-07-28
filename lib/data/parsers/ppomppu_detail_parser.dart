@@ -86,8 +86,7 @@ class PpomppuDetailParser {
         for (final img in imgs) {
           final src = img.attributes['src'] ?? '';
           if (src.isNotEmpty) {
-            final fullSrc =
-                src.startsWith('//') ? 'https:$src' : src;
+            final fullSrc = src.startsWith('//') ? 'https:$src' : src;
             blocks.add(ImageBlock(url: fullSrc));
           }
         }

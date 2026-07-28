@@ -32,9 +32,12 @@ void main() {
       final posts = PpomppuListParser.parse(listHtml);
       expect(posts, isNotEmpty);
 
-      final detailUrl =
-          'https://www.ppomppu.co.kr/zboard/${posts.first.url}';
-      final detailHtml = await fetchHtml(detailUrl, encoding: 'cp949', desktop: true);
+      final detailUrl = 'https://www.ppomppu.co.kr/zboard/${posts.first.url}';
+      final detailHtml = await fetchHtml(
+        detailUrl,
+        encoding: 'cp949',
+        desktop: true,
+      );
       final detail = PpomppuDetailParser.parse(detailHtml);
 
       expect(detail.title, isNotEmpty);

@@ -49,42 +49,44 @@ void main() {
   tearDown(di.sl.reset);
 
   List<FeedItem> sampleItems() => [
-        const FeedItem(
-          community: CommunityId.humoruniv,
-          id: '1',
-          title: '첫 번째 글',
-          url: '/u1',
-          author: '작성자1',
-          recommendCount: 100,
-          commentCount: 5,
-          viewCount: 1000,
-        ),
-        const FeedItem(
-          community: CommunityId.todayhumor,
-          id: '2',
-          title: '두 번째 글',
-          url: '/u2',
-          author: '작성자2',
-          recommendCount: 200,
-          commentCount: 8,
-          viewCount: 2000,
-        ),
-      ];
+    const FeedItem(
+      community: CommunityId.humoruniv,
+      id: '1',
+      title: '첫 번째 글',
+      url: '/u1',
+      author: '작성자1',
+      recommendCount: 100,
+      commentCount: 5,
+      viewCount: 1000,
+    ),
+    const FeedItem(
+      community: CommunityId.todayhumor,
+      id: '2',
+      title: '두 번째 글',
+      url: '/u2',
+      author: '작성자2',
+      recommendCount: 200,
+      commentCount: 8,
+      viewCount: 2000,
+    ),
+  ];
 
   MergedPage page(List<FeedItem> items) => MergedPage(items: items);
 
   Widget buildApp() => ProviderScope(
-        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-        child: const MaterialApp(home: HomeScreen()),
-      );
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    child: const MaterialApp(home: HomeScreen()),
+  );
 
   testWidgets('should display post titles when data loads', (tester) async {
-    when(() => mockRepo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-          maxRatioPerSource: any(named: 'maxRatioPerSource'),
-        )).thenAnswer((_) async => Right(page(sampleItems())));
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+        maxRatioPerSource: any(named: 'maxRatioPerSource'),
+      ),
+    ).thenAnswer((_) async => Right(page(sampleItems())));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -94,12 +96,14 @@ void main() {
   });
 
   testWidgets('should render a FeedCard for each item', (tester) async {
-    when(() => mockRepo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-          maxRatioPerSource: any(named: 'maxRatioPerSource'),
-        )).thenAnswer((_) async => Right(page(sampleItems())));
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+        maxRatioPerSource: any(named: 'maxRatioPerSource'),
+      ),
+    ).thenAnswer((_) async => Right(page(sampleItems())));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -109,12 +113,14 @@ void main() {
 
   testWidgets('should show skeleton feed cards while loading', (tester) async {
     final completer = Completer<Either<Failure, MergedPage>>();
-    when(() => mockRepo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-          maxRatioPerSource: any(named: 'maxRatioPerSource'),
-        )).thenAnswer((_) => completer.future);
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+        maxRatioPerSource: any(named: 'maxRatioPerSource'),
+      ),
+    ).thenAnswer((_) => completer.future);
 
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -124,12 +130,14 @@ void main() {
   });
 
   testWidgets('should show empty message when no posts', (tester) async {
-    when(() => mockRepo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-          maxRatioPerSource: any(named: 'maxRatioPerSource'),
-        )).thenAnswer((_) async => Right(page([])));
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+        maxRatioPerSource: any(named: 'maxRatioPerSource'),
+      ),
+    ).thenAnswer((_) async => Right(page([])));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -138,12 +146,14 @@ void main() {
   });
 
   testWidgets('should show error message when fetch fails', (tester) async {
-    when(() => mockRepo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-          maxRatioPerSource: any(named: 'maxRatioPerSource'),
-        )).thenAnswer((_) async => const Left(ServerFailure('error')));
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+        maxRatioPerSource: any(named: 'maxRatioPerSource'),
+      ),
+    ).thenAnswer((_) async => const Left(ServerFailure('error')));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -152,12 +162,14 @@ void main() {
   });
 
   testWidgets('should display AppBar with 통합 유머 피드 title', (tester) async {
-    when(() => mockRepo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-          maxRatioPerSource: any(named: 'maxRatioPerSource'),
-        )).thenAnswer((_) async => Right(page([])));
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+        maxRatioPerSource: any(named: 'maxRatioPerSource'),
+      ),
+    ).thenAnswer((_) async => Right(page([])));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -168,12 +180,14 @@ void main() {
   });
 
   testWidgets('should display settings gear action', (tester) async {
-    when(() => mockRepo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-          maxRatioPerSource: any(named: 'maxRatioPerSource'),
-        )).thenAnswer((_) async => Right(page([])));
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+        maxRatioPerSource: any(named: 'maxRatioPerSource'),
+      ),
+    ).thenAnswer((_) async => Right(page([])));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();

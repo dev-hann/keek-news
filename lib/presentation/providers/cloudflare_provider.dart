@@ -4,11 +4,14 @@ import 'package:humoruniv/presentation/providers/shared_preferences_provider.dar
 
 final cloudflareCookieStoreProvider =
     Provider.family<CloudflareCookieStore, String>((ref, domain) {
-  final prefs = ref.read(sharedPreferencesProvider);
-  return CloudflareCookieStore(prefs, domain);
-});
+      final prefs = ref.read(sharedPreferencesProvider);
+      return CloudflareCookieStore(prefs, domain);
+    });
 
-final cfCookieStatusProvider = StateProvider.family<bool, String>((ref, domain) {
+final cfCookieStatusProvider = StateProvider.family<bool, String>((
+  ref,
+  domain,
+) {
   final store = ref.read(cloudflareCookieStoreProvider(domain));
   return store.hasValidCookies;
 });

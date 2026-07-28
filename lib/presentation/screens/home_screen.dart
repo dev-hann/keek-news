@@ -125,26 +125,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           slivers: [
             if (hasBanner)
               SliverToBoxAdapter(
-                child: _PartialFailureBanner(
-                  failed: feedState.failedSources,
-                ),
+                child: _PartialFailureBanner(failed: feedState.failedSources),
               ),
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == feedState.items.length) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: LoadingIndicator(),
-                    );
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.p12),
-                    child: _MergedCard(item: feedState.items[index]),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index == feedState.items.length) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: LoadingIndicator(),
                   );
-                },
-                childCount: feedState.items.length + extra,
-              ),
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.p12),
+                  child: _MergedCard(item: feedState.items[index]),
+                );
+              }, childCount: feedState.items.length + extra),
             ),
           ],
         ),
@@ -190,7 +185,9 @@ class _PartialFailureBanner extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            needsCloudflare ? Icons.shield_outlined : Icons.warning_amber_rounded,
+            needsCloudflare
+                ? Icons.shield_outlined
+                : Icons.warning_amber_rounded,
             size: 16,
             color: Theme.of(context).colorScheme.onErrorContainer,
           ),
@@ -235,7 +232,9 @@ class _PartialFailureBanner extends StatelessWidget {
 
     if (result != null && result.isNotEmpty) {
       try {
-        final store = di.sl<CloudflareCookieStore>(instanceName: 'fmkoreaCookies');
+        final store = di.sl<CloudflareCookieStore>(
+          instanceName: 'fmkoreaCookies',
+        );
         await store.saveCookies(result);
       } catch (_) {}
     }
@@ -284,14 +283,14 @@ class _MergedCard extends ConsumerWidget {
           onImageTap: !hasImages
               ? null
               : (i) => Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (_) => ImageViewerScreen(
-                        imageUrls: detail.imageUrls,
-                        initialIndex: i,
-                      ),
-                      fullscreenDialog: true,
+                  MaterialPageRoute<void>(
+                    builder: (_) => ImageViewerScreen(
+                      imageUrls: detail.imageUrls,
+                      initialIndex: i,
                     ),
+                    fullscreenDialog: true,
                   ),
+                ),
           onCommentsTap: !hasComments
               ? null
               : () => _showComments(context, detail),

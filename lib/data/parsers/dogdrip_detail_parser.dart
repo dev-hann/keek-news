@@ -119,8 +119,7 @@ class DogdripDetailParser {
         .querySelectorAll('img')
         .map((img) => img.attributes['src'] ?? '')
         .where((src) => src.isNotEmpty)
-        .map((src) =>
-            src.startsWith('/') ? 'https://www.dogdrip.net$src' : src)
+        .map((src) => src.startsWith('/') ? 'https://www.dogdrip.net$src' : src)
         .toList();
   }
 
@@ -133,8 +132,9 @@ class DogdripDetailParser {
       for (final img in imgs) {
         final src = img.attributes['src'] ?? '';
         if (src.isNotEmpty) {
-          final fullSrc =
-              src.startsWith('/') ? 'https://www.dogdrip.net$src' : src;
+          final fullSrc = src.startsWith('/')
+              ? 'https://www.dogdrip.net$src'
+              : src;
           blocks.add(ImageBlock(url: fullSrc));
         }
       }

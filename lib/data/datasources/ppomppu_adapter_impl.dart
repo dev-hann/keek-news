@@ -41,9 +41,7 @@ class PpomppuAdapterImpl implements CommunityAdapter {
   @override
   Future<PostDetail> fetchDetail(String id) async {
     try {
-      final html = await htmlClient.get(
-        '/zboard/view.php?id=humor&no=$id',
-      );
+      final html = await htmlClient.get('/zboard/view.php?id=humor&no=$id');
       return PpomppuDetailParser.parse(html);
     } on ServerFailure {
       rethrow;

@@ -19,10 +19,7 @@ class CommunitySettings {
 
   bool isEnabled(CommunityId id) => enabled.contains(id);
 
-  CommunitySettings copyWith({
-    Set<CommunityId>? enabled,
-    double? maxRatio,
-  }) {
+  CommunitySettings copyWith({Set<CommunityId>? enabled, double? maxRatio}) {
     return CommunitySettings(
       enabled: enabled ?? this.enabled,
       maxRatio: maxRatio ?? this.maxRatio,
@@ -70,5 +67,5 @@ class CommunitySettingsNotifier extends Notifier<CommunitySettings> {
 
 final communitySettingsProvider =
     NotifierProvider<CommunitySettingsNotifier, CommunitySettings>(
-  CommunitySettingsNotifier.new,
-);
+      CommunitySettingsNotifier.new,
+    );

@@ -16,15 +16,19 @@ void registerMergedFeedFallbacks() {
 }
 
 void setupMergedFeedMocks(MockMergedFeedRepository mock) {
-  when(() => mock.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
-      )).thenAnswer((_) async => const Right(MergedPage(items: [])));
+  when(
+    () => mock.fetchMerged(
+      perSource: any(named: 'perSource'),
+      cursor: any(named: 'cursor'),
+      enabled: any(named: 'enabled'),
+      maxRatioPerSource: any(named: 'maxRatioPerSource'),
+    ),
+  ).thenAnswer((_) async => const Right(MergedPage(items: [])));
 
-  when(() => mock.fetchDetail(
-        community: any(named: 'community'),
-        id: any(named: 'id'),
-      )).thenAnswer((_) async => const Left(ServerFailure('no detail in test')));
+  when(
+    () => mock.fetchDetail(
+      community: any(named: 'community'),
+      id: any(named: 'id'),
+    ),
+  ).thenAnswer((_) async => const Left(ServerFailure('no detail in test')));
 }

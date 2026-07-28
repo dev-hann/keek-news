@@ -84,8 +84,20 @@ void main() {
     });
 
     test('should not be equal when community differs', () {
-      const a = Post(id: 1, title: 't', recommendCount: 0, url: 'u', community: CommunityId.humoruniv);
-      const b = Post(id: 1, title: 't', recommendCount: 0, url: 'u', community: CommunityId.todayhumor);
+      const a = Post(
+        id: 1,
+        title: 't',
+        recommendCount: 0,
+        url: 'u',
+        community: CommunityId.humoruniv,
+      );
+      const b = Post(
+        id: 1,
+        title: 't',
+        recommendCount: 0,
+        url: 'u',
+        community: CommunityId.todayhumor,
+      );
       expect(a, isNot(equals(b)));
     });
   });

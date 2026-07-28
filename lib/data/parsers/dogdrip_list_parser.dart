@@ -29,10 +29,7 @@ class DogdripListParser {
 
     final metaDiv = row.querySelector('div.ed.flex.list-meta');
     final recommendText = metaDiv?.querySelector('span.text-primary')?.text;
-    final recommendCount = int.tryParse(
-          (recommendText ?? '').trim(),
-        ) ??
-        0;
+    final recommendCount = int.tryParse((recommendText ?? '').trim()) ?? 0;
 
     final timeText = metaDiv?.text ?? '';
     final publishedAt = _parseRelativeTime(timeText);
@@ -49,7 +46,9 @@ class DogdripListParser {
       publishedAt: publishedAt,
       recommendCount: recommendCount,
       thumbnailUrl: thumbnailUrl != null && thumbnailUrl.isNotEmpty
-          ? (thumbnailUrl.startsWith('/') ? 'https://www.dogdrip.net$thumbnailUrl' : thumbnailUrl)
+          ? (thumbnailUrl.startsWith('/')
+                ? 'https://www.dogdrip.net$thumbnailUrl'
+                : thumbnailUrl)
           : null,
     );
   }

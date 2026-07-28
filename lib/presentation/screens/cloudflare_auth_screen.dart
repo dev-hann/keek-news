@@ -28,9 +28,7 @@ class _CloudflareAuthScreenState extends State<CloudflareAuthScreen> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: _onPageFinished,
-        ),
+        NavigationDelegate(onPageFinished: _onPageFinished),
       )
       ..loadRequest(Uri.parse(widget.url));
   }
@@ -43,8 +41,9 @@ class _CloudflareAuthScreenState extends State<CloudflareAuthScreen> {
     if (_loadCount < 2) return;
 
     try {
-      final result = await _controller
-          .runJavaScriptReturningResult('document.cookie');
+      final result = await _controller.runJavaScriptReturningResult(
+        'document.cookie',
+      );
 
       final cookieString = result.toString();
       if (cookieString.isEmpty || cookieString == '""') return;

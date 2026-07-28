@@ -11,10 +11,7 @@ class TodayhumorListParser {
     final doc = html_parser.parse(htmlString);
     final rows = doc.querySelectorAll('tr.view');
 
-    return rows
-        .map(_parseRow)
-        .whereType<FeedItemDto>()
-        .toList();
+    return rows.map(_parseRow).whereType<FeedItemDto>().toList();
   }
 
   static FeedItemDto? _parseRow(dom.Element row) {

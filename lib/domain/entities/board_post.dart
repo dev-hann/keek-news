@@ -50,17 +50,17 @@ class BoardPost {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        title,
-        url,
-        author,
-        date,
-        recommendCount,
-        notRecommendCount,
-        commentCount,
-        viewCount,
-        thumbnailUrl,
-        previewText,
-        community,
-      );
+    id,
+    title,
+    url,
+    author,
+    date,
+    recommendCount,
+    notRecommendCount,
+    commentCount,
+    viewCount,
+    thumbnailUrl,
+    previewText,
+    community,
+  );
 }

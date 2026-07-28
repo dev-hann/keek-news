@@ -5,43 +5,46 @@ import 'package:humoruniv/domain/services/feed_merger.dart';
 
 void main() {
   group('mergeFeedStreams', () {
-    test('should merge items from two streams sorted by publishedAt descending', () {
-      final streams = <CommunityId, List<FeedItem>>{
-        CommunityId.humoruniv: [
-          FeedItem(
-            community: CommunityId.humoruniv,
-            id: '1',
-            title: 'hu-1',
-            url: 'u1',
-            publishedAt: DateTime(2026, 7, 26, 10),
-          ),
-          FeedItem(
-            community: CommunityId.humoruniv,
-            id: '2',
-            title: 'hu-2',
-            url: 'u2',
-            publishedAt: DateTime(2026, 7, 26, 8),
-          ),
-        ],
-        CommunityId.todayhumor: [
-          FeedItem(
-            community: CommunityId.todayhumor,
-            id: '1',
-            title: 'th-1',
-            url: 'u3',
-            publishedAt: DateTime(2026, 7, 26, 12),
-          ),
-        ],
-      };
+    test(
+      'should merge items from two streams sorted by publishedAt descending',
+      () {
+        final streams = <CommunityId, List<FeedItem>>{
+          CommunityId.humoruniv: [
+            FeedItem(
+              community: CommunityId.humoruniv,
+              id: '1',
+              title: 'hu-1',
+              url: 'u1',
+              publishedAt: DateTime(2026, 7, 26, 10),
+            ),
+            FeedItem(
+              community: CommunityId.humoruniv,
+              id: '2',
+              title: 'hu-2',
+              url: 'u2',
+              publishedAt: DateTime(2026, 7, 26, 8),
+            ),
+          ],
+          CommunityId.todayhumor: [
+            FeedItem(
+              community: CommunityId.todayhumor,
+              id: '1',
+              title: 'th-1',
+              url: 'u3',
+              publishedAt: DateTime(2026, 7, 26, 12),
+            ),
+          ],
+        };
 
-      final result = mergeFeedStreams(streams: streams);
+        final result = mergeFeedStreams(streams: streams);
 
-      expect(result.items.map((e) => '${e.community}-${e.id}'), [
-        CommunityId.todayhumor.toString() + '-1',
-        CommunityId.humoruniv.toString() + '-1',
-        CommunityId.humoruniv.toString() + '-2',
-      ]);
-    });
+        expect(result.items.map((e) => '${e.community}-${e.id}'), [
+          CommunityId.todayhumor.toString() + '-1',
+          CommunityId.humoruniv.toString() + '-1',
+          CommunityId.humoruniv.toString() + '-2',
+        ]);
+      },
+    );
 
     test('should respect maxItems limit', () {
       final streams = <CommunityId, List<FeedItem>>{
@@ -83,10 +86,7 @@ void main() {
         ],
       };
 
-      final result = mergeFeedStreams(
-        streams: streams,
-        olderThan: cutoff,
-      );
+      final result = mergeFeedStreams(streams: streams, olderThan: cutoff);
 
       expect(result.items, hasLength(1));
       expect(result.items.first.id, '2');
@@ -156,12 +156,36 @@ void main() {
       final ts = DateTime(2026, 7, 26, 10);
       final streams = <CommunityId, List<FeedItem>>{
         CommunityId.humoruniv: [
-          FeedItem(community: CommunityId.humoruniv, id: 'a', title: 'a', url: 'u', publishedAt: ts),
-          FeedItem(community: CommunityId.humoruniv, id: 'b', title: 'b', url: 'u', publishedAt: ts),
+          FeedItem(
+            community: CommunityId.humoruniv,
+            id: 'a',
+            title: 'a',
+            url: 'u',
+            publishedAt: ts,
+          ),
+          FeedItem(
+            community: CommunityId.humoruniv,
+            id: 'b',
+            title: 'b',
+            url: 'u',
+            publishedAt: ts,
+          ),
         ],
         CommunityId.todayhumor: [
-          FeedItem(community: CommunityId.todayhumor, id: 'c', title: 'c', url: 'u', publishedAt: ts),
-          FeedItem(community: CommunityId.todayhumor, id: 'd', title: 'd', url: 'u', publishedAt: ts),
+          FeedItem(
+            community: CommunityId.todayhumor,
+            id: 'c',
+            title: 'c',
+            url: 'u',
+            publishedAt: ts,
+          ),
+          FeedItem(
+            community: CommunityId.todayhumor,
+            id: 'd',
+            title: 'd',
+            url: 'u',
+            publishedAt: ts,
+          ),
         ],
       };
 
@@ -197,13 +221,11 @@ void main() {
         ],
       };
 
-      final result = mergeFeedStreams(
-        streams: streams,
-        maxRatioPerSource: 0.4,
-      );
+      final result = mergeFeedStreams(streams: streams, maxRatioPerSource: 0.4);
 
-      final fmCount =
-          result.items.where((e) => e.community == CommunityId.fmkorea).length;
+      final fmCount = result.items
+          .where((e) => e.community == CommunityId.fmkorea)
+          .length;
       final huCount = result.items
           .where((e) => e.community == CommunityId.humoruniv)
           .length;

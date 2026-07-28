@@ -50,15 +50,35 @@ void main() {
     });
 
     test('should not be equal when community differs', () {
-      const a = FeedItem(community: CommunityId.humoruniv, id: '1', title: 't', url: 'u');
-      const b = FeedItem(community: CommunityId.todayhumor, id: '1', title: 't', url: 'u');
+      const a = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '1',
+        title: 't',
+        url: 'u',
+      );
+      const b = FeedItem(
+        community: CommunityId.todayhumor,
+        id: '1',
+        title: 't',
+        url: 'u',
+      );
 
       expect(a, isNot(equals(b)));
     });
 
     test('should not be equal when id differs', () {
-      const a = FeedItem(community: CommunityId.humoruniv, id: '1', title: 't', url: 'u');
-      const b = FeedItem(community: CommunityId.humoruniv, id: '2', title: 't', url: 'u');
+      const a = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '1',
+        title: 't',
+        url: 'u',
+      );
+      const b = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '2',
+        title: 't',
+        url: 'u',
+      );
 
       expect(a, isNot(equals(b)));
     });

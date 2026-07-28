@@ -17,13 +17,15 @@ class HumorunivAdapterImpl implements CommunityAdapter {
   Future<FeedListResult> fetchLatest({String? pageToken}) async {
     final dtos = await remoteDs.fetchMainPage();
     final items = dtos
-        .map((d) => FeedItemDto(
-              community: CommunityId.humoruniv,
-              id: d.id.toString(),
-              title: d.title,
-              url: d.url,
-              recommendCount: d.recommendCount,
-            ))
+        .map(
+          (d) => FeedItemDto(
+            community: CommunityId.humoruniv,
+            id: d.id.toString(),
+            title: d.title,
+            url: d.url,
+            recommendCount: d.recommendCount,
+          ),
+        )
         .toList();
     return FeedListResult(items: items);
   }

@@ -17,14 +17,17 @@ MergedPage mergeFeedStreams({
   final filtered = olderThan == null
       ? all
       : all
-          .where((e) =>
-              e.publishedAt != null && e.publishedAt!.isBefore(olderThan))
-          .toList();
+            .where(
+              (e) =>
+                  e.publishedAt != null && e.publishedAt!.isBefore(olderThan),
+            )
+            .toList();
 
   final sorted = _sortByPublishedAtDescending(filtered);
 
-  final limited =
-      sorted.length > maxItems ? sorted.sublist(0, maxItems) : sorted;
+  final limited = sorted.length > maxItems
+      ? sorted.sublist(0, maxItems)
+      : sorted;
 
   final capped = maxRatioPerSource < 1.0
       ? _applyFairnessQuota(limited, maxRatioPerSource)
@@ -41,17 +44,11 @@ MergedPage mergeFeedStreams({
 
   return MergedPage(
     items: capped,
-    next: MergedCursor(
-      oldestSeen: oldest,
-      perSourceTokens: Map.of(nextTokens),
-    ),
+    next: MergedCursor(oldestSeen: oldest, perSourceTokens: Map.of(nextTokens)),
   );
 }
 
-List<FeedItem> _applyFairnessQuota(
-  List<FeedItem> items,
-  double maxRatio,
-) {
+List<FeedItem> _applyFairnessQuota(List<FeedItem> items, double maxRatio) {
   final maxPerSource = (maxRatio * items.length).floor();
   if (maxPerSource < 1) return items;
 
@@ -82,8 +79,7 @@ List<FeedItem> _sortByPublishedAtDescending(List<FeedItem> items) {
   var rotation = 0;
   while (i < hasTs.length) {
     var j = i;
-    while (j < hasTs.length &&
-        hasTs[j].publishedAt == hasTs[i].publishedAt) {
+    while (j < hasTs.length && hasTs[j].publishedAt == hasTs[i].publishedAt) {
       j++;
     }
     final group = hasTs.sublist(i, j);

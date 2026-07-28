@@ -82,8 +82,8 @@ void main() {
   tearDown(di.sl.reset);
 
   List<Override> testOverrides() => [
-        sharedPreferencesProvider.overrideWithValue(prefs),
-      ];
+    sharedPreferencesProvider.overrideWithValue(prefs),
+  ];
 
   group('appRouter', () {
     testWidgets('route / should render HomeScreen', (tester) async {

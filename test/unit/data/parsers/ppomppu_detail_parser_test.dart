@@ -8,9 +8,7 @@ void main() {
   late String html;
 
   setUpAll(() {
-    html = File(
-      'test/fixtures/ppomppu/detail_770409.html',
-    ).readAsStringSync();
+    html = File('test/fixtures/ppomppu/detail_770409.html').readAsStringSync();
   });
 
   group('PpomppuDetailParser', () {

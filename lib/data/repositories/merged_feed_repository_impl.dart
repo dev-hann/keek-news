@@ -136,7 +136,7 @@ class _FetchOutcome {
 
   _FetchOutcome(this.id, this.items, this.nextToken) : failed = false;
   _FetchOutcome.failed(this.id)
-      : items = const [],
-        nextToken = null,
-        failed = true;
+    : items = const [],
+      nextToken = null,
+      failed = true;
 }

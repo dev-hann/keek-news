@@ -235,14 +235,30 @@ void main() {
 
     test('should not be equal when community differs', () {
       const a = BoardPost(
-        id: 1, title: 't', url: 'u', author: 'a', date: 'd',
-        recommendCount: 0, notRecommendCount: 0, commentCount: 0,
-        viewCount: 0, thumbnailUrl: '', community: CommunityId.humoruniv,
+        id: 1,
+        title: 't',
+        url: 'u',
+        author: 'a',
+        date: 'd',
+        recommendCount: 0,
+        notRecommendCount: 0,
+        commentCount: 0,
+        viewCount: 0,
+        thumbnailUrl: '',
+        community: CommunityId.humoruniv,
       );
       const b = BoardPost(
-        id: 1, title: 't', url: 'u', author: 'a', date: 'd',
-        recommendCount: 0, notRecommendCount: 0, commentCount: 0,
-        viewCount: 0, thumbnailUrl: '', community: CommunityId.ppomppu,
+        id: 1,
+        title: 't',
+        url: 'u',
+        author: 'a',
+        date: 'd',
+        recommendCount: 0,
+        notRecommendCount: 0,
+        commentCount: 0,
+        viewCount: 0,
+        thumbnailUrl: '',
+        community: CommunityId.ppomppu,
       );
       expect(a, isNot(equals(b)));
     });

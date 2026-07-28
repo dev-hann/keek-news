@@ -19,17 +19,16 @@ class HtmlClientImpl implements HtmlClient {
     String encoding = 'euc-kr',
     bool desktop = false,
     this.cookieProvider,
-  })  : _dio = dio ??
-            Dio(
-              BaseOptions(
-                baseUrl: baseUrl,
-                headers: {
-                  'User-Agent': desktop ? _desktopUA : _mobileUA,
-                },
-                responseType: ResponseType.bytes,
-              ),
-            ),
-        _encoding = encoding;
+  }) : _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               baseUrl: baseUrl,
+               headers: {'User-Agent': desktop ? _desktopUA : _mobileUA},
+               responseType: ResponseType.bytes,
+             ),
+           ),
+       _encoding = encoding;
 
   final Dio _dio;
   final String _encoding;

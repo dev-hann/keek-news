@@ -8,8 +8,7 @@ void main() {
   late String html;
 
   setUpAll(() {
-    html =
-        File('test/fixtures/fmkorea/list_humorbest.html').readAsStringSync();
+    html = File('test/fixtures/fmkorea/list_humorbest.html').readAsStringSync();
   });
 
   group('FmkoreaListParser', () {
