@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:humoruniv/core/errors/failures.dart';
 import 'package:humoruniv/core/widgets/molecules/feed_card.dart';
 import 'package:humoruniv/core/widgets/states/skeleton_feed_card.dart';
+import 'package:humoruniv/core/widgets/states/error_state_view.dart';
 import 'package:humoruniv/domain/entities/community.dart';
 import 'package:humoruniv/domain/entities/feed_item.dart';
 import 'package:humoruniv/domain/entities/merged_feed.dart';
@@ -158,7 +159,7 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    expect(find.text('게시글을 불러올 수 없습니다.'), findsOneWidget);
+    expect(find.byType(ErrorStateView), findsOneWidget);
   });
 
   testWidgets('should display AppBar with 통합 유머 피드 title', (tester) async {
