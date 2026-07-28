@@ -172,5 +172,46 @@ void main() {
       expect(communities[1], isNot(communities[2]));
       expect(communities[2], isNot(communities[3]));
     });
+
+    test('should cap one source with maxRatioPerSource', () {
+      final ts = DateTime(2026, 7, 26, 10);
+      final streams = <CommunityId, List<FeedItem>>{
+        CommunityId.fmkorea: List.generate(
+          8,
+          (i) => FeedItem(
+            community: CommunityId.fmkorea,
+            id: 'fm$i',
+            title: 'fm-$i',
+            url: 'u',
+            publishedAt: ts.subtract(Duration(minutes: i)),
+          ),
+        ),
+        CommunityId.humoruniv: [
+          FeedItem(
+            community: CommunityId.humoruniv,
+            id: 'hu1',
+            title: 'hu-1',
+            url: 'u',
+            publishedAt: ts,
+          ),
+        ],
+      };
+
+      final result = mergeFeedStreams(
+        streams: streams,
+        maxRatioPerSource: 0.4,
+      );
+
+      final fmCount =
+          result.items.where((e) => e.community == CommunityId.fmkorea).length;
+      final huCount = result.items
+          .where((e) => e.community == CommunityId.humoruniv)
+          .length;
+
+      final totalAll = 8 + 1;
+      final maxFmAllowed = (0.4 * totalAll).floor();
+      expect(fmCount, lessThanOrEqualTo(maxFmAllowed));
+      expect(huCount, greaterThanOrEqualTo(1));
+    });
   });
 }
