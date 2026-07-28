@@ -12,9 +12,15 @@ import 'package:humoruniv/domain/services/feed_merger.dart';
 class MergedFeedRepositoryImpl implements MergedFeedRepository {
   MergedFeedRepositoryImpl({
     required Map<CommunityId, CommunityAdapter> adapters,
+    this.cacheTtl = const Duration(minutes: 2),
   }) : _adapters = adapters;
 
   final Map<CommunityId, CommunityAdapter> _adapters;
+  final Duration cacheTtl;
+
+  MergedPage? _cachedFirstPage;
+  DateTime? _cachedAt;
+  Set<CommunityId>? _cachedEnabled;
 
   @override
   Future<Either<Failure, MergedPage>> fetchMerged({
@@ -23,6 +29,10 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
     Set<CommunityId> enabled = const {},
     double maxRatioPerSource = 0.4,
   }) async {
+    if (cursor == null && _isCacheValid(enabled)) {
+      return Right(_cachedFirstPage!);
+    }
+
     final active = enabled.isEmpty
         ? _adapters
         : Map.fromEntries(
@@ -58,12 +68,31 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
       maxRatioPerSource: maxRatioPerSource,
     );
 
-    return Right(MergedPage(
+    final result = MergedPage(
       items: page.items,
       next: page.next,
       failedSources: failed,
-    ));
+    );
+
+    if (cursor == null) {
+      _cachedFirstPage = result;
+      _cachedAt = DateTime.now();
+      _cachedEnabled = enabled;
+    }
+
+    return Right(result);
   }
+
+  bool _isCacheValid(Set<CommunityId> enabled) {
+    if (_cachedFirstPage == null || _cachedAt == null) return false;
+    final age = DateTime.now().difference(_cachedAt!);
+    if (age > cacheTtl) return false;
+    if (_cachedEnabled == null) return enabled.isEmpty;
+    return _setEquals(_cachedEnabled!, enabled);
+  }
+
+  static bool _setEquals<T>(Set<T> a, Set<T> b) =>
+      a.length == b.length && a.containsAll(b);
 
   @override
   Future<Either<Failure, PostDetail>> fetchDetail({
