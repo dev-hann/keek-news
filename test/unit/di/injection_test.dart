@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:humoruniv/core/network/html_client_impl.dart';
+import 'package:humoruniv/data/datasources/community_adapter.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds.dart';
+import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/repositories/post_repository_impl.dart';
 import 'package:humoruniv/data/repositories/update_repository_impl.dart';
@@ -32,6 +34,25 @@ void main() {
       await di.configureDependencies();
 
       expect(di.sl.isRegistered<HumorunivRemoteDs>(), isTrue);
+    });
+
+    test('should register CommunityAdapter', () async {
+      await di.configureDependencies();
+
+      expect(di.sl.isRegistered<CommunityAdapter>(), isTrue);
+    });
+
+    test('CommunityAdapter should resolve without throwing', () async {
+      await di.configureDependencies();
+
+      expect(() => di.sl<CommunityAdapter>(), returnsNormally);
+    });
+
+    test('CommunityAdapter should be HumorunivAdapterImpl', () async {
+      await di.configureDependencies();
+
+      final adapter = di.sl<CommunityAdapter>();
+      expect(adapter, isA<HumorunivAdapterImpl>());
     });
 
     test('should register PostRepository', () async {

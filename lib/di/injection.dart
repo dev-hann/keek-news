@@ -5,8 +5,10 @@ import 'package:humoruniv/data/datasources/apk_download_data_source.dart';
 import 'package:humoruniv/data/datasources/apk_download_data_source_impl.dart';
 import 'package:humoruniv/data/datasources/apk_installer_service.dart';
 import 'package:humoruniv/data/datasources/apk_installer_service_impl.dart';
+import 'package:humoruniv/data/datasources/community_adapter.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds.dart';
 import 'package:humoruniv/data/datasources/github_remote_ds_impl.dart';
+import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
 import 'package:humoruniv/data/datasources/humoruniv_remote_ds_impl.dart';
 import 'package:humoruniv/data/datasources/image_cache_service.dart';
@@ -31,6 +33,10 @@ Future<void> configureDependencies() async {
 
   sl.registerLazySingleton<HumorunivRemoteDs>(
     () => HumorunivRemoteDsImpl(htmlClient: sl<HtmlClientImpl>()),
+  );
+
+  sl.registerLazySingleton<CommunityAdapter>(
+    () => HumorunivAdapterImpl(remoteDs: sl<HumorunivRemoteDs>()),
   );
 
   sl.registerLazySingleton<PostRepository>(
