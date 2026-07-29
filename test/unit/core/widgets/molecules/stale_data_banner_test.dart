@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/widgets/molecules/stale_data_banner.dart';
+import 'package:happy_news/core/widgets/molecules/stale_data_banner.dart';
 
 void main() {
   group('StaleDataBanner', () {

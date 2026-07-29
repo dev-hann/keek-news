@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/data/datasources/community_adapter.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/feed_item.dart';
-import 'package:humoruniv/domain/entities/merged_feed.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
-import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
-import 'package:humoruniv/domain/services/feed_merger.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/data/datasources/community_adapter.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/feed_item.dart';
+import 'package:happy_news/domain/entities/merged_feed.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
+import 'package:happy_news/domain/services/feed_merger.dart';
 
 class MergedFeedRepositoryImpl implements MergedFeedRepository {
   MergedFeedRepositoryImpl({

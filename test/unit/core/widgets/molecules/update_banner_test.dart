@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/widgets/molecules/update_banner.dart';
-import 'package:humoruniv/domain/entities/download_progress.dart';
-import 'package:humoruniv/presentation/providers/update_provider.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/widgets/molecules/update_banner.dart';
+import 'package:happy_news/domain/entities/download_progress.dart';
+import 'package:happy_news/presentation/providers/update_provider.dart';
 
 void main() {
   group('UpdateBanner', () {

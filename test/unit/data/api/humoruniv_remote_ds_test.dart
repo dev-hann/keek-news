@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/core/network/html_client.dart';
-import 'package:humoruniv/data/datasources/humoruniv_remote_ds_impl.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/core/network/html_client.dart';
+import 'package:happy_news/data/datasources/humoruniv_remote_ds_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHtmlClient extends Mock implements HtmlClient {}

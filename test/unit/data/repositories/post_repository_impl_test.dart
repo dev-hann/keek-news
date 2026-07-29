@@ -1,15 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
-import 'package:humoruniv/data/models/board_post_dto.dart';
-import 'package:humoruniv/data/models/post_dto.dart';
-import 'package:humoruniv/data/repositories/post_repository_impl.dart';
-import 'package:humoruniv/domain/entities/board_list_result.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
-import 'package:humoruniv/domain/entities/post.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
-import 'package:humoruniv/domain/entities/sort_option.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/data/datasources/humoruniv_remote_ds.dart';
+import 'package:happy_news/data/models/board_post_dto.dart';
+import 'package:happy_news/data/models/post_dto.dart';
+import 'package:happy_news/data/repositories/post_repository_impl.dart';
+import 'package:happy_news/domain/entities/board_list_result.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:happy_news/domain/entities/post.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:happy_news/domain/entities/sort_option.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHumorunivRemoteDs extends Mock implements HumorunivRemoteDs {}

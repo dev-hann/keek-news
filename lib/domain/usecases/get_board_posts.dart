@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/domain/entities/board_list_result.dart';
-import 'package:humoruniv/domain/entities/sort_option.dart';
-import 'package:humoruniv/domain/repositories/post_repository.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/domain/entities/board_list_result.dart';
+import 'package:happy_news/domain/entities/sort_option.dart';
+import 'package:happy_news/domain/repositories/post_repository.dart';
 
 class GetBoardPosts {
   const GetBoardPosts({required this.repository});

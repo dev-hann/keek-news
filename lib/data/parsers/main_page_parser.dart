@@ -1,6 +1,6 @@
 import 'package:html/parser.dart' as html_parser;
 
-import 'package:humoruniv/data/models/post_dto.dart';
+import 'package:happy_news/data/models/post_dto.dart';
 
 class MainPageParser {
   static List<PostDto> parseBestPosts(String htmlString) {

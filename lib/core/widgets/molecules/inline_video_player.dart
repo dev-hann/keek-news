@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:humoruniv/core/providers/feed_video_playback_provider.dart';
-import 'package:humoruniv/core/themes/app_colors.dart';
-import 'package:humoruniv/core/themes/app_durations.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/widgets/atoms/retryable_network_image.dart';
-import 'package:humoruniv/core/widgets/atoms/video_surface.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
+import 'package:happy_news/core/providers/feed_video_playback_provider.dart';
+import 'package:happy_news/core/themes/app_colors.dart';
+import 'package:happy_news/core/themes/app_durations.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/widgets/atoms/retryable_network_image.dart';
+import 'package:happy_news/core/widgets/atoms/video_surface.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 

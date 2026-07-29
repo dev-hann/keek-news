@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/utils/long_image.dart';
+import 'package:happy_news/core/utils/long_image.dart';
 
 void main() {
   group('LongImage.fitWidthScale', () {

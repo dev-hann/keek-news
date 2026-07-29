@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:humoruniv/core/themes/app_colors.dart';
-import 'package:humoruniv/core/themes/app_radius.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
-import 'package:humoruniv/core/widgets/atoms/retryable_network_image.dart';
-import 'package:humoruniv/core/widgets/molecules/inline_video_player.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
-import 'package:humoruniv/presentation/screens/image_viewer_screen.dart';
+import 'package:happy_news/core/themes/app_colors.dart';
+import 'package:happy_news/core/themes/app_radius.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
+import 'package:happy_news/core/widgets/atoms/retryable_network_image.dart';
+import 'package:happy_news/core/widgets/molecules/inline_video_player.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:happy_news/presentation/screens/image_viewer_screen.dart';
 
 class ContentBlockView extends StatelessWidget {
   const ContentBlockView({

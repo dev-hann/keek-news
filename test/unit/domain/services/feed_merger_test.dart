@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/feed_item.dart';
-import 'package:humoruniv/domain/services/feed_merger.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/feed_item.dart';
+import 'package:happy_news/domain/services/feed_merger.dart';
 
 void main() {
   group('mergeFeedStreams', () {

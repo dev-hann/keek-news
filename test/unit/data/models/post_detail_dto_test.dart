@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/models/comment_dto.dart';
-import 'package:humoruniv/data/models/post_detail_dto.dart';
+import 'package:happy_news/data/models/comment_dto.dart';
+import 'package:happy_news/data/models/post_detail_dto.dart';
 
 void main() {
   test('PostDetailDto should convert to PostDetail entity', () {

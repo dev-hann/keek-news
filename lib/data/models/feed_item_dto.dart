@@ -1,5 +1,5 @@
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/feed_item.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/feed_item.dart';
 
 class FeedItemDto {
   const FeedItemDto({

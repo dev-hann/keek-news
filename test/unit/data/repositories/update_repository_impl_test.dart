@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/data/datasources/github_remote_ds.dart';
-import 'package:humoruniv/data/repositories/update_repository_impl.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/data/datasources/github_remote_ds.dart';
+import 'package:happy_news/data/repositories/update_repository_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockGitHubRemoteDs extends Mock implements GitHubRemoteDs {}

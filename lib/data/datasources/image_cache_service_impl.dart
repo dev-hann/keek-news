@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:humoruniv/data/datasources/image_cache_service.dart';
+import 'package:happy_news/data/datasources/image_cache_service.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageCacheServiceImpl implements ImageCacheService {

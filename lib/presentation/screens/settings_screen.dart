@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:humoruniv/core/widgets/molecules/dark_mode_selector.dart';
-import 'package:humoruniv/core/widgets/molecules/settings_group.dart';
-import 'package:humoruniv/core/widgets/molecules/settings_tile.dart';
-import 'package:humoruniv/core/widgets/molecules/update_banner.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/presentation/providers/cache_management_provider.dart';
-import 'package:humoruniv/presentation/providers/community_settings_provider.dart';
-import 'package:humoruniv/presentation/providers/theme_provider.dart';
-import 'package:humoruniv/presentation/providers/update_provider.dart';
+import 'package:happy_news/core/widgets/molecules/dark_mode_selector.dart';
+import 'package:happy_news/core/widgets/molecules/settings_group.dart';
+import 'package:happy_news/core/widgets/molecules/settings_tile.dart';
+import 'package:happy_news/core/widgets/molecules/update_banner.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/presentation/providers/cache_management_provider.dart';
+import 'package:happy_news/presentation/providers/community_settings_provider.dart';
+import 'package:happy_news/presentation/providers/theme_provider.dart';
+import 'package:happy_news/presentation/providers/update_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _repoUrl = 'https://github.com/dev-hann/humoruniv';
+const _repoUrl = 'https://github.com/dev-hann/happy-news';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -220,7 +220,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _showLicenses(BuildContext context) {
     showLicensePage(
       context: context,
-      applicationName: '웃긴대학',
+      applicationName: '해피뉴스',
       applicationLegalese: '© dev-hann',
     );
   }

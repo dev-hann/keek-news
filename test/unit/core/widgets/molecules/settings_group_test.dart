@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/widgets/molecules/settings_group.dart';
-import 'package:humoruniv/core/widgets/molecules/settings_tile.dart';
+import 'package:happy_news/core/widgets/molecules/settings_group.dart';
+import 'package:happy_news/core/widgets/molecules/settings_tile.dart';
 
 void main() {
   group('SettingsGroup', () {

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/domain/entities/download_progress.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/domain/entities/download_progress.dart';
 
 /// Repository responsible for downloading the update APK and handing it
 /// to the platform's system installer.

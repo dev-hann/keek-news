@@ -1,9 +1,9 @@
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 class PpomppuDetailParser {
   static PostDetail parse(String htmlString) {

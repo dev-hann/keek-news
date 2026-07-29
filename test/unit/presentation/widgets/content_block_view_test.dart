@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
-import 'package:humoruniv/presentation/widgets/content_block_view.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:happy_news/presentation/widgets/content_block_view.dart';
 
 void main() {
   group('ContentBlockView (compact — comment media)', () {

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:humoruniv/data/datasources/apk_download_data_source.dart';
+import 'package:happy_news/data/datasources/apk_download_data_source.dart';
 
 class ApkDownloadDataSourceImpl implements ApkDownloadDataSource {
   ApkDownloadDataSourceImpl({

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:humoruniv/core/themes/app_colors.dart';
-import 'package:humoruniv/core/themes/app_durations.dart';
-import 'package:humoruniv/core/themes/app_radius.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
-import 'package:humoruniv/core/utils/long_image.dart';
-import 'package:humoruniv/core/widgets/atoms/retryable_network_image.dart';
+import 'package:happy_news/core/themes/app_colors.dart';
+import 'package:happy_news/core/themes/app_durations.dart';
+import 'package:happy_news/core/themes/app_radius.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
+import 'package:happy_news/core/utils/long_image.dart';
+import 'package:happy_news/core/widgets/atoms/retryable_network_image.dart';
 
 /// Full-screen image viewer.
 ///

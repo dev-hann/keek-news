@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/board_list_result.dart';
-import 'package:humoruniv/domain/entities/board_post.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/sort_option.dart';
+import 'package:happy_news/domain/entities/board_list_result.dart';
+import 'package:happy_news/domain/entities/board_post.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/sort_option.dart';
 
 void main() {
   group('BoardPost', () {

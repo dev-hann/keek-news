@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/datasources/github_remote_ds.dart';
-import 'package:humoruniv/data/repositories/update_repository_impl.dart';
-import 'package:humoruniv/domain/entities/app_release.dart';
-import 'package:humoruniv/domain/repositories/update_repository.dart';
-import 'package:humoruniv/domain/usecases/check_for_update.dart';
+import 'package:happy_news/data/datasources/github_remote_ds.dart';
+import 'package:happy_news/data/repositories/update_repository_impl.dart';
+import 'package:happy_news/domain/entities/app_release.dart';
+import 'package:happy_news/domain/repositories/update_repository.dart';
+import 'package:happy_news/domain/usecases/check_for_update.dart';
 
 class FixtureGitHubRemoteDs implements GitHubRemoteDs {
   FixtureGitHubRemoteDs(this._fixturePath);

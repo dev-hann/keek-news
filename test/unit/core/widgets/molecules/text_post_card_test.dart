@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/widgets/molecules/text_post_card.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/widgets/molecules/text_post_card.dart';
 
 void main() {
   group('TextPostCard', () {

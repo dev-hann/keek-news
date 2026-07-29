@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/utils/time_ago.dart';
-import 'package:humoruniv/core/widgets/atoms/skeleton_box.dart';
-import 'package:humoruniv/core/widgets/molecules/feed_card.dart';
-import 'package:humoruniv/core/widgets/molecules/feed_image_carousel.dart';
-import 'package:humoruniv/core/widgets/molecules/text_post_card.dart';
-import 'package:humoruniv/domain/entities/board_post.dart';
-import 'package:humoruniv/domain/entities/comment.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/utils/time_ago.dart';
+import 'package:happy_news/core/widgets/atoms/skeleton_box.dart';
+import 'package:happy_news/core/widgets/molecules/feed_card.dart';
+import 'package:happy_news/core/widgets/molecules/feed_image_carousel.dart';
+import 'package:happy_news/core/widgets/molecules/text_post_card.dart';
+import 'package:happy_news/domain/entities/board_post.dart';
+import 'package:happy_news/domain/entities/comment.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 void main() {
   group('FeedCard', () {

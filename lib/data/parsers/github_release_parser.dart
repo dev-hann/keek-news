@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:humoruniv/data/models/app_release_dto.dart';
+import 'package:happy_news/data/models/app_release_dto.dart';
 
 class GitHubReleaseParser {
   static AppReleaseDto? parse(String jsonString) {

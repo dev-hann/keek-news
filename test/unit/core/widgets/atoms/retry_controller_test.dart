@@ -1,7 +1,7 @@
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/widgets/atoms/retry_controller.dart';
+import 'package:happy_news/core/widgets/atoms/retry_controller.dart';
 
 void main() {
   group('RetryController', () {

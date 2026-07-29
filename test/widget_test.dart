@@ -1,15 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/app_release.dart';
-import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
-import 'package:humoruniv/domain/repositories/update_repository.dart';
-import 'package:humoruniv/domain/usecases/check_for_update.dart';
-import 'package:humoruniv/domain/usecases/get_merged_feed.dart';
-import 'package:humoruniv/di/injection.dart' as di;
-import 'package:humoruniv/main.dart';
-import 'package:humoruniv/presentation/providers/shared_preferences_provider.dart';
-import 'package:humoruniv/presentation/screens/home_screen.dart';
+import 'package:happy_news/domain/entities/app_release.dart';
+import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
+import 'package:happy_news/domain/repositories/update_repository.dart';
+import 'package:happy_news/domain/usecases/check_for_update.dart';
+import 'package:happy_news/domain/usecases/get_merged_feed.dart';
+import 'package:happy_news/di/injection.dart' as di;
+import 'package:happy_news/main.dart';
+import 'package:happy_news/presentation/providers/shared_preferences_provider.dart';
+import 'package:happy_news/presentation/screens/home_screen.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -69,7 +69,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-        child: const HumorUnivApp(),
+        child: const HappyNewsApp(),
       ),
     );
     await tester.pumpAndSettle();

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/datasources/apk_download_data_source_impl.dart';
+import 'package:happy_news/data/datasources/apk_download_data_source_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDio extends Mock implements Dio {}

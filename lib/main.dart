@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:humoruniv/core/themes/app_theme.dart';
-import 'package:humoruniv/di/injection.dart';
-import 'package:humoruniv/presentation/providers/shared_preferences_provider.dart';
-import 'package:humoruniv/presentation/providers/theme_provider.dart';
-import 'package:humoruniv/routes/app_router.dart';
+import 'package:happy_news/core/themes/app_theme.dart';
+import 'package:happy_news/di/injection.dart';
+import 'package:happy_news/presentation/providers/shared_preferences_provider.dart';
+import 'package:happy_news/presentation/providers/theme_provider.dart';
+import 'package:happy_news/routes/app_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -14,19 +14,19 @@ void main() async {
   runApp(
     ProviderScope(
       overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-      child: const HumorUnivApp(),
+      child: const HappyNewsApp(),
     ),
   );
 }
 
-class HumorUnivApp extends ConsumerWidget {
-  const HumorUnivApp({super.key});
+class HappyNewsApp extends ConsumerWidget {
+  const HappyNewsApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
     return MaterialApp.router(
-      title: 'HumorUniv',
+      title: '해피뉴스',
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: themeMode,

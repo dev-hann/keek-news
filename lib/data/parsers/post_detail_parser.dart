@@ -1,10 +1,10 @@
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 
-import 'package:humoruniv/data/parsers/content_scanner.dart';
-import 'package:humoruniv/domain/entities/comment.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/data/parsers/content_scanner.dart';
+import 'package:happy_news/domain/entities/comment.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 class PostDetailParser {
   static PostDetail parse(String htmlString) {

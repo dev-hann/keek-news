@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:humoruniv/data/datasources/apk_installer_service.dart';
+import 'package:happy_news/data/datasources/apk_installer_service.dart';
 
 class ApkInstallerServiceImpl implements ApkInstallerService {
   ApkInstallerServiceImpl({MethodChannel? methodChannel})

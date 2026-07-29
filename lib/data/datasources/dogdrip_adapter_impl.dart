@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/core/network/html_client.dart';
-import 'package:humoruniv/data/datasources/community_adapter.dart';
-import 'package:humoruniv/data/parsers/dogdrip_detail_parser.dart';
-import 'package:humoruniv/data/parsers/dogdrip_list_parser.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/core/network/html_client.dart';
+import 'package:happy_news/data/datasources/community_adapter.dart';
+import 'package:happy_news/data/parsers/dogdrip_detail_parser.dart';
+import 'package:happy_news/data/parsers/dogdrip_list_parser.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 class DogdripAdapterImpl implements CommunityAdapter {
   DogdripAdapterImpl({required this.htmlClient});

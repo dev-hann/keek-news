@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:humoruniv/core/themes/app_radius.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
-import 'package:humoruniv/domain/entities/comment.dart';
-import 'package:humoruniv/presentation/widgets/content_block_view.dart';
+import 'package:happy_news/core/themes/app_radius.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
+import 'package:happy_news/domain/entities/comment.dart';
+import 'package:happy_news/presentation/widgets/content_block_view.dart';
 
 class CommentTile extends StatelessWidget {
   const CommentTile({required this.comment, super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:humoruniv/di/injection.dart';
-import 'package:humoruniv/data/datasources/image_cache_service.dart';
+import 'package:happy_news/di/injection.dart';
+import 'package:happy_news/data/datasources/image_cache_service.dart';
 
 class CacheManagementState {
   const CacheManagementState({this.sizeBytes, this.loading = false});

@@ -1,6 +1,6 @@
-import 'package:humoruniv/data/models/board_post_dto.dart';
-import 'package:humoruniv/data/models/post_dto.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/data/models/board_post_dto.dart';
+import 'package:happy_news/data/models/post_dto.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 class BoardListDsResult {
   const BoardListDsResult({

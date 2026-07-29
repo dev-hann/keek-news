@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/models/board_post_dto.dart';
+import 'package:happy_news/data/models/board_post_dto.dart';
 
 void main() {
   test('should convert BoardPostDto to BoardPost entity correctly', () {

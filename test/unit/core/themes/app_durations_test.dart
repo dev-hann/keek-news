@@ -1,6 +1,6 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/themes/app_durations.dart';
+import 'package:happy_news/core/themes/app_durations.dart';
 
 void main() {
   group('AppDurations', () {

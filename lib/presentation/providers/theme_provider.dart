@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:humoruniv/presentation/providers/shared_preferences_provider.dart';
+import 'package:happy_news/presentation/providers/shared_preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _themeModeKey = 'themeMode';

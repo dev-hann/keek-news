@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/themes/app_schemes.dart';
+import 'package:happy_news/core/themes/app_schemes.dart';
 
 void main() {
   group('AppSchemes', () {

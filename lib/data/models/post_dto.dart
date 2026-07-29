@@ -1,4 +1,4 @@
-import 'package:humoruniv/domain/entities/post.dart';
+import 'package:happy_news/domain/entities/post.dart';
 
 class PostDto {
   const PostDto({

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/app_release.dart';
+import 'package:happy_news/domain/entities/app_release.dart';
 
 void main() {
   group('AppRelease', () {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/comment.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
-import 'package:humoruniv/presentation/widgets/comment_tile.dart';
+import 'package:happy_news/domain/entities/comment.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:happy_news/presentation/widgets/comment_tile.dart';
 
 void main() {
   group('CommentTile', () {

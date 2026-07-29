@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/data/datasources/apk_download_data_source.dart';
-import 'package:humoruniv/data/datasources/apk_installer_service.dart';
-import 'package:humoruniv/domain/entities/download_progress.dart';
-import 'package:humoruniv/domain/repositories/apk_install_repository.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/data/datasources/apk_download_data_source.dart';
+import 'package:happy_news/data/datasources/apk_installer_service.dart';
+import 'package:happy_news/domain/entities/download_progress.dart';
+import 'package:happy_news/domain/repositories/apk_install_repository.dart';
 
 class ApkInstallRepositoryImpl implements ApkInstallRepository {
   ApkInstallRepositoryImpl({

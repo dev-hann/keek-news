@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:humoruniv/data/datasources/github_remote_ds.dart';
+import 'package:happy_news/data/datasources/github_remote_ds.dart';
 
 class GitHubRemoteDsImpl implements GitHubRemoteDs {
   GitHubRemoteDsImpl({Dio? dio})

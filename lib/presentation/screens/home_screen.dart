@@ -3,19 +3,19 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:humoruniv/core/themes/app_spacing.dart';
-import 'package:humoruniv/core/widgets/atoms/loading_indicator.dart';
-import 'package:humoruniv/core/widgets/atoms/scroll_to_top_button.dart';
-import 'package:humoruniv/core/widgets/molecules/feed_card.dart';
-import 'package:humoruniv/core/widgets/states/empty_state_view.dart';
-import 'package:humoruniv/core/widgets/states/error_state_view.dart';
-import 'package:humoruniv/core/widgets/states/skeleton_feed_card.dart';
-import 'package:humoruniv/domain/entities/board_post.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/feed_item.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
-import 'package:humoruniv/presentation/providers/merged_feed_provider.dart';
-import 'package:humoruniv/presentation/screens/image_viewer_screen.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
+import 'package:happy_news/core/widgets/atoms/loading_indicator.dart';
+import 'package:happy_news/core/widgets/atoms/scroll_to_top_button.dart';
+import 'package:happy_news/core/widgets/molecules/feed_card.dart';
+import 'package:happy_news/core/widgets/states/empty_state_view.dart';
+import 'package:happy_news/core/widgets/states/error_state_view.dart';
+import 'package:happy_news/core/widgets/states/skeleton_feed_card.dart';
+import 'package:happy_news/domain/entities/board_post.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/feed_item.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:happy_news/presentation/providers/merged_feed_provider.dart';
+import 'package:happy_news/presentation/screens/image_viewer_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});

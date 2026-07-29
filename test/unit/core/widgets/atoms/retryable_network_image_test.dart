@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/widgets/atoms/retry_controller.dart';
-import 'package:humoruniv/core/widgets/atoms/retryable_network_image.dart';
+import 'package:happy_news/core/widgets/atoms/retry_controller.dart';
+import 'package:happy_news/core/widgets/atoms/retryable_network_image.dart';
 
 void main() {
   group('RetryableNetworkImage', () {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/widgets/atoms/count_badge.dart';
+import 'package:happy_news/core/widgets/atoms/count_badge.dart';
 
 void main() {
   group('CountBadge', () {

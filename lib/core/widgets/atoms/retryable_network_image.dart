@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:humoruniv/core/widgets/atoms/retry_controller.dart';
+import 'package:happy_news/core/widgets/atoms/retry_controller.dart';
 
 class RetryableNetworkImage extends StatefulWidget {
   const RetryableNetworkImage({

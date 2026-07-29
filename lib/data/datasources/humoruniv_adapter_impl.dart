@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/data/datasources/community_adapter.dart';
-import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
-import 'package:humoruniv/data/models/feed_item_dto.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/data/datasources/community_adapter.dart';
+import 'package:happy_news/data/datasources/humoruniv_remote_ds.dart';
+import 'package:happy_news/data/models/feed_item_dto.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 class HumorunivAdapterImpl implements CommunityAdapter {
   const HumorunivAdapterImpl({required this.remoteDs});

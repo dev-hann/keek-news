@@ -1,4 +1,4 @@
-import 'package:humoruniv/domain/entities/app_release.dart';
+import 'package:happy_news/domain/entities/app_release.dart';
 import 'package:meta/meta.dart';
 
 enum UpdateStatusType { upToDate, updateAvailable }

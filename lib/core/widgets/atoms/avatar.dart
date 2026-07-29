@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:humoruniv/core/themes/app_sizes.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
 
 class Avatar extends StatelessWidget {
   const Avatar({super.key, this.imageUrl, this.radius});

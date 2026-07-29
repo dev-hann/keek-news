@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/datasources/github_remote_ds_impl.dart';
-import 'package:humoruniv/data/parsers/github_release_parser.dart';
+import 'package:happy_news/data/datasources/github_remote_ds_impl.dart';
+import 'package:happy_news/data/parsers/github_release_parser.dart';
 
 void main() {
   final skip = Platform.environment['SMOKE'] != '1';

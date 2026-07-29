@@ -1,4 +1,4 @@
-import 'package:humoruniv/domain/entities/board_post.dart';
+import 'package:happy_news/domain/entities/board_post.dart';
 
 class BoardPostDto {
   const BoardPostDto({

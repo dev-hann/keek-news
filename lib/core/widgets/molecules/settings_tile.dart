@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
 
 class SettingsTile extends StatelessWidget {
   const SettingsTile({

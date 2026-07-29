@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:humoruniv/di/injection.dart';
-import 'package:humoruniv/domain/entities/app_release.dart';
-import 'package:humoruniv/domain/entities/download_progress.dart';
-import 'package:humoruniv/domain/repositories/apk_install_repository.dart';
-import 'package:humoruniv/domain/usecases/check_for_update.dart';
+import 'package:happy_news/di/injection.dart';
+import 'package:happy_news/domain/entities/app_release.dart';
+import 'package:happy_news/domain/entities/download_progress.dart';
+import 'package:happy_news/domain/repositories/apk_install_repository.dart';
+import 'package:happy_news/domain/usecases/check_for_update.dart';
 
 enum UpdateCheckStatus {
   idle,

@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:charset_converter/charset_converter.dart';
 import 'package:dio/dio.dart';
-import 'package:humoruniv/core/network/html_client.dart';
+import 'package:happy_news/core/network/html_client.dart';
 
 const _mobileUA =
     'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) '

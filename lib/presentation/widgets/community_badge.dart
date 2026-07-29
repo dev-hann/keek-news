@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:humoruniv/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/community.dart';
 
 class CommunityBadge extends StatelessWidget {
   const CommunityBadge({super.key, required this.community});

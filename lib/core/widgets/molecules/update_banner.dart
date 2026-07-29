@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:humoruniv/core/themes/app_radius.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
-import 'package:humoruniv/domain/entities/download_progress.dart';
-import 'package:humoruniv/presentation/providers/update_provider.dart';
+import 'package:happy_news/core/themes/app_radius.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
+import 'package:happy_news/domain/entities/download_progress.dart';
+import 'package:happy_news/presentation/providers/update_provider.dart';
 
 class UpdateBanner extends StatelessWidget {
   const UpdateBanner({

@@ -1,8 +1,8 @@
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 
-import 'package:humoruniv/data/models/feed_item_dto.dart';
-import 'package:humoruniv/domain/entities/community.dart';
+import 'package:happy_news/data/models/feed_item_dto.dart';
+import 'package:happy_news/domain/entities/community.dart';
 
 class DogdripListParser {
   static List<FeedItemDto> parse(String htmlString) {

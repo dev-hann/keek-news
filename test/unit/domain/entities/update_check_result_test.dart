@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/app_release.dart';
-import 'package:humoruniv/domain/entities/update_check_result.dart';
+import 'package:happy_news/domain/entities/app_release.dart';
+import 'package:happy_news/domain/entities/update_check_result.dart';
 
 void main() {
   group('UpdateCheckResult', () {

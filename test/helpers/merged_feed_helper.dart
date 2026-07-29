@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/merged_feed.dart';
-import 'package:humoruniv/domain/repositories/merged_feed_repository.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/merged_feed.dart';
+import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockMergedFeedRepository extends Mock implements MergedFeedRepository {}

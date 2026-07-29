@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:humoruniv/core/themes/app_radius.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/widgets/atoms/retryable_network_image.dart';
+import 'package:happy_news/core/themes/app_radius.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/widgets/atoms/retryable_network_image.dart';
 
 enum ThumbnailSize { small, medium, large }
 

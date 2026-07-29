@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/presentation/screens/image_viewer_screen.dart';
+import 'package:happy_news/presentation/screens/image_viewer_screen.dart';
 
 void main() {
   group('ImageViewerScreen', () {

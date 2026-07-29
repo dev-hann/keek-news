@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:humoruniv/core/themes/app_elevation.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
-import 'package:humoruniv/core/widgets/atoms/skeleton_box.dart';
+import 'package:happy_news/core/themes/app_elevation.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
+import 'package:happy_news/core/widgets/atoms/skeleton_box.dart';
 
 class SkeletonFeedCard extends StatelessWidget {
   const SkeletonFeedCard({super.key, this.screenHeight});

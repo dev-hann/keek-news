@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/network/html_client.dart';
-import 'package:humoruniv/data/datasources/humoruniv_remote_ds_impl.dart';
-import 'package:humoruniv/data/repositories/post_repository_impl.dart';
-import 'package:humoruniv/domain/entities/post.dart';
-import 'package:humoruniv/domain/repositories/post_repository.dart';
+import 'package:happy_news/core/network/html_client.dart';
+import 'package:happy_news/data/datasources/humoruniv_remote_ds_impl.dart';
+import 'package:happy_news/data/repositories/post_repository_impl.dart';
+import 'package:happy_news/domain/entities/post.dart';
+import 'package:happy_news/domain/repositories/post_repository.dart';
 
 class FixtureHtmlClient implements HtmlClient {
   FixtureHtmlClient(this._fixtures);

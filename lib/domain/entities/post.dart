@@ -1,4 +1,4 @@
-import 'package:humoruniv/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/community.dart';
 import 'package:meta/meta.dart';
 
 @immutable

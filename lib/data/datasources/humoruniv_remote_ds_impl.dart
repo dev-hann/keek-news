@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/core/network/html_client.dart';
-import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
-import 'package:humoruniv/data/models/post_dto.dart';
-import 'package:humoruniv/data/parsers/board_list_parser.dart';
-import 'package:humoruniv/data/parsers/main_page_parser.dart';
-import 'package:humoruniv/data/parsers/post_detail_parser.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/core/network/html_client.dart';
+import 'package:happy_news/data/datasources/humoruniv_remote_ds.dart';
+import 'package:happy_news/data/models/post_dto.dart';
+import 'package:happy_news/data/parsers/board_list_parser.dart';
+import 'package:happy_news/data/parsers/main_page_parser.dart';
+import 'package:happy_news/data/parsers/post_detail_parser.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 class HumorunivRemoteDsImpl implements HumorunivRemoteDs {
   const HumorunivRemoteDsImpl({required this.htmlClient});

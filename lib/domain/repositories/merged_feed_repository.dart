@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/merged_feed.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/merged_feed.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 abstract class MergedFeedRepository {
   Future<Either<Failure, MergedPage>> fetchMerged({

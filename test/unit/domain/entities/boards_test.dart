@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/domain/entities/boards.dart';
+import 'package:happy_news/domain/entities/boards.dart';
 
 void main() {
   group('boards', () {

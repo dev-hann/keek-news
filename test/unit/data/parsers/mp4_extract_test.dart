@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/parser.dart' as html_parser;
-import 'package:humoruniv/data/parsers/content_scanner.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
+import 'package:happy_news/data/parsers/content_scanner.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
 
 void main() {
   ContentScanResult scan(String innerHtml, {String? outsideBody}) {

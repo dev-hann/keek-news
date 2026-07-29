@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/utils/media_classifier.dart';
+import 'package:happy_news/core/utils/media_classifier.dart';
 
 void main() {
   group('MediaClassifier', () {

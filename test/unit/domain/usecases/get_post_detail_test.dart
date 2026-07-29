@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
-import 'package:humoruniv/domain/repositories/post_repository.dart';
-import 'package:humoruniv/domain/usecases/get_post_detail.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:happy_news/domain/repositories/post_repository.dart';
+import 'package:happy_news/domain/usecases/get_post_detail.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockPostRepository extends Mock implements PostRepository {}

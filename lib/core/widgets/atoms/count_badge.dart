@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:humoruniv/core/themes/app_colors.dart';
-import 'package:humoruniv/core/themes/app_radius.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/themes/app_spacing.dart';
+import 'package:happy_news/core/themes/app_colors.dart';
+import 'package:happy_news/core/themes/app_radius.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/themes/app_spacing.dart';
 
 class CountBadge extends StatelessWidget {
   const CountBadge({

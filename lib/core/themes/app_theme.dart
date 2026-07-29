@@ -1,8 +1,8 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
-import 'package:humoruniv/core/themes/app_schemes.dart';
-import 'package:humoruniv/core/themes/app_typography.dart';
+import 'package:happy_news/core/themes/app_schemes.dart';
+import 'package:happy_news/core/themes/app_typography.dart';
 
 abstract final class AppTheme {
   static ThemeData light() {

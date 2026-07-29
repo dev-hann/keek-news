@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:humoruniv/presentation/providers/theme_provider.dart';
+import 'package:happy_news/presentation/providers/theme_provider.dart';
 
 class DarkModeSelector extends StatelessWidget {
   const DarkModeSelector({

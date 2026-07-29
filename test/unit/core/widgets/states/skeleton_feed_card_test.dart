@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
-import 'package:humoruniv/core/widgets/atoms/skeleton_box.dart';
-import 'package:humoruniv/core/widgets/states/skeleton_feed_card.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
+import 'package:happy_news/core/widgets/atoms/skeleton_box.dart';
+import 'package:happy_news/core/widgets/states/skeleton_feed_card.dart';
 
 void main() {
   group('SkeletonFeedCard', () {

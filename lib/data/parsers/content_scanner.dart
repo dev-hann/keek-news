@@ -1,8 +1,8 @@
 import 'package:html/dom.dart' as dom;
 
-import 'package:humoruniv/core/network/url_normalizer.dart';
-import 'package:humoruniv/core/utils/media_classifier.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
+import 'package:happy_news/core/network/url_normalizer.dart';
+import 'package:happy_news/core/utils/media_classifier.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
 
 class ContentScanResult {
   const ContentScanResult({required this.blocks, required this.imageUrls});

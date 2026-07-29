@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:humoruniv/core/themes/app_sizes.dart';
+import 'package:happy_news/core/themes/app_sizes.dart';
 
 class SkeletonBox extends StatelessWidget {
   const SkeletonBox({super.key, this.width, this.height, this.borderRadius});

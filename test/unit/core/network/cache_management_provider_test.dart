@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/datasources/image_cache_service.dart';
-import 'package:humoruniv/presentation/providers/cache_management_provider.dart';
+import 'package:happy_news/data/datasources/image_cache_service.dart';
+import 'package:happy_news/presentation/providers/cache_management_provider.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _FakeImageCacheService extends Mock implements ImageCacheService {}

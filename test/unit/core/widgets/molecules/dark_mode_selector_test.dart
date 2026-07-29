@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/widgets/molecules/dark_mode_selector.dart';
-import 'package:humoruniv/presentation/providers/theme_provider.dart';
+import 'package:happy_news/core/widgets/molecules/dark_mode_selector.dart';
+import 'package:happy_news/presentation/providers/theme_provider.dart';
 
 void main() {
   group('DarkModeSelector', () {

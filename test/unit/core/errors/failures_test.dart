@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/errors/failures.dart';
+import 'package:happy_news/core/errors/failures.dart';
 
 void main() {
   group('ServerFailure', () {

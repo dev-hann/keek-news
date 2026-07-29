@@ -1,5 +1,5 @@
-import 'package:humoruniv/domain/entities/comment.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
+import 'package:happy_news/domain/entities/comment.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
 
 class CommentDto {
   const CommentDto({

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/network/html_client_impl.dart';
+import 'package:happy_news/core/network/html_client_impl.dart';
 
 void main() {
   group('HtmlClientImpl', () {

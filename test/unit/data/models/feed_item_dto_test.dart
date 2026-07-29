@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/models/feed_item_dto.dart';
-import 'package:humoruniv/domain/entities/community.dart';
+import 'package:happy_news/data/models/feed_item_dto.dart';
+import 'package:happy_news/domain/entities/community.dart';
 
 void main() {
   group('FeedItemDto', () {

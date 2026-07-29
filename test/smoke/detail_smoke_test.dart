@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/parsers/main_page_parser.dart';
-import 'package:humoruniv/data/parsers/post_detail_parser.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
+import 'package:happy_news/data/parsers/main_page_parser.dart';
+import 'package:happy_news/data/parsers/post_detail_parser.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
 
 import 'helpers.dart';
 

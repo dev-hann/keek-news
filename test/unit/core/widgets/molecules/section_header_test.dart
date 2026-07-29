@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/widgets/molecules/section_header.dart';
+import 'package:happy_news/core/widgets/molecules/section_header.dart';
 
 void main() {
   group('SectionHeader', () {

@@ -1,7 +1,7 @@
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 
-import 'package:humoruniv/data/models/board_post_dto.dart';
+import 'package:happy_news/data/models/board_post_dto.dart';
 
 class BoardListParseResult {
   const BoardListParseResult({

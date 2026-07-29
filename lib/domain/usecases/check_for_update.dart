@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:humoruniv/core/errors/failures.dart';
-import 'package:humoruniv/domain/entities/update_check_result.dart';
-import 'package:humoruniv/domain/repositories/update_repository.dart';
+import 'package:happy_news/core/errors/failures.dart';
+import 'package:happy_news/domain/entities/update_check_result.dart';
+import 'package:happy_news/domain/repositories/update_repository.dart';
 
 class CheckForUpdate {
   const CheckForUpdate({

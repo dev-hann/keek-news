@@ -1,19 +1,19 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/core/network/html_client.dart';
-import 'package:humoruniv/data/datasources/community_adapter.dart';
-import 'package:humoruniv/data/datasources/dogdrip_adapter_impl.dart';
-import 'package:humoruniv/data/datasources/humoruniv_adapter_impl.dart';
-import 'package:humoruniv/data/datasources/humoruniv_remote_ds.dart';
-import 'package:humoruniv/data/datasources/ppomppu_adapter_impl.dart';
-import 'package:humoruniv/data/datasources/todayhumor_adapter_impl.dart';
-import 'package:humoruniv/data/models/board_post_dto.dart';
-import 'package:humoruniv/data/models/post_dto.dart';
-import 'package:humoruniv/data/parsers/main_page_parser.dart';
-import 'package:humoruniv/data/repositories/merged_feed_repository_impl.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/core/network/html_client.dart';
+import 'package:happy_news/data/datasources/community_adapter.dart';
+import 'package:happy_news/data/datasources/dogdrip_adapter_impl.dart';
+import 'package:happy_news/data/datasources/humoruniv_adapter_impl.dart';
+import 'package:happy_news/data/datasources/humoruniv_remote_ds.dart';
+import 'package:happy_news/data/datasources/ppomppu_adapter_impl.dart';
+import 'package:happy_news/data/datasources/todayhumor_adapter_impl.dart';
+import 'package:happy_news/data/models/board_post_dto.dart';
+import 'package:happy_news/data/models/post_dto.dart';
+import 'package:happy_news/data/parsers/main_page_parser.dart';
+import 'package:happy_news/data/repositories/merged_feed_repository_impl.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockHumorunivRemoteDs extends Mock implements HumorunivRemoteDs {}

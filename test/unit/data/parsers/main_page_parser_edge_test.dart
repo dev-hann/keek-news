@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/parsers/main_page_parser.dart';
+import 'package:happy_news/data/parsers/main_page_parser.dart';
 
 void main() {
   group('MainPageParser edge cases', () {

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 abstract final class AppSchemes {
   static const orange = FlexSchemeData(
     name: 'Orange',
-    description: 'HumorUniv default theme based on site brand color',
+    description: 'HappyNews default theme based on brand colors',
     light: FlexSchemeColor(
       primary: Color(0xFFFF6D00),
       primaryContainer: Color(0xFFFFDBC8),

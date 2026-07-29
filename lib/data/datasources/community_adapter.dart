@@ -1,6 +1,6 @@
-import 'package:humoruniv/data/models/feed_item_dto.dart';
-import 'package:humoruniv/domain/entities/community.dart';
-import 'package:humoruniv/domain/entities/post_detail.dart';
+import 'package:happy_news/data/models/feed_item_dto.dart';
+import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 
 abstract class CommunityAdapter {
   CommunityId get communityId;

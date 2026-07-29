@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/datasources/apk_installer_service_impl.dart';
+import 'package:happy_news/data/datasources/apk_installer_service_impl.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/models/comment_dto.dart';
-import 'package:humoruniv/domain/entities/content_block.dart';
+import 'package:happy_news/data/models/comment_dto.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
 
 void main() {
   group('CommentDto', () {

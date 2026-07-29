@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/parsers/github_release_parser.dart';
+import 'package:happy_news/data/parsers/github_release_parser.dart';
 
 void main() {
   group('GitHubReleaseParser', () {

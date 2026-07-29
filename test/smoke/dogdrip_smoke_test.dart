@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:humoruniv/data/parsers/dogdrip_list_parser.dart';
-import 'package:humoruniv/data/parsers/dogdrip_detail_parser.dart';
+import 'package:happy_news/data/parsers/dogdrip_list_parser.dart';
+import 'package:happy_news/data/parsers/dogdrip_detail_parser.dart';
 
 import 'helpers.dart';
 
