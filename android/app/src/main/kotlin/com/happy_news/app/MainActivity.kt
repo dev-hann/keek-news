@@ -1,4 +1,4 @@
-package com.humoruniv.app
+package com.happy_news.app
 
 import android.content.Intent
 import android.net.Uri
