@@ -100,32 +100,5 @@ void main() {
 
       verify(() => mockDs.fetchPostDetail(expectedUrl)).called(1);
     });
-
-    test(
-      'healthCheck should return true when fetchBoardList succeeds',
-      () async {
-        when(() => mockDs.fetchBoardList(any(), any(), any())).thenAnswer(
-          (_) async =>
-              const BoardListDsResult(posts: [], currentPage: 1, totalPage: 0),
-        );
-
-        final healthy = await adapter.healthCheck();
-
-        expect(healthy, isTrue);
-      },
-    );
-
-    test(
-      'healthCheck should return false when fetchBoardList throws',
-      () async {
-        when(
-          () => mockDs.fetchBoardList(any(), any(), any()),
-        ).thenThrow(Exception('down'));
-
-        final healthy = await adapter.healthCheck();
-
-        expect(healthy, isFalse);
-      },
-    );
   });
 }

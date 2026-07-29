@@ -9,7 +9,6 @@ abstract class MergedFeedRepository {
     required int perSource,
     MergedCursor? cursor,
     Set<CommunityId> enabled = const {},
-    double maxRatioPerSource = 0.4,
   });
 
   Future<Either<Failure, PostDetail>> fetchDetail({

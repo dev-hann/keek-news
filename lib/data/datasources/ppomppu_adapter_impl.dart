@@ -52,15 +52,4 @@ class PpomppuAdapterImpl implements CommunityAdapter {
       throw ServerFailure(e.toString());
     }
   }
-
-  @override
-  Future<bool> healthCheck() async {
-    try {
-      await htmlClient.get('/zboard/zboard.php?id=humor&page=1');
-      return true;
-    } catch (e) {
-      debugPrint('PpomppuAdapterImpl healthCheck failed: $e');
-      return false;
-    }
-  }
 }

@@ -18,18 +18,13 @@ import 'package:happy_news/data/datasources/ppomppu_adapter_impl.dart';
 import 'package:happy_news/data/datasources/todayhumor_adapter_impl.dart';
 import 'package:happy_news/data/repositories/apk_install_repository_impl.dart';
 import 'package:happy_news/data/repositories/merged_feed_repository_impl.dart';
-import 'package:happy_news/data/repositories/post_repository_impl.dart';
 import 'package:happy_news/data/repositories/update_repository_impl.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/repositories/apk_install_repository.dart';
 import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
-import 'package:happy_news/domain/repositories/post_repository.dart';
 import 'package:happy_news/domain/repositories/update_repository.dart';
 import 'package:happy_news/domain/usecases/check_for_update.dart';
-import 'package:happy_news/domain/usecases/get_best_posts.dart';
-import 'package:happy_news/domain/usecases/get_board_posts.dart';
 import 'package:happy_news/domain/usecases/get_merged_feed.dart';
-import 'package:happy_news/domain/usecases/get_post_detail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,20 +103,6 @@ Future<void> configureDependencies() async {
 
   sl.registerLazySingleton(
     () => GetMergedFeed(repository: sl<MergedFeedRepository>()),
-  );
-
-  sl.registerLazySingleton<PostRepository>(
-    () => PostRepositoryImpl(remoteDs: sl<HumorunivRemoteDs>()),
-  );
-
-  sl.registerLazySingleton(
-    () => GetBestPosts(repository: sl<PostRepository>()),
-  );
-  sl.registerLazySingleton(
-    () => GetPostDetail(repository: sl<PostRepository>()),
-  );
-  sl.registerLazySingleton(
-    () => GetBoardPosts(repository: sl<PostRepository>()),
   );
 
   sl.registerLazySingleton<GitHubRemoteDs>(GitHubRemoteDsImpl.new);

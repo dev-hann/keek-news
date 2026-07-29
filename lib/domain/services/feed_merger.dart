@@ -7,7 +7,6 @@ MergedPage mergeFeedStreams({
   Map<CommunityId, String?> nextTokens = const {},
   DateTime? olderThan,
   int maxItems = 50,
-  double maxRatioPerSource = 1.0,
 }) {
   final all = <FeedItem>[];
   for (final items in streams.values) {
@@ -29,41 +28,19 @@ MergedPage mergeFeedStreams({
       ? sorted.sublist(0, maxItems)
       : sorted;
 
-  final capped = maxRatioPerSource < 1.0
-      ? _applyFairnessQuota(limited, maxRatioPerSource)
-      : limited;
-
-  if (capped.isEmpty) {
-    return MergedPage(items: capped);
+  if (limited.isEmpty) {
+    return MergedPage(items: limited);
   }
 
-  final oldest = capped.last.publishedAt;
+  final oldest = limited.last.publishedAt;
   if (oldest == null) {
-    return MergedPage(items: capped);
+    return MergedPage(items: limited);
   }
 
   return MergedPage(
-    items: capped,
+    items: limited,
     next: MergedCursor(oldestSeen: oldest, perSourceTokens: Map.of(nextTokens)),
   );
-}
-
-List<FeedItem> _applyFairnessQuota(List<FeedItem> items, double maxRatio) {
-  final maxPerSource = (maxRatio * items.length).floor();
-  if (maxPerSource < 1) return items;
-
-  final perSource = <CommunityId, int>{};
-  final result = <FeedItem>[];
-
-  for (final item in items) {
-    final count = perSource[item.community] ?? 0;
-    if (count < maxPerSource) {
-      result.add(item);
-      perSource[item.community] = count + 1;
-    }
-  }
-
-  return result;
 }
 
 List<FeedItem> _sortByPublishedAtDescending(List<FeedItem> items) {
@@ -75,7 +52,7 @@ List<FeedItem> _sortByPublishedAtDescending(List<FeedItem> items) {
   final result = <FeedItem>[];
   result.addAll(nullTs);
 
-  int i = 0;
+  var i = 0;
   var rotation = 0;
   while (i < hasTs.length) {
     var j = i;

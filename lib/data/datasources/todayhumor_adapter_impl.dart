@@ -54,15 +54,4 @@ class TodayhumorAdapterImpl implements CommunityAdapter {
       throw ServerFailure(e.toString());
     }
   }
-
-  @override
-  Future<bool> healthCheck() async {
-    try {
-      await htmlClient.get('/board/list.php?table=bestofbest&page=1');
-      return true;
-    } catch (e) {
-      debugPrint('TodayhumorAdapterImpl healthCheck failed: $e');
-      return false;
-    }
-  }
 }

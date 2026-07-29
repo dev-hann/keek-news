@@ -8,8 +8,6 @@ abstract class CommunityAdapter {
   Future<FeedListResult> fetchLatest({String? pageToken});
 
   Future<PostDetail> fetchDetail(String id);
-
-  Future<bool> healthCheck();
 }
 
 class FeedListResult {

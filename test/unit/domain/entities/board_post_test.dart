@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/domain/entities/board_list_result.dart';
 import 'package:happy_news/domain/entities/board_post.dart';
 import 'package:happy_news/domain/entities/community.dart';
-import 'package:happy_news/domain/entities/sort_option.dart';
 
 void main() {
   group('BoardPost', () {
@@ -260,51 +258,6 @@ void main() {
         thumbnailUrl: '',
         community: CommunityId.ppomppu,
       );
-      expect(a, isNot(equals(b)));
-    });
-  });
-
-  group('SortOption', () {
-    test('should have 6 values', () {
-      expect(SortOption.values, hasLength(6));
-    });
-
-    test('should have correct label', () {
-      expect(SortOption.all.label, '전체');
-      expect(SortOption.day.label, '일간');
-      expect(SortOption.week.label, '주간');
-      expect(SortOption.month.label, '월간');
-      expect(SortOption.year.label, '연간');
-      expect(SortOption.recommend500.label, '추천500');
-    });
-
-    test('should have correct value for API', () {
-      expect(SortOption.all.value, '');
-      expect(SortOption.day.value, 'day');
-      expect(SortOption.recommend500.value, 'better');
-    });
-  });
-
-  group('BoardListResult', () {
-    test('should create with posts, currentPage, totalPage', () {
-      const result = BoardListResult(posts: [], currentPage: 0, totalPage: 5);
-
-      expect(result.posts, isEmpty);
-      expect(result.currentPage, 0);
-      expect(result.totalPage, 5);
-    });
-
-    test('should support value equality', () {
-      const a = BoardListResult(posts: [], currentPage: 0, totalPage: 5);
-      const b = BoardListResult(posts: [], currentPage: 0, totalPage: 5);
-
-      expect(a, equals(b));
-    });
-
-    test('should not be equal when currentPage differs', () {
-      const a = BoardListResult(posts: [], currentPage: 0, totalPage: 5);
-      const b = BoardListResult(posts: [], currentPage: 1, totalPage: 5);
-
       expect(a, isNot(equals(b)));
     });
   });

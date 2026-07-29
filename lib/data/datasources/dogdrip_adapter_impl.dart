@@ -50,15 +50,4 @@ class DogdripAdapterImpl implements CommunityAdapter {
       throw ServerFailure(e.toString());
     }
   }
-
-  @override
-  Future<bool> healthCheck() async {
-    try {
-      await htmlClient.get('/index.php?mid=dogdrip&page=1');
-      return true;
-    } catch (e) {
-      debugPrint('DogdripAdapterImpl healthCheck failed: $e');
-      return false;
-    }
-  }
 }

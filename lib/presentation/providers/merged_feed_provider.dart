@@ -8,7 +8,6 @@ import 'package:happy_news/domain/entities/merged_feed.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
 import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
 import 'package:happy_news/domain/usecases/get_merged_feed.dart';
-import 'package:happy_news/presentation/providers/community_settings_provider.dart';
 
 class MergedFeedState {
   const MergedFeedState({
@@ -51,20 +50,11 @@ class MergedFeedState {
 }
 
 class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
-  MergedFeedNotifier(this._readSettings)
-    : super(const MergedFeedState(isLoading: true));
-
-  final CommunitySettings Function() _readSettings;
+  MergedFeedNotifier() : super(const MergedFeedState(isLoading: true));
 
   Future<void> fetch() async {
-    final settings = _readSettings();
-    state = MergedFeedState(isLoading: true);
-    final result = await sl<GetMergedFeed>()(
-      MergedFeedParams(
-        enabled: settings.enabled,
-        maxRatioPerSource: settings.maxRatio,
-      ),
-    );
+    state = const MergedFeedState(isLoading: true);
+    final result = await sl<GetMergedFeed>()(const MergedFeedParams());
     _applyResult(result);
   }
 
@@ -72,13 +62,8 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
     if (state.isLoadingMore || !state.hasMore || state.cursor == null) return;
 
     state = state.copyWith(isLoadingMore: true);
-    final settings = _readSettings();
     final result = await sl<GetMergedFeed>()(
-      MergedFeedParams(
-        cursor: state.cursor,
-        enabled: settings.enabled,
-        maxRatioPerSource: settings.maxRatio,
-      ),
+      MergedFeedParams(cursor: state.cursor),
     );
 
     result.fold((_) => state = state.copyWith(isLoadingMore: false), (page) {
@@ -114,9 +99,7 @@ final mergedFeedProvider =
     StateNotifierProvider.autoDispose<MergedFeedNotifier, MergedFeedState>((
       ref,
     ) {
-      final notifier = MergedFeedNotifier(
-        () => ref.read(communitySettingsProvider),
-      );
+      final notifier = MergedFeedNotifier();
       notifier.fetch();
       return notifier;
     });

@@ -6,7 +6,6 @@ import 'package:happy_news/core/widgets/molecules/settings_tile.dart';
 import 'package:happy_news/core/widgets/molecules/update_banner.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/presentation/providers/cache_management_provider.dart';
-import 'package:happy_news/presentation/providers/community_settings_provider.dart';
 import 'package:happy_news/presentation/providers/theme_provider.dart';
 import 'package:happy_news/presentation/providers/update_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -37,7 +36,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final themeMode = ref.watch(themeProvider);
     final updateState = ref.watch(updateProvider);
     final cacheState = ref.watch(cacheManagementProvider);
-    final commSettings = ref.watch(communitySettingsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('설정')),
@@ -130,45 +128,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: '소스 코드',
                   subtitle: 'GitHub',
                   onTap: () => _launchUrl(_repoUrl),
-                ),
-              ],
-            ),
-            SettingsGroup(
-              title: '커뮤니티',
-              children: [
-                ...communities.map((c) {
-                  final enabled = commSettings.isEnabled(c.id);
-                  return SettingsTile(
-                    leading: Icon(
-                      Icons.circle,
-                      color: Color(c.brandColorArgb),
-                      size: 16,
-                    ),
-                    title: c.displayName,
-                    trailing: Switch(
-                      value: enabled,
-                      onChanged: (_) => ref
-                          .read(communitySettingsProvider.notifier)
-                          .toggle(c.id),
-                    ),
-                  );
-                }),
-                SettingsTile(
-                  leading: const Icon(Icons.balance_outlined),
-                  title: '한 커뮤니티 최대 비율',
-                  subtitle: '${(commSettings.maxRatio * 100).round()}%',
-                  trailing: SizedBox(
-                    width: 120,
-                    child: Slider(
-                      value: commSettings.maxRatio,
-                      min: 0.25,
-                      max: 0.6,
-                      divisions: 7,
-                      onChanged: (v) => ref
-                          .read(communitySettingsProvider.notifier)
-                          .setMaxRatio(v),
-                    ),
-                  ),
                 ),
               ],
             ),

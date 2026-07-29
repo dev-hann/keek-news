@@ -51,15 +51,4 @@ class HumorunivAdapterImpl implements CommunityAdapter {
     final url = '/board/read.html?table=pds&number=$id';
     return remoteDs.fetchPostDetail(url);
   }
-
-  @override
-  Future<bool> healthCheck() async {
-    try {
-      await remoteDs.fetchBoardList('pds', 1, '');
-      return true;
-    } catch (e) {
-      debugPrint('HumorunivAdapterImpl healthCheck failed: $e');
-      return false;
-    }
-  }
 }

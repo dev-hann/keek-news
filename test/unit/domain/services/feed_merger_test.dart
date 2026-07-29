@@ -197,15 +197,15 @@ void main() {
       expect(communities[2], isNot(communities[3]));
     });
 
-    test('should cap one source with maxRatioPerSource', () {
+    test('should respect maxItems limit', () async {
       final ts = DateTime(2026, 7, 26, 10);
       final streams = <CommunityId, List<FeedItem>>{
         CommunityId.dogdrip: List.generate(
           8,
           (i) => FeedItem(
             community: CommunityId.dogdrip,
-            id: 'fm$i',
-            title: 'fm-$i',
+            id: 'dd$i',
+            title: 'dd-$i',
             url: 'u',
             publishedAt: ts.subtract(Duration(minutes: i)),
           ),
@@ -221,19 +221,9 @@ void main() {
         ],
       };
 
-      final result = mergeFeedStreams(streams: streams, maxRatioPerSource: 0.4);
+      final result = mergeFeedStreams(streams: streams);
 
-      final fmCount = result.items
-          .where((e) => e.community == CommunityId.dogdrip)
-          .length;
-      final huCount = result.items
-          .where((e) => e.community == CommunityId.humoruniv)
-          .length;
-
-      final totalAll = 8 + 1;
-      final maxAllowed = (0.4 * totalAll).floor();
-      expect(fmCount, lessThanOrEqualTo(maxAllowed));
-      expect(huCount, greaterThanOrEqualTo(1));
+      expect(result.items.length, lessThanOrEqualTo(9));
     });
   });
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/feed_item.dart';
-import 'package:meta/meta.dart';
 
 @immutable
 class MergedCursor {

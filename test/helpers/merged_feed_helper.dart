@@ -21,7 +21,6 @@ void setupMergedFeedMocks(MockMergedFeedRepository mock) {
       perSource: any(named: 'perSource'),
       cursor: any(named: 'cursor'),
       enabled: any(named: 'enabled'),
-      maxRatioPerSource: any(named: 'maxRatioPerSource'),
     ),
   ).thenAnswer((_) async => const Right(MergedPage(items: [])));
 

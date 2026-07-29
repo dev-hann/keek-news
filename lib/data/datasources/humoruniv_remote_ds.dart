@@ -1,5 +1,4 @@
 import 'package:happy_news/data/models/board_post_dto.dart';
-import 'package:happy_news/data/models/post_dto.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
 
 class BoardListDsResult {
@@ -14,7 +13,6 @@ class BoardListDsResult {
 }
 
 abstract class HumorunivRemoteDs {
-  Future<List<PostDto>> fetchMainPage();
   Future<PostDetail> fetchPostDetail(String url);
   Future<BoardListDsResult> fetchBoardList(String table, int page, String sort);
 }

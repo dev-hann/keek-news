@@ -85,7 +85,6 @@ void main() {
         perSource: any(named: 'perSource'),
         cursor: any(named: 'cursor'),
         enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
       ),
     ).thenAnswer((_) async => Right(page(sampleItems())));
 
@@ -102,7 +101,6 @@ void main() {
         perSource: any(named: 'perSource'),
         cursor: any(named: 'cursor'),
         enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
       ),
     ).thenAnswer((_) async => Right(page(sampleItems())));
 
@@ -119,7 +117,6 @@ void main() {
         perSource: any(named: 'perSource'),
         cursor: any(named: 'cursor'),
         enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
       ),
     ).thenAnswer((_) => completer.future);
 
@@ -136,7 +133,6 @@ void main() {
         perSource: any(named: 'perSource'),
         cursor: any(named: 'cursor'),
         enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
       ),
     ).thenAnswer((_) async => Right(page([])));
 
@@ -152,7 +148,6 @@ void main() {
         perSource: any(named: 'perSource'),
         cursor: any(named: 'cursor'),
         enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
       ),
     ).thenAnswer((_) async => const Left(ServerFailure('error')));
 
@@ -168,7 +163,6 @@ void main() {
         perSource: any(named: 'perSource'),
         cursor: any(named: 'cursor'),
         enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
       ),
     ).thenAnswer((_) async => Right(page([])));
 
@@ -186,7 +180,6 @@ void main() {
         perSource: any(named: 'perSource'),
         cursor: any(named: 'cursor'),
         enabled: any(named: 'enabled'),
-        maxRatioPerSource: any(named: 'maxRatioPerSource'),
       ),
     ).thenAnswer((_) async => Right(page([])));
 

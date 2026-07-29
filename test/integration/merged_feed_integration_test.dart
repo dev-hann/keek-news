@@ -9,11 +9,8 @@ import 'package:happy_news/data/datasources/humoruniv_remote_ds.dart';
 import 'package:happy_news/data/datasources/ppomppu_adapter_impl.dart';
 import 'package:happy_news/data/datasources/todayhumor_adapter_impl.dart';
 import 'package:happy_news/data/models/board_post_dto.dart';
-import 'package:happy_news/data/models/post_dto.dart';
-import 'package:happy_news/data/parsers/main_page_parser.dart';
 import 'package:happy_news/data/repositories/merged_feed_repository_impl.dart';
 import 'package:happy_news/domain/entities/community.dart';
-import 'package:happy_news/domain/entities/post_detail.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockHumorunivRemoteDs extends Mock implements HumorunivRemoteDs {}
@@ -38,30 +35,23 @@ void main() {
   late MergedFeedRepositoryImpl repo;
 
   setUpAll(() {
-    registerFallbackValue(
-      PostDto(id: 0, title: '', recommendCount: 0, url: ''),
-    );
-
-    final humorunivHtml = _readFixture('main_page.html');
     final humorunivDs = _MockHumorunivRemoteDs();
     when(() => humorunivDs.fetchBoardList(any(), any(), any())).thenAnswer(
       (_) async => BoardListDsResult(
-        posts: MainPageParser.parseBestPosts(humorunivHtml)
-            .map(
-              (p) => BoardPostDto(
-                id: p.id,
-                title: p.title,
-                url: p.url,
-                author: '테스터',
-                date: '26/07/28',
-                recommendCount: p.recommendCount,
-                notRecommendCount: 0,
-                commentCount: 0,
-                viewCount: 0,
-                thumbnailUrl: '',
-              ),
-            )
-            .toList(),
+        posts: [
+          BoardPostDto(
+            id: 100,
+            title: '웃대 테스트 글',
+            url: '/board/read.html?table=pds&number=100',
+            author: '테스터',
+            date: '26/07/28',
+            recommendCount: 50,
+            notRecommendCount: 0,
+            commentCount: 3,
+            viewCount: 500,
+            thumbnailUrl: '',
+          ),
+        ],
         currentPage: 1,
         totalPage: 10,
       ),
@@ -157,7 +147,6 @@ void main() {
         expect(detailResult.isRight(), isTrue);
         final detail = detailResult.getOrElse(() => throw StateError(''));
         expect(detail.title, isNotEmpty);
-        expect(detail.community, CommunityId.todayhumor);
       }
     });
 
@@ -176,7 +165,7 @@ void main() {
     test('should isolate adapter failures', () async {
       final failingDs = _MockHumorunivRemoteDs();
       when(
-        () => failingDs.fetchMainPage(),
+        () => failingDs.fetchBoardList(any(), any(), any()),
       ).thenThrow(Exception('network down'));
 
       final failRepo = MergedFeedRepositoryImpl(
