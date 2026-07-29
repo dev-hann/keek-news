@@ -14,7 +14,9 @@ class PpomppuDetailParser {
     final date = _extractDate(doc);
     final contentEl = doc.querySelector('.board-contents');
     final contentHtml = contentEl?.innerHtml ?? '';
+    final videoUrls = _extractVideoUrls(contentEl);
     final imageUrls = _extractImages(contentEl);
+    final allMediaUrls = [...videoUrls, ...imageUrls];
     final contentBlocks = _buildBlocks(contentEl);
     final viewCount = _extractViewCount(doc);
 
@@ -27,7 +29,7 @@ class PpomppuDetailParser {
       date: date,
       contentHtml: contentHtml,
       contentBlocks: contentBlocks,
-      imageUrls: imageUrls,
+      imageUrls: allMediaUrls,
       recommendCount: 0,
       notRecommendCount: 0,
       viewCount: viewCount,
@@ -66,6 +68,20 @@ class PpomppuDetailParser {
     return DateTime.now();
   }
 
+  static List<String> _extractVideoUrls(dom.Element? content) {
+    if (content == null) return [];
+    final urls = <String>[];
+
+    for (final source in content.querySelectorAll('source')) {
+      final src = source.attributes['src'] ?? '';
+      if (src.isNotEmpty && src.contains('.mp4')) {
+        urls.add(src.startsWith('//') ? 'https:$src' : src);
+      }
+    }
+
+    return urls.toSet().toList();
+  }
+
   static List<String> _extractImages(dom.Element? content) {
     if (content == null) return [];
     return content
@@ -81,6 +97,23 @@ class PpomppuDetailParser {
     final blocks = <ContentBlock>[];
 
     for (final p in content.querySelectorAll('p')) {
+      final videos = p.querySelectorAll('video');
+      if (videos.isNotEmpty) {
+        for (final video in videos) {
+          final sources = video.querySelectorAll('source');
+          for (final source in sources) {
+            final src = source.attributes['src'] ?? '';
+            if (src.isNotEmpty && src.contains('.mp4')) {
+              final fullSrc = src.startsWith('//') ? 'https:$src' : src;
+              if (!blocks.any((b) => b is VideoBlock && b.url == fullSrc)) {
+                blocks.add(VideoBlock(url: fullSrc));
+              }
+            }
+          }
+        }
+        continue;
+      }
+
       final imgs = p.querySelectorAll('img');
       if (imgs.isNotEmpty) {
         for (final img in imgs) {
@@ -90,8 +123,14 @@ class PpomppuDetailParser {
             blocks.add(ImageBlock(url: fullSrc));
           }
         }
-      } else if (p.text.trim().isNotEmpty) {
-        blocks.add(TextBlock(p.text.trim()));
+      } else {
+        final text = p.text.trim();
+        if (text.isNotEmpty &&
+            !text.contains('browser does not support') &&
+            !text.contains('브라우저') &&
+            text != '\u00a0') {
+          blocks.add(TextBlock(text));
+        }
       }
     }
 

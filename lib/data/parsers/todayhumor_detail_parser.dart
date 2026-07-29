@@ -78,15 +78,26 @@ class TodayhumorDetailParser {
 
   static List<String> _extractImages(dom.Element? content) {
     if (content == null) return [];
-    return content
-        .querySelectorAll('img')
-        .where((img) {
-          final src = img.attributes['src'] ?? '';
-          return src.contains('todayhumor') || src.startsWith('http');
-        })
-        .map((img) => img.attributes['src'] ?? '')
-        .where((src) => src.isNotEmpty)
-        .toList();
+    final urls = <String>[];
+
+    for (final source in content.querySelectorAll('source')) {
+      final src = source.attributes['src'] ?? '';
+      if (src.isNotEmpty && src.contains('.mp4')) {
+        urls.add(src.startsWith('//') ? 'https:$src' : src);
+      }
+    }
+
+    urls.addAll(
+      content
+          .querySelectorAll('img')
+          .where((img) {
+            final src = img.attributes['src'] ?? '';
+            return src.contains('todayhumor') || src.startsWith('http');
+          })
+          .map((img) => img.attributes['src'] ?? '')
+          .where((src) => src.isNotEmpty),
+    );
+    return urls;
   }
 
   static List<ContentBlock> _buildBlocks(dom.Element? content) {
@@ -94,6 +105,22 @@ class TodayhumorDetailParser {
     final blocks = <ContentBlock>[];
 
     for (final child in content.children) {
+      final videos = child.querySelectorAll('video');
+      if (videos.isNotEmpty) {
+        for (final video in videos) {
+          for (final source in video.querySelectorAll('source')) {
+            final src = source.attributes['src'] ?? '';
+            if (src.isNotEmpty && src.contains('.mp4')) {
+              final full = src.startsWith('//') ? 'https:$src' : src;
+              if (!blocks.any((b) => b is VideoBlock && b.url == full)) {
+                blocks.add(VideoBlock(url: full));
+              }
+            }
+          }
+        }
+        continue;
+      }
+
       final imgs = child.querySelectorAll('img');
       if (imgs.isNotEmpty) {
         for (final img in imgs) {
@@ -102,8 +129,13 @@ class TodayhumorDetailParser {
             blocks.add(ImageBlock(url: src));
           }
         }
-      } else if (child.text.trim().isNotEmpty) {
-        blocks.add(TextBlock(child.text.trim()));
+      } else {
+        final text = child.text.trim();
+        if (text.isNotEmpty &&
+            !text.contains('browser does not support') &&
+            !text.contains('브라우저')) {
+          blocks.add(TextBlock(text));
+        }
       }
     }
 

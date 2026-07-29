@@ -115,12 +115,31 @@ class DogdripDetailParser {
 
   static List<String> _extractImages(dom.Element? content) {
     if (content == null) return [];
-    return content
-        .querySelectorAll('img')
-        .map((img) => img.attributes['src'] ?? '')
-        .where((src) => src.isNotEmpty)
-        .map((src) => src.startsWith('/') ? 'https://www.dogdrip.net$src' : src)
-        .toList();
+    final urls = <String>[];
+
+    for (final source in content.querySelectorAll('source')) {
+      final src = source.attributes['src'] ?? '';
+      if (src.isNotEmpty && src.contains('.mp4')) {
+        urls.add(
+          src.startsWith('//')
+              ? 'https:$src'
+              : src.startsWith('/')
+              ? 'https://www.dogdrip.net$src'
+              : src,
+        );
+      }
+    }
+
+    urls.addAll(
+      content
+          .querySelectorAll('img')
+          .map((img) => img.attributes['src'] ?? '')
+          .where((src) => src.isNotEmpty)
+          .map(
+            (src) => src.startsWith('/') ? 'https://www.dogdrip.net$src' : src,
+          ),
+    );
+    return urls;
   }
 
   static List<ContentBlock> _buildBlocks(dom.Element? content) {
@@ -128,6 +147,26 @@ class DogdripDetailParser {
     final blocks = <ContentBlock>[];
 
     for (final p in content.querySelectorAll('p')) {
+      final videos = p.querySelectorAll('video');
+      if (videos.isNotEmpty) {
+        for (final video in videos) {
+          for (final source in video.querySelectorAll('source')) {
+            final src = source.attributes['src'] ?? '';
+            if (src.isNotEmpty && src.contains('.mp4')) {
+              final full = src.startsWith('//')
+                  ? 'https:$src'
+                  : src.startsWith('/')
+                  ? 'https://www.dogdrip.net$src'
+                  : src;
+              if (!blocks.any((b) => b is VideoBlock && b.url == full)) {
+                blocks.add(VideoBlock(url: full));
+              }
+            }
+          }
+        }
+        continue;
+      }
+
       final imgs = p.querySelectorAll('img');
       for (final img in imgs) {
         final src = img.attributes['src'] ?? '';
@@ -138,8 +177,13 @@ class DogdripDetailParser {
           blocks.add(ImageBlock(url: fullSrc));
         }
       }
-      if (imgs.isEmpty && p.text.trim().isNotEmpty) {
-        blocks.add(TextBlock(p.text.trim()));
+      if (imgs.isEmpty) {
+        final text = p.text.trim();
+        if (text.isNotEmpty &&
+            !text.contains('browser does not support') &&
+            !text.contains('브라우저')) {
+          blocks.add(TextBlock(text));
+        }
       }
     }
 
