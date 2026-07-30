@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:happy_news/core/utils/media_classifier.dart';
+import 'package:happy_news/domain/entities/comment.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
@@ -17,6 +20,8 @@ class PpomppuDetailParser {
     final imageUrls = _extractImages(contentEl);
     final contentBlocks = _buildBlocks(contentEl);
     final viewCount = _extractViewCount(doc);
+    final commentData = _extractCommentData(doc);
+    final comments = _extractComments(commentData, date);
 
     final noMatch = RegExp(r'no=(\d+)').firstMatch(doc.body?.text ?? '');
 
@@ -31,8 +36,8 @@ class PpomppuDetailParser {
       recommendCount: 0,
       notRecommendCount: 0,
       viewCount: viewCount,
-      commentCount: 0,
-      comments: const [],
+      commentCount: _extractCommentCount(commentData),
+      comments: comments,
       community: CommunityId.ppomppu,
     );
   }
@@ -129,5 +134,81 @@ class PpomppuDetailParser {
       if (match != null) return int.parse(match.group(1)!);
     }
     return 0;
+  }
+
+  static Map<String, dynamic>? _extractCommentData(dom.Document doc) {
+    final match = RegExp(
+      r'initialCommentData\s*=\s*(\{.*\})\s*;',
+      dotAll: true,
+    ).firstMatch(doc.outerHtml);
+    if (match == null) return null;
+    try {
+      final decoded = jsonDecode(match.group(1)!) as Map<String, dynamic>;
+      return decoded;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static int _extractCommentCount(Map<String, dynamic>? data) {
+    if (data == null) return 0;
+    return (data['total_comment'] as num?)?.toInt() ?? 0;
+  }
+
+  static List<Comment> _extractComments(
+    Map<String, dynamic>? data,
+    DateTime postDate,
+  ) {
+    if (data == null) return const [];
+    final raw = data['comments'];
+    if (raw is! List) return const [];
+
+    final result = <Comment>[];
+    for (final item in raw) {
+      if (item is! Map<String, dynamic>) continue;
+
+      final id = (item['no'] as num?)?.toInt() ?? 0;
+      final author = _stripTags(item['name'] as String? ?? '');
+      final content = _stripTags(item['memo'] as String? ?? '');
+      final voteBtn = item['vote_btn'];
+      final recommend = voteBtn is Map<String, dynamic>
+          ? (voteBtn['vote_count'] as num?)?.toInt() ?? 0
+          : 0;
+      final time = (item['meta'] is Map<String, dynamic>)
+          ? (item['meta']!['time_display'] as String?)
+          : null;
+
+      result.add(
+        Comment(
+          id: id,
+          author: author,
+          content: content,
+          date: _mergeTime(postDate, time),
+          recommendCount: recommend,
+          isBest: false,
+          replies: const [],
+        ),
+      );
+    }
+    return result;
+  }
+
+  static String _stripTags(String html) {
+    final text = html_parser.parseFragment(html).text ?? '';
+    return text.replaceAll('\u00a0', ' ').trim();
+  }
+
+  static DateTime _mergeTime(DateTime base, String? time) {
+    if (time == null) return base;
+    final match = RegExp(r'(\d{2}):(\d{2}):(\d{2})').firstMatch(time);
+    if (match == null) return base;
+    return DateTime(
+      base.year,
+      base.month,
+      base.day,
+      int.parse(match.group(1)!),
+      int.parse(match.group(2)!),
+      int.parse(match.group(3)!),
+    );
   }
 }

@@ -22,6 +22,7 @@ class PpomppuListParser {
     final recTd = row.querySelector('td.baseList-rec');
     final viewsTd = row.querySelector('td.baseList-views');
     final imgIcon = row.querySelector('img.baseList-img');
+    final commentSpan = row.querySelector('span.baseList-c');
 
     if (titleLink == null || numbTd == null) return null;
 
@@ -41,8 +42,15 @@ class PpomppuListParser {
       publishedAt: _parseDate(dateTd?.attributes['title'], timeTd?.text),
       recommendCount: int.tryParse(recTd?.text.trim() ?? '') ?? 0,
       viewCount: int.tryParse(viewsTd?.text.trim() ?? '') ?? 0,
+      commentCount: _parseCommentCount(commentSpan?.text),
       thumbnailUrl: imgIcon?.attributes['src'],
     );
+  }
+
+  static int _parseCommentCount(String? text) {
+    if (text == null) return 0;
+    final match = RegExp(r'(\d+)').firstMatch(text.trim());
+    return match != null ? int.parse(match.group(1)!) : 0;
   }
 
   static String _extractNo(String href) {
