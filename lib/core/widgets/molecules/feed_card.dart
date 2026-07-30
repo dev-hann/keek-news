@@ -264,6 +264,7 @@ class _ExpandableTextState extends State<_ExpandableText> {
           text: TextSpan(text: widget.text, style: style),
           maxLines: widget.maxLines,
           textDirection: TextDirection.ltr,
+          textScaler: MediaQuery.textScalerOf(context),
         )..layout(maxWidth: constraints.maxWidth);
         final overflow = painter.didExceedMaxLines;
         return Column(

@@ -335,6 +335,88 @@ void main() {
       final size = tester.getSize(finder);
       expect(size.height, greaterThanOrEqualTo(AppSizes.minTouchTarget));
     });
+
+    testWidgets('더보기 tap expands body and reveals 접기', (tester) async {
+      final body = List.generate(15, (i) => '본문 ${i + 1}번 줄').join('\n');
+      final detail = detailWith(blocks: [TextBlock(body)]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
+            ),
+          ),
+        ),
+      );
+      final collapsedHeight = tester.getSize(find.text(body)).height;
+      expect(find.text('더보기'), findsOneWidget);
+
+      await tester.tap(find.text('더보기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('접기'), findsOneWidget);
+      expect(find.text('더보기'), findsNothing);
+      final expandedHeight = tester.getSize(find.text(body)).height;
+      expect(expandedHeight, greaterThan(collapsedHeight));
+    });
+
+    testWidgets('접기 tap collapses body back to 더보기', (tester) async {
+      final body = List.generate(15, (i) => '본문 ${i + 1}번 줄').join('\n');
+      final detail = detailWith(blocks: [TextBlock(body)]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
+            ),
+          ),
+        ),
+      );
+      final collapsedHeight = tester.getSize(find.text(body)).height;
+      await tester.tap(find.text('더보기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('접기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('더보기'), findsOneWidget);
+      expect(find.text('접기'), findsNothing);
+      expect(tester.getSize(find.text(body)).height, equals(collapsedHeight));
+    });
+
+    testWidgets('short body does not show 더보기', (tester) async {
+      final detail = detailWith(blocks: const [TextBlock('짧은 본문입니다.')]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('더보기'), findsNothing);
+    });
+
+    testWidgets(
+      '더보기 appears under enlarged text scale (textScaler respected)',
+      (tester) async {
+        final body = List.filled(30, '一二三四五六七八九十').join(' ');
+        final detail = detailWith(blocks: [TextBlock(body)]);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+              child: Scaffold(
+                body: SingleChildScrollView(
+                  child: FeedCard(post: post, detail: detail),
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(find.text('더보기'), findsOneWidget);
+      },
+    );
   });
 
   group('FeedCard action buttons', () {
