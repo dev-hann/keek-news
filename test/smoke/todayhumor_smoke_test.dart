@@ -10,9 +10,9 @@ void main() {
   final skip = Platform.environment['SMOKE'] != '1';
 
   group('Smoke: todayhumor', () {
-    test('list parser should parse live bestofbest page', () async {
+    test('list parser should parse live humorbest page', () async {
       final html = await fetchHtml(
-        'https://www.todayhumor.co.kr/board/list.php?table=bestofbest',
+        'https://www.todayhumor.co.kr/board/list.php?table=humorbest',
         encoding: 'utf-8',
         desktop: true,
       );
@@ -26,7 +26,7 @@ void main() {
 
     test('detail parser should parse live post page', () async {
       final listHtml = await fetchHtml(
-        'https://www.todayhumor.co.kr/board/list.php?table=bestofbest',
+        'https://www.todayhumor.co.kr/board/list.php?table=humorbest',
         encoding: 'utf-8',
       );
       final posts = TodayhumorListParser.parse(listHtml);

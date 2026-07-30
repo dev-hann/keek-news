@@ -406,7 +406,7 @@
             <form name='login' method='post' action='https://www.todayhumor.co.kr/member/login.php' target='_top' onsubmit='return check_login()'>
                 <input name='id' type='text' id='id' value='' class='login_input' placeholder='ID'>
                 <input name='passwd' type='password' id='passwd' class='login_input' placeholder='PASS'>
-                <input name='cur_url' type='hidden' value='https://www.todayhumor.co.kr/board/list.php?table=bestofbest'>
+                <input name='cur_url' type='hidden' value='https://www.todayhumor.co.kr/board/list.php?table=humorbest'>
                 <input type='submit' class='login_btn' value='로그인'>
             </form>
             <div id='login_user_menu'>
@@ -628,48 +628,49 @@
 
 <table width="100%" border="0" cellspacing="1" cellpadding="0">
   <tr> 
-	<td height=45><a href="list.php?table=bestofbest"><img src="images/title_bestofbest.gif?100" border="0"></a></td>
+    <td align=left valign=middle rowspan=3 width=90 height=110><a href="list.php?kind=todaybest"  target="_top"><img src="images/todaybest_menu_tmp.gif" border=0 alt="오늘의베스트는 베스트유머를 추천순으로 재배열한 곳입니다"></a>
+	</td>
+	<td width=640>
+		<a href="list.php?table=humorbest"><img src="images/title_humorbest.gif?100" height="25" border="0" /></a>
+	</td>	
   </tr>
-  <tr><td height=17><font color=BD6F07>
- 베스트오브베스트는 베스트게시물 중에서 추천수가 높은 게시물이 자동으로 옮겨지는 곳입니다.<br>
-  </td></tr>
 
-  <tr><td height=17><font color=BD6F07>
-  <b>비공감수가 추천수를 초과하면</b> 베스트오브베스트에서 삭제됩니다..<br>
-  </td></tr>
+  <tr>
+	  <td valign=top><font color=BD6F07>
+			&nbsp;<img src=images/mini_icon.gif>베스트게시물 게시판은 각 게시판의 게시물이 추천수가 10(비공감3이하)이 되면 자동으로 옮겨지는 곳입니다.<br>
+			&nbsp;&nbsp;&nbsp;&nbsp;<b>비공감수가 추천수를 초과하면 베스트게시물에서 삭제됩니다.<br>
+			<font color=red><b>←</b>"오늘의베스트"는 오늘 하루 동안의 베스트게시물을 추천수가 높은 순으로 재배열한 곳입니다.<br></font>
 
-  <tr><td height=17><font color=BD6F07>
-  제목 왼쪽에 있는 아이콘은 이 게시물이 원래 어느 게시판에서 처음 등록된 게시물인지를 표시해주고 있습니다.<br>
-<b>게시판별 베오베</b>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=humordata'><div class='board_icon_mini humordata'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=humorstory'><div class='board_icon_mini humorstory'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=gomin'><div class='board_icon_mini gomin'></div></a>
+		</td>
+  </tr>
+  <tr>
+	<td colspan='2'>
+		<b>게시판별 베스트</b>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=humordata'><div class='board_icon_mini humordata'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=humorstory'><div class='board_icon_mini humorstory'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=gomin'><div class='board_icon_mini gomin'></div></a>
 
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=star'><div class='board_icon_mini star'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=sisa'><div class='board_icon_mini sisa'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=jisik'><div class='board_icon_mini jisik'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=cook'><div class='board_icon_mini cook'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=animal'><div class='board_icon_mini animal'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=military'><div class='board_icon_mini military'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=computer'><div class='board_icon_mini computer'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=lovestory'><div class='board_icon_mini lovestory'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=art'><div class='board_icon_mini art'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=fashion'><div class='board_icon_mini fashion'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=soccer'><div class='board_icon_mini soccer'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=gametalk'><div class='board_icon_mini gametalk'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=star'><div class='board_icon_mini star'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=sisa'><div class='board_icon_mini sisa'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=jisik'><div class='board_icon_mini jisik'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=cook'><div class='board_icon_mini cook'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=animal'><div class='board_icon_mini animal'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=military'><div class='board_icon_mini military'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=computer'><div class='board_icon_mini computer'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=lovestory'><div class='board_icon_mini lovestory'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=art'><div class='board_icon_mini art'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=fashion'><div class='board_icon_mini fashion'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=soccer'><div class='board_icon_mini soccer'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=gametalk'><div class='board_icon_mini gametalk'></div></a>
 
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=history'><div class='board_icon_mini history'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=science'><div class='board_icon_mini science'></div></a>
-		<a href='http://www.todayhumor.co.kr/board/list.php?kind=bestofbest_sort&o_table=panic'><div class='board_icon_mini panic'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=history'><div class='board_icon_mini history'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=science'><div class='board_icon_mini science'></div></a>
+		<a href='http://www.todayhumor.co.kr/board/list.php?kind=humorbest_sort&o_table=panic'><div class='board_icon_mini panic'></div></a>
 		<br>
+		목록의 아이콘을 클릭하시면 해당 게시판의 베스트게시물이 열립니다.
 
-		(기타 게시판별 베오베는 각 게시판에 링크가 있습니다.)
-		<br>
-목록의 아이콘을 클릭하시면 해당 게시판의 베스트게시물이 열립니다.
-
-  
-  </td></tr>
-
+	</td>
+  </tr>
 </table>	</div>
 
 
@@ -698,17 +699,13 @@
 					
 
 		<tr><td colspan='7' class='list_ad'>					
-		<script type="text/javascript"><!--
-		google_ad_client = "ca-pub-3751810951269827";
-		/* 데스크탑 리스트 페이지 가로 배너 */
-		google_ad_slot = "3617500837";
-		google_ad_width = 750;
-		google_ad_height = 100;
-		//-->
-		</script>
-		<script type="text/javascript"
-		src="//pagead2.googlesyndication.com/pagead/show_ads.js">
-		</script>							
+		
+		<!-- /237975088/top_level_desktop_list_page_upper_wide -->
+		<div id='div-gpt-ad-1622272645593-0' style='min-width: 728px; min-height: 90px;'>
+		  <script>
+		    googletag.cmd.push(function() { googletag.display('div-gpt-ad-1622272645593-0'); });
+		  </script>
+		</div>							
 		</td></tr>
 		
 
@@ -717,304 +714,304 @@
 
 
 
-			<tr class="view list_tr_humordata" mn='537055'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483503&s_no=483503&no_tag=1&page=1 target='_top''>483503</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483503&s_no=483503&page=1" target="_top">50년 전에도 먹혔던 취재가 시작되자.. 필살기.jpg</a><span class='list_memo_count_span'> [10]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
-			<td class="name"><a href="list.php?kind=member&mn=537055" target='_blank' class='list_name_member'>방과후개그지도</a></td>
-			<td class="date">26/07/28 21:41</td>
-			<td class="hits">3758</td>
-			<td class="oknok">51</td>
+			<tr class="view list_tr_humordata" mn='117629'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796479&s_no=1796479&no_tag=1&page=1 target='_top''>1796479</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796479&s_no=1796479&page=1" target="_top">일트윗)여러분이 아는 '무서운 이야기'를 가르쳐 주세요.jpg</a><span class='list_memo_count_span'> [1]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
+			<td class="date">26/07/30 11:26</td>
+			<td class="hits">528</td>
+			<td class="oknok">10</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483502&s_no=483502&no_tag=1&page=1 target='_top''>483502</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483502&s_no=483502&page=1" target="_top">학교 폭력 재판 불출석해 패소한 변호사 근황</a><span class='list_memo_count_span'> [9]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796478&s_no=1796478&no_tag=1&page=1 target='_top''>1796478</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796478&s_no=1796478&page=1" target="_top">길가다 ○○ 정리좀 하지마세요.jpg</a><span class='list_memo_count_span'> [4]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/28 21:37</td>
-			<td class="hits">2790</td>
-			<td class="oknok">54</td>
+			<td class="date">26/07/30 11:17</td>
+			<td class="hits">1152</td>
+			<td class="oknok">12</td>
 		</tr>
 			
-			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483501&s_no=483501&no_tag=1&page=1 target='_top''>483501</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483501&s_no=483501&page=1" target="_top">흔한 여고생의 장기자랑.mp4</a><span class='list_memo_count_span'> [18]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> <span style='color:#999'>4일</span></td>
-			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/28 12:10</td>
-			<td class="hits">6149</td>
-			<td class="oknok">66</td>
+			<tr class="view list_tr_humordata" mn='284835'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796477&s_no=1796477&no_tag=1&page=1 target='_top''>1796477</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796477&s_no=1796477&page=1" target="_top">타이어 gif</a><span class='list_memo_count_span'> [45]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=284835" target='_blank' class='list_name_member'>말랑한옴팡이</a></td>
+			<td class="date">26/07/30 10:52</td>
+			<td class="hits">2645</td>
+			<td class="oknok">15</td>
 		</tr>
 			
-			<tr class="view list_tr_sisa" mn='15449'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483500&s_no=483500&no_tag=1&page=1 target='_top''>483500</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483500&s_no=483500&page=1" target="_top">노통을 좋아하는 사람도 문통을 싫어할 수 있다고?</a><span class='list_memo_count_span'> [49]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_pencil.gif?2' alt='창작글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=15449" target='_blank' class='list_name_member'>서상훈</a></td>
-			<td class="date">26/07/28 06:35</td>
-			<td class="hits">2101</td>
-			<td class="oknok">100</td>
+			<tr class="view list_tr_sisa" mn='786894'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796476&s_no=1796476&no_tag=1&page=1 target='_top''>1796476</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796476&s_no=1796476&page=1" target="_top">박선원 구독자 대폭락... 순식간에 4만명 증발하자 '긴급 해명문' 공개</a><span class='list_memo_count_span'> [6]</span>   </td>
+			<td class="name"><a href="list.php?kind=member&mn=786894" target='_blank' class='list_name_member'>고상한척</a></td>
+			<td class="date">26/07/30 10:45</td>
+			<td class="hits">660</td>
+			<td class="oknok">15</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='642377'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796475&s_no=1796475&no_tag=1&page=1 target='_top''>1796475</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796475&s_no=1796475&page=1" target="_top">&lsquo;여주 멸종위기 악어, 어떻게 구입했나 보니&rsquo;&hellip;주인 검거 </a><span class='list_memo_count_span'> [5]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=642377" target='_blank' class='list_name_member'>라이온맨킹</a></td>
+			<td class="date">26/07/30 10:19</td>
+			<td class="hits">2128</td>
+			<td class="oknok">17</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='422209'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483499&s_no=483499&no_tag=1&page=1 target='_top''>483499</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483499&s_no=483499&page=1" target="_top">수술해준 의사선생을 꼭 찾고싶은 사람</a><span class='list_memo_count_span'> [14]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> <span style='color:#999'>3일</span></td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796474&s_no=1796474&no_tag=1&page=1 target='_top''>1796474</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796474&s_no=1796474&page=1" target="_top">일본여성이 느낀 호감있는 한국남자 특징</a><span class='list_memo_count_span'> [12]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=422209" target='_blank' class='list_name_member'>감동브레이커</a></td>
-			<td class="date">26/07/28 01:13</td>
-			<td class="hits">5161</td>
-			<td class="oknok">78</td>
+			<td class="date">26/07/30 10:18</td>
+			<td class="hits">2129</td>
+			<td class="oknok">20</td>
 		</tr>
 			
-			<tr class="view list_tr_sisa" mn='797115'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483498&s_no=483498&no_tag=1&page=1 target='_top''>483498</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483498&s_no=483498&page=1" target="_top">정청래를 왜 지지하는지 모른다라..</a><span class='list_memo_count_span'> [32]</span>   </td>
-			<td class="name"><a href="list.php?kind=member&mn=797115" target='_blank' class='list_name_member'>알트코인</a></td>
-			<td class="date">26/07/27 19:58</td>
-			<td class="hits">2914</td>
-			<td class="oknok">90</td>
+			<tr class="view list_tr_sisa" mn='149436'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796473&s_no=1796473&no_tag=1&page=1 target='_top''>1796473</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796473&s_no=1796473&page=1" target="_top">지는 들을 생각도 없으면서</a><span class='list_memo_count_span'> [7]</span>   </td>
+			<td class="name"><a href="list.php?kind=member&mn=149436" target='_blank' class='list_name_member'>NeoGenius</a></td>
+			<td class="date">26/07/30 10:03</td>
+			<td class="hits">374</td>
+			<td class="oknok">16</td>
 		</tr>
 			
-			<tr class="view list_tr_sisa" mn='726711'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483497&s_no=483497&no_tag=1&page=1 target='_top''>483497</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483497&s_no=483497&page=1" target="_top">[민주당 최고위원 선출] 전략투표 당원필독</a><span class='list_memo_count_span'> [24]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> <span style='color:#999'>7일</span></td>
-			<td class="name"><a href="list.php?kind=member&mn=726711" target='_blank' class='list_name_member'>퇴개미</a></td>
-			<td class="date">26/07/27 19:30</td>
-			<td class="hits">1991</td>
-			<td class="oknok">62</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='93447'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483496&s_no=483496&no_tag=1&page=1 target='_top''>483496</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483496&s_no=483496&page=1" target="_top">gpt야, 랜덤으로 사람이름 50개 만들고 가운데 *넣어줘</a><span class='list_memo_count_span'> [30]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> <span style='color:#999'>3일</span></td>
-			<td class="name"><a href="list.php?kind=member&mn=93447" target='_blank' class='list_name_member'>갤러해드</a></td>
-			<td class="date">26/07/27 13:18</td>
-			<td class="hits">7712</td>
-			<td class="oknok">82</td>
-		</tr>
-			
-			<tr class="view list_tr_sisa" mn='777080'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483495&s_no=483495&no_tag=1&page=1 target='_top''>483495</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483495&s_no=483495&page=1" target="_top">유시민은 지지율 하락의 원인이 아니라 신호입니다.</a><span class='list_memo_count_span'> [39]</span>   </td>
-			<td class="name"><a href="list.php?kind=member&mn=777080" target='_blank' class='list_name_member'>iamtalker</a></td>
-			<td class="date">26/07/27 09:45</td>
-			<td class="hits">3345</td>
-			<td class="oknok">108</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='422209'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483494&s_no=483494&no_tag=1&page=1 target='_top''>483494</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483494&s_no=483494&page=1" target="_top">지루하고 현학적임 VS 간단명료</a><span class='list_memo_count_span'> [25]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=422209" target='_blank' class='list_name_member'>감동브레이커</a></td>
-			<td class="date">26/07/26 22:37</td>
-			<td class="hits">6692</td>
-			<td class="oknok">93</td>
+			<tr class="view list_tr_sisa" mn='596030'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796472&s_no=1796472&no_tag=1&page=1 target='_top''>1796472</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796472&s_no=1796472&page=1" target="_top">신천지로는 안되니 이제 이진련인가?</a><span class='list_memo_count_span'> [11]</span>   </td>
+			<td class="name"><a href="list.php?kind=member&mn=596030" target='_blank' class='list_name_member'>Whoisit</a></td>
+			<td class="date">26/07/30 10:00</td>
+			<td class="hits">740</td>
+			<td class="oknok">14</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483493&s_no=483493&no_tag=1&page=1 target='_top''>483493</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483493&s_no=483493&page=1" target="_top">좋은거 혼자 쓰지 말고 좀 빌려줘</a><span class='list_memo_count_span'> [24]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796471&s_no=1796471&no_tag=1&page=1 target='_top''>1796471</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796471&s_no=1796471&page=1" target="_top">[공식입장] '법인카드 사용 의혹' 홍명보의 반박</a><span class='list_memo_count_span'> [5]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/26 20:56</td>
-			<td class="hits">5485</td>
-			<td class="oknok">86</td>
+			<td class="date">26/07/30 09:50</td>
+			<td class="hits">1010</td>
+			<td class="oknok">18</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='220186'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796470&s_no=1796470&no_tag=1&page=1 target='_top''>1796470</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796470&s_no=1796470&page=1" target="_top">출장갔다가 일찍 돌아온 남편이 본 아내의 모습. (만화)</a><span class='list_memo_count_span'> [3]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=220186" target='_blank' class='list_name_member'>날아라바퀴벌레</a></td>
+			<td class="date">26/07/30 09:48</td>
+			<td class="hits">3672</td>
+			<td class="oknok">20</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483492&s_no=483492&no_tag=1&page=1 target='_top''>483492</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483492&s_no=483492&page=1" target="_top">6년전 이혼한 아내 측으로부터 연락이 옴</a><span class='list_memo_count_span'> [14]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796469&s_no=1796469&no_tag=1&page=1 target='_top''>1796469</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796469&s_no=1796469&page=1" target="_top">장항준이 말하는 5%의 미학</a><span class='list_memo_count_span'> [2]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/26 17:12</td>
-			<td class="hits">7385</td>
-			<td class="oknok">95</td>
+			<td class="date">26/07/30 09:47</td>
+			<td class="hits">1483</td>
+			<td class="oknok">22</td>
 		</tr>
 			
-			<tr class="view list_tr_humordata" mn='422209'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483491&s_no=483491&no_tag=1&page=1 target='_top''>483491</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483491&s_no=483491&page=1" target="_top">경주에서 관광객없는 깔끔한 사진 찍는 법</a><span class='list_memo_count_span'> [13]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=422209" target='_blank' class='list_name_member'>감동브레이커</a></td>
-			<td class="date">26/07/26 16:01</td>
-			<td class="hits">8028</td>
-			<td class="oknok">87</td>
+			<tr class="view list_tr_sisa" mn='809614'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796468&s_no=1796468&no_tag=1&page=1 target='_top''>1796468</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796468&s_no=1796468&page=1" target="_top">일본군을 한국에 배치시키자는 올공시위대</a><span class='list_memo_count_span'> [10]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="name"><a href="list.php?kind=member&mn=809614" target='_blank' class='list_name_member'>염병핵시설</a></td>
+			<td class="date">26/07/30 09:45</td>
+			<td class="hits">853</td>
+			<td class="oknok">20</td>
 		</tr>
 			
-			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483490&s_no=483490&no_tag=1&page=1 target='_top''>483490</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483490&s_no=483490&page=1" target="_top">스스로 불러온 재앙.jpg</a><span class='list_memo_count_span'> [8]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> <span style='color:#999'>4일</span></td>
-			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/26 09:16</td>
-			<td class="hits">9664</td>
-			<td class="oknok">91</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483489&s_no=483489&no_tag=1&page=1 target='_top''>483489</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483489&s_no=483489&page=1" target="_top">연평해전에서 각성한 병사.jpg</a><span class='list_memo_count_span'> [8]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/26 00:01</td>
-			<td class="hits">5840</td>
-			<td class="oknok">99</td>
-		</tr>
-			
-			<tr class="view list_tr_sisa" mn='584991'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483488&s_no=483488&no_tag=1&page=1 target='_top''>483488</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483488&s_no=483488&page=1" target="_top">중앙위50 권당 50룰에서 박성준탈락</a><span class='list_memo_count_span'> [11]</span>   </td>
-			<td class="name"><a href="list.php?kind=member&mn=584991" target='_blank' class='list_name_member'>파란하늘이다</a></td>
-			<td class="date">26/07/25 20:41</td>
-			<td class="hits">3327</td>
-			<td class="oknok">89</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483487&s_no=483487&no_tag=1&page=1 target='_top''>483487</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483487&s_no=483487&page=1" target="_top">본인 와이프를 관찰하고 그린 웹툰</a><span class='list_memo_count_span'> [13]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/25 19:04</td>
-			<td class="hits">8710</td>
-			<td class="oknok">91</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483486&s_no=483486&no_tag=1&page=1 target='_top''>483486</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483486&s_no=483486&page=1" target="_top">대한민국 양궁 대표팀의 남vs여 대결.jpg</a><span class='list_memo_count_span'> [17]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/25 17:26</td>
-			<td class="hits">5910</td>
-			<td class="oknok">88</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483485&s_no=483485&no_tag=1&page=1 target='_top''>483485</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483485&s_no=483485&page=1" target="_top">의뢰인이 이혼 후 변호사를 다시 찾은 이유.txt</a><span class='list_memo_count_span'> [21]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> <span style='color:#999'>3일</span></td>
-			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/25 14:30</td>
-			<td class="hits">7067</td>
-			<td class="oknok">79</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483484&s_no=483484&no_tag=1&page=1 target='_top''>483484</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483484&s_no=483484&page=1" target="_top">누가봐도 면제인데 군대 4번이나 끌려온 32살 신병.manhwa</a><span class='list_memo_count_span'> [15]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> <span style='color:#999'>3일</span></td>
-			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/25 14:11</td>
-			<td class="hits">5251</td>
-			<td class="oknok">84</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='422209'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483483&s_no=483483&no_tag=1&page=1 target='_top''>483483</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483483&s_no=483483&page=1" target="_top">초등학교 고학년에게 피드백 받았다는 치과의사</a><span class='list_memo_count_span'> [9]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=422209" target='_blank' class='list_name_member'>감동브레이커</a></td>
-			<td class="date">26/07/25 13:19</td>
-			<td class="hits">5391</td>
-			<td class="oknok">80</td>
-		</tr>
-			
-			<tr class="view list_tr_freeboard" mn='35376'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483482&s_no=483482&no_tag=1&page=1 target='_top''>483482</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=freeboard><div class='board_icon_mini freeboard'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483482&s_no=483482&page=1" target="_top">아내가 아들 재우러 갔는데</a><span class='list_memo_count_span'> [15]</span>   <span style='color:#999'>3일</span></td>
+			<tr class="view list_tr_humordata" mn='35376'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796467&s_no=1796467&no_tag=1&page=1 target='_top''>1796467</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796467&s_no=1796467&page=1" target="_top">타겟을 노리는 고양이</a><span class='list_memo_count_span'> [6]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
 			<td class="name"><a href="list.php?kind=member&mn=35376" target='_blank' class='list_name_member'>댓글러버</a></td>
-			<td class="date">26/07/25 00:15</td>
-			<td class="hits">5750</td>
-			<td class="oknok">82</td>
-		</tr>
-			
-			<tr class="view list_tr_humordata" mn='422209'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483481&s_no=483481&no_tag=1&page=1 target='_top''>483481</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483481&s_no=483481&page=1" target="_top">여후배한테 기프티콘 보낸 남자</a><span class='list_memo_count_span'> [26]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
-			<td class="name"><a href="list.php?kind=member&mn=422209" target='_blank' class='list_name_member'>감동브레이커</a></td>
-			<td class="date">26/07/24 19:26</td>
-			<td class="hits">7589</td>
-			<td class="oknok">104</td>
+			<td class="date">26/07/30 08:54</td>
+			<td class="hits">1144</td>
+			<td class="oknok">26</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483480&s_no=483480&no_tag=1&page=1 target='_top''>483480</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483480&s_no=483480&page=1" target="_top">조상님들 창호지로 겨울 어떻게 버팀?ㄷㄷㄷ</a><span class='list_memo_count_span'> [15]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> <span style='color:#999'>7일</span></td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796466&s_no=1796466&no_tag=1&page=1 target='_top''>1796466</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796466&s_no=1796466&page=1" target="_top">자연) 산불이 지구온난화를 늦춘다.jpg</a><span class='list_memo_count_span'> [9]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/24 19:24</td>
-			<td class="hits">8457</td>
-			<td class="oknok">79</td>
+			<td class="date">26/07/30 08:00</td>
+			<td class="hits">1644</td>
+			<td class="oknok">19</td>
+		</tr>
+			
+			<tr class="view list_tr_sisa" mn='642377'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796465&s_no=1796465&no_tag=1&page=1 target='_top''>1796465</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796465&s_no=1796465&page=1" target="_top">정청래 &ldquo;조 의장, &lsquo;연임 개헌 발언&rsquo; 기자에게 낚인 것 같다&rdquo;</a><span class='list_memo_count_span'> [3]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=642377" target='_blank' class='list_name_member'>라이온맨킹</a></td>
+			<td class="date">26/07/30 07:55</td>
+			<td class="hits">753</td>
+			<td class="oknok">17</td>
+		</tr>
+			
+			<tr class="view list_tr_sisa" mn='658171'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796464&s_no=1796464&no_tag=1&page=1 target='_top''>1796464</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796464&s_no=1796464&page=1" target="_top">오마이 기자의 정청래 반명 프레임 최민희가 박살내는데 통쾌하네요 </a><span class='list_memo_count_span'> [2]</span>   </td>
+			<td class="name"><a href="list.php?kind=member&mn=658171" target='_blank' class='list_name_member'>몸쪽꽉찬커터</a></td>
+			<td class="date">26/07/30 07:51</td>
+			<td class="hits">632</td>
+			<td class="oknok">22</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='791079'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796463&s_no=1796463&no_tag=1&page=1 target='_top''>1796463</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796463&s_no=1796463&page=1" target="_top">문명7 지도자로 등장했다는 이순신 장군 </a><span class='list_memo_count_span'> [3]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=791079" target='_blank' class='list_name_member'>파루땅</a></td>
+			<td class="date">26/07/30 07:28</td>
+			<td class="hits">2635</td>
+			<td class="oknok">18</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483479&s_no=483479&no_tag=1&page=1 target='_top''>483479</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483479&s_no=483479&page=1" target="_top">매일 리뷰를 남겨준 손님</a><span class='list_memo_count_span'> [14]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796462&s_no=1796462&no_tag=1&page=1 target='_top''>1796462</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796462&s_no=1796462&page=1" target="_top">혐)구조헬기 비용이 아까웠던 등산가가 한 일</a><span class='list_memo_count_span'> [9]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/24 14:05</td>
-			<td class="hits">4576</td>
-			<td class="oknok">104</td>
+			<td class="date">26/07/30 07:23</td>
+			<td class="hits">2143</td>
+			<td class="oknok">21</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='422209'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483478&s_no=483478&no_tag=1&page=1 target='_top''>483478</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483478&s_no=483478&page=1" target="_top">집보러온 신혼부부</a><span class='list_memo_count_span'> [16]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796461&s_no=1796461&no_tag=1&page=1 target='_top''>1796461</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796461&s_no=1796461&page=1" target="_top">어제 주점에서 제 발 밟고 사과하신 남자분</a><span class='list_memo_count_span'> [14]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=422209" target='_blank' class='list_name_member'>감동브레이커</a></td>
-			<td class="date">26/07/24 13:27</td>
-			<td class="hits">6394</td>
-			<td class="oknok">110</td>
+			<td class="date">26/07/30 06:46</td>
+			<td class="hits">2451</td>
+			<td class="oknok">24</td>
 		</tr>
 			
-			<tr class="view list_tr_sisa" mn='123541'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483477&s_no=483477&no_tag=1&page=1 target='_top''>483477</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483477&s_no=483477&page=1" target="_top">아침 속보 올라오다가 포털 메인에서 사라진 뉴스</a><span class='list_memo_count_span'> [11]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
-			<td class="name"><a href="list.php?kind=member&mn=123541" target='_blank' class='list_name_member'>투수코치</a></td>
-			<td class="date">26/07/24 09:48</td>
-			<td class="hits">6261</td>
-			<td class="oknok">101</td>
+			<tr class="view list_tr_humordata" mn='307532'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796460&s_no=1796460&no_tag=1&page=1 target='_top''>1796460</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796460&s_no=1796460&page=1" target="_top">세계 게요리 1등</a><span class='list_memo_count_span'> [14]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=307532" target='_blank' class='list_name_member'>글로배웠어요</a></td>
+			<td class="date">26/07/30 02:48</td>
+			<td class="hits">3737</td>
+			<td class="oknok">23</td>
 		</tr>
 			
 			<tr class="view list_tr_sisa" mn='808326'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483476&s_no=483476&no_tag=1&page=1 target='_top''>483476</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483476&s_no=483476&page=1" target="_top">정청래 유튜브 게시물업</a><span class='list_memo_count_span'> [20]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> <span style='color:#999'>6일</span></td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796459&s_no=1796459&no_tag=1&page=1 target='_top''>1796459</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796459&s_no=1796459&page=1" target="_top">제가 직접 만든 웹자보입니다. 널리 퍼뜨려주세요 ^^</a><span class='list_memo_count_span'> [2]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
 			<td class="name"><a href="list.php?kind=member&mn=808326" target='_blank' class='list_name_member'>아리나케이져</a></td>
-			<td class="date">26/07/23 21:03</td>
-			<td class="hits">4630</td>
-			<td class="oknok">117</td>
+			<td class="date">26/07/30 01:53</td>
+			<td class="hits">263</td>
+			<td class="oknok">36</td>
 		</tr>
 			
 			<tr class="view list_tr_humordata" mn='117629'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483475&s_no=483475&no_tag=1&page=1 target='_top''>483475</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483475&s_no=483475&page=1" target="_top">인기휴양림 예약이 불가능했던 이유.jpg</a><span class='list_memo_count_span'> [10]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796458&s_no=1796458&no_tag=1&page=1 target='_top''>1796458</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796458&s_no=1796458&page=1" target="_top">가수 박진영이 6년전부터 지원중이라는 사업</a><span class='list_memo_count_span'> [5]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
 			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
-			<td class="date">26/07/23 20:02</td>
-			<td class="hits">6944</td>
-			<td class="oknok">105</td>
+			<td class="date">26/07/30 00:33</td>
+			<td class="hits">1618</td>
+			<td class="oknok">35</td>
 		</tr>
 			
-			<tr class="view list_tr_humordata" mn='422209'>
-			<td class="no"><a href=/board/view.php?table=bestofbest&no=483474&s_no=483474&no_tag=1&page=1 target='_top''>483474</a></td>
-			<td class="icon"><a href=list.php?kind=bestofbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
-			<td class="subject"><a href="/board/view.php?table=bestofbest&no=483474&s_no=483474&page=1" target="_top">벚꽃 놀이가기로 했는데 몸살났다는 남친</a><span class='list_memo_count_span'> [6]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> <span style='color:#999'>6일</span></td>
-			<td class="name"><a href="list.php?kind=member&mn=422209" target='_blank' class='list_name_member'>감동브레이커</a></td>
-			<td class="date">26/07/23 13:47</td>
-			<td class="hits">11419</td>
-			<td class="oknok">99</td>
+			<tr class="view list_tr_humordata" mn='31663'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796457&s_no=1796457&no_tag=1&page=1 target='_top''>1796457</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796457&s_no=1796457&page=1" target="_top">4000</a><span class='list_memo_count_span'> [8]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_pencil.gif?2' alt='창작글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="name"><a href="list.php?kind=member&mn=31663" target='_blank' class='list_name_member'>큰누나</a></td>
+			<td class="date">26/07/30 00:03</td>
+			<td class="hits">1461</td>
+			<td class="oknok">24</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='117629'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796456&s_no=1796456&no_tag=1&page=1 target='_top''>1796456</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796456&s_no=1796456&page=1" target="_top">이태리 미슐랭 쉐프가 털어간 대장간 근황</a><span class='list_memo_count_span'> [10]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
+			<td class="date">26/07/29 19:34</td>
+			<td class="hits">3414</td>
+			<td class="oknok">33</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='63095'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796455&s_no=1796455&no_tag=1&page=1 target='_top''>1796455</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796455&s_no=1796455&page=1" target="_top">1970년대 우리의 자화상</a><span class='list_memo_count_span'> [9]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="name"><a href="list.php?kind=member&mn=63095" target='_blank' class='list_name_member'>눈물한스푼</a></td>
+			<td class="date">26/07/29 19:33</td>
+			<td class="hits">2289</td>
+			<td class="oknok">40</td>
+		</tr>
+			
+			<tr class="view list_tr_sisa" mn='38460'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796454&s_no=1796454&no_tag=1&page=1 target='_top''>1796454</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=sisa><div class='board_icon_mini sisa'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796454&s_no=1796454&page=1" target="_top">ㅋㅋㅋㅋㅋㅋ</a><span class='list_memo_count_span'> [7]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="name"><a href="list.php?kind=member&mn=38460" target='_blank' class='list_name_member'>call4luv</a></td>
+			<td class="date">26/07/29 18:25</td>
+			<td class="hits">1305</td>
+			<td class="oknok">23</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='642377'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796453&s_no=1796453&no_tag=1&page=1 target='_top''>1796453</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796453&s_no=1796453&page=1" target="_top">BTS, 그래미 보이콧...&ldquo;음악, 언어로 구분되지 않길&rdquo; [공식]</a><span class='list_memo_count_span'> [11]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=642377" target='_blank' class='list_name_member'>라이온맨킹</a></td>
+			<td class="date">26/07/29 16:38</td>
+			<td class="hits">1867</td>
+			<td class="oknok">31</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='18176'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796452&s_no=1796452&no_tag=1&page=1 target='_top''>1796452</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796452&s_no=1796452&page=1" target="_top">[연상퀴즈] 다음 그림이 의미하는 것을 적어주세요</a><span class='list_memo_count_span'> [26]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=18176" target='_blank' class='list_name_member'>크리링</a></td>
+			<td class="date">26/07/29 16:18</td>
+			<td class="hits">1667</td>
+			<td class="oknok">20</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='117629'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796451&s_no=1796451&no_tag=1&page=1 target='_top''>1796451</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796451&s_no=1796451&page=1" target="_top">싱글벙글 1402년 조선시대 지도에 나오는 외국 수도 ㄷㄷ</a><span class='list_memo_count_span'> [6]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span><img src='//www.todayhumor.co.kr/board/images/list_icon_shovel.gif?2' alt='펌글' style='margin-right:3px;top:2px;position:relative'> </td>
+			<td class="name"><a href="list.php?kind=member&mn=117629" target='_blank' class='list_name_member'>우가가</a></td>
+			<td class="date">26/07/29 15:58</td>
+			<td class="hits">3207</td>
+			<td class="oknok">30</td>
+		</tr>
+			
+			<tr class="view list_tr_humordata" mn='307532'>
+			<td class="no"><a href=/board/view.php?table=humorbest&no=1796450&s_no=1796450&no_tag=1&page=1 target='_top''>1796450</a></td>
+			<td class="icon"><a href=list.php?kind=humorbest_sort&o_table=humordata><div class='board_icon_mini humordata'></div></a></td>
+			<td class="subject"><a href="/board/view.php?table=humorbest&no=1796450&s_no=1796450&page=1" target="_top">미카엘, 가브리엘, 라파엘, 우리엘, 카시엘</a><span class='list_memo_count_span'> [15]</span>  <span style='margin-left:4px;'><img src='//www.todayhumor.co.kr/board/images/list_icon_photo.gif' style='vertical-align:middle; margin-bottom:1px;' /> </span> </td>
+			<td class="name"><a href="list.php?kind=member&mn=307532" target='_blank' class='list_name_member'>글로배웠어요</a></td>
+			<td class="date">26/07/29 15:32</td>
+			<td class="hits">1799</td>
+			<td class="oknok">34</td>
 		</tr>
 								<tr>
                       <td height="30" colspan="8" align="center"> <table width="100%" border="0" cellspacing="1" cellpadding="0">
@@ -1023,7 +1020,7 @@
                             </td>
                             <td style='padding:20px 0 5px 0;text-align:center'>
 
-		 <a href='list.php?table=bestofbest&page=2'  target='_top'><img src='http://www.todayhumor.co.kr/board/images/nextpage.gif?1' style='width:73px;height:19px;margin-left:10px' border=0></a>
+		 <a href='list.php?table=humorbest&page=2'  target='_top'><img src='http://www.todayhumor.co.kr/board/images/nextpage.gif?1' style='width:73px;height:19px;margin-left:10px' border=0></a>
 		                             </td>
                             <td width="20%" style='text-align:right'>
                             </td>
@@ -1034,7 +1031,7 @@
                       <td height="40" colspan="8" align="center">
 
 
-<b><font size=3 color=red>[1]</font></b> <a href='list.php?table=bestofbest&page=2' target="_top"><font size=3 >[2]</a> <a href='list.php?table=bestofbest&page=3' target="_top"><font size=3 >[3]</a> <a href='list.php?table=bestofbest&page=4' target="_top"><font size=3 >[4]</a> <a href='list.php?table=bestofbest&page=5' target="_top"><font size=3 >[5]</a> <a href='list.php?table=bestofbest&page=6' target="_top"><font size=3 >[6]</a> <a href='list.php?table=bestofbest&page=7' target="_top"><font size=3 >[7]</a> <a href='list.php?table=bestofbest&page=8' target="_top"><font size=3 >[8]</a> <a href='list.php?table=bestofbest&page=9' target="_top"><font size=3 >[9]</a> <a href='list.php?table=bestofbest&page=10' target="_top"><font size=3 >[10]</a> <a href='list.php?table=bestofbest&page=11' target="_top">[다음10개▶]</a>                      </td>
+<b><font size=3 color=red>[1]</font></b> <a href='list.php?table=humorbest&page=2' target="_top"><font size=3 >[2]</a> <a href='list.php?table=humorbest&page=3' target="_top"><font size=3 >[3]</a> <a href='list.php?table=humorbest&page=4' target="_top"><font size=3 >[4]</a> <a href='list.php?table=humorbest&page=5' target="_top"><font size=3 >[5]</a> <a href='list.php?table=humorbest&page=6' target="_top"><font size=3 >[6]</a> <a href='list.php?table=humorbest&page=7' target="_top"><font size=3 >[7]</a> <a href='list.php?table=humorbest&page=8' target="_top"><font size=3 >[8]</a> <a href='list.php?table=humorbest&page=9' target="_top"><font size=3 >[9]</a> <a href='list.php?table=humorbest&page=10' target="_top"><font size=3 >[10]</a> <a href='list.php?table=humorbest&page=11' target="_top">[다음10개▶]</a>                      </td>
                     </tr>
 
 
@@ -1052,8 +1049,8 @@
 						<td colspan="8" style="text-align: center;">
 							<form action="list.php" method="get" name="down_search" id="search" target="_top" onSubmit="return down_search_check();">
 								<input type="hidden" name="kind" value="search">
-								<input type="hidden" name="table" value="bestofbest">
-								<input type="hidden" name="search_table_name" value="bestofbest">
+								<input type="hidden" name="table" value="humorbest">
+								<input type="hidden" name="search_table_name" value="humorbest">
 																<select name="keyfield">
 	                              <option  value="subject"  selected>제 목</option>
 	                              <option  value="name"  >글쓴이</option>
@@ -1135,7 +1132,7 @@ urchinTracker();
             document.cookie = name + '=' + value + expires + domainPart + '; path=/';
         }
 
-        setCookie('__dvst__', '20260728', 86400, '.todayhumor.co.kr');
+        setCookie('__dvst__', '20260730', 86400, '.todayhumor.co.kr');
     </script>
 
 
@@ -1230,5 +1227,5 @@ function check_all(check_all_btn){
 
 
 
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a2241f420c7dd1e5',t:'MTc4NTI0NDIwNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a230f1f7cd2bd1eb',t:'MTc4NTM3ODY2Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

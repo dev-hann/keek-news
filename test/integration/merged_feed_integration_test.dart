@@ -61,8 +61,8 @@ void main() {
       CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: humorunivDs),
       CommunityId.todayhumor: TodayhumorAdapterImpl(
         htmlClient: FixtureHtmlClient({
-          'list.php?table=bestofbest': _readFixture(
-            'todayhumor/list_bestofbest_pc.html',
+          'list.php?table=humorbest': _readFixture(
+            'todayhumor/list_humorbest_pc.html',
           ),
           'view.php': _readFixture('todayhumor/detail_483503.html'),
         }),
@@ -96,6 +96,11 @@ void main() {
 
       final communities = page.items.map((e) => e.community).toSet();
       expect(communities.length, greaterThan(1));
+      expect(
+        communities,
+        contains(CommunityId.todayhumor),
+        reason: 'todayhumor adapter must contribute items (humorbest board)',
+      );
     });
 
     test('should sort by publishedAt descending', () async {
@@ -173,7 +178,7 @@ void main() {
           CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: failingDs),
           CommunityId.todayhumor: TodayhumorAdapterImpl(
             htmlClient: FixtureHtmlClient({
-              'list.php': _readFixture('todayhumor/list_bestofbest_pc.html'),
+              'list.php': _readFixture('todayhumor/list_humorbest_pc.html'),
             }),
           ),
         },

@@ -20,7 +20,7 @@ class TodayhumorAdapterImpl implements CommunityAdapter {
     try {
       final page = pageToken ?? '1';
       final html = await htmlClient.get(
-        '/board/list.php?table=bestofbest&page=$page',
+        '/board/list.php?table=humorbest&page=$page',
       );
       final items = TodayhumorListParser.parse(html);
       final nextPage = (int.tryParse(page) ?? 0) + 1;
@@ -42,7 +42,7 @@ class TodayhumorAdapterImpl implements CommunityAdapter {
   Future<PostDetail> fetchDetail(String id) async {
     try {
       final html = await htmlClient.get(
-        '/board/view.php?table=bestofbest&no=$id',
+        '/board/view.php?table=humorbest&no=$id',
       );
       return TodayhumorDetailParser.parse(html);
     } on ServerFailure {

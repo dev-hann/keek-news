@@ -95,8 +95,8 @@ void main() {
 
     test('todayhumor: fetchLatest가 list.php 요청하고 타임스탬프 포함', () async {
       final client = _RecordingHtmlClient({
-        'list.php?table=bestofbest': _fixture(
-          'todayhumor/list_bestofbest_pc.html',
+        'list.php?table=humorbest': _fixture(
+          'todayhumor/list_humorbest_pc.html',
         ),
       });
       final adapter = TodayhumorAdapterImpl(htmlClient: client);

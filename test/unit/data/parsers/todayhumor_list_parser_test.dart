@@ -9,7 +9,7 @@ void main() {
 
   setUpAll(() {
     html = File(
-      'test/fixtures/todayhumor/list_bestofbest_pc.html',
+      'test/fixtures/todayhumor/list_humorbest_pc.html',
     ).readAsStringSync();
   });
 
