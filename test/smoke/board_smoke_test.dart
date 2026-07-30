@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/data/parsers/board_list_parser.dart';
+import 'package:keek_news/service/parser/board_list_parser.dart';
 
 import 'helpers.dart';
 

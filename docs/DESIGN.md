@@ -127,7 +127,7 @@ When adding a new design token:
 When adding a new component:
 1. Determine its level (atom / molecule / organism).
 2. Define its variants and states before coding.
-3. Write widget tests for all variants and states (see [TESTING.md](TESTING.md)).
+3. Write widget tests for all variants and states (see [TESTING_POLICY.md](TESTING_POLICY.md)).
 4. Place it in the correct subdirectory under `lib/core/widgets/`.
 
 ## Reference: Code File Locations

@@ -1,4 +1,4 @@
-# HumorUniv App
+# 킥뉴스
 
 An unofficial Flutter mobile app for [humoruniv.com](https://m.humoruniv.com), a Korean humor community since 1998.
 
@@ -31,13 +31,14 @@ For detailed setup, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 | Document | Description |
 |----------|-------------|
-| [AGENTS.md](AGENTS.md) | AI agent rules, TDD workflow, prohibited actions |
+| [AGENTS.md](AGENTS.md) | AI agent rules, layer access rules, prohibited actions |
 | [docs/PRODUCT_PLAN.md](docs/PRODUCT_PLAN.md) | Product definition, personas, UX specs, feature roadmap |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Clean architecture layers, dependency rules, data flow |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 4-layer architecture (Service → Repository → UseCase → Provider) |
 | [docs/DESIGN.md](docs/DESIGN.md) | Design system rules, tokens, components, accessibility |
-| [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | Coding style, naming, parser patterns |
+| [docs/NAMING_CONVENTIONS.md](docs/NAMING_CONVENTIONS.md) | File and class naming (`*_repo`, `*_impl`, `*_use_case`, `*_view`) |
+| [docs/CODE_STYLE.md](docs/CODE_STYLE.md) | Equatable models, dartz Either, parser patterns, lint |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Environment setup, commands, build instructions |
-| [docs/TESTING.md](docs/TESTING.md) | TDD tiers, test levels, enforcement rules |
+| [docs/TESTING_POLICY.md](docs/TESTING_POLICY.md) | Test levels, fixture management, mock conventions |
 
 ## License
 

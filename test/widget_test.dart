@@ -1,22 +1,22 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/di/injection.dart' as di;
-import 'package:happy_news/domain/entities/app_release.dart';
-import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
-import 'package:happy_news/domain/repositories/update_repository.dart';
-import 'package:happy_news/domain/usecases/check_for_update.dart';
-import 'package:happy_news/domain/usecases/get_merged_feed.dart';
-import 'package:happy_news/main.dart';
-import 'package:happy_news/presentation/providers/shared_preferences_provider.dart';
-import 'package:happy_news/presentation/screens/home_screen.dart';
+import 'package:keek_news/app.dart';
+import 'package:keek_news/model/app_release.dart';
+import 'package:keek_news/pages/home_view.dart';
+import 'package:keek_news/provider/shared_preferences_provider.dart';
+import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
+import 'package:keek_news/repository/update/update_repo.dart';
+import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/check_for_update_use_case.dart';
+import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/merged_feed_helper.dart';
 import 'helpers/package_info_helper.dart';
 
-class MockUpdateRepository extends Mock implements UpdateRepository {}
+class MockUpdateRepository extends Mock implements UpdateRepo {}
 
 void main() {
   late MockUpdateRepository mockUpdateRepo;
@@ -35,25 +35,28 @@ void main() {
     mockMergedRepo = MockMergedFeedRepository();
     setupMergedFeedMocks(mockMergedRepo);
     await di.configureDependencies();
-    if (di.sl.isRegistered<UpdateRepository>()) {
-      di.sl.unregister<UpdateRepository>();
+    if (di.sl.isRegistered<UpdateRepo>()) {
+      di.sl.unregister<UpdateRepo>();
     }
-    if (di.sl.isRegistered<CheckForUpdate>()) {
-      di.sl.unregister<CheckForUpdate>();
+    if (di.sl.isRegistered<CheckForUpdateUseCase>()) {
+      di.sl.unregister<CheckForUpdateUseCase>();
     }
-    if (di.sl.isRegistered<MergedFeedRepository>()) {
-      di.sl.unregister<MergedFeedRepository>();
+    if (di.sl.isRegistered<MergedFeedRepo>()) {
+      di.sl.unregister<MergedFeedRepo>();
     }
-    if (di.sl.isRegistered<GetMergedFeed>()) {
-      di.sl.unregister<GetMergedFeed>();
+    if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
+      di.sl.unregister<GetMergedFeedUseCase>();
     }
-    di.sl.registerLazySingleton<UpdateRepository>(() => mockUpdateRepo);
+    di.sl.registerLazySingleton<UpdateRepo>(() => mockUpdateRepo);
     di.sl.registerLazySingleton(
-      () => CheckForUpdate(repository: mockUpdateRepo, currentVersion: '1.1.0'),
+      () => CheckForUpdateUseCase(
+        repository: mockUpdateRepo,
+        currentVersion: '1.1.0',
+      ),
     );
-    di.sl.registerLazySingleton<MergedFeedRepository>(() => mockMergedRepo);
+    di.sl.registerLazySingleton<MergedFeedRepo>(() => mockMergedRepo);
     di.sl.registerLazySingleton(
-      () => GetMergedFeed(repository: mockMergedRepo),
+      () => GetMergedFeedUseCase(repository: mockMergedRepo),
     );
   });
 
@@ -69,12 +72,12 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-        child: const HappyNewsApp(),
+        child: const KeekNewsApp(),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(find.text('웃긴대학'), findsOneWidget);
-    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(HomeView), findsOneWidget);
   });
 }

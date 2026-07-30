@@ -1,23 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/data/datasources/bookmark_local_data_source.dart';
-import 'package:happy_news/data/repositories/bookmark_repository_impl.dart';
-import 'package:happy_news/domain/entities/bookmark.dart';
-import 'package:happy_news/domain/entities/community.dart';
-import 'package:happy_news/domain/repositories/bookmark_repository.dart';
-import 'package:happy_news/presentation/providers/bookmark_provider.dart';
+import 'package:keek_news/model/bookmark.dart';
+import 'package:keek_news/model/community.dart';
+import 'package:keek_news/provider/bookmark_provider.dart';
+import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
+import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
+import 'package:keek_news/service/bookmark_local_data_source.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late SharedPreferences prefs;
   late BookmarkLocalDataSource dataSource;
-  late BookmarkRepository repository;
+  late BookmarkRepo repository;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     dataSource = BookmarkLocalDataSourceImpl(prefs);
-    repository = BookmarkRepositoryImpl(dataSource);
+    repository = BookmarkImpl(dataSource);
   });
 
   Bookmark bookmark({
@@ -40,9 +40,7 @@ void main() {
       final bm = bookmark(id: '100');
       await repository.add(bm);
 
-      final freshRepo = BookmarkRepositoryImpl(
-        BookmarkLocalDataSourceImpl(prefs),
-      );
+      final freshRepo = BookmarkImpl(BookmarkLocalDataSourceImpl(prefs));
       final all = await freshRepo.getAll();
 
       expect(all.length, 1);
@@ -61,7 +59,7 @@ void main() {
         await container.read(bookmarkProvider.notifier).load();
         expect(container.read(bookmarkProvider), isEmpty);
 
-        final bm = bookmark(id: '1');
+        final bm = bookmark();
         final added = await container
             .read(bookmarkProvider.notifier)
             .toggle(bm);
@@ -90,7 +88,7 @@ void main() {
       addTearDown(container.dispose);
 
       await container.read(bookmarkProvider.notifier).load();
-      await container.read(bookmarkProvider.notifier).toggle(bookmark(id: '1'));
+      await container.read(bookmarkProvider.notifier).toggle(bookmark());
       await container.read(bookmarkProvider.notifier).toggle(bookmark(id: '2'));
       await container.read(bookmarkProvider.notifier).toggle(bookmark(id: '3'));
 
@@ -121,7 +119,7 @@ void main() {
       final notifier = container.read(bookmarkProvider.notifier);
       await notifier.load();
 
-      await notifier.toggle(bookmark(id: '1'));
+      await notifier.toggle(bookmark());
       await notifier.toggle(bookmark(id: '2'));
       await notifier.remove(CommunityId.humoruniv, '1');
 

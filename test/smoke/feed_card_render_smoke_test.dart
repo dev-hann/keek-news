@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/core/widgets/molecules/feed_card.dart';
-import 'package:happy_news/core/widgets/molecules/feed_image_carousel.dart';
-import 'package:happy_news/data/parsers/post_detail_parser.dart';
-import 'package:happy_news/domain/entities/board_post.dart';
-import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:keek_news/model/board_post.dart';
+import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/service/parser/post_detail_parser.dart';
+import 'package:keek_news/widgets/feed_card.dart';
+import 'package:keek_news/widgets/feed_image_carousel.dart';
 
 void main() {
   final skip = Platform.environment['SMOKE'] != '1';

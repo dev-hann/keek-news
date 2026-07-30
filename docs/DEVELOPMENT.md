@@ -28,7 +28,7 @@ flutter test                    # All tests in test/
 flutter test integration_test/  # E2E (needs device/emulator)
 ```
 
-For detailed test commands and coverage, see [TESTING.md](TESTING.md).
+For detailed test commands and coverage, see [TESTING_POLICY.md](TESTING_POLICY.md).
 
 ## Analyze
 
@@ -50,14 +50,20 @@ flutter build ios --release       # iOS
 
 ```
 lib/
-├── core/           # Shared utilities, constants, network client
-├── domain/         # Entities, repository interfaces, use cases
-├── data/           # DTOs, parsers, API, data sources, repository impls
-├── presentation/   # Screens, widgets, providers
-├── di/             # Dependency injection setup
-└── routes/         # Navigation configuration
+├── const/        design tokens, theme
+├── model/        entities + DTOs + failures (Equatable)
+├── pages/        screens (*_view.dart)
+├── provider/     Riverpod providers
+├── repository/   abstract (*_repo.dart) + impl (*_impl.dart), feature-grouped
+├── service/      datasources, adapters, parsers, DI (service_locator.dart)
+├── use_case/     business operations (*_use_case.dart)
+├── utils/        pure helpers
+├── widgets/      reusable UI
+├── app.dart      KeekNewsApp + GoRouter
+└── main.dart     entry
 ```
 
 For architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
-For coding rules, see [CONVENTIONS.md](CONVENTIONS.md).
-For testing, see [TESTING.md](TESTING.md).
+For naming rules, see [NAMING_CONVENTIONS.md](NAMING_CONVENTIONS.md).
+For coding style, see [CODE_STYLE.md](CODE_STYLE.md).
+For testing, see [TESTING_POLICY.md](TESTING_POLICY.md).

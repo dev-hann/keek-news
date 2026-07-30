@@ -1,15 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/core/network/html_client.dart';
-import 'package:happy_news/data/datasources/dogdrip_adapter_impl.dart';
-import 'package:happy_news/data/datasources/humoruniv_adapter_impl.dart';
-import 'package:happy_news/data/datasources/humoruniv_remote_ds.dart';
-import 'package:happy_news/data/datasources/ppomppu_adapter_impl.dart';
-import 'package:happy_news/data/datasources/todayhumor_adapter_impl.dart';
-import 'package:happy_news/data/models/board_post_dto.dart';
-import 'package:happy_news/domain/entities/community.dart';
-import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:keek_news/model/board_post_dto.dart';
+import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/service/dogdrip_adapter_impl.dart';
+import 'package:keek_news/service/html_client.dart';
+import 'package:keek_news/service/humoruniv_adapter_impl.dart';
+import 'package:keek_news/service/humoruniv_remote_ds.dart';
+import 'package:keek_news/service/ppomppu_adapter_impl.dart';
+import 'package:keek_news/service/todayhumor_adapter_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockHumorunivDs extends Mock implements HumorunivRemoteDs {}
