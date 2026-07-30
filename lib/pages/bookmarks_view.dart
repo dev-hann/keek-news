@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:keek_news/model/board_post.dart';
 import 'package:keek_news/model/bookmark.dart';
+import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
 import 'package:keek_news/widgets/feed_card_entry.dart';
@@ -26,7 +26,7 @@ class BookmarksView extends ConsumerWidget {
               itemBuilder: (context, i) {
                 final bookmark = bookmarks[i];
                 return FeedCardEntry(
-                  post: _toBoardPost(bookmark),
+                  post: _toFeedItem(bookmark),
                   isBookmarked: true,
                   onBookmarkTap: () {
                     ref
@@ -39,20 +39,19 @@ class BookmarksView extends ConsumerWidget {
     );
   }
 
-  BoardPost _toBoardPost(Bookmark b) {
-    return BoardPost(
-      id: int.tryParse(b.id) ?? 0,
+  FeedItem _toFeedItem(Bookmark b) {
+    return FeedItem(
+      community: b.community,
+      id: b.id,
       title: b.title,
       url: b.url,
-      author: b.author ?? '',
-      date: b.publishedAt?.toIso8601String() ?? '',
+      author: b.author,
+      publishedAt: b.publishedAt,
       recommendCount: b.recommendCount,
-      notRecommendCount: 0,
       commentCount: b.commentCount,
       viewCount: b.viewCount,
-      thumbnailUrl: b.thumbnailUrl ?? '',
+      thumbnailUrl: b.thumbnailUrl,
       previewText: b.previewText,
-      community: b.community,
     );
   }
 }

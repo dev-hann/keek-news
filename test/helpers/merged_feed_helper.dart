@@ -1,33 +1,17 @@
 import 'package:dartz/dartz.dart';
-import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/merged_feed.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
+import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockMergedFeedRepository extends Mock implements MergedFeedRepo {}
+class MockMergedFeedUseCase extends Mock implements GetMergedFeedUseCase {}
 
 void registerMergedFeedFallbacks() {
-  registerFallbackValue(
-    MergedCursor(oldestSeen: DateTime(2000), perSourceTokens: const {}),
-  );
-  registerFallbackValue(<CommunityId>{});
-  registerFallbackValue(CommunityId.humoruniv);
+  registerFallbackValue(const MergedFeedParams());
 }
 
-void setupMergedFeedMocks(MockMergedFeedRepository mock) {
+void setupMergedFeedMocks(MockMergedFeedUseCase mock) {
   when(
-    () => mock.fetchMerged(
-      perSource: any(named: 'perSource'),
-      cursor: any(named: 'cursor'),
-      enabled: any(named: 'enabled'),
-    ),
+    () => mock.call(any()),
   ).thenAnswer((_) async => const Right(MergedPage(items: [])));
-
-  when(
-    () => mock.fetchDetail(
-      community: any(named: 'community'),
-      id: any(named: 'id'),
-    ),
-  ).thenAnswer((_) async => const Left(ServerFailure('no detail in test')));
 }

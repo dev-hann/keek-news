@@ -5,8 +5,11 @@ import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/apk_install/apk_install_impl.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_impl.dart';
+import 'package:keek_news/repository/community_repo.dart';
+import 'package:keek_news/repository/dogdrip/dogdrip_impl.dart';
+import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
+import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
+import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
 import 'package:keek_news/service/apk_download_data_source.dart';
@@ -14,27 +17,37 @@ import 'package:keek_news/service/apk_download_data_source_impl.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
 import 'package:keek_news/service/apk_installer_service_impl.dart';
 import 'package:keek_news/service/bookmark_local_data_source.dart';
-import 'package:keek_news/service/community_adapter.dart';
-import 'package:keek_news/service/dogdrip_adapter_impl.dart';
+import 'package:keek_news/service/dio_html_client.dart';
 import 'package:keek_news/service/github_remote_ds.dart';
 import 'package:keek_news/service/github_remote_ds_impl.dart';
-import 'package:keek_news/service/html_client_impl.dart';
-import 'package:keek_news/service/humoruniv_adapter_impl.dart';
-import 'package:keek_news/service/humoruniv_remote_ds.dart';
-import 'package:keek_news/service/humoruniv_remote_ds_impl.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/image_cache_service_impl.dart';
-import 'package:keek_news/service/ppomppu_adapter_impl.dart';
-import 'package:keek_news/service/todayhumor_adapter_impl.dart';
 import 'package:keek_news/use_case/add_bookmark_use_case.dart';
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
 import 'package:keek_news/use_case/get_bookmarks_use_case.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:keek_news/use_case/get_post_detail_use_case.dart';
 import 'package:keek_news/use_case/is_bookmarked_use_case.dart';
 import 'package:keek_news/use_case/remove_bookmark_use_case.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+const _mobileUA =
+    'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) '
+    'Chrome/125.0.0.0 Mobile Safari/537.36';
+
+const _desktopUA =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+    '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
+
+Dio _dio({required String baseUrl, String ua = _mobileUA}) => Dio(
+  BaseOptions(
+    baseUrl: baseUrl,
+    headers: {'User-Agent': ua},
+    responseType: ResponseType.bytes,
+  ),
+);
 
 final sl = GetIt.instance;
 
@@ -42,70 +55,49 @@ Future<void> configureDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
 
-  sl.registerLazySingleton<HtmlClientImpl>(HtmlClientImpl.new);
-
-  sl.registerLazySingleton<HumorunivRemoteDs>(
-    () => HumorunivRemoteDsImpl(htmlClient: sl<HtmlClientImpl>()),
+  final humorunivHtml = DioHtmlClient(
+    dio: _dio(baseUrl: 'https://m.humoruniv.com'),
+    encoding: 'euc-kr',
+  );
+  final todayhumorHtml = DioHtmlClient(
+    dio: _dio(baseUrl: 'https://www.todayhumor.co.kr', ua: _desktopUA),
+    encoding: 'utf-8',
+  );
+  final ppomppuHtml = DioHtmlClient(
+    dio: _dio(baseUrl: 'https://www.ppomppu.co.kr', ua: _desktopUA),
+    encoding: 'euc-kr',
+  );
+  final dogdripHtml = DioHtmlClient(
+    dio: _dio(baseUrl: 'https://www.dogdrip.net', ua: _desktopUA),
+    encoding: 'utf-8',
   );
 
-  sl.registerLazySingleton<CommunityAdapter>(
-    () => HumorunivAdapterImpl(remoteDs: sl<HumorunivRemoteDs>()),
-  );
+  final repos = <CommunityId, CommunityRepo>{
+    CommunityId.humoruniv: HumorunivImpl(htmlClient: humorunivHtml),
+    CommunityId.todayhumor: TodayhumorImpl(htmlClient: todayhumorHtml),
+    CommunityId.ppomppu: PpomppuImpl(htmlClient: ppomppuHtml),
+    CommunityId.dogdrip: DogdripImpl(htmlClient: dogdripHtml),
+  };
 
-  sl.registerLazySingleton<HtmlClientImpl>(
-    () => HtmlClientImpl(
-      baseUrl: 'https://www.todayhumor.co.kr',
-      encoding: 'utf-8',
-      desktop: true,
-    ),
-    instanceName: 'todayhumorHtmlClient',
+  sl.registerLazySingleton<Map<CommunityId, CommunityRepo>>(() => repos);
+  sl.registerLazySingleton<HumorunivImpl>(
+    () => repos[CommunityId.humoruniv]! as HumorunivImpl,
   );
-
-  sl.registerLazySingleton<TodayhumorAdapterImpl>(
-    () => TodayhumorAdapterImpl(
-      htmlClient: sl<HtmlClientImpl>(instanceName: 'todayhumorHtmlClient'),
-    ),
+  sl.registerLazySingleton<TodayhumorImpl>(
+    () => repos[CommunityId.todayhumor]! as TodayhumorImpl,
   );
-
-  sl.registerLazySingleton<HtmlClientImpl>(
-    () => HtmlClientImpl(baseUrl: 'https://www.ppomppu.co.kr', desktop: true),
-    instanceName: 'ppomppuHtmlClient',
+  sl.registerLazySingleton<PpomppuImpl>(
+    () => repos[CommunityId.ppomppu]! as PpomppuImpl,
   );
-
-  sl.registerLazySingleton<PpomppuAdapterImpl>(
-    () => PpomppuAdapterImpl(
-      htmlClient: sl<HtmlClientImpl>(instanceName: 'ppomppuHtmlClient'),
-    ),
-  );
-
-  sl.registerLazySingleton<HtmlClientImpl>(
-    () => HtmlClientImpl(
-      baseUrl: 'https://www.dogdrip.net',
-      encoding: 'utf-8',
-      desktop: true,
-    ),
-    instanceName: 'dogdripHtmlClient',
-  );
-
-  sl.registerLazySingleton<DogdripAdapterImpl>(
-    () => DogdripAdapterImpl(
-      htmlClient: sl<HtmlClientImpl>(instanceName: 'dogdripHtmlClient'),
-    ),
-  );
-
-  sl.registerLazySingleton<MergedFeedRepo>(
-    () => MergedFeedImpl(
-      adapters: {
-        CommunityId.humoruniv: sl<CommunityAdapter>(),
-        CommunityId.todayhumor: sl<TodayhumorAdapterImpl>(),
-        CommunityId.ppomppu: sl<PpomppuAdapterImpl>(),
-        CommunityId.dogdrip: sl<DogdripAdapterImpl>(),
-      },
-    ),
+  sl.registerLazySingleton<DogdripImpl>(
+    () => repos[CommunityId.dogdrip]! as DogdripImpl,
   );
 
   sl.registerLazySingleton(
-    () => GetMergedFeedUseCase(repository: sl<MergedFeedRepo>()),
+    () => GetMergedFeedUseCase(repos: sl<Map<CommunityId, CommunityRepo>>()),
+  );
+  sl.registerLazySingleton(
+    () => GetPostDetailUseCase(repos: sl<Map<CommunityId, CommunityRepo>>()),
   );
 
   sl.registerLazySingleton<GitHubRemoteDs>(GitHubRemoteDsImpl.new);

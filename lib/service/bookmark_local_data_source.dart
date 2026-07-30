@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:keek_news/model/bookmark_dto.dart';
+import 'package:keek_news/model/bookmark.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class BookmarkLocalDataSource {
-  Future<List<BookmarkDto>> getAll();
+  Future<List<Bookmark>> getAll();
 
   Future<bool> exists(String key);
 
-  Future<void> upsert(BookmarkDto dto);
+  Future<void> upsert(Bookmark bookmark);
 
   Future<void> remove(String key);
 }
@@ -20,10 +20,8 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
 
   final SharedPreferences _prefs;
 
-  String _keyOf(BookmarkDto dto) => '${dto.community.name}:${dto.id}';
-
   @override
-  Future<List<BookmarkDto>> getAll() async {
+  Future<List<Bookmark>> getAll() async {
     final raw = _prefs.getString(storageKey);
     if (raw == null) return const [];
 
@@ -31,11 +29,11 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
       final decoded = jsonDecode(raw);
       if (decoded is! List) return const [];
 
-      final result = <BookmarkDto>[];
+      final result = <Bookmark>[];
       for (final entry in decoded) {
         if (entry is! Map<String, dynamic>) continue;
         try {
-          result.add(BookmarkDto.fromJson(entry));
+          result.add(Bookmark.fromJson(entry));
         } catch (_) {
           continue;
         }
@@ -49,28 +47,27 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
   @override
   Future<bool> exists(String key) async {
     final all = await getAll();
-    return all.any((dto) => _keyOf(dto) == key);
+    return all.any((b) => b.key == key);
   }
 
   @override
-  Future<void> upsert(BookmarkDto dto) async {
+  Future<void> upsert(Bookmark bookmark) async {
     final all = await getAll();
-    final key = _keyOf(dto);
-    final filtered = all.where((d) => _keyOf(d) != key).toList();
-    final next = <BookmarkDto>[dto, ...filtered];
+    final filtered = all.where((b) => b.key != bookmark.key).toList();
+    final next = [bookmark, ...filtered];
     await _prefs.setString(
       storageKey,
-      jsonEncode(next.map((d) => d.toJson()).toList()),
+      jsonEncode(next.map((b) => b.toJson()).toList()),
     );
   }
 
   @override
   Future<void> remove(String key) async {
     final all = await getAll();
-    final filtered = all.where((d) => _keyOf(d) != key).toList();
+    final filtered = all.where((b) => b.key != key).toList();
     await _prefs.setString(
       storageKey,
-      jsonEncode(filtered.map((d) => d.toJson()).toList()),
+      jsonEncode(filtered.map((b) => b.toJson()).toList()),
     );
   }
 }

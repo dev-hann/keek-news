@@ -1,92 +1,122 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
+import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockMergedFeedRepo extends Mock implements MergedFeedRepo {}
+class MockCommunityRepo extends Mock implements CommunityRepo {}
 
 void main() {
-  late MockMergedFeedRepo repo;
+  late MockCommunityRepo humorunivRepo;
+  late MockCommunityRepo dogdripRepo;
   late GetMergedFeedUseCase useCase;
 
   setUp(() {
-    repo = MockMergedFeedRepo();
-    useCase = GetMergedFeedUseCase(repository: repo);
+    humorunivRepo = MockCommunityRepo();
+    dogdripRepo = MockCommunityRepo();
+    when(() => humorunivRepo.communityId).thenReturn(CommunityId.humoruniv);
+    when(() => dogdripRepo.communityId).thenReturn(CommunityId.dogdrip);
+    useCase = GetMergedFeedUseCase(
+      repos: {
+        CommunityId.humoruniv: humorunivRepo,
+        CommunityId.dogdrip: dogdripRepo,
+      },
+    );
   });
 
   group('GetMergedFeedUseCase', () {
-    test('should delegate to repository.fetchMerged', () async {
-      const page = MergedPage(
-        items: [
-          FeedItem(
-            community: CommunityId.humoruniv,
-            id: '1',
-            title: 't',
-            url: 'u',
-          ),
-        ],
+    test('should fan-out to all repos and merge results', () async {
+      final item1 = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '1',
+        title: 'h',
+        url: 'u1',
+        publishedAt: DateTime(2026, 7, 28),
+      );
+      final item2 = FeedItem(
+        community: CommunityId.dogdrip,
+        id: '2',
+        title: 'd',
+        url: 'u2',
+        publishedAt: DateTime(2026, 7, 29),
       );
       when(
-        () => repo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-        ),
-      ).thenAnswer((_) async => const Right(page));
+        () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer((_) async => CommunityListResult(items: [item1]));
+      when(
+        () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer((_) async => CommunityListResult(items: [item2]));
 
       final result = await useCase(const MergedFeedParams());
 
       expect(result.isRight(), isTrue);
-      verify(() => repo.fetchMerged(perSource: 20)).called(1);
+      final page = result.getOrElse(() => throw StateError(''));
+      expect(page.items, hasLength(2));
+      // dogdrip's item is newer → should come first after sort
+      expect(page.items.first.id, '2');
     });
 
-    test('should forward cursor and enabled set', () async {
-      final cursor = MergedCursor(
-        oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: const {CommunityId.humoruniv: '2'},
+    test('should isolate failing repos and merge successful ones', () async {
+      final item = FeedItem(
+        community: CommunityId.dogdrip,
+        id: '1',
+        title: 'd',
+        url: 'u',
+        publishedAt: DateTime(2026, 7, 28),
       );
       when(
-        () => repo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-        ),
-      ).thenAnswer((_) async => const Right(MergedPage(items: [])));
+        () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenThrow(Exception('humoruniv down'));
+      when(
+        () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer((_) async => CommunityListResult(items: [item]));
 
-      await useCase(
-        MergedFeedParams(
-          perSource: 15,
-          cursor: cursor,
-          enabled: {CommunityId.humoruniv},
-        ),
-      );
+      final result = await useCase(const MergedFeedParams());
 
-      verify(
-        () => repo.fetchMerged(
-          perSource: 15,
-          cursor: cursor,
-          enabled: {CommunityId.humoruniv},
-        ),
-      ).called(1);
+      expect(result.isRight(), isTrue);
+      final page = result.getOrElse(() => throw StateError(''));
+      expect(page.failedSources, contains(CommunityId.humoruniv));
+      expect(page.items, hasLength(1));
+      expect(page.items.first.community, CommunityId.dogdrip);
     });
 
-    test('should return Left when repository fails', () async {
+    test('should return Left when all repos fail', () async {
       when(
-        () => repo.fetchMerged(
-          perSource: any(named: 'perSource'),
-          cursor: any(named: 'cursor'),
-          enabled: any(named: 'enabled'),
-        ),
-      ).thenAnswer((_) async => const Left(ServerFailure('all failed')));
+        () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenThrow(Exception('down'));
+      when(
+        () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenThrow(Exception('down'));
 
       final result = await useCase(const MergedFeedParams());
 
       expect(result.isLeft(), isTrue);
+    });
+
+    test('should respect enabled filter', () async {
+      final item = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '1',
+        title: 'h',
+        url: 'u',
+        publishedAt: DateTime(2026, 7, 28),
+      );
+      when(
+        () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer((_) async => CommunityListResult(items: [item]));
+
+      final result = await useCase(
+        const MergedFeedParams(enabled: {CommunityId.humoruniv}),
+      );
+
+      verifyNever(
+        () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      );
+      expect(result.isRight(), isTrue);
     });
   });
 }

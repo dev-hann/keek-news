@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/bookmark.dart';
-import 'package:keek_news/model/bookmark_dto.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
 import 'package:keek_news/service/bookmark_local_data_source.dart';
@@ -32,45 +31,25 @@ void main() {
     ds = MockBookmarkLocalDataSource();
     repo = BookmarkImpl(ds);
     registerFallbackValue(
-      const BookmarkDto(
+      Bookmark(
         community: CommunityId.humoruniv,
         id: 'fallback',
         title: '',
         url: '',
-        savedAtMillis: 0,
+        savedAt: DateTime.fromMillisecondsSinceEpoch(0),
       ),
     );
   });
 
   group('BookmarkImpl getAll', () {
-    test('should return entities mapped from datasource DTOs', () async {
-      when(() => ds.getAll()).thenAnswer(
-        (_) async => [
-          const BookmarkDto(
-            community: CommunityId.humoruniv,
-            id: '1',
-            title: 'first',
-            url: 'u1',
-            savedAtMillis: 1000,
-          ),
-          const BookmarkDto(
-            community: CommunityId.dogdrip,
-            id: '2',
-            title: 'second',
-            url: 'u2',
-            savedAtMillis: 2000,
-          ),
-        ],
-      );
+    test('should delegate to datasource directly', () async {
+      final b = bookmark(title: 'first');
+      when(() => ds.getAll()).thenAnswer((_) async => [b]);
 
       final result = await repo.getAll();
 
-      expect(result.length, 2);
-      expect(result[0].id, '1');
+      expect(result.length, 1);
       expect(result[0].title, 'first');
-      expect(result[0].community, CommunityId.humoruniv);
-      expect(result[1].id, '2');
-      expect(result[1].community, CommunityId.dogdrip);
     });
 
     test('should return empty list when datasource empty', () async {
@@ -109,17 +88,17 @@ void main() {
   });
 
   group('BookmarkImpl add', () {
-    test('should convert entity to DTO and call datasource.upsert', () async {
+    test('should forward entity directly to datasource.upsert', () async {
       final b = bookmark(title: '제목');
       when(() => ds.upsert(any())).thenAnswer((_) async {});
 
       await repo.add(b);
 
       final captured =
-          verify(() => ds.upsert(captureAny())).captured.single as BookmarkDto;
+          verify(() => ds.upsert(captureAny())).captured.single as Bookmark;
       expect(captured.id, '1');
       expect(captured.title, '제목');
-      expect(captured.savedAtMillis, 1722324000000);
+      expect(captured.savedAt.millisecondsSinceEpoch, 1722324000000);
     });
   });
 

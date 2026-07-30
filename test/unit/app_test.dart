@@ -10,7 +10,6 @@ import 'package:keek_news/pages/settings_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/app.dart';
 import 'package:keek_news/service/image_cache_service.dart';
@@ -36,7 +35,7 @@ void main() {
   late MockApkInstallRepository mockApkRepo;
   late FakeImageCacheService fakeCacheService;
   late FakeBookmarkRepository fakeBookmarkRepo;
-  late MockMergedFeedRepository mockMergedRepo;
+  late MockMergedFeedUseCase mockMergedUseCase;
   late SharedPreferences prefs;
 
   setUpAll(() async {
@@ -51,8 +50,8 @@ void main() {
     mockApkRepo = MockApkInstallRepository();
     fakeCacheService = FakeImageCacheService();
     fakeBookmarkRepo = FakeBookmarkRepository();
-    mockMergedRepo = MockMergedFeedRepository();
-    setupMergedFeedMocks(mockMergedRepo);
+    mockMergedUseCase = MockMergedFeedUseCase();
+    setupMergedFeedMocks(mockMergedUseCase);
     when(() => fakeCacheService.getSizeBytes()).thenAnswer((_) async => 0);
     when(() => fakeBookmarkRepo.getAll()).thenAnswer((_) async => const []);
     await di.configureDependencies();
@@ -71,9 +70,6 @@ void main() {
     if (di.sl.isRegistered<BookmarkRepo>()) {
       di.sl.unregister<BookmarkRepo>();
     }
-    if (di.sl.isRegistered<MergedFeedRepo>()) {
-      di.sl.unregister<MergedFeedRepo>();
-    }
     if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
       di.sl.unregister<GetMergedFeedUseCase>();
     }
@@ -87,10 +83,7 @@ void main() {
     di.sl.registerLazySingleton<ApkInstallRepo>(() => mockApkRepo);
     di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
     di.sl.registerLazySingleton<BookmarkRepo>(() => fakeBookmarkRepo);
-    di.sl.registerLazySingleton<MergedFeedRepo>(() => mockMergedRepo);
-    di.sl.registerLazySingleton(
-      () => GetMergedFeedUseCase(repository: mockMergedRepo),
-    );
+    di.sl.registerLazySingleton<GetMergedFeedUseCase>(() => mockMergedUseCase);
   });
 
   tearDown(di.sl.reset);

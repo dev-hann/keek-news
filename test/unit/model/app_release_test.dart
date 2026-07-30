@@ -107,4 +107,58 @@ void main() {
       expect(a, equals(a));
     });
   });
+
+  group('AppRelease.fromJson', () {
+    test('should strip v prefix from tag_name', () {
+      final release = AppRelease.fromJson({
+        'tag_name': 'v1.2.3',
+        'html_url': 'https://github.com/x/y/releases/tag/v1.2.3',
+      });
+
+      expect(release.version, '1.2.3');
+      expect(release.htmlUrl, 'https://github.com/x/y/releases/tag/v1.2.3');
+    });
+
+    test('should extract apk asset browser_download_url', () {
+      final release = AppRelease.fromJson({
+        'tag_name': '1.0.0',
+        'html_url': 'https://example.com',
+        'assets': [
+          {
+            'name': 'app-release.apk',
+            'browser_download_url': 'https://dl/a.apk',
+          },
+          {'name': 'checksum.txt', 'browser_download_url': 'https://dl/c.txt'},
+        ],
+      });
+
+      expect(release.downloadUrl, 'https://dl/a.apk');
+    });
+
+    test('should set releaseNotes from body when non-empty', () {
+      final release = AppRelease.fromJson({
+        'tag_name': '1.0.0',
+        'html_url': 'https://example.com',
+        'body': '변경 내역',
+      });
+
+      expect(release.releaseNotes, '변경 내역');
+    });
+
+    test('should null releaseNotes when body empty', () {
+      final release = AppRelease.fromJson({
+        'tag_name': '1.0.0',
+        'html_url': 'https://example.com',
+        'body': '',
+      });
+
+      expect(release.releaseNotes, isNull);
+    });
+
+    test('should default to empty version when tag_name missing', () {
+      final release = AppRelease.fromJson({'html_url': 'https://x'});
+
+      expect(release.version, isEmpty);
+    });
+  });
 }

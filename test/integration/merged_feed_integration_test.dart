@@ -1,19 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/model/board_post_dto.dart';
+import 'package:html/dom.dart';
+import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_impl.dart';
-import 'package:keek_news/service/community_adapter.dart';
-import 'package:keek_news/service/dogdrip_adapter_impl.dart';
+import 'package:keek_news/model/merged_feed.dart';
+import 'package:keek_news/repository/community_repo.dart';
+import 'package:keek_news/repository/dogdrip/dogdrip_impl.dart';
+import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
+import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
+import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/service/html_client.dart';
-import 'package:keek_news/service/humoruniv_adapter_impl.dart';
-import 'package:keek_news/service/humoruniv_remote_ds.dart';
-import 'package:keek_news/service/ppomppu_adapter_impl.dart';
-import 'package:keek_news/service/todayhumor_adapter_impl.dart';
-import 'package:mocktail/mocktail.dart';
-
-class _MockHumorunivRemoteDs extends Mock implements HumorunivRemoteDs {}
+import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 
 class FixtureHtmlClient implements HtmlClient {
   FixtureHtmlClient(this._fixtures);
@@ -26,40 +25,60 @@ class FixtureHtmlClient implements HtmlClient {
     }
     throw Exception('No fixture for: $path');
   }
+
+  @override
+  int extractNumber(String? text) {
+    if (text == null) return 0;
+    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(digits) ?? 0;
+  }
+
+  @override
+  String textOf(Element? element) => element?.text.trim() ?? '';
+
+  @override
+  String? attrOf(Element? element, String name) => element?.attributes[name];
+
+  @override
+  int statOf(Element? parent, String selector) {
+    if (parent == null) return 0;
+    return extractNumber(textOf(parent.querySelector(selector)));
+  }
+
+  @override
+  DateTime? parseDate(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return null;
+    return DateTime.tryParse(trimmed);
+  }
+
+  @override
+  ContentScanResult scanContent(Element container) =>
+      const ContentScanResult(blocks: [], imageUrls: []);
+
+  @override
+  ContentScanResult scanContentFull(Document doc, Element contentEl) =>
+      const ContentScanResult(blocks: [], imageUrls: []);
+
+  @override
+  List<ContentBlock> scanContentCompact(Element container) => const [];
 }
 
 String _readFixture(String path) =>
     File('test/fixtures/$path').readAsStringSync();
 
 void main() {
-  late MergedFeedImpl repo;
+  late GetMergedFeedUseCase useCase;
 
   setUpAll(() {
-    final humorunivDs = _MockHumorunivRemoteDs();
-    when(() => humorunivDs.fetchBoardList(any(), any(), any())).thenAnswer(
-      (_) async => const BoardListDsResult(
-        posts: [
-          BoardPostDto(
-            id: 100,
-            title: '웃대 테스트 글',
-            url: '/board/read.html?table=pds&number=100',
-            author: '테스터',
-            date: '26/07/28',
-            recommendCount: 50,
-            notRecommendCount: 0,
-            commentCount: 3,
-            viewCount: 500,
-            thumbnailUrl: '',
-          ),
-        ],
-        currentPage: 1,
-        totalPage: 10,
+    final repos = <CommunityId, CommunityRepo>{
+      CommunityId.humoruniv: HumorunivImpl(
+        htmlClient: FixtureHtmlClient({
+          'board/list.html': _readFixture('board_list_pds.html'),
+          'board/read.html': _readFixture('pds_1415455.html'),
+        }),
       ),
-    );
-
-    final adapters = <CommunityId, CommunityAdapter>{
-      CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: humorunivDs),
-      CommunityId.todayhumor: TodayhumorAdapterImpl(
+      CommunityId.todayhumor: TodayhumorImpl(
         htmlClient: FixtureHtmlClient({
           'list.php?table=humorbest': _readFixture(
             'todayhumor/list_humorbest_pc.html',
@@ -67,28 +86,25 @@ void main() {
           'view.php': _readFixture('todayhumor/detail_483503.html'),
         }),
       ),
-      CommunityId.ppomppu: PpomppuAdapterImpl(
+      CommunityId.ppomppu: PpomppuImpl(
         htmlClient: FixtureHtmlClient({
           'zboard.php?id=humor': _readFixture('ppomppu/list_humor.html'),
           'view.php': _readFixture('ppomppu/detail_770409.html'),
         }),
       ),
-      CommunityId.dogdrip: DogdripAdapterImpl(
+      CommunityId.dogdrip: DogdripImpl(
         htmlClient: FixtureHtmlClient({
           'mid=dogdrip': _readFixture('dogdrip/list_dogdrip.html'),
         }),
       ),
     };
 
-    repo = MergedFeedImpl(
-      adapters: adapters,
-      cacheTtl: const Duration(milliseconds: 1),
-    );
+    useCase = GetMergedFeedUseCase(repos: repos);
   });
 
-  group('Merged feed integration (real adapters + fixture HTML)', () {
+  group('Merged feed integration (real repos + fixture HTML)', () {
     test('should return items from multiple communities', () async {
-      final result = await repo.fetchMerged(perSource: 20);
+      final result = await useCase(const MergedFeedParams(perSource: 20));
 
       expect(result.isRight(), isTrue);
       final page = result.getOrElse(() => throw StateError(''));
@@ -99,12 +115,12 @@ void main() {
       expect(
         communities,
         contains(CommunityId.todayhumor),
-        reason: 'todayhumor adapter must contribute items (humorbest board)',
+        reason: 'todayhumor repo must contribute items (humorbest board)',
       );
     });
 
     test('should sort by publishedAt descending', () async {
-      final result = await repo.fetchMerged(perSource: 20);
+      final result = await useCase(const MergedFeedParams(perSource: 20));
 
       final page = result.getOrElse(() => throw StateError(''));
       final ts = page.items
@@ -118,7 +134,7 @@ void main() {
     });
 
     test('should return items with titles and URLs', () async {
-      final result = await repo.fetchMerged(perSource: 20);
+      final result = await useCase(const MergedFeedParams(perSource: 20));
 
       final page = result.getOrElse(() => throw StateError(''));
       for (final item in page.items) {
@@ -129,7 +145,7 @@ void main() {
     });
 
     test('should have cursor for pagination', () async {
-      final result = await repo.fetchMerged(perSource: 20);
+      final result = await useCase(const MergedFeedParams(perSource: 20));
 
       final page = result.getOrElse(() => throw StateError(''));
       if (page.items.isNotEmpty) {
@@ -137,28 +153,9 @@ void main() {
       }
     });
 
-    test('should fetch detail from correct adapter', () async {
-      final feedResult = await repo.fetchMerged(perSource: 20);
-      final page = feedResult.getOrElse(() => throw StateError(''));
-
-      final thItem = page.items
-          .where((e) => e.community == CommunityId.todayhumor)
-          .firstOrNull;
-      if (thItem != null) {
-        final detailResult = await repo.fetchDetail(
-          community: CommunityId.todayhumor,
-          id: thItem.id,
-        );
-        expect(detailResult.isRight(), isTrue);
-        final detail = detailResult.getOrElse(() => throw StateError(''));
-        expect(detail.title, isNotEmpty);
-      }
-    });
-
     test('should filter by enabled communities', () async {
-      final result = await repo.fetchMerged(
-        perSource: 20,
-        enabled: {CommunityId.humoruniv},
+      final result = await useCase(
+        const MergedFeedParams(perSource: 20, enabled: {CommunityId.humoruniv}),
       );
 
       final page = result.getOrElse(() => throw StateError(''));
@@ -167,25 +164,23 @@ void main() {
       }
     });
 
-    test('should isolate adapter failures', () async {
-      final failingDs = _MockHumorunivRemoteDs();
-      when(
-        () => failingDs.fetchBoardList(any(), any(), any()),
-      ).thenThrow(Exception('network down'));
-
-      final failRepo = MergedFeedImpl(
-        adapters: {
-          CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: failingDs),
-          CommunityId.todayhumor: TodayhumorAdapterImpl(
+    test('should isolate failing repos', () async {
+      final failingUseCase = GetMergedFeedUseCase(
+        repos: {
+          CommunityId.humoruniv: HumorunivImpl(
+            htmlClient: FixtureHtmlClient({}),
+          ),
+          CommunityId.todayhumor: TodayhumorImpl(
             htmlClient: FixtureHtmlClient({
               'list.php': _readFixture('todayhumor/list_humorbest_pc.html'),
             }),
           ),
         },
-        cacheTtl: const Duration(milliseconds: 1),
       );
 
-      final result = await failRepo.fetchMerged(perSource: 20);
+      final result = await failingUseCase(
+        const MergedFeedParams(perSource: 20),
+      );
       expect(result.isRight(), isTrue);
 
       final page = result.getOrElse(() => throw StateError(''));

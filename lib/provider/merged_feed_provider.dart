@@ -5,9 +5,9 @@ import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/model/post_detail.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
 import 'package:keek_news/service/service_locator.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:keek_news/use_case/get_post_detail_use_case.dart';
 
 class MergedFeedState {
   const MergedFeedState({
@@ -109,8 +109,5 @@ final mergedDetailProvider = FutureProvider.autoDispose
       ref,
       key,
     ) {
-      return sl<MergedFeedRepo>().fetchDetail(
-        community: key.community,
-        id: key.id,
-      );
+      return sl<GetPostDetailUseCase>()(community: key.community, id: key.id);
     });

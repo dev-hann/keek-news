@@ -134,4 +134,74 @@ void main() {
       expect(bookmark.key, 'dogdrip:42');
     });
   });
+
+  group('Bookmark.fromJson', () {
+    test('should deserialize all fields', () {
+      final json = <String, dynamic>{
+        'community': 'humoruniv',
+        'id': '100',
+        'title': '제목',
+        'url': '/u',
+        'savedAtMillis': 1722324000000,
+        'author': 'writer',
+        'thumbnailUrl': 'thumb',
+        'previewText': 'preview',
+        'publishedAtMillis': 1722240000000,
+        'recommendCount': 5,
+        'commentCount': 3,
+        'viewCount': 100,
+      };
+
+      final b = Bookmark.fromJson(json);
+
+      expect(b.community, CommunityId.humoruniv);
+      expect(b.id, '100');
+      expect(b.title, '제목');
+      expect(b.url, '/u');
+      expect(b.savedAt.millisecondsSinceEpoch, 1722324000000);
+      expect(b.author, 'writer');
+      expect(b.thumbnailUrl, 'thumb');
+      expect(b.previewText, 'preview');
+      expect(b.publishedAt!.millisecondsSinceEpoch, 1722240000000);
+      expect(b.recommendCount, 5);
+      expect(b.commentCount, 3);
+      expect(b.viewCount, 100);
+    });
+
+    test('should default counts to 0 when missing', () {
+      final b = Bookmark.fromJson({
+        'community': 'humoruniv',
+        'id': '1',
+        'title': 't',
+        'url': 'u',
+        'savedAtMillis': 0,
+      });
+
+      expect(b.recommendCount, 0);
+      expect(b.commentCount, 0);
+      expect(b.viewCount, 0);
+      expect(b.publishedAt, isNull);
+    });
+
+    test('should round-trip via toJson', () {
+      final original = Bookmark(
+        community: CommunityId.dogdrip,
+        id: '42',
+        title: 't',
+        url: 'u',
+        author: 'w',
+        thumbnailUrl: 'th',
+        previewText: 'pv',
+        publishedAt: DateTime(2026, 7, 28),
+        recommendCount: 5,
+        commentCount: 3,
+        viewCount: 10,
+        savedAt: DateTime(2026, 7, 30),
+      );
+
+      final roundTripped = Bookmark.fromJson(original.toJson());
+
+      expect(roundTripped, original);
+    });
+  });
 }

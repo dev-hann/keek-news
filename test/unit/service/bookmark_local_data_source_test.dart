@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/model/bookmark_dto.dart';
+import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/service/bookmark_local_data_source.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,19 +16,19 @@ void main() {
     dataSource = BookmarkLocalDataSourceImpl(prefs);
   });
 
-  BookmarkDto bookmarkDto({
+  Bookmark bookmark({
     CommunityId community = CommunityId.humoruniv,
     String id = '1',
     String title = 't',
     String url = 'u',
     int savedAtMillis = 1722324000000,
   }) {
-    return BookmarkDto(
+    return Bookmark(
       community: community,
       id: id,
       title: title,
       url: url,
-      savedAtMillis: savedAtMillis,
+      savedAt: DateTime.fromMillisecondsSinceEpoch(savedAtMillis),
     );
   }
 
@@ -39,11 +39,11 @@ void main() {
       expect(result, isEmpty);
     });
 
-    test('should return parsed DTOs from stored JSON list', () async {
-      final dto = bookmarkDto(id: '100', title: '제목');
+    test('should return parsed bookmarks from stored JSON list', () async {
+      final b = bookmark(id: '100', title: '제목');
       await prefs.setString(
         BookmarkLocalDataSourceImpl.storageKey,
-        jsonEncode([dto.toJson()]),
+        jsonEncode([b.toJson()]),
       );
 
       final result = await dataSource.getAll();
@@ -54,8 +54,8 @@ void main() {
     });
 
     test('should return multiple bookmarks in stored order', () async {
-      final a = bookmarkDto(savedAtMillis: 1000);
-      final b = bookmarkDto(id: '2', savedAtMillis: 2000);
+      final a = bookmark(savedAtMillis: 1000);
+      final b = bookmark(id: '2', savedAtMillis: 2000);
       await prefs.setString(
         BookmarkLocalDataSourceImpl.storageKey,
         jsonEncode([a.toJson(), b.toJson()]),
@@ -80,7 +80,7 @@ void main() {
     });
 
     test('should skip entries that fail to parse', () async {
-      final valid = bookmarkDto().toJson();
+      final valid = bookmark().toJson();
       final broken = <String, dynamic>{'community': 'not_a_community'};
       await prefs.setString(
         BookmarkLocalDataSourceImpl.storageKey,
@@ -96,8 +96,8 @@ void main() {
 
   group('BookmarkLocalDataSource exists', () {
     test('should return true when key present', () async {
-      final dto = bookmarkDto(id: '42');
-      await dataSource.upsert(dto);
+      final b = bookmark(id: '42');
+      await dataSource.upsert(b);
 
       final exists = await dataSource.exists('humoruniv:42');
 
@@ -111,8 +111,8 @@ void main() {
     });
 
     test('should distinguish keys across communities', () async {
-      final dto = bookmarkDto();
-      await dataSource.upsert(dto);
+      final b = bookmark();
+      await dataSource.upsert(b);
 
       expect(await dataSource.exists('humoruniv:1'), isTrue);
       expect(await dataSource.exists('todayhumor:1'), isFalse);
@@ -121,9 +121,9 @@ void main() {
 
   group('BookmarkLocalDataSource upsert', () {
     test('should add new bookmark to empty storage', () async {
-      final dto = bookmarkDto();
+      final b = bookmark();
 
-      await dataSource.upsert(dto);
+      await dataSource.upsert(b);
 
       final result = await dataSource.getAll();
       expect(result.length, 1);
@@ -133,10 +133,10 @@ void main() {
     test(
       'should update existing bookmark with same key without duplicating',
       () async {
-        final original = bookmarkDto(title: 'old');
+        final original = bookmark(title: 'old');
         await dataSource.upsert(original);
 
-        final updated = bookmarkDto(title: 'new');
+        final updated = bookmark(title: 'new');
         await dataSource.upsert(updated);
 
         final result = await dataSource.getAll();
@@ -148,8 +148,8 @@ void main() {
     test(
       'should place new bookmark at front (most-recent-saved-first)',
       () async {
-        await dataSource.upsert(bookmarkDto(savedAtMillis: 1000));
-        await dataSource.upsert(bookmarkDto(id: '2', savedAtMillis: 2000));
+        await dataSource.upsert(bookmark(savedAtMillis: 1000));
+        await dataSource.upsert(bookmark(id: '2', savedAtMillis: 2000));
 
         final result = await dataSource.getAll();
         expect(result.first.id, '2');
@@ -158,10 +158,10 @@ void main() {
     );
 
     test('should move updated bookmark to front', () async {
-      await dataSource.upsert(bookmarkDto(savedAtMillis: 1000));
-      await dataSource.upsert(bookmarkDto(id: '2', savedAtMillis: 2000));
+      await dataSource.upsert(bookmark(savedAtMillis: 1000));
+      await dataSource.upsert(bookmark(id: '2', savedAtMillis: 2000));
       await dataSource.upsert(
-        bookmarkDto(savedAtMillis: 3000, title: 'refreshed'),
+        bookmark(savedAtMillis: 3000, title: 'refreshed'),
       );
 
       final result = await dataSource.getAll();
@@ -171,16 +171,16 @@ void main() {
     });
 
     test('should preserve other bookmarks when adding new one', () async {
-      await dataSource.upsert(bookmarkDto());
-      await dataSource.upsert(bookmarkDto(id: '2'));
+      await dataSource.upsert(bookmark());
+      await dataSource.upsert(bookmark(id: '2'));
 
       final result = await dataSource.getAll();
       expect(result.length, 2);
     });
 
     test('should persist across instances', () async {
-      final dto = bookmarkDto();
-      await dataSource.upsert(dto);
+      final b = bookmark();
+      await dataSource.upsert(b);
 
       final fresh = BookmarkLocalDataSourceImpl(prefs);
       final result = await fresh.getAll();
@@ -192,8 +192,8 @@ void main() {
 
   group('BookmarkLocalDataSource remove', () {
     test('should delete bookmark by key', () async {
-      await dataSource.upsert(bookmarkDto());
-      await dataSource.upsert(bookmarkDto(id: '2'));
+      await dataSource.upsert(bookmark());
+      await dataSource.upsert(bookmark(id: '2'));
 
       await dataSource.remove('humoruniv:1');
 
@@ -203,7 +203,7 @@ void main() {
     });
 
     test('should be no-op when key absent', () async {
-      await dataSource.upsert(bookmarkDto());
+      await dataSource.upsert(bookmark());
 
       await dataSource.remove('humoruniv:99');
 

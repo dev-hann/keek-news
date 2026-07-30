@@ -3,32 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/model/board_post.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/failures.dart';
+import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/get_post_detail_use_case.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/feed_card_entry.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockMergedFeedRepository extends Mock implements MergedFeedRepo {}
+import '../../helpers/post_detail_helper.dart';
 
 class MockBookmarkRepository extends Mock implements BookmarkRepo {}
 
 void main() {
-  late MockMergedFeedRepository mockFeedRepo;
+  late MockPostDetailUseCase mockPostDetail;
   late MockBookmarkRepository mockBookmarkRepo;
   String? clipboardContent;
 
   setUp(() {
-    mockFeedRepo = MockMergedFeedRepository();
+    mockPostDetail = MockPostDetailUseCase();
     mockBookmarkRepo = MockBookmarkRepository();
     when(() => mockBookmarkRepo.getAll()).thenAnswer((_) async => const []);
     registerFallbackValue(CommunityId.humoruniv);
@@ -45,10 +45,10 @@ void main() {
           }
           return null;
         });
-    if (di.sl.isRegistered<MergedFeedRepo>()) {
-      di.sl.unregister<MergedFeedRepo>();
+    if (di.sl.isRegistered<GetPostDetailUseCase>()) {
+      di.sl.unregister<GetPostDetailUseCase>();
     }
-    di.sl.registerLazySingleton<MergedFeedRepo>(() => mockFeedRepo);
+    di.sl.registerLazySingleton<GetPostDetailUseCase>(() => mockPostDetail);
     if (di.sl.isRegistered<BookmarkRepo>()) {
       di.sl.unregister<BookmarkRepo>();
     }
@@ -57,17 +57,16 @@ void main() {
 
   tearDown(di.sl.reset);
 
-  const post = BoardPost(
-    id: 1,
+  const post = FeedItem(
+    community: CommunityId.humoruniv,
+    id: '1',
     title: '게시글 제목',
     url: '/board/read.html?table=pds&number=1',
     author: '유머작가',
-    date: '2026-05-15',
+    publishedAt: null,
     recommendCount: 42,
-    notRecommendCount: 1,
     commentCount: 10,
     viewCount: 500,
-    thumbnailUrl: '',
   );
 
   PostDetail detailWith({
@@ -130,12 +129,7 @@ void main() {
 
   group('FeedCardEntry', () {
     testWidgets('should render FeedCard with post metadata', (tester) async {
-      when(
-        () => mockFeedRepo.fetchDetail(
-          community: any(named: 'community'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => const Left(ServerFailure('none')));
+      setupPostDetailFailureMock(mockPostDetail);
 
       await pumpEntry(tester, makeContainer());
 
@@ -146,14 +140,9 @@ void main() {
     testWidgets('should load detail via mergedDetailProvider and show images', (
       tester,
     ) async {
-      when(
-        () => mockFeedRepo.fetchDetail(
-          community: any(named: 'community'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer(
-        (_) async =>
-            Right(detailWith(imageUrls: const ['https://example.com/a.jpg'])),
+      setupPostDetailResponseMock(
+        mockPostDetail,
+        () => detailWith(imageUrls: const ['https://example.com/a.jpg']),
       );
 
       await pumpEntry(tester, makeContainer());
@@ -177,12 +166,7 @@ void main() {
           ),
         ],
       );
-      when(
-        () => mockFeedRepo.fetchDetail(
-          community: any(named: 'community'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => Right(detail));
+      setupPostDetailResponseMock(mockPostDetail, () => detail);
 
       await pumpEntry(tester, makeContainer());
 
@@ -190,12 +174,7 @@ void main() {
     });
 
     testWidgets('should reflect bookmarked state on the card', (tester) async {
-      when(
-        () => mockFeedRepo.fetchDetail(
-          community: any(named: 'community'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => const Left(ServerFailure('none')));
+      setupPostDetailFailureMock(mockPostDetail);
 
       await pumpEntry(tester, makeContainer(), isBookmarked: true);
 
@@ -206,12 +185,7 @@ void main() {
       tester,
     ) async {
       var tapped = 0;
-      when(
-        () => mockFeedRepo.fetchDetail(
-          community: any(named: 'community'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => const Left(ServerFailure('none')));
+      setupPostDetailFailureMock(mockPostDetail);
 
       await pumpEntry(tester, makeContainer(), onBookmarkTap: () => tapped++);
 
@@ -222,12 +196,7 @@ void main() {
     testWidgets('should copy post url and show snackbar when copy tapped', (
       tester,
     ) async {
-      when(
-        () => mockFeedRepo.fetchDetail(
-          community: any(named: 'community'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => const Left(ServerFailure('none')));
+      setupPostDetailFailureMock(mockPostDetail);
 
       await pumpEntry(tester, makeContainer());
 
@@ -244,12 +213,7 @@ void main() {
     testWidgets('should pass detailLoading true while detail unresolved', (
       tester,
     ) async {
-      when(
-        () => mockFeedRepo.fetchDetail(
-          community: any(named: 'community'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => const Left(ServerFailure('none')));
+      setupPostDetailFailureMock(mockPostDetail);
 
       final container = makeContainer();
       await pumpEntry(tester, container);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keek_news/const/app_spacing.dart';
-import 'package:keek_news/model/board_post.dart';
+import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
@@ -17,14 +17,14 @@ class FeedCardEntry extends ConsumerWidget {
     super.key,
   });
 
-  final BoardPost post;
+  final FeedItem post;
   final bool isBookmarked;
   final VoidCallback onBookmarkTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncDetail = ref.watch(
-      mergedDetailProvider((community: post.community, id: '${post.id}')),
+      mergedDetailProvider((community: post.community, id: post.id)),
     );
 
     final detail = asyncDetail.whenOrNull(

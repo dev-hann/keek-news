@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/service/github_remote_ds_impl.dart';
-import 'package:keek_news/service/parser/github_release_parser.dart';
 
 void main() {
   final skip = Platform.environment['SMOKE'] != '1';
@@ -14,10 +15,9 @@ void main() {
 
       expect(json, isNotEmpty, reason: 'GitHub API should return JSON');
 
-      final dto = GitHubReleaseParser.parse(json);
-      expect(dto, isNotNull, reason: 'Latest release should be parseable');
-
-      final release = dto!.toEntity();
+      final decoded = jsonDecode(json);
+      expect(decoded, isA<Map<String, dynamic>>());
+      final release = AppRelease.fromJson(decoded as Map<String, dynamic>);
       expect(
         release.version,
         isNotEmpty,

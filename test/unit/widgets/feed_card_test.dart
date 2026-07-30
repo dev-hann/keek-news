@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/const/app_sizes.dart';
-import 'package:keek_news/model/board_post.dart';
 import 'package:keek_news/model/comment.dart';
+import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/feed_card.dart';
@@ -17,17 +18,16 @@ void main() {
   });
 
   group('FeedCard', () {
-    const post = BoardPost(
-      id: 1,
+    const post = FeedItem(
+      community: CommunityId.humoruniv,
+      id: '1',
       title: '게시글 제목',
       url: '/board/read.html?table=pds&number=1',
       author: '유머작가',
-      date: '2026-05-15',
+      publishedAt: null,
       recommendCount: 42,
-      notRecommendCount: 1,
       commentCount: 10,
       viewCount: 500,
-      thumbnailUrl: '',
     );
 
     PostDetail detailWith({
@@ -179,17 +179,13 @@ void main() {
     testWidgets('should show BEST badge when recommendCount >= 500', (
       tester,
     ) async {
-      const best = BoardPost(
-        id: 3,
+      const best = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '3',
         title: 't',
         url: 'u',
         author: 'a',
-        date: '2026-05-15',
         recommendCount: 500,
-        notRecommendCount: 0,
-        commentCount: 0,
-        viewCount: 0,
-        thumbnailUrl: '',
       );
       await tester.pumpWidget(
         const MaterialApp(
@@ -249,12 +245,19 @@ void main() {
     });
 
     testWidgets('should show formatted timestamp', (tester) async {
+      final post = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '1',
+        title: '게시글 제목',
+        url: '/u',
+        publishedAt: DateTime(2026, 5, 15),
+      );
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(body: FeedCard(post: post)),
         ),
       );
-      expect(find.text(TimeAgo.formatDateString('2026-05-15')), findsOneWidget);
+      expect(find.text(TimeAgo.format(DateTime(2026, 5, 15))), findsOneWidget);
     });
 
     testWidgets(
@@ -420,17 +423,15 @@ void main() {
   });
 
   group('FeedCard action buttons', () {
-    const post = BoardPost(
-      id: 1,
+    const post = FeedItem(
+      community: CommunityId.humoruniv,
+      id: '1',
       title: '게시글 제목',
       url: '/board/read.html?table=pds&number=1',
       author: '유머작가',
-      date: '2026-05-15',
       recommendCount: 42,
-      notRecommendCount: 1,
       commentCount: 10,
       viewCount: 500,
-      thumbnailUrl: '',
     );
 
     testWidgets('should render copy link button when onCopyTap provided', (

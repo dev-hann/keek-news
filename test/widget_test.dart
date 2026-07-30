@@ -5,7 +5,6 @@ import 'package:keek_news/app.dart';
 import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/pages/home_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
@@ -20,7 +19,7 @@ class MockUpdateRepository extends Mock implements UpdateRepo {}
 
 void main() {
   late MockUpdateRepository mockUpdateRepo;
-  late MockMergedFeedRepository mockMergedRepo;
+  late MockMergedFeedUseCase mockMergedUseCase;
   late SharedPreferences prefs;
 
   setUpAll(() async {
@@ -32,17 +31,14 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     mockUpdateRepo = MockUpdateRepository();
-    mockMergedRepo = MockMergedFeedRepository();
-    setupMergedFeedMocks(mockMergedRepo);
+    mockMergedUseCase = MockMergedFeedUseCase();
+    setupMergedFeedMocks(mockMergedUseCase);
     await di.configureDependencies();
     if (di.sl.isRegistered<UpdateRepo>()) {
       di.sl.unregister<UpdateRepo>();
     }
     if (di.sl.isRegistered<CheckForUpdateUseCase>()) {
       di.sl.unregister<CheckForUpdateUseCase>();
-    }
-    if (di.sl.isRegistered<MergedFeedRepo>()) {
-      di.sl.unregister<MergedFeedRepo>();
     }
     if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
       di.sl.unregister<GetMergedFeedUseCase>();
@@ -54,10 +50,7 @@ void main() {
         currentVersion: '1.1.0',
       ),
     );
-    di.sl.registerLazySingleton<MergedFeedRepo>(() => mockMergedRepo);
-    di.sl.registerLazySingleton(
-      () => GetMergedFeedUseCase(repository: mockMergedRepo),
-    );
+    di.sl.registerLazySingleton<GetMergedFeedUseCase>(() => mockMergedUseCase);
   });
 
   tearDown(di.sl.reset);

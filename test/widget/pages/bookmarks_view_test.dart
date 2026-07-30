@@ -9,15 +9,15 @@ import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/get_post_detail_use_case.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockBookmarkRepository extends Mock implements BookmarkRepo {}
+import '../../helpers/post_detail_helper.dart';
 
-class MockMergedFeedRepository extends Mock implements MergedFeedRepo {}
+class MockBookmarkRepository extends Mock implements BookmarkRepo {}
 
 Bookmark _bookmark({
   CommunityId community = CommunityId.humoruniv,
@@ -37,12 +37,12 @@ Bookmark _bookmark({
 
 void main() {
   late MockBookmarkRepository repo;
-  late MockMergedFeedRepository mockFeedRepo;
+  late MockPostDetailUseCase mockPostDetail;
   String? clipboardContent;
 
   setUp(() {
     repo = MockBookmarkRepository();
-    mockFeedRepo = MockMergedFeedRepository();
+    mockPostDetail = MockPostDetailUseCase();
     registerFallbackValue(CommunityId.humoruniv);
     registerFallbackValue(
       Bookmark(
@@ -54,16 +54,11 @@ void main() {
       ),
     );
     when(() => repo.getAll()).thenAnswer((_) async => const []);
-    when(
-      () => mockFeedRepo.fetchDetail(
-        community: any(named: 'community'),
-        id: any(named: 'id'),
-      ),
-    ).thenAnswer((_) async => const Left(ServerFailure('none')));
-    if (di.sl.isRegistered<MergedFeedRepo>()) {
-      di.sl.unregister<MergedFeedRepo>();
+    setupPostDetailFailureMock(mockPostDetail);
+    if (di.sl.isRegistered<GetPostDetailUseCase>()) {
+      di.sl.unregister<GetPostDetailUseCase>();
     }
-    di.sl.registerLazySingleton<MergedFeedRepo>(() => mockFeedRepo);
+    di.sl.registerLazySingleton<GetPostDetailUseCase>(() => mockPostDetail);
     clipboardContent = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {

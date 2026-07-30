@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:keek_news/const/app_elevation.dart';
 import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/const/app_spacing.dart';
-import 'package:keek_news/model/board_post.dart';
 import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/action_button.dart';
@@ -24,7 +24,7 @@ class FeedCard extends StatelessWidget {
     this.onBookmarkTap,
     this.isBookmarked = false,
   });
-  final BoardPost post;
+  final FeedItem post;
   final PostDetail? detail;
   final bool detailLoading;
   final ValueChanged<int>? onImageTap;
@@ -56,10 +56,6 @@ class FeedCard extends StatelessWidget {
     final textTheme = theme.textTheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    // Card surface: a tonal step above the scaffold (surfaceContainer) gives
-    // real figure-ground contrast in BOTH light and dark. Light mode adds a
-    // hairline elevation; dark mode is tonal-only (DESIGN.md elevation rule).
-    // No radius — keeping media full-bleed square (Visual content priority).
     return Material(
       color: colorScheme.surfaceContainer,
       elevation: isDark ? AppElevation.level0 : AppElevation.level1,
@@ -72,7 +68,7 @@ class FeedCard extends StatelessWidget {
           _caption(textTheme, colorScheme),
           if (detail != null && detail!.comments.isNotEmpty)
             _commentPreview(textTheme, colorScheme),
-          if (post.date.isNotEmpty) _timestamp(textTheme, colorScheme),
+          if (post.publishedAt != null) _timestamp(textTheme, colorScheme),
         ],
       ),
     );
@@ -93,11 +89,10 @@ class FeedCard extends StatelessWidget {
           imageUrls: detail?.imageUrls ?? const [],
           videoBlocks: _videoBlocks,
           onImageTap: onImageTap,
-          postId: post.id,
+          postId: int.tryParse(post.id) ?? 0,
         ),
       ];
     }
-    // Text-only posts: no media block. Title + body render in the caption.
     return [];
   }
 
@@ -111,7 +106,7 @@ class FeedCard extends StatelessWidget {
           AppSpacing.sbW12,
           Expanded(
             child: Text(
-              post.author,
+              post.author ?? '',
               style: textTheme.labelLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -231,7 +226,7 @@ class FeedCard extends StatelessWidget {
         bottom: AppSpacing.p8,
       ),
       child: Text(
-        TimeAgo.formatDateString(post.date),
+        TimeAgo.format(post.publishedAt!),
         style: textTheme.labelSmall?.copyWith(
           color: colorScheme.onSurfaceVariant,
         ),

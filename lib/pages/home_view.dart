@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keek_news/const/app_spacing.dart';
-import 'package:keek_news/model/board_post.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
@@ -242,19 +241,7 @@ class _FeedCard extends ConsumerWidget {
     );
 
     return FeedCardEntry(
-      post: BoardPost(
-        id: int.tryParse(item.id) ?? 0,
-        title: item.title,
-        url: item.url,
-        author: item.author ?? '',
-        date: item.publishedAt?.toIso8601String() ?? '',
-        recommendCount: item.recommendCount,
-        notRecommendCount: 0,
-        commentCount: item.commentCount,
-        viewCount: item.viewCount,
-        thumbnailUrl: item.thumbnailUrl ?? '',
-        community: item.community,
-      ),
+      post: item,
       isBookmarked: isBookmarked,
       onBookmarkTap: () {
         ref

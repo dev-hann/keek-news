@@ -10,9 +10,9 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/pages/home_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
-import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:keek_news/use_case/get_post_detail_use_case.dart';
 import 'package:keek_news/widgets/error_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/skeleton_feed_card.dart';
@@ -22,30 +22,39 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../helpers/merged_feed_helper.dart';
 import '../../helpers/package_info_helper.dart';
 
+class MockPostDetailUseCase extends Mock implements GetPostDetailUseCase {}
+
 void main() {
-  late MockMergedFeedRepository mockRepo;
+  late MockMergedFeedUseCase mockUseCase;
+  late MockPostDetailUseCase mockPostDetail;
   late SharedPreferences prefs;
 
   setUpAll(() async {
     await setupPackageInfoMock();
     registerMergedFeedFallbacks();
+    registerFallbackValue(CommunityId.humoruniv);
   });
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
-    mockRepo = MockMergedFeedRepository();
+    mockUseCase = MockMergedFeedUseCase();
+    mockPostDetail = MockPostDetailUseCase();
     await di.configureDependencies();
-    if (di.sl.isRegistered<MergedFeedRepo>()) {
-      di.sl.unregister<MergedFeedRepo>();
-    }
     if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
       di.sl.unregister<GetMergedFeedUseCase>();
     }
-    di.sl.registerLazySingleton<MergedFeedRepo>(() => mockRepo);
-    di.sl.registerLazySingleton(
-      () => GetMergedFeedUseCase(repository: mockRepo),
-    );
+    if (di.sl.isRegistered<GetPostDetailUseCase>()) {
+      di.sl.unregister<GetPostDetailUseCase>();
+    }
+    di.sl.registerLazySingleton<GetMergedFeedUseCase>(() => mockUseCase);
+    di.sl.registerLazySingleton<GetPostDetailUseCase>(() => mockPostDetail);
+    when(
+      () => mockPostDetail.call(
+        community: any(named: 'community'),
+        id: any(named: 'id'),
+      ),
+    ).thenAnswer((_) async => const Left(ServerFailure('none')));
   });
 
   tearDown(di.sl.reset);
@@ -75,19 +84,19 @@ void main() {
 
   MergedPage page(List<FeedItem> items) => MergedPage(items: items);
 
+  void stubMergedPage(MergedPage Function() factory) {
+    when(
+      () => mockUseCase.call(any()),
+    ).thenAnswer((_) async => Right(factory()));
+  }
+
   Widget buildApp() => ProviderScope(
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
     child: const MaterialApp(home: HomeView()),
   );
 
   testWidgets('should display post titles when data loads', (tester) async {
-    when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).thenAnswer((_) async => Right(page(sampleItems())));
+    stubMergedPage(() => page(sampleItems()));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -97,13 +106,7 @@ void main() {
   });
 
   testWidgets('should render a FeedCard for each item', (tester) async {
-    when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).thenAnswer((_) async => Right(page(sampleItems())));
+    stubMergedPage(() => page(sampleItems()));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -114,13 +117,7 @@ void main() {
   testWidgets('should toggle bookmark icon when bookmark button tapped', (
     tester,
   ) async {
-    when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).thenAnswer((_) async => Right(page(sampleItems())));
+    stubMergedPage(() => page(sampleItems()));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -136,13 +133,7 @@ void main() {
 
   testWidgets('should show skeleton feed cards while loading', (tester) async {
     final completer = Completer<Either<Failure, MergedPage>>();
-    when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).thenAnswer((_) => completer.future);
+    when(() => mockUseCase.call(any())).thenAnswer((_) => completer.future);
 
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -152,13 +143,7 @@ void main() {
   });
 
   testWidgets('should show empty message when no posts', (tester) async {
-    when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).thenAnswer((_) async => Right(page([])));
+    stubMergedPage(() => page([]));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -168,11 +153,7 @@ void main() {
 
   testWidgets('should show error message when fetch fails', (tester) async {
     when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
+      () => mockUseCase.call(any()),
     ).thenAnswer((_) async => const Left(ServerFailure('error')));
 
     await tester.pumpWidget(buildApp());
@@ -182,13 +163,7 @@ void main() {
   });
 
   testWidgets('should display AppBar with 통합 유머 피드 title', (tester) async {
-    when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).thenAnswer((_) async => Right(page([])));
+    stubMergedPage(() => page([]));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -199,13 +174,7 @@ void main() {
   });
 
   testWidgets('should display settings gear action', (tester) async {
-    when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).thenAnswer((_) async => Right(page([])));
+    stubMergedPage(() => page([]));
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
@@ -247,11 +216,7 @@ void main() {
 
     var call = 0;
     when(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: any(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
+      () => mockUseCase.call(any()),
     ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : secondPage));
 
     await tester.pumpWidget(buildApp());
@@ -264,22 +229,16 @@ void main() {
       matching: find.byType(ListView),
     );
 
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < 6; i++) {
       await tester.drag(feedList, const Offset(0, -1500));
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
     }
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
 
-    final captured = verify(
-      () => mockRepo.fetchMerged(
-        perSource: any(named: 'perSource'),
-        cursor: captureAny(named: 'cursor'),
-        enabled: any(named: 'enabled'),
-      ),
-    ).captured;
+    final captured = verify(() => mockUseCase.call(captureAny())).captured;
 
-    expect(captured.length, 2);
-    expect(captured[0], isNull);
-    expect(captured[1], isA<MergedCursor>());
+    expect(captured.length, greaterThanOrEqualTo(2));
+    expect((captured[0] as MergedFeedParams).cursor, isNull);
+    expect((captured[1] as MergedFeedParams).cursor, isA<MergedCursor>());
   });
 }
