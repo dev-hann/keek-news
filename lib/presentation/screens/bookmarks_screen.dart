@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:happy_news/core/themes/app_spacing.dart';
-import 'package:happy_news/core/widgets/molecules/feed_card.dart';
 import 'package:happy_news/core/widgets/states/empty_state_view.dart';
 import 'package:happy_news/domain/entities/board_post.dart';
 import 'package:happy_news/domain/entities/bookmark.dart';
 import 'package:happy_news/presentation/providers/bookmark_provider.dart';
+import 'package:happy_news/presentation/widgets/feed_card_entry.dart';
 
 class BookmarksScreen extends ConsumerWidget {
   const BookmarksScreen({super.key});
@@ -28,40 +26,17 @@ class BookmarksScreen extends ConsumerWidget {
               itemCount: bookmarks.length,
               itemBuilder: (context, i) {
                 final bookmark = bookmarks[i];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.p12),
-                  child: _BookmarkFeedCard(bookmark: bookmark),
+                return FeedCardEntry(
+                  post: _toBoardPost(bookmark),
+                  isBookmarked: true,
+                  onBookmarkTap: () {
+                    ref
+                        .read(bookmarkProvider.notifier)
+                        .remove(bookmark.community, bookmark.id);
+                  },
                 );
               },
             ),
-    );
-  }
-}
-
-class _BookmarkFeedCard extends ConsumerWidget {
-  const _BookmarkFeedCard({required this.bookmark});
-  final Bookmark bookmark;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return FeedCard(
-      post: _toBoardPost(bookmark),
-      isBookmarked: true,
-      onBookmarkTap: () {
-        ref
-            .read(bookmarkProvider.notifier)
-            .remove(bookmark.community, bookmark.id);
-      },
-      onCopyTap: () async {
-        await Clipboard.setData(ClipboardData(text: bookmark.url));
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('링크를 복사했어요'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
     );
   }
 

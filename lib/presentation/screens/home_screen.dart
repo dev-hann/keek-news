@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:happy_news/core/themes/app_spacing.dart';
 import 'package:happy_news/core/widgets/atoms/loading_indicator.dart';
 import 'package:happy_news/core/widgets/atoms/scroll_to_top_button.dart';
-import 'package:happy_news/core/widgets/molecules/feed_card.dart';
 import 'package:happy_news/core/widgets/states/empty_state_view.dart';
 import 'package:happy_news/core/widgets/states/error_state_view.dart';
 import 'package:happy_news/core/widgets/states/skeleton_feed_card.dart';
@@ -14,10 +12,9 @@ import 'package:happy_news/domain/entities/board_post.dart';
 import 'package:happy_news/domain/entities/bookmark.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/feed_item.dart';
-import 'package:happy_news/domain/entities/post_detail.dart';
 import 'package:happy_news/presentation/providers/bookmark_provider.dart';
 import 'package:happy_news/presentation/providers/merged_feed_provider.dart';
-import 'package:happy_news/presentation/screens/image_viewer_screen.dart';
+import 'package:happy_news/presentation/widgets/feed_card_entry.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -240,101 +237,46 @@ class _FeedCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncDetail = ref.watch(
-      mergedDetailProvider((community: item.community, id: item.id)),
-    );
     final bookmarks = ref.watch(bookmarkProvider);
     final isBookmarked = bookmarks.any(
       (b) => b.community == item.community && b.id == item.id,
     );
 
-    final detail = asyncDetail.whenOrNull(
-      data: (either) => either.fold((_) => null, (d) => d),
-    );
-    final hasImages = detail != null && detail.imageUrls.isNotEmpty;
-    final hasComments = detail != null && detail.comments.isNotEmpty;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.p12),
-      child: FeedCard(
-        post: BoardPost(
-          id: int.tryParse(item.id) ?? 0,
-          title: item.title,
-          url: item.url,
-          author: item.author ?? '',
-          date: item.publishedAt?.toIso8601String() ?? '',
-          recommendCount: item.recommendCount,
-          notRecommendCount: 0,
-          commentCount: item.commentCount,
-          viewCount: item.viewCount,
-          thumbnailUrl: item.thumbnailUrl ?? '',
-          community: item.community,
-        ),
-        detail: detail,
-        detailLoading: asyncDetail.isLoading,
-        isBookmarked: isBookmarked,
-        onImageTap: !hasImages
-            ? null
-            : (i) => Navigator.of(context).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (_) => ImageViewerScreen(
-                    imageUrls: detail.imageUrls,
-                    initialIndex: i,
-                  ),
-                  fullscreenDialog: true,
-                ),
+    return FeedCardEntry(
+      post: BoardPost(
+        id: int.tryParse(item.id) ?? 0,
+        title: item.title,
+        url: item.url,
+        author: item.author ?? '',
+        date: item.publishedAt?.toIso8601String() ?? '',
+        recommendCount: item.recommendCount,
+        notRecommendCount: 0,
+        commentCount: item.commentCount,
+        viewCount: item.viewCount,
+        thumbnailUrl: item.thumbnailUrl ?? '',
+        community: item.community,
+      ),
+      isBookmarked: isBookmarked,
+      onBookmarkTap: () {
+        ref
+            .read(bookmarkProvider.notifier)
+            .toggle(
+              Bookmark(
+                community: item.community,
+                id: item.id,
+                title: item.title,
+                url: item.url,
+                author: item.author,
+                thumbnailUrl: item.thumbnailUrl,
+                previewText: item.previewText,
+                publishedAt: item.publishedAt,
+                recommendCount: item.recommendCount,
+                commentCount: item.commentCount,
+                viewCount: item.viewCount,
+                savedAt: DateTime.now(),
               ),
-        onCommentsTap: !hasComments
-            ? null
-            : () => _showComments(context, detail),
-        onCopyTap: () async {
-          await Clipboard.setData(ClipboardData(text: item.url));
-          if (!context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('링크를 복사했어요'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        },
-        onBookmarkTap: () {
-          ref
-              .read(bookmarkProvider.notifier)
-              .toggle(
-                Bookmark(
-                  community: item.community,
-                  id: item.id,
-                  title: item.title,
-                  url: item.url,
-                  author: item.author,
-                  thumbnailUrl: item.thumbnailUrl,
-                  previewText: item.previewText,
-                  publishedAt: item.publishedAt,
-                  recommendCount: item.recommendCount,
-                  commentCount: item.commentCount,
-                  viewCount: item.viewCount,
-                  savedAt: DateTime.now(),
-                ),
-              );
-        },
-      ),
-    );
-  }
-
-  void _showComments(BuildContext context, PostDetail detail) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (_) => Container(
-        padding: const EdgeInsets.all(16),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: detail.comments.length,
-          itemBuilder: (_, i) => ListTile(
-            title: Text(detail.comments[i].author),
-            subtitle: Text(detail.comments[i].content),
-          ),
-        ),
-      ),
+            );
+      },
     );
   }
 }

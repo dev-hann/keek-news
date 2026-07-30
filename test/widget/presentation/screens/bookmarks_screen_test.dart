@@ -1,17 +1,23 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:happy_news/core/errors/failures.dart';
 import 'package:happy_news/core/widgets/molecules/feed_card.dart';
 import 'package:happy_news/core/widgets/states/empty_state_view.dart';
+import 'package:happy_news/di/injection.dart' as di;
 import 'package:happy_news/domain/entities/bookmark.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/repositories/bookmark_repository.dart';
+import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
 import 'package:happy_news/presentation/providers/bookmark_provider.dart';
 import 'package:happy_news/presentation/screens/bookmarks_screen.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockBookmarkRepository extends Mock implements BookmarkRepository {}
+
+class MockMergedFeedRepository extends Mock implements MergedFeedRepository {}
 
 Bookmark _bookmark({
   CommunityId community = CommunityId.humoruniv,
@@ -31,10 +37,13 @@ Bookmark _bookmark({
 
 void main() {
   late MockBookmarkRepository repo;
+  late MockMergedFeedRepository mockFeedRepo;
   String? clipboardContent;
 
   setUp(() {
     repo = MockBookmarkRepository();
+    mockFeedRepo = MockMergedFeedRepository();
+    registerFallbackValue(CommunityId.humoruniv);
     registerFallbackValue(
       Bookmark(
         community: CommunityId.humoruniv,
@@ -44,6 +53,17 @@ void main() {
         savedAt: DateTime.fromMillisecondsSinceEpoch(0),
       ),
     );
+    when(() => repo.getAll()).thenAnswer((_) async => const []);
+    when(
+      () => mockFeedRepo.fetchDetail(
+        community: any(named: 'community'),
+        id: any(named: 'id'),
+      ),
+    ).thenAnswer((_) async => const Left(ServerFailure('none')));
+    if (di.sl.isRegistered<MergedFeedRepository>()) {
+      di.sl.unregister<MergedFeedRepository>();
+    }
+    di.sl.registerLazySingleton<MergedFeedRepository>(() => mockFeedRepo);
     clipboardContent = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -58,6 +78,8 @@ void main() {
           return null;
         });
   });
+
+  tearDown(di.sl.reset);
 
   ProviderContainer makeContainer() {
     final container = ProviderContainer(
