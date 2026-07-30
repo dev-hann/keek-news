@@ -104,10 +104,10 @@ final mergedFeedProvider =
       return notifier;
     });
 
-final mergedDetailProvider = FutureProvider.autoDispose
-    .family<Either<Failure, PostDetail>, ({CommunityId community, String id})>((
-      ref,
-      key,
-    ) {
+final mergedDetailProvider =
+    FutureProvider.family<
+      Either<Failure, PostDetail>,
+      ({CommunityId community, String id})
+    >((ref, key) {
       return sl<GetPostDetailUseCase>()(community: key.community, id: key.id);
     });
