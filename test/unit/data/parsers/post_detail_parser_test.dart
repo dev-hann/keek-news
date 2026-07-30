@@ -51,6 +51,31 @@ void main() {
     expect(result.viewCount, greaterThan(0));
   });
 
+  test('should parse view count from ic_view span, not the date year', () {
+    const html = '''
+    <html><head><title>t</title></head><body>
+    <div id="read_profile_td"><span class="hu_nick_txt">user</span></div>
+    <p id="read_profile_desc">
+      <span class="etc">작성 2026-07-29 12:50:22</span>
+      <br><span class="etc">이동 2026-07-30 07:23:34</span>
+      <br>
+      <span class="ok"><img src="/images/ic_ok.png"> <span id="ok_div">242</span></span>
+      <span class="notok"><img src="/images/ic_not_ok.png"> <span id="not_ok_span">0</span></span>
+      <span class="comment_num"><img src="/images/ic_re.png"> 21</span>
+      <span class="etc"><img src="/images/ic_view.png"> 18,504</span>
+    </p>
+    </body></html>
+    ''';
+
+    final result = PostDetailParser.parse(html);
+
+    expect(
+      result.viewCount,
+      18504,
+      reason: '조회수는 ic_view span의 값이어야 함 (작성일 연도 2026이 아님)',
+    );
+  });
+
   test('should parse comment count', () {
     final result = PostDetailParser.parse(fixtureHtml);
 

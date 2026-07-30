@@ -120,11 +120,16 @@ class PostDetailParser {
   static int _extractViewCount(dom.Document doc) {
     final descEl = doc.querySelector('#read_profile_desc');
     if (descEl == null) return 0;
-    final text = descEl.text;
-    final match = RegExp(r'(\d[\d,]+)').firstMatch(text);
-    if (match == null) return 0;
-    final lastNumber = match.group(1)?.replaceAll(',', '') ?? '0';
-    return int.tryParse(lastNumber) ?? 0;
+
+    for (final span in descEl.querySelectorAll('.etc')) {
+      final img = span.querySelector('img[src*="ic_view"]');
+      if (img == null) continue;
+      final match = RegExp(r'(\d[\d,]*)').firstMatch(span.text);
+      if (match == null) continue;
+      return int.tryParse(match.group(1)!.replaceAll(',', '')) ?? 0;
+    }
+
+    return 0;
   }
 
   static int _extractCommentCount(dom.Document doc) {

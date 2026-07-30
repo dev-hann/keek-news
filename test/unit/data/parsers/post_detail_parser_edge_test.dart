@@ -37,6 +37,23 @@ void main() {
       <div id="read_profile_td"><span class="hu_nick_txt">user</span></div>
       <div id="read_profile_desc">
         <span class="etc">작성 2026-05-15 11:00:00</span>
+        <span class="etc"><img src="/images/ic_view.png"> 36,491</span>
+      </div>
+      <div class="body_editor"><p>content</p></div>
+      </body></html>
+      ''';
+
+      final result = PostDetailParser.parse(html);
+
+      expect(result.viewCount, 36491);
+    });
+
+    test('should return 0 view count when ic_view span absent', () {
+      const html = '''
+      <html><head><title>Test</title></head><body>
+      <div id="read_profile_td"><span class="hu_nick_txt">user</span></div>
+      <div id="read_profile_desc">
+        <span class="etc">작성 2026-05-15 11:00:00</span>
         <span class="etc">조회 36,491</span>
       </div>
       <div class="body_editor"><p>content</p></div>
@@ -45,7 +62,7 @@ void main() {
 
       final result = PostDetailParser.parse(html);
 
-      expect(result.viewCount, greaterThan(0));
+      expect(result.viewCount, 0);
     });
 
     test('should handle empty body_editor', () {
