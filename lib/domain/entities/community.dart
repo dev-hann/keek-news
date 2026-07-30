@@ -10,12 +10,14 @@ class Community {
     required this.displayName,
     required this.brandColorArgb,
     required this.iconAsset,
+    required this.baseUrl,
   });
   final CommunityId id;
   final String shortName;
   final String displayName;
   final int brandColorArgb;
   final String iconAsset;
+  final String baseUrl;
 
   static Community? findById(CommunityId id) {
     for (final c in communities) {
@@ -40,13 +42,15 @@ const communities = <Community>[
     displayName: '웃긴대학',
     brandColorArgb: 0xFFEF4444,
     iconAsset: 'assets/icons/community_humoruniv.png',
+    baseUrl: 'https://m.humoruniv.com',
   ),
   Community(
     id: CommunityId.todayhumor,
     shortName: '오유',
     displayName: '오늘의유머',
-    brandColorArgb: 0xFF06B6D4,
+    brandColorArgb: 0xFF06B6A4,
     iconAsset: 'assets/icons/community_todayhumor.png',
+    baseUrl: 'https://www.todayhumor.co.kr',
   ),
   Community(
     id: CommunityId.dogdrip,
@@ -54,6 +58,7 @@ const communities = <Community>[
     displayName: 'DogDrip',
     brandColorArgb: 0xFFA855F7,
     iconAsset: 'assets/icons/community_dogdrip.png',
+    baseUrl: 'https://www.dogdrip.net',
   ),
   Community(
     id: CommunityId.ppomppu,
@@ -61,5 +66,6 @@ const communities = <Community>[
     displayName: '뽐뿌',
     brandColorArgb: 0xFFF59E0B,
     iconAsset: 'assets/icons/community_ppomppu.png',
+    baseUrl: 'https://www.ppomppu.co.kr',
   ),
 ];

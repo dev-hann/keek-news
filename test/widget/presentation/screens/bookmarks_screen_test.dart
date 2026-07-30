@@ -184,7 +184,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.link));
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(clipboardContent, '/copied-url');
+      expect(clipboardContent, 'https://m.humoruniv.com/copied-url');
     });
 
     testWidgets('should show snackbar after copying link', (tester) async {

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:happy_news/core/themes/app_spacing.dart';
+import 'package:happy_news/core/utils/url_builder.dart';
 import 'package:happy_news/core/widgets/molecules/feed_card.dart';
 import 'package:happy_news/domain/entities/board_post.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
@@ -55,7 +56,11 @@ class FeedCardEntry extends ConsumerWidget {
             ? null
             : () => _showComments(context, detail),
         onCopyTap: () async {
-          await Clipboard.setData(ClipboardData(text: post.url));
+          await Clipboard.setData(
+            ClipboardData(
+              text: UrlBuilder.resolveAbsolute(post.community, post.url),
+            ),
+          );
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

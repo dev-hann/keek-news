@@ -234,7 +234,10 @@ void main() {
       await tester.tap(find.byIcon(Icons.link));
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(clipboardContent, '/board/read.html?table=pds&number=1');
+      expect(
+        clipboardContent,
+        'https://m.humoruniv.com/board/read.html?table=pds&number=1',
+      );
       expect(find.text('링크를 복사했어요'), findsOneWidget);
     });
 
