@@ -1,7 +1,7 @@
 name: happy_news
 description: "해피뉴스 — 다중 커뮤니티 통합 유머 피드"
 publish_to: 'none'
-version: 3.1.0+31
+version: 3.2.0+32
 
 environment:
   sdk: ^3.11.5
