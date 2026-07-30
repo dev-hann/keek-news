@@ -1,0 +1,167 @@
+import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:keek_news/model/app_release.dart';
+import 'package:keek_news/pages/bookmarks_view.dart';
+import 'package:keek_news/pages/home_view.dart';
+import 'package:keek_news/pages/settings_view.dart';
+import 'package:keek_news/provider/shared_preferences_provider.dart';
+import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
+import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
+import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
+import 'package:keek_news/repository/update/update_repo.dart';
+import 'package:keek_news/app.dart';
+import 'package:keek_news/service/image_cache_service.dart';
+import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/check_for_update_use_case.dart';
+import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/merged_feed_helper.dart';
+import '../helpers/package_info_helper.dart';
+
+class MockUpdateRepository extends Mock implements UpdateRepo {}
+
+class MockApkInstallRepository extends Mock implements ApkInstallRepo {}
+
+class FakeImageCacheService extends Mock implements ImageCacheService {}
+
+class FakeBookmarkRepository extends Mock implements BookmarkRepo {}
+
+void main() {
+  late MockUpdateRepository mockUpdateRepo;
+  late MockApkInstallRepository mockApkRepo;
+  late FakeImageCacheService fakeCacheService;
+  late FakeBookmarkRepository fakeBookmarkRepo;
+  late MockMergedFeedRepository mockMergedRepo;
+  late SharedPreferences prefs;
+
+  setUpAll(() async {
+    await setupPackageInfoMock();
+    registerMergedFeedFallbacks();
+  });
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
+    mockUpdateRepo = MockUpdateRepository();
+    mockApkRepo = MockApkInstallRepository();
+    fakeCacheService = FakeImageCacheService();
+    fakeBookmarkRepo = FakeBookmarkRepository();
+    mockMergedRepo = MockMergedFeedRepository();
+    setupMergedFeedMocks(mockMergedRepo);
+    when(() => fakeCacheService.getSizeBytes()).thenAnswer((_) async => 0);
+    when(() => fakeBookmarkRepo.getAll()).thenAnswer((_) async => const []);
+    await di.configureDependencies();
+    if (di.sl.isRegistered<UpdateRepo>()) {
+      di.sl.unregister<UpdateRepo>();
+    }
+    if (di.sl.isRegistered<CheckForUpdateUseCase>()) {
+      di.sl.unregister<CheckForUpdateUseCase>();
+    }
+    if (di.sl.isRegistered<ApkInstallRepo>()) {
+      di.sl.unregister<ApkInstallRepo>();
+    }
+    if (di.sl.isRegistered<ImageCacheService>()) {
+      di.sl.unregister<ImageCacheService>();
+    }
+    if (di.sl.isRegistered<BookmarkRepo>()) {
+      di.sl.unregister<BookmarkRepo>();
+    }
+    if (di.sl.isRegistered<MergedFeedRepo>()) {
+      di.sl.unregister<MergedFeedRepo>();
+    }
+    if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
+      di.sl.unregister<GetMergedFeedUseCase>();
+    }
+    di.sl.registerLazySingleton<UpdateRepo>(() => mockUpdateRepo);
+    di.sl.registerLazySingleton(
+      () => CheckForUpdateUseCase(
+        repository: mockUpdateRepo,
+        currentVersion: '1.0.0',
+      ),
+    );
+    di.sl.registerLazySingleton<ApkInstallRepo>(() => mockApkRepo);
+    di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
+    di.sl.registerLazySingleton<BookmarkRepo>(() => fakeBookmarkRepo);
+    di.sl.registerLazySingleton<MergedFeedRepo>(() => mockMergedRepo);
+    di.sl.registerLazySingleton(
+      () => GetMergedFeedUseCase(repository: mockMergedRepo),
+    );
+  });
+
+  tearDown(di.sl.reset);
+
+  List<Override> testOverrides() => [
+    sharedPreferencesProvider.overrideWithValue(prefs),
+  ];
+
+  group('appRouter', () {
+    testWidgets('route / should render HomeView', (tester) async {
+      when(() => mockUpdateRepo.getLatestRelease()).thenAnswer(
+        (_) async => const Right(
+          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testOverrides(),
+          child: MaterialApp.router(routerConfig: appRouter),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HomeView), findsOneWidget);
+    });
+
+    testWidgets('route /settings should render SettingsView', (tester) async {
+      when(() => mockUpdateRepo.getLatestRelease()).thenAnswer(
+        (_) async => const Right(
+          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
+        ),
+      );
+
+      final settingsRouter = GoRouter(
+        initialLocation: '/settings',
+        routes: appRouter.configuration.routes,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testOverrides(),
+          child: MaterialApp.router(routerConfig: settingsRouter),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SettingsView), findsOneWidget);
+    });
+
+    testWidgets('route /bookmarks should render BookmarksView', (tester) async {
+      when(() => mockUpdateRepo.getLatestRelease()).thenAnswer(
+        (_) async => const Right(
+          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
+        ),
+      );
+
+      final bookmarksRouter = GoRouter(
+        initialLocation: '/bookmarks',
+        routes: appRouter.configuration.routes,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testOverrides(),
+          child: MaterialApp.router(routerConfig: bookmarksRouter),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BookmarksView), findsOneWidget);
+    });
+  });
+}

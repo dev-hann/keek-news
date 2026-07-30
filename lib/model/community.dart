@@ -1,0 +1,65 @@
+import 'package:equatable/equatable.dart';
+
+enum CommunityId { humoruniv, todayhumor, dogdrip, ppomppu }
+
+class Community extends Equatable {
+  const Community({
+    required this.id,
+    required this.shortName,
+    required this.displayName,
+    required this.brandColorArgb,
+    required this.iconAsset,
+    required this.baseUrl,
+  });
+  final CommunityId id;
+  final String shortName;
+  final String displayName;
+  final int brandColorArgb;
+  final String iconAsset;
+  final String baseUrl;
+
+  static Community? findById(CommunityId id) {
+    for (final c in communities) {
+      if (c.id == id) return c;
+    }
+    return null;
+  }
+
+  @override
+  List<Object?> get props => [id];
+}
+
+const communities = <Community>[
+  Community(
+    id: CommunityId.humoruniv,
+    shortName: '웃대',
+    displayName: '웃긴대학',
+    brandColorArgb: 0xFFEF4444,
+    iconAsset: 'assets/icons/community_humoruniv.png',
+    baseUrl: 'https://m.humoruniv.com',
+  ),
+  Community(
+    id: CommunityId.todayhumor,
+    shortName: '오유',
+    displayName: '오늘의유머',
+    brandColorArgb: 0xFF06B6A4,
+    iconAsset: 'assets/icons/community_todayhumor.png',
+    baseUrl: 'https://www.todayhumor.co.kr',
+  ),
+  Community(
+    id: CommunityId.dogdrip,
+    shortName: '개드립',
+    displayName: 'DogDrip',
+    brandColorArgb: 0xFFA855F7,
+    iconAsset: 'assets/icons/community_dogdrip.png',
+    baseUrl: 'https://www.dogdrip.net',
+  ),
+  Community(
+    id: CommunityId.ppomppu,
+    shortName: '뽐뿌',
+    displayName: '뽐뿌',
+    brandColorArgb: 0xFFF59E0B,
+    iconAsset: 'assets/icons/community_ppomppu.png',
+    baseUrl: 'https://www.ppomppu.co.kr',
+  ),
+];

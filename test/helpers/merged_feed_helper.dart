@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
-import 'package:happy_news/core/errors/failures.dart';
-import 'package:happy_news/domain/entities/community.dart';
-import 'package:happy_news/domain/entities/merged_feed.dart';
-import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
+import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/failures.dart';
+import 'package:keek_news/model/merged_feed.dart';
+import 'package:keek_news/repository/merged_feed/merged_feed_repo.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockMergedFeedRepository extends Mock implements MergedFeedRepository {}
+class MockMergedFeedRepository extends Mock implements MergedFeedRepo {}
 
 void registerMergedFeedFallbacks() {
   registerFallbackValue(

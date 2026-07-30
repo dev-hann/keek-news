@@ -1,16 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/core/network/html_client.dart';
-import 'package:happy_news/data/datasources/community_adapter.dart';
-import 'package:happy_news/data/datasources/dogdrip_adapter_impl.dart';
-import 'package:happy_news/data/datasources/humoruniv_adapter_impl.dart';
-import 'package:happy_news/data/datasources/humoruniv_remote_ds.dart';
-import 'package:happy_news/data/datasources/ppomppu_adapter_impl.dart';
-import 'package:happy_news/data/datasources/todayhumor_adapter_impl.dart';
-import 'package:happy_news/data/models/board_post_dto.dart';
-import 'package:happy_news/data/repositories/merged_feed_repository_impl.dart';
-import 'package:happy_news/domain/entities/community.dart';
+import 'package:keek_news/model/board_post_dto.dart';
+import 'package:keek_news/model/community.dart';
+import 'package:keek_news/repository/merged_feed/merged_feed_impl.dart';
+import 'package:keek_news/service/community_adapter.dart';
+import 'package:keek_news/service/dogdrip_adapter_impl.dart';
+import 'package:keek_news/service/html_client.dart';
+import 'package:keek_news/service/humoruniv_adapter_impl.dart';
+import 'package:keek_news/service/humoruniv_remote_ds.dart';
+import 'package:keek_news/service/ppomppu_adapter_impl.dart';
+import 'package:keek_news/service/todayhumor_adapter_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockHumorunivRemoteDs extends Mock implements HumorunivRemoteDs {}
@@ -32,7 +32,7 @@ String _readFixture(String path) =>
     File('test/fixtures/$path').readAsStringSync();
 
 void main() {
-  late MergedFeedRepositoryImpl repo;
+  late MergedFeedImpl repo;
 
   setUpAll(() {
     final humorunivDs = _MockHumorunivRemoteDs();
@@ -80,7 +80,7 @@ void main() {
       ),
     };
 
-    repo = MergedFeedRepositoryImpl(
+    repo = MergedFeedImpl(
       adapters: adapters,
       cacheTtl: const Duration(milliseconds: 1),
     );
@@ -173,7 +173,7 @@ void main() {
         () => failingDs.fetchBoardList(any(), any(), any()),
       ).thenThrow(Exception('network down'));
 
-      final failRepo = MergedFeedRepositoryImpl(
+      final failRepo = MergedFeedImpl(
         adapters: {
           CommunityId.humoruniv: HumorunivAdapterImpl(remoteDs: failingDs),
           CommunityId.todayhumor: TodayhumorAdapterImpl(

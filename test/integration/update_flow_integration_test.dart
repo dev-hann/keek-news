@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:happy_news/data/datasources/github_remote_ds.dart';
-import 'package:happy_news/data/repositories/update_repository_impl.dart';
-import 'package:happy_news/domain/entities/app_release.dart';
-import 'package:happy_news/domain/repositories/update_repository.dart';
-import 'package:happy_news/domain/usecases/check_for_update.dart';
+import 'package:keek_news/model/app_release.dart';
+import 'package:keek_news/repository/update/update_repo.dart';
+import 'package:keek_news/repository/update/update_impl.dart';
+import 'package:keek_news/service/github_remote_ds.dart';
+import 'package:keek_news/use_case/check_for_update_use_case.dart';
 
 class FixtureGitHubRemoteDs implements GitHubRemoteDs {
   FixtureGitHubRemoteDs(this._fixturePath);
@@ -18,15 +18,15 @@ class FixtureGitHubRemoteDs implements GitHubRemoteDs {
 }
 
 void main() {
-  late UpdateRepository repository;
-  late CheckForUpdate checkForUpdate;
+  late UpdateRepo repository;
+  late CheckForUpdateUseCase checkForUpdate;
 
   setUp(() {
     final remoteDs = FixtureGitHubRemoteDs(
       'test/fixtures/github_release_latest.json',
     );
-    repository = UpdateRepositoryImpl(remoteDs: remoteDs);
-    checkForUpdate = CheckForUpdate(
+    repository = UpdateImpl(remoteDs: remoteDs);
+    checkForUpdate = CheckForUpdateUseCase(
       repository: repository,
       currentVersion: '1.0.0',
     );
@@ -61,7 +61,7 @@ void main() {
     test(
       'should report up-to-date when current version matches fixture',
       () async {
-        final useCase = CheckForUpdate(
+        final useCase = CheckForUpdateUseCase(
           repository: repository,
           currentVersion: '1.5.0',
         );
