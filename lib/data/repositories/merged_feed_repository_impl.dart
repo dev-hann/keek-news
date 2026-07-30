@@ -13,14 +13,23 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
   MergedFeedRepositoryImpl({
     required Map<CommunityId, CommunityAdapter> adapters,
     this.cacheTtl = const Duration(minutes: 2),
-  }) : _adapters = adapters;
+    this.detailCacheTtl = const Duration(minutes: 5),
+    this.detailCacheMaxEntries = 50,
+    DateTime Function()? now,
+  }) : _adapters = adapters,
+       _now = now ?? DateTime.now;
 
   final Map<CommunityId, CommunityAdapter> _adapters;
   final Duration cacheTtl;
+  final Duration detailCacheTtl;
+  final int detailCacheMaxEntries;
+  final DateTime Function() _now;
 
   MergedPage? _cachedFirstPage;
   DateTime? _cachedAt;
   Set<CommunityId>? _cachedEnabled;
+
+  final _DetailCache _detailCache = _DetailCache();
 
   @override
   Future<Either<Failure, MergedPage>> fetchMerged({
@@ -74,7 +83,7 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
 
     if (cursor == null) {
       _cachedFirstPage = result;
-      _cachedAt = DateTime.now();
+      _cachedAt = _now();
       _cachedEnabled = enabled;
     }
 
@@ -83,7 +92,7 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
 
   bool _isCacheValid(Set<CommunityId> enabled) {
     if (_cachedFirstPage == null || _cachedAt == null) return false;
-    final age = DateTime.now().difference(_cachedAt!);
+    final age = _now().difference(_cachedAt!);
     if (age > cacheTtl) return false;
     if (_cachedEnabled == null) return enabled.isEmpty;
     return _setEquals(_cachedEnabled!, enabled);
@@ -97,12 +106,17 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
     required CommunityId community,
     required String id,
   }) async {
+    final key = (community: community, id: id);
+    final cached = _detailCache.get(key, _now(), detailCacheTtl);
+    if (cached != null) return Right(cached);
+
     final adapter = _adapters[community];
     if (adapter == null) {
       return Left(ServerFailure('No adapter for $community'));
     }
     try {
       final detail = await adapter.fetchDetail(id);
+      _detailCache.put(key, detail, _now(), detailCacheMaxEntries);
       return Right(detail);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -136,4 +150,43 @@ class _FetchOutcome {
   final List<FeedItem> items;
   final String? nextToken;
   final bool failed;
+}
+
+typedef DetailCacheKey = ({CommunityId community, String id});
+
+class _DetailCache {
+  final Map<DetailCacheKey, DateTime> _cachedAt = {};
+
+  PostDetail? get(DetailCacheKey key, DateTime now, Duration ttl) {
+    final cached = _store[key];
+    final at = _cachedAt[key];
+    if (cached == null || at == null) return null;
+    if (now.difference(at) > ttl) {
+      _store.remove(key);
+      _cachedAt.remove(key);
+      return null;
+    }
+    _store.remove(key);
+    _store[key] = cached;
+    _cachedAt.remove(key);
+    _cachedAt[key] = now;
+    return cached;
+  }
+
+  void put(
+    DetailCacheKey key,
+    PostDetail detail,
+    DateTime now,
+    int maxEntries,
+  ) {
+    _store[key] = detail;
+    _cachedAt[key] = now;
+    while (_store.length > maxEntries) {
+      final oldest = _store.keys.first;
+      _store.remove(oldest);
+      _cachedAt.remove(oldest);
+    }
+  }
+
+  final Map<DetailCacheKey, PostDetail> _store = {};
 }

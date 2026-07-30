@@ -4,6 +4,7 @@ import 'package:happy_news/data/datasources/community_adapter.dart';
 import 'package:happy_news/data/models/feed_item_dto.dart';
 import 'package:happy_news/data/repositories/merged_feed_repository_impl.dart';
 import 'package:happy_news/domain/entities/community.dart';
+import 'package:happy_news/domain/entities/post_detail.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockCommunityAdapter extends Mock implements CommunityAdapter {}
@@ -163,6 +164,90 @@ void main() {
       verifyNever(
         () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
       );
+    });
+  });
+
+  group('MergedFeedRepositoryImpl detail cache', () {
+    PostDetail detail() => PostDetail(
+      id: 1,
+      title: 't',
+      author: 'a',
+      date: DateTime(2026, 7, 30),
+      contentHtml: '',
+      contentBlocks: const [],
+      imageUrls: const ['https://example.com/img.jpg'],
+      recommendCount: 1,
+      notRecommendCount: 0,
+      viewCount: 1,
+      commentCount: 0,
+      comments: const [],
+    );
+
+    test('should cache detail — second call does not hit adapter', () async {
+      when(
+        () => huAdapter.fetchDetail('100'),
+      ).thenAnswer((_) async => detail());
+
+      await repo.fetchDetail(community: CommunityId.humoruniv, id: '100');
+      await repo.fetchDetail(community: CommunityId.humoruniv, id: '100');
+
+      verify(() => huAdapter.fetchDetail('100')).called(1);
+    });
+
+    test('should refetch after cacheTtl expires', () async {
+      var now = DateTime(2026, 7, 30, 10);
+      final timed = MergedFeedRepositoryImpl(
+        adapters: {CommunityId.humoruniv: huAdapter},
+        detailCacheTtl: const Duration(minutes: 2),
+        now: () => now,
+      );
+      when(
+        () => huAdapter.fetchDetail('100'),
+      ).thenAnswer((_) async => detail());
+
+      await timed.fetchDetail(community: CommunityId.humoruniv, id: '100');
+      now = now.add(const Duration(minutes: 3));
+      await timed.fetchDetail(community: CommunityId.humoruniv, id: '100');
+
+      verify(() => huAdapter.fetchDetail('100')).called(2);
+    });
+
+    test('should not cache failures', () async {
+      when(() => huAdapter.fetchDetail('100')).thenThrow(Exception('down'));
+
+      final first = await repo.fetchDetail(
+        community: CommunityId.humoruniv,
+        id: '100',
+      );
+      expect(first.isLeft(), isTrue);
+
+      when(
+        () => huAdapter.fetchDetail('100'),
+      ).thenAnswer((_) async => detail());
+      final second = await repo.fetchDetail(
+        community: CommunityId.humoruniv,
+        id: '100',
+      );
+      expect(second.isRight(), isTrue);
+
+      verify(() => huAdapter.fetchDetail('100')).called(2);
+    });
+
+    test('should cache distinct keys independently', () async {
+      when(
+        () => huAdapter.fetchDetail('100'),
+      ).thenAnswer((_) async => detail());
+      when(
+        () => huAdapter.fetchDetail('200'),
+      ).thenAnswer((_) async => detail());
+
+      await repo.fetchDetail(community: CommunityId.humoruniv, id: '100');
+      await repo.fetchDetail(community: CommunityId.humoruniv, id: '200');
+      await repo.fetchDetail(community: CommunityId.humoruniv, id: '100');
+      await repo.fetchDetail(community: CommunityId.humoruniv, id: '200');
+
+      verify(() => huAdapter.fetchDetail('100')).called(1);
+      verify(() => huAdapter.fetchDetail('200')).called(1);
     });
   });
 }
