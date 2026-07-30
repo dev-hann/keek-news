@@ -111,7 +111,8 @@ App
 │   │       ├── ImageViewerScreen (push, on image tap)
 │   │       └── FeedCommentsSheet (bottom sheet, on comment-preview tap)
 │   └── SettingsScreen (push `/settings`, from AppBar gear)
-│       └── (Phase 2+) LoginScreen, ScrapListScreen, ReadHistoryScreen
+│       ├── BookmarksScreen (push, from 저장함 tile — local bookmark list, Phase 1)
+│       └── (Phase 2+) LoginScreen, ReadHistoryScreen
 └── NsfwWarningDialog (first-launch overlay, shown over HomeScreen)
 ```
 
@@ -261,6 +262,8 @@ Read-only humor content viewer.
 | F-10 | Error states: network error, parse error, empty state | P0 |
 | F-11 | NSFW content warning on first launch (persisted) + settings toggle (persisted) | P0 |
 | F-12 | Pull-to-refresh on feed | P1 |
+| F-16a | Local bookmark (save posts to SharedPreferences, view in 저장함 screen) — local-only half of F-16, pulled forward as low-risk | P1 |
+| F-19a | Copy post link to clipboard from feed card — local-only half of F-19, pulled forward as low-risk | P1 |
 
 **MVP exit criteria**: App is listed on store. User can browse, read, and search humor posts with a better experience than mobile web.
 
@@ -273,10 +276,10 @@ Login and active participation. Write operations are high-risk and may be cut.
 | F-13 | Login via WebView + cookie management | P0 | Medium |
 | F-14 | Recommend / not-recommend | P0 | **High** (POST + CSRF) |
 | F-15 | Comment write | P1 | **High** (POST + CSRF) |
-| F-16 | Scrap / bookmark (local + server) | P1 | Low |
+| F-16 | Scrap / bookmark server sync (local half = F-16a, done in Phase 1) | P1 | Low |
 | F-17 | Favorite boards pin | P2 | Low |
 | F-18 | Deep linking (open humoruniv URLs in app) | P1 | Low |
-| F-19 | Share post link | P1 | Low |
+| F-19 | Share post link (system share sheet; copy-to-clipboard = F-19a, done in Phase 1) | P1 | Low |
 | F-20 | User block list | P2 | Medium |
 | F-21 | Font size setting | P2 | Low |
 | F-22 | 6 color themes | P3 | Low |

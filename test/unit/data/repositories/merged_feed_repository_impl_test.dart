@@ -53,8 +53,8 @@ void main() {
 
       final result = await repo.fetchMerged(perSource: 10);
 
-      verify(() => huAdapter.fetchLatest(pageToken: null)).called(1);
-      verify(() => thAdapter.fetchLatest(pageToken: null)).called(1);
+      verify(() => huAdapter.fetchLatest()).called(1);
+      verify(() => thAdapter.fetchLatest()).called(1);
       expect(result.isRight(), isTrue);
     });
 
@@ -159,7 +159,7 @@ void main() {
 
       await repo.fetchMerged(perSource: 10, enabled: {CommunityId.humoruniv});
 
-      verify(() => huAdapter.fetchLatest(pageToken: null)).called(1);
+      verify(() => huAdapter.fetchLatest()).called(1);
       verifyNever(
         () => thAdapter.fetchLatest(pageToken: any(named: 'pageToken')),
       );

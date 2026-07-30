@@ -243,7 +243,6 @@ void main() {
         commentCount: 0,
         viewCount: 0,
         thumbnailUrl: '',
-        community: CommunityId.humoruniv,
       );
       const b = BoardPost(
         id: 1,

@@ -1,8 +1,7 @@
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as html_parser;
-
 import 'package:happy_news/data/models/feed_item_dto.dart';
 import 'package:happy_news/domain/entities/community.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as html_parser;
 
 class TodayhumorListParser {
   static List<FeedItemDto> parse(String htmlString) {

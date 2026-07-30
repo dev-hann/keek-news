@@ -33,7 +33,7 @@ void main() {
         ).thenAnswer(
           (_) async => Response<dynamic>(
             statusCode: 200,
-            requestOptions: RequestOptions(path: ''),
+            requestOptions: RequestOptions(),
           ),
         );
 
@@ -61,7 +61,7 @@ void main() {
       ).thenAnswer(
         (_) async => Response<dynamic>(
           statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
+          requestOptions: RequestOptions(),
         ),
       );
 
@@ -84,7 +84,7 @@ void main() {
       ).thenAnswer(
         (_) async => Response<dynamic>(
           statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
+          requestOptions: RequestOptions(),
         ),
       );
 
@@ -110,7 +110,7 @@ void main() {
         capturedProgress?.call(100, 100);
         return Response<dynamic>(
           statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
+          requestOptions: RequestOptions(),
         );
       });
 
@@ -133,7 +133,7 @@ void main() {
         ),
       ).thenThrow(
         DioException(
-          requestOptions: RequestOptions(path: ''),
+          requestOptions: RequestOptions(),
           type: DioExceptionType.connectionError,
         ),
       );
@@ -157,7 +157,7 @@ void main() {
         capturedToken = invocation.namedArguments[#cancelToken] as CancelToken?;
         return Response<dynamic>(
           statusCode: 200,
-          requestOptions: RequestOptions(path: ''),
+          requestOptions: RequestOptions(),
         );
       });
 

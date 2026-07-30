@@ -165,11 +165,11 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: UpdateBanner(
               status: UpdateCheckStatus.downloading,
-              downloadProgress: const DownloadProgress(
+              downloadProgress: DownloadProgress(
                 receivedBytes: 40,
                 totalBytes: 100,
               ),

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happy_news/data/parsers/todayhumor_detail_parser.dart';
+import 'package:happy_news/domain/entities/content_block.dart';
 import 'package:happy_news/domain/entities/community.dart';
 
 void main() {
@@ -47,6 +48,30 @@ void main() {
       expect(result.imageUrls.first, contains('todayhumor'));
     });
 
+    test('imageUrls must NOT contain .mp4 URLs', () {
+      final result = TodayhumorDetailParser.parse(html);
+
+      final mp4s = result.imageUrls.where((u) => u.contains('.mp4')).toList();
+      expect(
+        mp4s,
+        isEmpty,
+        reason: 'mp4 must be a VideoBlock, not an image: $mp4s',
+      );
+    });
+
+    test('inline mp4 source should produce VideoBlock', () {
+      final result = TodayhumorDetailParser.parse(html);
+
+      final videos = result.contentBlocks.whereType<VideoBlock>();
+      final hasMp4Video = videos.any((v) => v.url.contains('.mp4'));
+      expect(
+        result.contentBlocks.where((b) => b is! TextBlock).isNotEmpty,
+        isTrue,
+        reason: 'expected at least one non-text block',
+      );
+      expect(hasMp4Video || videos.isEmpty, isTrue);
+    });
+
     test('should extract counts', () {
       final result = TodayhumorDetailParser.parse(html);
 
@@ -64,6 +89,35 @@ void main() {
       final result = TodayhumorDetailParser.parse(html);
 
       expect(result.contentHtml, isNotEmpty);
+    });
+  });
+
+  group('TodayhumorDetailParser synthetic video post', () {
+    test('imageUrls must NOT contain .mp4 from <source> tags', () {
+      const synthetic = '''
+<html><body>
+<div class="viewSubjectDiv">t</div>
+<div class="writerInfoContents">2026/01/01 00:00:00</div>
+<div class="viewContent">
+  <p>text</p>
+  <video><source src="//img.todayhumor.co.kr/a.mp4" type="video/mp4"></video>
+  <img src="http://img.todayhumor.co.kr/a.jpg" />
+</div>
+</body></html>
+''';
+
+      final result = TodayhumorDetailParser.parse(synthetic);
+
+      expect(
+        result.imageUrls.any((u) => u.contains('.mp4')),
+        isFalse,
+        reason: 'mp4 from <source> leaked into imageUrls',
+      );
+      expect(
+        result.imageUrls.any((u) => u.endsWith('.jpg')),
+        isTrue,
+        reason: 'real image dropped',
+      );
     });
   });
 }

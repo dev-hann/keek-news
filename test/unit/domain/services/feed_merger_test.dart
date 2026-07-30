@@ -39,9 +39,9 @@ void main() {
         final result = mergeFeedStreams(streams: streams);
 
         expect(result.items.map((e) => '${e.community}-${e.id}'), [
-          CommunityId.todayhumor.toString() + '-1',
-          CommunityId.humoruniv.toString() + '-1',
-          CommunityId.humoruniv.toString() + '-2',
+          '${CommunityId.todayhumor}-1',
+          '${CommunityId.humoruniv}-1',
+          '${CommunityId.humoruniv}-2',
         ]);
       },
     );

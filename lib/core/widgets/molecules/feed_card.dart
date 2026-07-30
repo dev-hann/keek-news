@@ -4,11 +4,11 @@ import 'package:happy_news/core/themes/app_elevation.dart';
 import 'package:happy_news/core/themes/app_sizes.dart';
 import 'package:happy_news/core/themes/app_spacing.dart';
 import 'package:happy_news/core/utils/time_ago.dart';
+import 'package:happy_news/core/widgets/atoms/action_button.dart';
 import 'package:happy_news/core/widgets/atoms/avatar.dart';
 import 'package:happy_news/core/widgets/atoms/count_badge.dart';
 import 'package:happy_news/core/widgets/atoms/skeleton_box.dart';
 import 'package:happy_news/core/widgets/molecules/feed_image_carousel.dart';
-import 'package:happy_news/core/widgets/molecules/text_post_card.dart';
 import 'package:happy_news/domain/entities/board_post.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
@@ -21,20 +21,23 @@ class FeedCard extends StatelessWidget {
     this.detailLoading = false,
     this.onImageTap,
     this.onCommentsTap,
+    this.onCopyTap,
+    this.onBookmarkTap,
+    this.isBookmarked = false,
   });
   final BoardPost post;
   final PostDetail? detail;
   final bool detailLoading;
   final ValueChanged<int>? onImageTap;
   final VoidCallback? onCommentsTap;
+  final VoidCallback? onCopyTap;
+  final VoidCallback? onBookmarkTap;
+  final bool isBookmarked;
 
   bool get _hasImages => detail != null && detail!.imageUrls.isNotEmpty;
 
   List<VideoBlock> get _videoBlocks =>
       detail?.contentBlocks.whereType<VideoBlock>().toList() ?? const [];
-
-  /// A text-only post (no images, no videos) once its detail has loaded.
-  bool get _isTextPost => detail != null && !_hasImages && _videoBlocks.isEmpty;
 
   String? get _bodyText {
     final d = detail;
@@ -95,12 +98,7 @@ class FeedCard extends StatelessWidget {
         ),
       ];
     }
-    // Detail loaded, text-only post → brand-color title block as the visual
-    // anchor (mirrors full-bleed media for image posts). The body stays in the
-    // caption below to avoid duplication.
-    if (_isTextPost) {
-      return [TextPostCard(title: post.title)];
-    }
+    // Text-only posts: no media block. Title + body render in the caption.
     return [];
   }
 
@@ -129,6 +127,7 @@ class FeedCard extends StatelessWidget {
   }
 
   Widget _actions() {
+    final showActions = onCopyTap != null || onBookmarkTap != null;
     return Padding(
       padding: AppSpacing.edgeH16V8,
       child: Row(
@@ -138,6 +137,21 @@ class FeedCard extends StatelessWidget {
           CommentBadge(count: post.commentCount),
           AppSpacing.sbW16,
           ViewBadge(count: post.viewCount),
+          if (showActions) ...[
+            const Spacer(),
+            AppSpacing.sbW24,
+            ActionButton(
+              icon: Icons.link,
+              semanticsLabel: '링크 복사',
+              onTap: onCopyTap,
+            ),
+            ActionButton(
+              icon: isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              semanticsLabel: isBookmarked ? '저장 취소' : '저장',
+              active: isBookmarked,
+              onTap: onBookmarkTap,
+            ),
+          ],
         ],
       ),
     );
@@ -150,20 +164,17 @@ class FeedCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Text posts show the title inside TextPostCard already; here we only
-          // render the body. Image posts render title + body.
-          if (!_isTextPost)
-            Text(
-              post.title,
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          Text(
+            post.title,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (body != null && body.isNotEmpty) ...[
-            if (!_isTextPost) AppSpacing.sbH4,
+            AppSpacing.sbH4,
             _ExpandableText(body, maxLines: _hasImages ? 3 : 8),
           ],
         ],

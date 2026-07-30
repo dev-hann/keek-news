@@ -17,7 +17,6 @@ void main() {
         fakeAsync((async) {
           var notifications = 0;
           final c = RetryController(
-            maxAttempts: 3,
             retryDelay: const Duration(milliseconds: 100),
           );
           addTearDown(c.dispose);
@@ -88,7 +87,7 @@ void main() {
       });
 
       test('canAutoRetry is false on fresh controller', () {
-        final c = RetryController(maxAttempts: 3);
+        final c = RetryController();
         addTearDown(c.dispose);
         expect(c.canAutoRetry, isFalse);
       });
@@ -103,7 +102,7 @@ void main() {
     group('after recordFailure (before retry timer fires)', () {
       test('hasError becomes true', () {
         fakeAsync((async) {
-          final c = RetryController(maxAttempts: 3);
+          final c = RetryController();
           addTearDown(c.dispose);
 
           c.recordFailure();
@@ -114,7 +113,7 @@ void main() {
 
       test('canAutoRetry true when attempts remain', () {
         fakeAsync((async) {
-          final c = RetryController(maxAttempts: 3);
+          final c = RetryController();
           addTearDown(c.dispose);
 
           c.recordFailure();
@@ -125,7 +124,7 @@ void main() {
 
       test('isExhausted false when attempts remain', () {
         fakeAsync((async) {
-          final c = RetryController(maxAttempts: 3);
+          final c = RetryController();
           addTearDown(c.dispose);
 
           c.recordFailure();
@@ -151,7 +150,6 @@ void main() {
       test('hasError becomes false (new attempt starts)', () {
         fakeAsync((async) {
           final c = RetryController(
-            maxAttempts: 3,
             retryDelay: const Duration(milliseconds: 100),
           );
           addTearDown(c.dispose);
@@ -169,7 +167,6 @@ void main() {
           var notifications = 0;
           var lastSeenAttempt = 0;
           final c = RetryController(
-            maxAttempts: 3,
             retryDelay: const Duration(milliseconds: 100),
           );
           addTearDown(c.dispose);
@@ -189,7 +186,6 @@ void main() {
       test('each failure+retry advances attempt by 1', () {
         fakeAsync((async) {
           final c = RetryController(
-            maxAttempts: 3,
             retryDelay: const Duration(milliseconds: 100),
           );
           addTearDown(c.dispose);
@@ -215,7 +211,6 @@ void main() {
         fakeAsync((async) {
           var notifications = 0;
           final c = RetryController(
-            maxAttempts: 3,
             retryDelay: const Duration(milliseconds: 100),
           );
           addTearDown(c.dispose);
@@ -268,10 +263,7 @@ void main() {
       test('cancels pending auto-retry timer', () {
         fakeAsync((async) {
           var notifications = 0;
-          final c = RetryController(
-            maxAttempts: 3,
-            retryDelay: const Duration(milliseconds: 500),
-          );
+          final c = RetryController();
           addTearDown(c.dispose);
           c.addListener(() => notifications++);
 
@@ -311,7 +303,6 @@ void main() {
       test('no-op when URL is unchanged', () {
         fakeAsync((async) {
           final c = RetryController(
-            maxAttempts: 3,
             retryDelay: const Duration(milliseconds: 100),
           );
           addTearDown(c.dispose);
@@ -331,10 +322,7 @@ void main() {
       test('cancels pending timer', () {
         fakeAsync((async) {
           var notifications = 0;
-          final c = RetryController(
-            maxAttempts: 3,
-            retryDelay: const Duration(milliseconds: 500),
-          );
+          final c = RetryController();
           c.addListener(() => notifications++);
 
           c.recordFailure();

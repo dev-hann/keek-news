@@ -1,9 +1,9 @@
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as html_parser;
-
+import 'package:happy_news/core/utils/media_classifier.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as html_parser;
 
 class PpomppuDetailParser {
   static PostDetail parse(String htmlString) {
@@ -14,9 +14,7 @@ class PpomppuDetailParser {
     final date = _extractDate(doc);
     final contentEl = doc.querySelector('.board-contents');
     final contentHtml = contentEl?.innerHtml ?? '';
-    final videoUrls = _extractVideoUrls(contentEl);
     final imageUrls = _extractImages(contentEl);
-    final allMediaUrls = [...videoUrls, ...imageUrls];
     final contentBlocks = _buildBlocks(contentEl);
     final viewCount = _extractViewCount(doc);
 
@@ -29,7 +27,7 @@ class PpomppuDetailParser {
       date: date,
       contentHtml: contentHtml,
       contentBlocks: contentBlocks,
-      imageUrls: allMediaUrls,
+      imageUrls: imageUrls,
       recommendCount: 0,
       notRecommendCount: 0,
       viewCount: viewCount,
@@ -68,20 +66,6 @@ class PpomppuDetailParser {
     return DateTime.now();
   }
 
-  static List<String> _extractVideoUrls(dom.Element? content) {
-    if (content == null) return [];
-    final urls = <String>[];
-
-    for (final source in content.querySelectorAll('source')) {
-      final src = source.attributes['src'] ?? '';
-      if (src.isNotEmpty && src.contains('.mp4')) {
-        urls.add(src.startsWith('//') ? 'https:$src' : src);
-      }
-    }
-
-    return urls.toSet().toList();
-  }
-
   static List<String> _extractImages(dom.Element? content) {
     if (content == null) return [];
     return content
@@ -89,6 +73,7 @@ class PpomppuDetailParser {
         .map((img) => img.attributes['src'] ?? '')
         .where((src) => src.isNotEmpty)
         .map((src) => src.startsWith('//') ? 'https:$src' : src)
+        .where(MediaClassifier.isLoadableImage)
         .toList();
   }
 

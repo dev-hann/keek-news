@@ -7,6 +7,7 @@ import 'package:happy_news/core/themes/app_radius.dart';
 import 'package:happy_news/core/themes/app_sizes.dart';
 import 'package:happy_news/core/themes/app_spacing.dart';
 import 'package:happy_news/core/widgets/atoms/retryable_network_image.dart';
+import 'package:happy_news/core/widgets/atoms/video_thumbnail.dart';
 import 'package:happy_news/core/widgets/molecules/inline_video_player.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
 
@@ -178,7 +179,10 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
             placeholderColor: AppColors.mediaSurface,
           )
         else
-          const ColoredBox(color: AppColors.mediaSurface),
+          VideoThumbnail(
+            videoUrl: video.url,
+            placeholderColor: AppColors.mediaSurface,
+          ),
         Center(
           child: Semantics(
             label: '재생',

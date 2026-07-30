@@ -14,14 +14,26 @@ void main() {
       ).readAsStringSync();
     });
 
-    test('비디오 URL이 imageUrls에 포함되어야 함', () {
+    test('비디오 URL이 imageUrls에 포함되지 않아야 함', () {
       final result = PpomppuDetailParser.parse(html);
 
       expect(
         result.imageUrls.any((u) => u.contains('.mp4')),
-        isTrue,
-        reason: 'mp4 비디오 URL이 추출되어야 함',
+        isFalse,
+        reason: 'mp4는 VideoBlock이어야 하며 imageUrls에 섞이면 깨진 이미지 발생',
       );
+    });
+
+    test('imageUrls는 로드 가능한 이미지 URL만 포함해야 함', () {
+      final result = PpomppuDetailParser.parse(html);
+
+      for (final u in result.imageUrls) {
+        expect(
+          u.contains('.mp4') || u.contains('.webm'),
+          isFalse,
+          reason: '비디오 URL이 imageUrls에 있음: $u',
+        );
+      }
     });
 
     test('contentBlocks에 VideoBlock이 있어야 함', () {

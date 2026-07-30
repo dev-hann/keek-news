@@ -29,7 +29,7 @@ UpdateNotifier _notifierWith({
 }) {
   final checkRepo = MockUpdateRepository();
   when(
-    () => checkRepo.getLatestRelease(),
+    checkRepo.getLatestRelease,
   ).thenAnswer((_) async => const Right(_availableRelease));
   return UpdateNotifier(
     checkForUpdate: CheckForUpdate(
@@ -244,11 +244,9 @@ void main() {
         when(
           () => apkRepo.download('https://example.com/app.apk'),
         ).thenAnswer((_) => progressController.stream);
+        when(apkRepo.canRequestPackageInstalls).thenAnswer((_) async => true);
         when(
-          () => apkRepo.canRequestPackageInstalls(),
-        ).thenAnswer((_) async => true);
-        when(
-          () => apkRepo.launchInstaller(),
+          apkRepo.launchInstaller,
         ).thenAnswer((_) async => const Right(unit));
 
         await notifier.downloadUpdate();
@@ -304,7 +302,7 @@ void main() {
       await notifier.cancelDownload();
 
       expect(notifier.state.status, UpdateCheckStatus.available);
-      verify(() => apkRepo.cancelDownload()).called(1);
+      verify(apkRepo.cancelDownload).called(1);
       await progressController.close();
     });
 
@@ -320,11 +318,9 @@ void main() {
         when(
           () => apkRepo.download(any()),
         ).thenAnswer((_) => progressController.stream);
+        when(apkRepo.canRequestPackageInstalls).thenAnswer((_) async => true);
         when(
-          () => apkRepo.canRequestPackageInstalls(),
-        ).thenAnswer((_) async => true);
-        when(
-          () => apkRepo.launchInstaller(),
+          apkRepo.launchInstaller,
         ).thenAnswer((_) async => const Right(unit));
 
         await notifier.downloadUpdate();
@@ -336,7 +332,7 @@ void main() {
         // Simulate the user cancelling the system dialog then tapping 설치 again.
         await notifier.launchInstaller();
 
-        verify(() => apkRepo.launchInstaller()).called(2);
+        verify(apkRepo.launchInstaller).called(2);
       },
     );
 
@@ -352,9 +348,7 @@ void main() {
         when(
           () => apkRepo.download(any()),
         ).thenAnswer((_) => progressController.stream);
-        when(
-          () => apkRepo.canRequestPackageInstalls(),
-        ).thenAnswer((_) async => false);
+        when(apkRepo.canRequestPackageInstalls).thenAnswer((_) async => false);
 
         await notifier.downloadUpdate();
         await progressController.close();
@@ -364,7 +358,7 @@ void main() {
           notifier.state.status,
           UpdateCheckStatus.installPermissionRequired,
         );
-        verifyNever(() => apkRepo.launchInstaller());
+        verifyNever(apkRepo.launchInstaller);
       },
     );
   });

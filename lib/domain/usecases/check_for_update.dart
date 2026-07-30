@@ -26,7 +26,7 @@ class CheckForUpdate {
           ),
         );
       } catch (_) {
-        return Left(UpdateFailure('Invalid version format'));
+        return const Left(UpdateFailure('Invalid version format'));
       }
     });
   }
@@ -48,7 +48,7 @@ class CheckForUpdate {
     final stripped = version.startsWith('v') || version.startsWith('V')
         ? version.substring(1)
         : version;
-    final clean = stripped.split(RegExp(r'[-+]')).first;
+    final clean = stripped.split(RegExp('[-+]')).first;
     return clean.split('.').map(int.parse).toList();
   }
 }

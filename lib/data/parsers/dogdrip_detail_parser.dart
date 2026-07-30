@@ -1,10 +1,10 @@
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as html_parser;
-
+import 'package:happy_news/core/utils/media_classifier.dart';
 import 'package:happy_news/domain/entities/comment.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as html_parser;
 
 class DogdripDetailParser {
   static PostDetail parse(String htmlString) {
@@ -115,31 +115,17 @@ class DogdripDetailParser {
 
   static List<String> _extractImages(dom.Element? content) {
     if (content == null) return [];
-    final urls = <String>[];
-
-    for (final source in content.querySelectorAll('source')) {
-      final src = source.attributes['src'] ?? '';
-      if (src.isNotEmpty && src.contains('.mp4')) {
-        urls.add(
-          src.startsWith('//')
-              ? 'https:$src'
-              : src.startsWith('/')
-              ? 'https://www.dogdrip.net$src'
-              : src,
-        );
-      }
-    }
-
-    urls.addAll(
-      content
-          .querySelectorAll('img')
-          .map((img) => img.attributes['src'] ?? '')
-          .where((src) => src.isNotEmpty)
-          .map(
-            (src) => src.startsWith('/') ? 'https://www.dogdrip.net$src' : src,
-          ),
-    );
-    return urls;
+    return content
+        .querySelectorAll('img')
+        .map((img) => img.attributes['src'] ?? '')
+        .where((src) => src.isNotEmpty)
+        .map((src) {
+          if (src.startsWith('//')) return 'https:$src';
+          if (src.startsWith('/')) return 'https://www.dogdrip.net$src';
+          return src;
+        })
+        .where(MediaClassifier.isLoadableImage)
+        .toList();
   }
 
   static List<ContentBlock> _buildBlocks(dom.Element? content) {

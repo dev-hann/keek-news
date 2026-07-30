@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happy_news/core/providers/feed_video_playback_provider.dart';
+import 'package:happy_news/core/widgets/atoms/video_thumbnail.dart';
 import 'package:happy_news/core/widgets/molecules/feed_image_carousel.dart';
 import 'package:happy_news/core/widgets/molecules/inline_video_player.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
@@ -99,8 +100,8 @@ void main() {
         thumbnailUrl: 'https://example.com/t.jpg',
       );
       await tester.pumpWidget(
-        ProviderScope(
-          child: const MaterialApp(
+        const ProviderScope(
+          child: MaterialApp(
             home: Scaffold(
               body: FeedImageCarousel(
                 imageUrls: ['img'],
@@ -141,8 +142,8 @@ void main() {
           thumbnailUrl: 'https://example.com/t.jpg',
         );
         await tester.pumpWidget(
-          ProviderScope(
-            child: const MaterialApp(
+          const ProviderScope(
+            child: MaterialApp(
               home: Scaffold(
                 body: FeedImageCarousel(
                   imageUrls: [],
@@ -166,6 +167,34 @@ void main() {
         );
         expect(player.autoplay, isTrue);
         expect(player.videoId, const VideoId(postId: 7, blockIndex: 0));
+      },
+    );
+
+    testWidgets(
+      'video block without thumbnail renders VideoThumbnail (local frame fallback)',
+      (tester) async {
+        const block = VideoBlock(url: 'https://example.com/nthumb.mp4');
+        await tester.pumpWidget(
+          const ProviderScope(
+            child: MaterialApp(
+              home: Scaffold(
+                body: FeedImageCarousel(
+                  imageUrls: [],
+                  videoBlocks: [block],
+                  postId: 9,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(
+          find.byType(VideoThumbnail),
+          findsOneWidget,
+          reason:
+              'null-thumbnail videos must use VideoThumbnail for local frame extraction',
+        );
       },
     );
   });

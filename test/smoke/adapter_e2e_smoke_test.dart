@@ -36,7 +36,7 @@ void main() {
     test('humoruniv: fetchLatest가 pds 보드를 요청하고 FeedItemDto 생성', () async {
       final ds = _MockHumorunivDs();
       when(() => ds.fetchBoardList('pds', 1, '')).thenAnswer(
-        (_) async => BoardListDsResult(
+        (_) async => const BoardListDsResult(
           posts: [
             BoardPostDto(
               id: 100,
@@ -211,7 +211,7 @@ void main() {
     test('전체 파이프라인: 리스트 → 상세까지 id 일관성 유지', () async {
       final ds = _MockHumorunivDs();
       when(() => ds.fetchBoardList('pds', 1, '')).thenAnswer(
-        (_) async => BoardListDsResult(
+        (_) async => const BoardListDsResult(
           posts: [
             BoardPostDto(
               id: 42,

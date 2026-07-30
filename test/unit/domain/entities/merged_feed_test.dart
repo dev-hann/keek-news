@@ -8,7 +8,7 @@ void main() {
     test('should create with oldestSeen and perSourceTokens', () {
       final cursor = MergedCursor(
         oldestSeen: DateTime(2026, 7, 26, 10),
-        perSourceTokens: {
+        perSourceTokens: const {
           CommunityId.humoruniv: '2',
           CommunityId.todayhumor: null,
         },
@@ -22,11 +22,11 @@ void main() {
     test('should support value equality', () {
       final a = MergedCursor(
         oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: {CommunityId.humoruniv: '1'},
+        perSourceTokens: const {CommunityId.humoruniv: '1'},
       );
       final b = MergedCursor(
         oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: {CommunityId.humoruniv: '1'},
+        perSourceTokens: const {CommunityId.humoruniv: '1'},
       );
 
       expect(a, equals(b));
@@ -45,11 +45,11 @@ void main() {
     test('should create with cursor and failed sources', () {
       final cursor = MergedCursor(
         oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: {},
+        perSourceTokens: const {},
       );
       final page = MergedPage(
-        items: [
-          const FeedItem(
+        items: const [
+          FeedItem(
             community: CommunityId.humoruniv,
             id: '1',
             title: 't',
@@ -57,7 +57,7 @@ void main() {
           ),
         ],
         next: cursor,
-        failedSources: {CommunityId.dogdrip},
+        failedSources: const {CommunityId.dogdrip},
       );
 
       expect(page.items, hasLength(1));

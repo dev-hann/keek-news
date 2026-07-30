@@ -7,11 +7,13 @@ import 'package:happy_news/data/datasources/image_cache_service.dart';
 import 'package:happy_news/di/injection.dart' as di;
 import 'package:happy_news/domain/entities/app_release.dart';
 import 'package:happy_news/domain/repositories/apk_install_repository.dart';
+import 'package:happy_news/domain/repositories/bookmark_repository.dart';
 import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
 import 'package:happy_news/domain/repositories/update_repository.dart';
 import 'package:happy_news/domain/usecases/check_for_update.dart';
 import 'package:happy_news/domain/usecases/get_merged_feed.dart';
 import 'package:happy_news/presentation/providers/shared_preferences_provider.dart';
+import 'package:happy_news/presentation/screens/bookmarks_screen.dart';
 import 'package:happy_news/presentation/screens/home_screen.dart';
 import 'package:happy_news/presentation/screens/settings_screen.dart';
 import 'package:happy_news/routes/app_router.dart';
@@ -27,10 +29,13 @@ class MockApkInstallRepository extends Mock implements ApkInstallRepository {}
 
 class FakeImageCacheService extends Mock implements ImageCacheService {}
 
+class FakeBookmarkRepository extends Mock implements BookmarkRepository {}
+
 void main() {
   late MockUpdateRepository mockUpdateRepo;
   late MockApkInstallRepository mockApkRepo;
   late FakeImageCacheService fakeCacheService;
+  late FakeBookmarkRepository fakeBookmarkRepo;
   late MockMergedFeedRepository mockMergedRepo;
   late SharedPreferences prefs;
 
@@ -45,9 +50,11 @@ void main() {
     mockUpdateRepo = MockUpdateRepository();
     mockApkRepo = MockApkInstallRepository();
     fakeCacheService = FakeImageCacheService();
+    fakeBookmarkRepo = FakeBookmarkRepository();
     mockMergedRepo = MockMergedFeedRepository();
     setupMergedFeedMocks(mockMergedRepo);
     when(() => fakeCacheService.getSizeBytes()).thenAnswer((_) async => 0);
+    when(() => fakeBookmarkRepo.getAll()).thenAnswer((_) async => const []);
     await di.configureDependencies();
     if (di.sl.isRegistered<UpdateRepository>()) {
       di.sl.unregister<UpdateRepository>();
@@ -61,6 +68,9 @@ void main() {
     if (di.sl.isRegistered<ImageCacheService>()) {
       di.sl.unregister<ImageCacheService>();
     }
+    if (di.sl.isRegistered<BookmarkRepository>()) {
+      di.sl.unregister<BookmarkRepository>();
+    }
     if (di.sl.isRegistered<MergedFeedRepository>()) {
       di.sl.unregister<MergedFeedRepository>();
     }
@@ -73,6 +83,7 @@ void main() {
     );
     di.sl.registerLazySingleton<ApkInstallRepository>(() => mockApkRepo);
     di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
+    di.sl.registerLazySingleton<BookmarkRepository>(() => fakeBookmarkRepo);
     di.sl.registerLazySingleton<MergedFeedRepository>(() => mockMergedRepo);
     di.sl.registerLazySingleton(
       () => GetMergedFeed(repository: mockMergedRepo),
@@ -125,6 +136,31 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(SettingsScreen), findsOneWidget);
+    });
+
+    testWidgets('route /bookmarks should render BookmarksScreen', (
+      tester,
+    ) async {
+      when(() => mockUpdateRepo.getLatestRelease()).thenAnswer(
+        (_) async => const Right(
+          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
+        ),
+      );
+
+      final bookmarksRouter = GoRouter(
+        initialLocation: '/bookmarks',
+        routes: appRouter.configuration.routes,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: testOverrides(),
+          child: MaterialApp.router(routerConfig: bookmarksRouter),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BookmarksScreen), findsOneWidget);
     });
   });
 }

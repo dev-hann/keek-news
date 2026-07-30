@@ -8,7 +8,6 @@ class VideoSurface extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FittedBox(
-      fit: BoxFit.contain,
       child: SizedBox(
         width: controller.value.size.width,
         height: controller.value.size.height,

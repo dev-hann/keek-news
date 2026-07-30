@@ -1,9 +1,9 @@
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as html_parser;
-
+import 'package:happy_news/core/utils/media_classifier.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:html/dom.dart' as dom;
+import 'package:html/parser.dart' as html_parser;
 
 class TodayhumorDetailParser {
   static PostDetail parse(String htmlString) {
@@ -46,7 +46,7 @@ class TodayhumorDetailParser {
     final el = doc.querySelector('.viewSubjectDiv');
     final text = el?.text.trim() ?? '';
     final match = RegExp(
-      r'<!--EAP_SUBJECT-->(.*)<!--/EAP_SUBJECT-->',
+      '<!--EAP_SUBJECT-->(.*)<!--/EAP_SUBJECT-->',
     ).firstMatch(el?.innerHtml ?? '');
     return match?.group(1)?.trim() ?? text;
   }
@@ -78,26 +78,16 @@ class TodayhumorDetailParser {
 
   static List<String> _extractImages(dom.Element? content) {
     if (content == null) return [];
-    final urls = <String>[];
-
-    for (final source in content.querySelectorAll('source')) {
-      final src = source.attributes['src'] ?? '';
-      if (src.isNotEmpty && src.contains('.mp4')) {
-        urls.add(src.startsWith('//') ? 'https:$src' : src);
-      }
-    }
-
-    urls.addAll(
-      content
-          .querySelectorAll('img')
-          .where((img) {
-            final src = img.attributes['src'] ?? '';
-            return src.contains('todayhumor') || src.startsWith('http');
-          })
-          .map((img) => img.attributes['src'] ?? '')
-          .where((src) => src.isNotEmpty),
-    );
-    return urls;
+    return content
+        .querySelectorAll('img')
+        .where((img) {
+          final src = img.attributes['src'] ?? '';
+          return src.contains('todayhumor') || src.startsWith('http');
+        })
+        .map((img) => img.attributes['src'] ?? '')
+        .where((src) => src.isNotEmpty)
+        .where(MediaClassifier.isLoadableImage)
+        .toList();
   }
 
   static List<ContentBlock> _buildBlocks(dom.Element? content) {

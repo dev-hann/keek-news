@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,9 +11,11 @@ import 'package:happy_news/core/widgets/states/empty_state_view.dart';
 import 'package:happy_news/core/widgets/states/error_state_view.dart';
 import 'package:happy_news/core/widgets/states/skeleton_feed_card.dart';
 import 'package:happy_news/domain/entities/board_post.dart';
+import 'package:happy_news/domain/entities/bookmark.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/feed_item.dart';
 import 'package:happy_news/domain/entities/post_detail.dart';
+import 'package:happy_news/presentation/providers/bookmark_provider.dart';
 import 'package:happy_news/presentation/providers/merged_feed_provider.dart';
 import 'package:happy_news/presentation/screens/image_viewer_screen.dart';
 
@@ -108,12 +111,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (context, show, _) => ScrollToTopButton(
           visible: show,
           onTap: () {
-            if (_controller.hasClients)
+            if (_controller.hasClients) {
               _controller.animateTo(
                 0,
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeOut,
               );
+            }
           },
         ),
       ),
@@ -151,8 +155,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return ListView.builder(
       controller: _controller,
       physics: const AlwaysScrollableScrollPhysics(),
-      addAutomaticKeepAlives: true,
-      addRepaintBoundaries: true,
       itemCount: visibleItems.length + extra,
       itemBuilder: (context, index) {
         if (index == visibleItems.length) {
@@ -241,6 +243,10 @@ class _FeedCard extends ConsumerWidget {
     final asyncDetail = ref.watch(
       mergedDetailProvider((community: item.community, id: item.id)),
     );
+    final bookmarks = ref.watch(bookmarkProvider);
+    final isBookmarked = bookmarks.any(
+      (b) => b.community == item.community && b.id == item.id,
+    );
 
     final detail = asyncDetail.whenOrNull(
       data: (either) => either.fold((_) => null, (d) => d),
@@ -266,6 +272,7 @@ class _FeedCard extends ConsumerWidget {
         ),
         detail: detail,
         detailLoading: asyncDetail.isLoading,
+        isBookmarked: isBookmarked,
         onImageTap: !hasImages
             ? null
             : (i) => Navigator.of(context).push<void>(
@@ -280,6 +287,36 @@ class _FeedCard extends ConsumerWidget {
         onCommentsTap: !hasComments
             ? null
             : () => _showComments(context, detail),
+        onCopyTap: () async {
+          await Clipboard.setData(ClipboardData(text: item.url));
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('링크를 복사했어요'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
+        onBookmarkTap: () {
+          ref
+              .read(bookmarkProvider.notifier)
+              .toggle(
+                Bookmark(
+                  community: item.community,
+                  id: item.id,
+                  title: item.title,
+                  url: item.url,
+                  author: item.author,
+                  thumbnailUrl: item.thumbnailUrl,
+                  previewText: item.previewText,
+                  publishedAt: item.publishedAt,
+                  recommendCount: item.recommendCount,
+                  commentCount: item.commentCount,
+                  viewCount: item.viewCount,
+                  savedAt: DateTime.now(),
+                ),
+              );
+        },
       ),
     );
   }

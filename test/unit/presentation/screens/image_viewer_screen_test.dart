@@ -43,7 +43,7 @@ void main() {
     testWidgets('renders InteractiveViewer for a normal image', (tester) async {
       // viewport default 800x600 → viewportAspect 1.33; aspect 2.0 (wide) is NOT long.
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: ImageViewerScreen(
             imageUrls: ['https://example.com/a.jpg'],
             knownAspects: {'https://example.com/a.jpg': 2.0},
@@ -66,8 +66,8 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerScreen(
-              imageUrls: ['https://example.com/long.jpg'],
-              knownAspects: {'https://example.com/long.jpg': 0.5},
+              imageUrls: const ['https://example.com/long.jpg'],
+              knownAspects: const {'https://example.com/long.jpg': 0.5},
               imageBuilder: (_) => Container(height: 2000, color: Colors.red),
             ),
           ),
@@ -95,7 +95,7 @@ void main() {
         'instead of InteractiveViewer', (tester) async {
       // aspect 0.5 (tall) < viewportAspect 1.33 → long image.
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: ImageViewerScreen(
             imageUrls: ['https://example.com/a.jpg'],
             knownAspects: {'https://example.com/a.jpg': 0.5},
@@ -130,7 +130,7 @@ void main() {
       navigatorKey.currentState!.push(
         MaterialPageRoute<void>(
           builder: (_) => ImageViewerScreen(
-            imageUrls: ['https://example.com/a.jpg'],
+            imageUrls: const ['https://example.com/a.jpg'],
             imageBuilder: (_) => const SizedBox.shrink(),
           ),
         ),
@@ -158,7 +158,7 @@ void main() {
       navigatorKey.currentState!.push(
         MaterialPageRoute<void>(
           builder: (_) => ImageViewerScreen(
-            imageUrls: ['https://example.com/a.jpg'],
+            imageUrls: const ['https://example.com/a.jpg'],
             imageBuilder: (_) => const SizedBox.shrink(),
           ),
         ),
@@ -179,7 +179,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ImageViewerScreen(
-            imageUrls: [
+            imageUrls: const [
               'https://example.com/a.jpg',
               'https://example.com/b.jpg',
             ],
@@ -207,7 +207,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ImageViewerScreen(
-            imageUrls: [
+            imageUrls: const [
               'https://example.com/a.jpg',
               'https://example.com/b.jpg',
             ],
@@ -236,7 +236,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ImageViewerScreen(
-            imageUrls: [
+            imageUrls: const [
               'https://example.com/a.jpg',
               'https://example.com/b.jpg',
             ],
@@ -259,11 +259,11 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerScreen(
-              imageUrls: [
+              imageUrls: const [
                 'https://example.com/long.jpg',
                 'https://example.com/normal.jpg',
               ],
-              knownAspects: {
+              knownAspects: const {
                 'https://example.com/long.jpg': 0.5,
                 'https://example.com/normal.jpg': 2.0,
               },
@@ -294,11 +294,11 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerScreen(
-              imageUrls: [
+              imageUrls: const [
                 'https://example.com/normal.jpg',
                 'https://example.com/long.jpg',
               ],
-              knownAspects: {
+              knownAspects: const {
                 'https://example.com/normal.jpg': 2.0,
                 'https://example.com/long.jpg': 0.5,
               },
@@ -326,12 +326,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: ImageViewerScreen(
-            imageUrls: [
+            imageUrls: const [
               'https://example.com/long.jpg',
               'https://example.com/normal.jpg',
             ],
-            initialIndex: 0,
-            knownAspects: {
+            knownAspects: const {
               'https://example.com/long.jpg': 0.5,
               'https://example.com/normal.jpg': 2.0,
             },
@@ -371,11 +370,11 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerScreen(
-              imageUrls: [
+              imageUrls: const [
                 'https://example.com/normal.jpg',
                 'https://example.com/long.jpg',
               ],
-              knownAspects: {
+              knownAspects: const {
                 'https://example.com/normal.jpg': 2.0,
                 'https://example.com/long.jpg': 0.5,
               },
@@ -412,12 +411,12 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerScreen(
-              imageUrls: [
+              imageUrls: const [
                 'https://example.com/normal.jpg',
                 'https://example.com/long.jpg',
               ],
               initialIndex: 1,
-              knownAspects: {
+              knownAspects: const {
                 'https://example.com/normal.jpg': 2.0,
                 'https://example.com/long.jpg': 0.5,
               },

@@ -1,7 +1,7 @@
+import 'package:happy_news/core/utils/media_classifier.dart';
+import 'package:happy_news/data/models/board_post_dto.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
-
-import 'package:happy_news/data/models/board_post_dto.dart';
 
 class BoardListParseResult {
   const BoardListParseResult({
@@ -86,6 +86,12 @@ class BoardListParser {
     var original = Uri.decodeComponent(match.group(1)!);
     final sizeIdx = original.indexOf('?SIZE=');
     if (sizeIdx != -1) original = original.substring(0, sizeIdx);
+    if (MediaClassifier.classify(original) == MediaType.video) {
+      var thumbUrl = url;
+      final outerSizeIdx = thumbUrl.indexOf('?SIZE=');
+      if (outerSizeIdx != -1) thumbUrl = thumbUrl.substring(0, outerSizeIdx);
+      return thumbUrl;
+    }
     return original;
   }
 

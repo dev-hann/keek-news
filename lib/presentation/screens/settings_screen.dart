@@ -4,10 +4,10 @@ import 'package:happy_news/core/widgets/molecules/dark_mode_selector.dart';
 import 'package:happy_news/core/widgets/molecules/settings_group.dart';
 import 'package:happy_news/core/widgets/molecules/settings_tile.dart';
 import 'package:happy_news/core/widgets/molecules/update_banner.dart';
-import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/presentation/providers/cache_management_provider.dart';
 import 'package:happy_news/presentation/providers/theme_provider.dart';
 import 'package:happy_news/presentation/providers/update_provider.dart';
+import 'package:happy_news/presentation/screens/bookmarks_screen.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -42,6 +42,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: SafeArea(
         child: ListView(
           children: [
+            SettingsGroup(
+              title: '저장함',
+              children: [
+                SettingsTile(
+                  leading: const Icon(Icons.bookmark_outline),
+                  title: '저장한 게시물',
+                  onTap: () => _openBookmarks(context),
+                ),
+              ],
+            ),
             SettingsGroup(
               title: '화면',
               children: [
@@ -143,6 +153,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+
+  void _openBookmarks(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const BookmarksScreen()));
   }
 
   void _confirmClearCache(BuildContext context) {

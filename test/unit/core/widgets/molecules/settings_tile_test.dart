@@ -12,7 +12,7 @@ void main() {
       );
 
       final text = tester.widget<Text>(find.text('버전'));
-      expect(text.style?.color, isNot(equals(ColorScheme.light().error)));
+      expect(text.style?.color, isNot(equals(const ColorScheme.light().error)));
     });
 
     testWidgets('destructive renders title in colorScheme.error', (

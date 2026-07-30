@@ -212,7 +212,6 @@ void main() {
           // the retry Timer fired, so CachedNetworkImage kept its stale error
           // state and never re-fetched.
           final controller = RetryController(
-            maxAttempts: 3,
             retryDelay: const Duration(milliseconds: 100),
           );
           addTearDown(controller.dispose);
@@ -233,7 +232,7 @@ void main() {
             final w = tester.widget<CachedNetworkImage>(
               find.byType(CachedNetworkImage),
             );
-            return (w.key as ValueKey<String>).value;
+            return (w.key! as ValueKey<String>).value;
           }
 
           final initialKey = cachedImageKey();
@@ -287,7 +286,7 @@ void main() {
           final w = tester.widget<CachedNetworkImage>(
             find.byType(CachedNetworkImage),
           );
-          return (w.key as ValueKey<String>).value;
+          return (w.key! as ValueKey<String>).value;
         }
 
         expect(cachedImageKey(), contains('#0'));

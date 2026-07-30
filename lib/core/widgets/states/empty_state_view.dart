@@ -4,34 +4,49 @@ import 'package:happy_news/core/themes/app_spacing.dart';
 
 class EmptyStateView extends StatelessWidget {
   const EmptyStateView({
-    required this.message,
-    super.key,
+    this.message,
+    this.title,
+    this.subtitle,
     this.icon = Icons.inbox_outlined,
+    super.key,
   });
-  final String message;
+
+  final String? message;
+  final String? title;
+  final String? subtitle;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final effectiveTitle = title ?? message ?? '';
+
     return Center(
       child: Padding(
         padding: AppSpacing.edgeAll24,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 48,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),
             AppSpacing.sbH16,
             Text(
-              message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              effectiveTitle,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),
+            if (subtitle != null) ...[
+              AppSpacing.sbH8,
+              Text(
+                subtitle!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ],
         ),
       ),

@@ -37,7 +37,7 @@ void main() {
   setUpAll(() {
     final humorunivDs = _MockHumorunivRemoteDs();
     when(() => humorunivDs.fetchBoardList(any(), any(), any())).thenAnswer(
-      (_) async => BoardListDsResult(
+      (_) async => const BoardListDsResult(
         posts: [
           BoardPostDto(
             id: 100,

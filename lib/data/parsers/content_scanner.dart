@@ -1,8 +1,7 @@
-import 'package:html/dom.dart' as dom;
-
 import 'package:happy_news/core/network/url_normalizer.dart';
 import 'package:happy_news/core/utils/media_classifier.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:html/dom.dart' as dom;
 
 class ContentScanResult {
   const ContentScanResult({required this.blocks, required this.imageUrls});
@@ -350,6 +349,9 @@ abstract final class ContentScanner {
           break;
         }
       }
+    }
+    if (thumb != null && thumb.contains('url_enc=')) {
+      thumb = null;
     }
     return _UrlEntry(
       url: url,

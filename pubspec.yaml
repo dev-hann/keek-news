@@ -29,6 +29,7 @@ dependencies:
 
   meta: any
   visibility_detector: ^0.4.0+2
+  flutter_cache_manager: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -41,6 +42,7 @@ dev_dependencies:
   package_info_plus_platform_interface: ^3.2.1
   url_launcher_platform_interface: ^2.3.2
 
+  fake_async: any
 flutter:
   uses-material-design: true
 

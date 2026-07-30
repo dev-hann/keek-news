@@ -6,21 +6,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:happy_news/core/errors/failures.dart';
 import 'package:happy_news/core/widgets/molecules/feed_card.dart';
-import 'package:happy_news/core/widgets/states/skeleton_feed_card.dart';
 import 'package:happy_news/core/widgets/states/error_state_view.dart';
+import 'package:happy_news/core/widgets/states/skeleton_feed_card.dart';
+import 'package:happy_news/di/injection.dart' as di;
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/entities/feed_item.dart';
 import 'package:happy_news/domain/entities/merged_feed.dart';
 import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
 import 'package:happy_news/domain/usecases/get_merged_feed.dart';
-import 'package:happy_news/di/injection.dart' as di;
 import 'package:happy_news/presentation/providers/shared_preferences_provider.dart';
 import 'package:happy_news/presentation/screens/home_screen.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/merged_feed_helper.dart';
-
 import '../../../helpers/package_info_helper.dart';
 
 void main() {
@@ -110,6 +109,29 @@ void main() {
     expect(find.byType(FeedCard), findsNWidgets(2));
   });
 
+  testWidgets('should toggle bookmark icon when bookmark button tapped', (
+    tester,
+  ) async {
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+      ),
+    ).thenAnswer((_) async => Right(page(sampleItems())));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.bookmark_border), findsNWidgets(2));
+
+    await tester.tap(find.byIcon(Icons.bookmark_border).first);
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.bookmark), findsOneWidget);
+    expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+  });
+
   testWidgets('should show skeleton feed cards while loading', (tester) async {
     final completer = Completer<Either<Failure, MergedPage>>();
     when(
@@ -187,5 +209,75 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('설정'), findsOneWidget);
+  });
+
+  testWidgets('scroll near bottom triggers fetchNextPage with cursor', (
+    tester,
+  ) async {
+    final firstPage = MergedPage(
+      items: List.generate(
+        20,
+        (i) => FeedItem(
+          community: CommunityId.humoruniv,
+          id: '${i + 1}',
+          title: '글 ${i + 1}',
+          url: '/u${i + 1}',
+          author: 'a',
+          recommendCount: i,
+          commentCount: i,
+          viewCount: i,
+        ),
+      ),
+      next: MergedCursor(oldestSeen: DateTime(2024), perSourceTokens: const {}),
+    );
+    final secondPage = MergedPage(
+      items: List.generate(
+        5,
+        (i) => FeedItem(
+          community: CommunityId.humoruniv,
+          id: '${100 + i}',
+          title: '다음글 ${100 + i}',
+          url: '/n${100 + i}',
+          author: 'a',
+        ),
+      ),
+    );
+
+    var call = 0;
+    when(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: any(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+      ),
+    ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : secondPage));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FeedCard), findsWidgets);
+
+    final feedList = find.ancestor(
+      of: find.byType(FeedCard).first,
+      matching: find.byType(ListView),
+    );
+
+    for (var i = 0; i < 4; i++) {
+      await tester.drag(feedList, const Offset(0, -1500));
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+
+    final captured = verify(
+      () => mockRepo.fetchMerged(
+        perSource: any(named: 'perSource'),
+        cursor: captureAny(named: 'cursor'),
+        enabled: any(named: 'enabled'),
+      ),
+    ).captured;
+
+    expect(captured.length, 2);
+    expect(captured[0], isNull);
+    expect(captured[1], isA<MergedCursor>());
   });
 }

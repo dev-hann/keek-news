@@ -56,7 +56,7 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
     }
 
     if (streams.isEmpty) {
-      return Left(ServerFailure('All community adapters failed'));
+      return const Left(ServerFailure('All community adapters failed'));
     }
 
     final page = mergeFeedStreams(
@@ -127,14 +127,13 @@ class MergedFeedRepositoryImpl implements MergedFeedRepository {
 }
 
 class _FetchOutcome {
-  final CommunityId id;
-  final List<FeedItem> items;
-  final String? nextToken;
-  final bool failed;
-
   _FetchOutcome(this.id, this.items, this.nextToken) : failed = false;
   _FetchOutcome.failed(this.id)
     : items = const [],
       nextToken = null,
       failed = true;
+  final CommunityId id;
+  final List<FeedItem> items;
+  final String? nextToken;
+  final bool failed;
 }

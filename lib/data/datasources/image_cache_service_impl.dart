@@ -10,7 +10,7 @@ class ImageCacheServiceImpl implements ImageCacheService {
   /// `flutter_cache_manager`'s `DefaultCacheManager` stores files under a
   /// folder named [DefaultCacheManager.key] ("libCachedImageData") inside the
   /// system temporary directory.
-  static final String _cacheFolderName = DefaultCacheManager.key;
+  static const String _cacheFolderName = DefaultCacheManager.key;
 
   @override
   Future<int> getSizeBytes() async {

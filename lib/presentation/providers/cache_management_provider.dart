@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:happy_news/di/injection.dart';
 import 'package:happy_news/data/datasources/image_cache_service.dart';
+import 'package:happy_news/di/injection.dart';
 
 class CacheManagementState {
   const CacheManagementState({this.sizeBytes, this.loading = false});
@@ -21,14 +21,14 @@ class CacheManagementNotifier extends StateNotifier<CacheManagementState> {
   Future<void> loadSize() async {
     state = state.copyWith(loading: true);
     final size = await _service.getSizeBytes();
-    state = CacheManagementState(sizeBytes: size, loading: false);
+    state = CacheManagementState(sizeBytes: size);
   }
 
   Future<void> clear() async {
     state = state.copyWith(loading: true);
     await _service.clear();
     final size = await _service.getSizeBytes();
-    state = CacheManagementState(sizeBytes: size, loading: false);
+    state = CacheManagementState(sizeBytes: size);
   }
 }
 

@@ -24,7 +24,7 @@ void main() {
 
     test('fetchLatest should convert BoardPostDto to FeedItemDto', () async {
       when(() => mockDs.fetchBoardList('pds', 1, '')).thenAnswer(
-        (_) async => BoardListDsResult(
+        (_) async => const BoardListDsResult(
           posts: [
             BoardPostDto(
               id: 100,

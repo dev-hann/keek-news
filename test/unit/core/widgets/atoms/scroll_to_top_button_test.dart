@@ -20,7 +20,7 @@ void main() {
     });
 
     testWidgets('should be fully opaque when visible', (tester) async {
-      await tester.pumpWidget(harness(onTap: () {}, visible: true));
+      await tester.pumpWidget(harness(onTap: () {}));
       expect(
         tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
         1.0,
@@ -39,7 +39,7 @@ void main() {
       tester,
     ) async {
       var taps = 0;
-      await tester.pumpWidget(harness(onTap: () => taps++, visible: true));
+      await tester.pumpWidget(harness(onTap: () => taps++));
       await tester.tap(find.byType(ScrollToTopButton));
       await tester.pump();
       expect(taps, 1);
@@ -62,7 +62,7 @@ void main() {
           (w) =>
               w is Semantics &&
               w.properties.label == '맨 위로' &&
-              w.properties.button == true,
+              (w.properties.button ?? false),
         ),
         findsOneWidget,
       );

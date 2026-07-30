@@ -21,9 +21,9 @@ void main() {
 
   group('GetMergedFeed', () {
     test('should delegate to repository.fetchMerged', () async {
-      final page = MergedPage(
+      const page = MergedPage(
         items: [
-          const FeedItem(
+          FeedItem(
             community: CommunityId.humoruniv,
             id: '1',
             title: 't',
@@ -37,20 +37,18 @@ void main() {
           cursor: any(named: 'cursor'),
           enabled: any(named: 'enabled'),
         ),
-      ).thenAnswer((_) async => Right(page));
+      ).thenAnswer((_) async => const Right(page));
 
-      final result = await useCase(const MergedFeedParams(perSource: 20));
+      final result = await useCase(const MergedFeedParams());
 
       expect(result.isRight(), isTrue);
-      verify(
-        () => repo.fetchMerged(perSource: 20, cursor: null, enabled: const {}),
-      ).called(1);
+      verify(() => repo.fetchMerged(perSource: 20)).called(1);
     });
 
     test('should forward cursor and enabled set', () async {
       final cursor = MergedCursor(
         oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: {CommunityId.humoruniv: '2'},
+        perSourceTokens: const {CommunityId.humoruniv: '2'},
       );
       when(
         () => repo.fetchMerged(
@@ -84,7 +82,7 @@ void main() {
           cursor: any(named: 'cursor'),
           enabled: any(named: 'enabled'),
         ),
-      ).thenAnswer((_) async => Left(ServerFailure('all failed')));
+      ).thenAnswer((_) async => const Left(ServerFailure('all failed')));
 
       final result = await useCase(const MergedFeedParams());
 

@@ -1,8 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:html/parser.dart' as html_parser;
-
 import 'package:happy_news/data/parsers/content_scanner.dart';
 import 'package:happy_news/domain/entities/content_block.dart';
+import 'package:html/parser.dart' as html_parser;
 
 void main() {
   group('ContentScanner', () {
@@ -250,9 +249,11 @@ void main() {
         expect(video.url, 'http://example.com/video.mp4');
       });
 
-      test('should emit single VideoBlock for comment_mp4_expand container, '
-          'using poster img as thumbnail and no separate ImageBlock', () {
-        final doc = html_parser.parse('''
+      test(
+        'should emit single VideoBlock for comment_mp4_expand container, '
+        'dropping url_enc thumbnail (server returns 403) and no ImageBlock',
+        () {
+          final doc = html_parser.parse('''
             <div class="comment_body">
               <div class='comment_file'>
                 <div class='comment_img_div pointer' style='width:320px;'
@@ -265,17 +266,43 @@ void main() {
               <span class="comment_text">똥이나 처먹어!</span>
             </div>
           ''');
+          final container = doc.querySelector('.comment_body')!;
+
+          final result = ContentScanner.scanCompact(container);
+
+          expect(result, hasLength(1));
+          expect(result.whereType<ImageBlock>(), isEmpty);
+          final video = result.whereType<VideoBlock>().single;
+          expect(video.url, 'http://down.humoruniv.com/data/comment/video.mp4');
+          expect(
+            video.thumbnailUrl,
+            isNull,
+            reason:
+                'url_enc thumbnails return 403 for any client; '
+                'must be null so the UI can fall back to local frame extraction',
+          );
+        },
+      );
+
+      test('comment_mp4_expand with plaintext thumb.php thumbnail keeps it', () {
+        final doc = html_parser.parse('''
+            <div class="comment_body">
+              <div class='comment_file'>
+                <div class='comment_img_div pointer' style='width:320px;'
+                    OnClick="javascript:comment_mp4_expand('mp4_1_', 'http://down.humoruniv.com/data/comment/video.mp4', 'http://timg.humoruniv.com/thumb.php?url=http://down.humoruniv.com/data/comment/v.jpg', '320', '320', '', 'MP4', '', '', '');">
+                  <img src='http://timg.humoruniv.com/thumb.php?url=http://down.humoruniv.com/data/comment/v.jpg' width='320' class='comment_thumb_img'/>
+                </div>
+              </div>
+            </div>
+          ''');
         final container = doc.querySelector('.comment_body')!;
 
         final result = ContentScanner.scanCompact(container);
-
-        expect(result, hasLength(1));
-        expect(result.whereType<ImageBlock>(), isEmpty);
         final video = result.whereType<VideoBlock>().single;
-        expect(video.url, 'http://down.humoruniv.com/data/comment/video.mp4');
         expect(
           video.thumbnailUrl,
-          'http://timg.humoruniv.com/thumb.php?url_enc=abc',
+          'http://timg.humoruniv.com/thumb.php?url=http://down.humoruniv.com/data/comment/v.jpg',
+          reason: 'plaintext thumb.php URLs are loadable (server renders PNG)',
         );
       });
 

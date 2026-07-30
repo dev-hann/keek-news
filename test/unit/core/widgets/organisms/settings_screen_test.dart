@@ -10,10 +10,12 @@ import 'package:happy_news/data/datasources/image_cache_service.dart';
 import 'package:happy_news/di/injection.dart' as di;
 import 'package:happy_news/domain/entities/app_release.dart';
 import 'package:happy_news/domain/repositories/apk_install_repository.dart';
+import 'package:happy_news/domain/repositories/bookmark_repository.dart';
 import 'package:happy_news/domain/repositories/update_repository.dart';
 import 'package:happy_news/domain/usecases/check_for_update.dart';
 import 'package:happy_news/presentation/providers/shared_preferences_provider.dart';
 import 'package:happy_news/presentation/providers/update_provider.dart';
+import 'package:happy_news/presentation/screens/bookmarks_screen.dart';
 import 'package:happy_news/presentation/screens/settings_screen.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -26,6 +28,8 @@ class MockUpdateRepository extends Mock implements UpdateRepository {}
 class MockApkInstallRepository extends Mock implements ApkInstallRepository {}
 
 class FakeImageCacheService extends Mock implements ImageCacheService {}
+
+class FakeBookmarkRepository extends Mock implements BookmarkRepository {}
 
 class FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   bool canLaunchResult = true;
@@ -54,6 +58,7 @@ void main() {
   late MockUpdateRepository mockRepository;
   late MockApkInstallRepository mockApkRepo;
   late FakeImageCacheService fakeCacheService;
+  late FakeBookmarkRepository fakeBookmarkRepo;
   late SharedPreferences prefs;
   late FakeUrlLauncherPlatform fakeLauncher;
 
@@ -66,13 +71,14 @@ void main() {
       version: '1.5.0',
       buildNumber: '7',
       buildSignature: '',
-      installerStore: null,
     );
     fakeLauncher = FakeUrlLauncherPlatform();
     UrlLauncherPlatform.instance = fakeLauncher;
     mockRepository = MockUpdateRepository();
     mockApkRepo = MockApkInstallRepository();
     fakeCacheService = FakeImageCacheService();
+    fakeBookmarkRepo = FakeBookmarkRepository();
+    when(() => fakeBookmarkRepo.getAll()).thenAnswer((_) async => const []);
     registerFallbackValue(Uri.parse('https://example.com'));
     when(() => fakeCacheService.getSizeBytes()).thenAnswer((_) async => 4096);
     if (di.sl.isRegistered<UpdateRepository>()) {
@@ -87,12 +93,16 @@ void main() {
     if (di.sl.isRegistered<ImageCacheService>()) {
       di.sl.unregister<ImageCacheService>();
     }
+    if (di.sl.isRegistered<BookmarkRepository>()) {
+      di.sl.unregister<BookmarkRepository>();
+    }
     di.sl.registerLazySingleton<UpdateRepository>(() => mockRepository);
     di.sl.registerLazySingleton(
       () => CheckForUpdate(repository: mockRepository, currentVersion: '1.0.0'),
     );
     di.sl.registerLazySingleton<ApkInstallRepository>(() => mockApkRepo);
     di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
+    di.sl.registerLazySingleton<BookmarkRepository>(() => fakeBookmarkRepo);
   });
 
   tearDown(di.sl.reset);
@@ -112,6 +122,7 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
+      expect(find.text('저장함'), findsOneWidget);
       expect(find.text('화면'), findsOneWidget);
       expect(find.text('미디어 & 데이터'), findsOneWidget);
       expect(find.text('정보'), findsOneWidget);
@@ -203,6 +214,38 @@ void main() {
 
       expect(find.text('이미지 캐시'), findsOneWidget);
       expect(find.textContaining('KB'), findsWidgets);
+    });
+
+    testWidgets('renders the bookmarks tile in the 저장함 group', (tester) async {
+      when(() => mockRepository.getLatestRelease()).thenAnswer(
+        (_) async => const Right(
+          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
+        ),
+      );
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('저장한 게시물'), findsOneWidget);
+      expect(find.byIcon(Icons.bookmark_outline), findsOneWidget);
+    });
+
+    testWidgets('navigates to BookmarksScreen when bookmark tile tapped', (
+      tester,
+    ) async {
+      when(() => mockRepository.getLatestRelease()).thenAnswer(
+        (_) async => const Right(
+          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
+        ),
+      );
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('저장한 게시물'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BookmarksScreen), findsOneWidget);
     });
 
     testWidgets('should display update banner in idle state', (tester) async {

@@ -221,7 +221,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
       // footprint (offset + indicator height) so the user can scroll the
       // image's bottom edge above the overlay. SafeArea already consumes the
       // system bottom inset, so we only need the indicator's own footprint.
-      final bottomReserve =
+      const bottomReserve =
           AppSizes.imageViewerIndicatorBottom +
           AppSizes.imageViewerIndicatorHeight;
       return SingleChildScrollView(
@@ -231,7 +231,7 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _imageFor(url),
-              SizedBox(height: bottomReserve),
+              const SizedBox(height: bottomReserve),
             ],
           ),
         ),

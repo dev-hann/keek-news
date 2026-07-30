@@ -5,6 +5,7 @@ import 'package:happy_news/data/datasources/apk_download_data_source.dart';
 import 'package:happy_news/data/datasources/apk_download_data_source_impl.dart';
 import 'package:happy_news/data/datasources/apk_installer_service.dart';
 import 'package:happy_news/data/datasources/apk_installer_service_impl.dart';
+import 'package:happy_news/data/datasources/bookmark_local_data_source.dart';
 import 'package:happy_news/data/datasources/community_adapter.dart';
 import 'package:happy_news/data/datasources/dogdrip_adapter_impl.dart';
 import 'package:happy_news/data/datasources/github_remote_ds.dart';
@@ -17,14 +18,20 @@ import 'package:happy_news/data/datasources/image_cache_service_impl.dart';
 import 'package:happy_news/data/datasources/ppomppu_adapter_impl.dart';
 import 'package:happy_news/data/datasources/todayhumor_adapter_impl.dart';
 import 'package:happy_news/data/repositories/apk_install_repository_impl.dart';
+import 'package:happy_news/data/repositories/bookmark_repository_impl.dart';
 import 'package:happy_news/data/repositories/merged_feed_repository_impl.dart';
 import 'package:happy_news/data/repositories/update_repository_impl.dart';
 import 'package:happy_news/domain/entities/community.dart';
 import 'package:happy_news/domain/repositories/apk_install_repository.dart';
+import 'package:happy_news/domain/repositories/bookmark_repository.dart';
 import 'package:happy_news/domain/repositories/merged_feed_repository.dart';
 import 'package:happy_news/domain/repositories/update_repository.dart';
+import 'package:happy_news/domain/usecases/add_bookmark.dart';
 import 'package:happy_news/domain/usecases/check_for_update.dart';
+import 'package:happy_news/domain/usecases/get_bookmarks.dart';
 import 'package:happy_news/domain/usecases/get_merged_feed.dart';
+import 'package:happy_news/domain/usecases/is_bookmarked.dart';
+import 'package:happy_news/domain/usecases/remove_bookmark.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,11 +68,7 @@ Future<void> configureDependencies() async {
   );
 
   sl.registerLazySingleton<HtmlClientImpl>(
-    () => HtmlClientImpl(
-      baseUrl: 'https://www.ppomppu.co.kr',
-      encoding: 'euc-kr',
-      desktop: true,
-    ),
+    () => HtmlClientImpl(baseUrl: 'https://www.ppomppu.co.kr', desktop: true),
     instanceName: 'ppomppuHtmlClient',
   );
 
@@ -137,5 +140,26 @@ Future<void> configureDependencies() async {
       downloadDataSource: sl<ApkDownloadDataSource>(),
       installerService: sl<ApkInstallerService>(),
     ),
+  );
+
+  sl.registerLazySingleton<BookmarkLocalDataSource>(
+    () => BookmarkLocalDataSourceImpl(sl<SharedPreferences>()),
+  );
+
+  sl.registerLazySingleton<BookmarkRepository>(
+    () => BookmarkRepositoryImpl(sl<BookmarkLocalDataSource>()),
+  );
+
+  sl.registerLazySingleton(
+    () => GetBookmarks(repository: sl<BookmarkRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => IsBookmarked(repository: sl<BookmarkRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => AddBookmark(repository: sl<BookmarkRepository>()),
+  );
+  sl.registerLazySingleton(
+    () => RemoveBookmark(repository: sl<BookmarkRepository>()),
   );
 }
