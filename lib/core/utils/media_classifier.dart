@@ -13,6 +13,15 @@ abstract final class MediaClassifier {
   static const _videoExts = {'.mp4', '.webm', '.avi', '.mov', '.mkv'};
   static const _audioExts = {'.mp3', '.wav', '.ogg'};
 
+  static const _loadableImageExts = {
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.webp',
+    '.bmp',
+  };
+
   static MediaType classify(String url) {
     if (url.isEmpty) return MediaType.unknown;
 
@@ -65,5 +74,22 @@ abstract final class MediaClassifier {
         t == MediaType.video ||
         t == MediaType.audio ||
         t == MediaType.youtube;
+  }
+
+  static bool isLoadableImage(String url) {
+    if (url.isEmpty) return false;
+
+    if (url.contains('url_enc=')) return false;
+
+    final lower = url.toLowerCase();
+    final queryIdx = lower.indexOf('?');
+    final path = queryIdx >= 0 ? lower.substring(0, queryIdx) : lower;
+
+    if (lower.contains('thumb.php?url=')) return true;
+
+    for (final ext in _loadableImageExts) {
+      if (path.endsWith(ext)) return true;
+    }
+    return false;
   }
 }

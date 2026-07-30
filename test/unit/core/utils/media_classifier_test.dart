@@ -200,6 +200,74 @@ void main() {
       });
     });
 
+    group('isLoadableImage', () {
+      test('should return false for .mp4 video URL', () {
+        expect(
+          MediaClassifier.isLoadableImage('https://example.com/clip.mp4'),
+          isFalse,
+        );
+      });
+
+      test('should return false for .webm video URL', () {
+        expect(
+          MediaClassifier.isLoadableImage('https://example.com/clip.webm'),
+          isFalse,
+        );
+      });
+
+      test('should return true for .jpg image URL', () {
+        expect(
+          MediaClassifier.isLoadableImage('https://example.com/photo.jpg'),
+          isTrue,
+        );
+      });
+
+      test('should return true for .jpg with query string', () {
+        expect(
+          MediaClassifier.isLoadableImage(
+            'https://example.com/photo.jpg?SIZE=70x40',
+          ),
+          isTrue,
+        );
+      });
+
+      test('should return false for .svg (no decoder in app)', () {
+        expect(
+          MediaClassifier.isLoadableImage('https://example.com/icon.svg'),
+          isFalse,
+        );
+      });
+
+      test('should return false for humoruniv url_enc encrypted thumb', () {
+        expect(
+          MediaClassifier.isLoadableImage(
+            'https://timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7',
+          ),
+          isFalse,
+        );
+      });
+
+      test('should return true for humoruniv thumb.php with plaintext url', () {
+        expect(
+          MediaClassifier.isLoadableImage(
+            'https://timg.humoruniv.com/thumb.php?url=https://down.humoruniv.com/a.jpg',
+          ),
+          isTrue,
+        );
+      });
+
+      test('should return false for .html page URL', () {
+        expect(
+          MediaClassifier.isLoadableImage('https://example.com/page.html'),
+          isFalse,
+        );
+      });
+
+      test('should return false for empty string', () {
+        expect(MediaClassifier.isLoadableImage(''), isFalse);
+      });
+    });
+
     group('isMedia', () {
       test('should return true for image URLs', () {
         expect(MediaClassifier.isMedia('http://example.com/photo.jpg'), isTrue);
