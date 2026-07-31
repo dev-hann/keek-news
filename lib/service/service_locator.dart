@@ -12,16 +12,17 @@ import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
 import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
-import 'package:keek_news/service/apk_download_data_source.dart';
-import 'package:keek_news/service/apk_download_data_source_impl.dart';
+import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
-import 'package:keek_news/service/apk_installer_service_impl.dart';
-import 'package:keek_news/service/bookmark_local_data_source.dart';
-import 'package:keek_news/service/dio_html_client.dart';
-import 'package:keek_news/service/github_remote_ds.dart';
-import 'package:keek_news/service/github_remote_ds_impl.dart';
+import 'package:keek_news/service/bookmark_local_service.dart';
+import 'package:keek_news/service/default_image_cache_service.dart';
+import 'package:keek_news/service/dio_apk_download_service.dart';
+import 'package:keek_news/service/dio_github_remote_service.dart';
+import 'package:keek_news/service/dio_html_service.dart';
+import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/service/image_cache_service.dart';
-import 'package:keek_news/service/image_cache_service_impl.dart';
+import 'package:keek_news/service/method_channel_apk_installer_service.dart';
+import 'package:keek_news/service/prefs_bookmark_local_service.dart';
 import 'package:keek_news/use_case/add_bookmark_use_case.dart';
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
 import 'package:keek_news/use_case/get_bookmarks_use_case.dart';
@@ -55,19 +56,19 @@ Future<void> configureDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
 
-  final humorunivHtml = DioHtmlClient(
+  final humorunivHtml = DioHtmlService(
     dio: _dio(baseUrl: 'https://m.humoruniv.com'),
     encoding: 'euc-kr',
   );
-  final todayhumorHtml = DioHtmlClient(
+  final todayhumorHtml = DioHtmlService(
     dio: _dio(baseUrl: 'https://www.todayhumor.co.kr', ua: _desktopUA),
     encoding: 'utf-8',
   );
-  final ppomppuHtml = DioHtmlClient(
+  final ppomppuHtml = DioHtmlService(
     dio: _dio(baseUrl: 'https://www.ppomppu.co.kr', ua: _desktopUA),
     encoding: 'euc-kr',
   );
-  final dogdripHtml = DioHtmlClient(
+  final dogdripHtml = DioHtmlService(
     dio: _dio(baseUrl: 'https://www.dogdrip.net', ua: _desktopUA),
     encoding: 'utf-8',
   );
@@ -100,10 +101,10 @@ Future<void> configureDependencies() async {
     () => GetPostDetailUseCase(repos: sl<Map<CommunityId, CommunityRepo>>()),
   );
 
-  sl.registerLazySingleton<GitHubRemoteDs>(GitHubRemoteDsImpl.new);
+  sl.registerLazySingleton<GitHubRemoteService>(DioGitHubRemoteService.new);
 
   sl.registerLazySingleton<UpdateRepo>(
-    () => UpdateImpl(remoteDs: sl<GitHubRemoteDs>()),
+    () => UpdateImpl(remoteDs: sl<GitHubRemoteService>()),
   );
 
   final packageInfo = await PackageInfo.fromPlatform();
@@ -114,8 +115,8 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  sl.registerLazySingleton<ApkDownloadDataSource>(
-    () => ApkDownloadDataSourceImpl(
+  sl.registerLazySingleton<ApkDownloadService>(
+    () => DioApkDownloadService(
       dio: Dio(),
       resolveSavePath: () async {
         final dir = await getExternalStorageDirectory();
@@ -123,23 +124,25 @@ Future<void> configureDependencies() async {
       },
     ),
   );
-  sl.registerLazySingleton<ApkInstallerService>(ApkInstallerServiceImpl.new);
+  sl.registerLazySingleton<ApkInstallerService>(
+    MethodChannelApkInstallerService.new,
+  );
   sl.registerLazySingleton<ImageCacheService>(
-    () => const ImageCacheServiceImpl(),
+    () => const DefaultImageCacheService(),
   );
   sl.registerLazySingleton<ApkInstallRepo>(
     () => ApkInstallImpl(
-      downloadDataSource: sl<ApkDownloadDataSource>(),
+      downloadDataSource: sl<ApkDownloadService>(),
       installerService: sl<ApkInstallerService>(),
     ),
   );
 
-  sl.registerLazySingleton<BookmarkLocalDataSource>(
-    () => BookmarkLocalDataSourceImpl(sl<SharedPreferences>()),
+  sl.registerLazySingleton<BookmarkLocalService>(
+    () => PrefsBookmarkLocalService(sl<SharedPreferences>()),
   );
 
   sl.registerLazySingleton<BookmarkRepo>(
-    () => BookmarkImpl(sl<BookmarkLocalDataSource>()),
+    () => BookmarkImpl(sl<BookmarkLocalService>()),
   );
 
   sl.registerLazySingleton(

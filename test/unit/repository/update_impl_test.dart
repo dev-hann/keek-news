@@ -1,13 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
-import 'package:keek_news/service/github_remote_ds.dart';
+import 'package:keek_news/service/github_remote_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockGitHubRemoteDs extends Mock implements GitHubRemoteDs {}
+class MockGitHubRemoteService extends Mock implements GitHubRemoteService {}
 
 void main() {
-  late MockGitHubRemoteDs mockRemoteDs;
+  late MockGitHubRemoteService mockRemoteDs;
   late UpdateImpl repository;
 
   const validJson = '''
@@ -25,7 +25,7 @@ void main() {
   ''';
 
   setUp(() {
-    mockRemoteDs = MockGitHubRemoteDs();
+    mockRemoteDs = MockGitHubRemoteService();
     repository = UpdateImpl(remoteDs: mockRemoteDs);
   });
 

@@ -1,20 +1,11 @@
 import 'dart:convert';
 
 import 'package:keek_news/model/bookmark.dart';
+import 'package:keek_news/service/bookmark_local_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-abstract class BookmarkLocalDataSource {
-  Future<List<Bookmark>> getAll();
-
-  Future<bool> exists(String key);
-
-  Future<void> upsert(Bookmark bookmark);
-
-  Future<void> remove(String key);
-}
-
-class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
-  BookmarkLocalDataSourceImpl(this._prefs);
+class PrefsBookmarkLocalService implements BookmarkLocalService {
+  PrefsBookmarkLocalService(this._prefs);
 
   static const String storageKey = 'bookmarks';
 

@@ -11,9 +11,9 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for layer boundaries. See [NAMING_CONVENT
 
 ## Model Rules
 
-1. All entities/DTOs/failures MUST `extends Equatable`
+1. All entities/failures MUST `extends Equatable`
 2. All fields MUST be `final` (immutability)
-3. DTOs MUST have `toEntity()` returning the corresponding entity
+3. Entities that need persistence (e.g. `Bookmark`, `AppRelease`) own `toJson`/`fromJson` directly — no separate DTO layer
 4. Override `props` with all identity fields
 
 ```dart
@@ -48,13 +48,13 @@ class NetworkFailure extends Failure { ... }
 class ParseFailure extends Failure { ... }
 ```
 
-Return pattern in repository/datasource:
+Return pattern in repository:
 ```dart
 try {
-  final dto = await _datasource.fetch();
-  return Right(dto.toEntity());
-} on ServerException {
-  return Left(ServerFailure('...'));
+  final items = await _service.fetch();
+  return Right(items);
+} catch (e) {
+  return Left(ServerFailure(e.toString()));
 }
 ```
 
@@ -67,40 +67,15 @@ either.fold(
 );
 ```
 
-## Parser Rules
+## Service Rules
 
-Parsers live in `service/parser/`. Convert raw HTML strings into typed DTOs.
-
-- Stateless classes with static methods.
-- Input: `String html` → Output: `Dto` or `List<Dto>`.
-- DOM selector failures MUST NOT crash — return empty/default values.
-- One parser per HTML page structure per community.
-- Each parser MUST have corresponding fixture HTML in `test/fixtures/`.
-
-Pattern:
-```dart
-class DogdripListParser {
-  static List<FeedItemDto> parse(String html) {
-    if (html.isEmpty) return [];
-    final doc = html_parser.parse(html);
-    return doc.querySelectorAll(rowSelector)
-        .map(parseRow)
-        .whereType<FeedItemDto>()
-        .toList();
-  }
-}
-```
-
-## DTO Rules
-
-- DTOs live in `model/` with `_dto` suffix.
-- Each DTO MUST have a `toEntity()` method returning the corresponding entity.
-- DTOs `extends Equatable`.
-- DTOs are the parsing boundary type (HTML ↔ typed data).
+- `HtmlService` (concrete: `DioHtmlService`) is the single HTML service — owns HTTP fetch + charset decode + DOM parsing utilities (extractNumber, textOf, statOf, scanContent, etc.).
+- All service files follow `*_service.dart` naming (abstract) / `<tech>_*_service.dart` (concrete).
+- Services are constructor-injected into Repositories.
 
 ## Riverpod Provider Rules
 
-- Providers call use cases, never repositories or datasources directly.
+- Providers call use cases, never repositories or services directly.
 - Use `AsyncNotifierProvider` or `NotifierProvider` for state.
 - Provider file names match the feature: `merged_feed_provider.dart`.
 - Sole state holder — branch on UseCase results with `fold()`.

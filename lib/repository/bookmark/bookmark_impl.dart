@@ -1,12 +1,12 @@
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
-import 'package:keek_news/service/bookmark_local_data_source.dart';
+import 'package:keek_news/service/bookmark_local_service.dart';
 
 class BookmarkImpl implements BookmarkRepo {
   BookmarkImpl(this._dataSource);
 
-  final BookmarkLocalDataSource _dataSource;
+  final BookmarkLocalService _dataSource;
 
   String _keyOf(CommunityId community, String id) => '${community.name}:$id';
 

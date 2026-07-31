@@ -5,11 +5,11 @@ import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
-import 'package:keek_news/service/html_client.dart';
+import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
 
-class DioHtmlClient implements HtmlClient {
-  DioHtmlClient({required Dio dio, required String encoding})
+class DioHtmlService implements HtmlService {
+  DioHtmlService({required Dio dio, required String encoding})
     : _dio = dio,
       _encoding = encoding;
 

@@ -1,15 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
-import 'package:keek_news/service/dio_html_client.dart';
+import 'package:keek_news/service/dio_html_service.dart';
 
-DioHtmlClient _newClient({Dio? dio}) => DioHtmlClient(
+DioHtmlService _newClient({Dio? dio}) => DioHtmlService(
   dio: dio ?? Dio(BaseOptions(baseUrl: 'https://example.test')),
   encoding: 'utf-8',
 );
 
 void main() {
-  group('DioHtmlClient', () {
+  group('DioHtmlService', () {
     test('should throw DioException when dio fails with bad URL', () {
       final client = _newClient(
         dio: Dio(

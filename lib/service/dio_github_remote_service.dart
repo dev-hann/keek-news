@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:keek_news/service/github_remote_ds.dart';
+import 'package:keek_news/service/github_remote_service.dart';
 
-class GitHubRemoteDsImpl implements GitHubRemoteDs {
-  GitHubRemoteDsImpl({Dio? dio})
+class DioGitHubRemoteService implements GitHubRemoteService {
+  DioGitHubRemoteService({Dio? dio})
     : _dio =
           dio ??
           Dio(

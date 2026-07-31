@@ -8,18 +8,18 @@ Service → Repository → UseCase → Provider
 
 | Layer | Role | State |
 |------------|-----------------------------------|----------------|
-| **Service** | SDK/plugin/HTTP wrapping, HTML parsing | None |
-| **Repository** | Service composition + persistence | None |
-| **UseCase** | Business logic + error handling | None |
+| **Service** | HTTP/DOM parsing, SDK wrapping, persistence | None |
+| **Repository** | Service composition + community-specific parsing | None |
+| **UseCase** | Business logic + error handling + multi-source fan-out | None |
 | **Provider** | State management (Riverpod) | **Sole holder** |
 
 ```
 lib/
-├── service/      datasources, adapters, parsers, DI (service_locator.dart)
+├── service/      datasources + HtmlService + DI (service_locator.dart)
 ├── repository/   abstract (*_repo.dart) + impl (*_impl.dart), feature-grouped
 ├── use_case/     business operations (*_use_case.dart)
 ├── provider/     Riverpod providers (Notifier/AsyncNotifier)
-├── model/        entities + DTOs + failures (Equatable, pure data)
+├── model/        entities + failures (Equatable, pure data)
 ├── pages/        screens (*_view.dart) — consume providers
 ├── widgets/      reusable UI
 ├── const/        design tokens, theme
@@ -50,14 +50,14 @@ provider  → useCase._repo                 // access internal field (private to
 ```dart
 // ✅ Do
 class GetMergedFeedUseCase {
-  GetMergedFeedUseCase(this._repo);
-  final MergedFeedRepo _repo;
+  GetMergedFeedUseCase({required this.repos});
+  final Map<CommunityId, CommunityRepo> repos;
 }
 
 // ❌ Do not
 class GetMergedFeedUseCase {
-  GetMergedFeedUseCase(this.repo);
-  final MergedFeedRepo repo;              // public field
+  GetMergedFeedUseCase({required this.repos});
+  final Map<CommunityId, CommunityRepo> repos;   // public is acceptable for collections; private preferred for single deps
 }
 ```
 
@@ -122,7 +122,7 @@ either.fold(
 // ❌ Do not
 final page = await getMergedFeedUseCase(params);   // no fold()
 getMergedFeedUseCase._repo.fetch();                // access UseCase internal
-ServiceLocator.sl<MergedFeedRepo>();               // Provider fetching Repo directly
+ServiceLocator.sl<CommunityRepo>();                // Provider fetching Repo directly
 ```
 
 ---
@@ -133,19 +133,20 @@ ServiceLocator.sl<MergedFeedRepo>();               // Provider fetching Repo dir
 2. Implementation uses `implements`
 3. Services injected via constructor
 4. Feature-grouped: `repository/<feature>/<feature>_repo.dart` + `<feature>_impl.dart`
+5. Community repos (`HumorunivRepo`, `DogdripRepo`, ...) bundle list + detail + community-specific HTML parsing logic
 
 ```dart
 // ✅ Do
 abstract class BookmarkRepo {
-  Future<Either<Failure, List<Bookmark>>> getAll();
+  Future<List<Bookmark>> getAll();
 }
 
 class BookmarkImpl implements BookmarkRepo {
-  BookmarkImpl(this._localDs);
-  final BookmarkLocalDataSource _localDs;
+  BookmarkImpl(this._localService);
+  final BookmarkLocalService _localService;
 
   @override
-  Future<Either<Failure, List<Bookmark>>> getAll() async { ... }
+  Future<List<Bookmark>> getAll() => _localService.getAll();
 }
 
 // ❌ Do not
@@ -169,14 +170,18 @@ sl.registerLazySingleton<BookmarkImpl>(...);      // register impl, not abstract
 ## Service Rules
 
 1. Single responsibility (own role only)
-2. Stateless (parsers use static methods)
+2. Stateless (instance methods, no shared state)
 3. Constructor-injected into Repository
+4. File naming: `*_service.dart` (abstract) / `<tech>_*_service.dart` (concrete)
 
 | Service | Role |
-|-----------------|---------------------------------------------------|
-| `HtmlClient` | HTTP fetch + charset decode (EUC-KR for some) |
-| `CommunityAdapter` (per community) | fetch HTML → parse → return DTOs |
-| `parser/*` | stateless HTML → DTO conversion |
+|---------|------|
+| `HtmlService` / `DioHtmlService` | HTTP fetch + charset decode + DOM parsing utilities + content scanning |
+| `ApkInstallerService` / `MethodChannelApkInstallerService` | Android system install via MethodChannel |
+| `ApkDownloadService` / `DioApkDownloadService` | File download via Dio |
+| `GitHubRemoteService` / `DioGitHubRemoteService` | GitHub API calls via Dio |
+| `ImageCacheService` / `DefaultImageCacheService` | flutter_cache_manager wrapping |
+| `BookmarkLocalService` / `PrefsBookmarkLocalService` | SharedPreferences-backed bookmark persistence |
 
 ---
 
@@ -185,7 +190,7 @@ sl.registerLazySingleton<BookmarkImpl>(...);      // register impl, not abstract
 All dependencies registered in `service/service_locator.dart` using GetIt.
 
 - Register interfaces mapped to implementations (abstract, not impl).
-- Singletons for stateless services (datasources, parsers, adapters).
+- Singletons for stateless services.
 - UseCases resolved via `sl<XxxUseCase>()`.
 - Provider tests may swap registrations via `di.sl` in `setUp`/`tearDown`.
 
@@ -197,10 +202,10 @@ No REST API. The app fetches HTML pages from multiple communities and parses the
 
 Supported communities (웃긴자료/pds board): **dogdrip, ppomppu, todayhumor, humoruniv**.
 
-- `HtmlClient` handles HTTP + charset decoding.
-- Per-community parsers in `service/parser/` convert decoded HTML → DTOs.
-- Community adapters in `service/` orchestrate: fetch → parse → return.
-- `feed_merger` combines results from all communities into a merged feed.
+- `HtmlService` (concrete `DioHtmlService`) handles HTTP + charset decoding + DOM utilities (parsing helpers + content scanning).
+- Per-community Repositories (`repository/<community>/`) orchestrate: fetch → parse → return entities. Each Repo holds community-specific selectors + parsing logic inline.
+- `GetMergedFeedUseCase` fans out across all 4 community Repos in parallel, merges results into a unified `MergedPage` (sorted by publishedAt, interleaved by community).
+- `GetPostDetailUseCase` dispatches to the correct community Repo for detail fetch.
 
 ## Adding a New Feature
 

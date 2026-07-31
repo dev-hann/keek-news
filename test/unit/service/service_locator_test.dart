@@ -7,7 +7,7 @@ import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
 import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
-import 'package:keek_news/service/github_remote_ds.dart';
+import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
@@ -60,7 +60,7 @@ void main() {
       expect(() => di.sl<Map<CommunityId, CommunityRepo>>(), returnsNormally);
       expect(() => di.sl<GetMergedFeedUseCase>(), returnsNormally);
       expect(() => di.sl<GetPostDetailUseCase>(), returnsNormally);
-      expect(() => di.sl<GitHubRemoteDs>(), returnsNormally);
+      expect(() => di.sl<GitHubRemoteService>(), returnsNormally);
       expect(() => di.sl<UpdateRepo>(), returnsNormally);
       expect(() => di.sl<CheckForUpdateUseCase>(), returnsNormally);
     });

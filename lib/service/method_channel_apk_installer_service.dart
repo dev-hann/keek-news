@@ -1,8 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
 
-class ApkInstallerServiceImpl implements ApkInstallerService {
-  ApkInstallerServiceImpl({MethodChannel? methodChannel})
+class MethodChannelApkInstallerService implements ApkInstallerService {
+  MethodChannelApkInstallerService({MethodChannel? methodChannel})
     : _methodChannel = methodChannel ?? const MethodChannel('apk_installer');
 
   final MethodChannel _methodChannel;

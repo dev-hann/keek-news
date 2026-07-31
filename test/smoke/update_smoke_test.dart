@@ -3,14 +3,14 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/app_release.dart';
-import 'package:keek_news/service/github_remote_ds_impl.dart';
+import 'package:keek_news/service/dio_github_remote_service.dart';
 
 void main() {
   final skip = Platform.environment['SMOKE'] != '1';
 
   group('Smoke: GitHub releases API with live server', () {
     test('should fetch and parse the latest release from GitHub', () async {
-      final remoteDs = GitHubRemoteDsImpl();
+      final remoteDs = DioGitHubRemoteService();
       final json = await remoteDs.fetchLatestRelease();
 
       expect(json, isNotEmpty, reason: 'GitHub API should return JSON');
@@ -31,7 +31,7 @@ void main() {
     }, skip: skip);
 
     test('should return JSON containing a version tag', () async {
-      final remoteDs = GitHubRemoteDsImpl();
+      final remoteDs = DioGitHubRemoteService();
       final json = await remoteDs.fetchLatestRelease();
 
       expect(

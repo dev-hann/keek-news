@@ -4,11 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
-import 'package:keek_news/service/github_remote_ds.dart';
+import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
 
-class FixtureGitHubRemoteDs implements GitHubRemoteDs {
-  FixtureGitHubRemoteDs(this._fixturePath);
+class FixtureGitHubRemoteService implements GitHubRemoteService {
+  FixtureGitHubRemoteService(this._fixturePath);
   final String _fixturePath;
 
   @override
@@ -22,7 +22,7 @@ void main() {
   late CheckForUpdateUseCase checkForUpdate;
 
   setUp(() {
-    final remoteDs = FixtureGitHubRemoteDs(
+    final remoteDs = FixtureGitHubRemoteService(
       'test/fixtures/github_release_latest.json',
     );
     repository = UpdateImpl(remoteDs: remoteDs);

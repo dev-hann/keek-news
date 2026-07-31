@@ -2,7 +2,7 @@ import 'package:html/dom.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
 
-abstract class HtmlClient {
+abstract class HtmlService {
   Future<String> get(String path);
 
   int extractNumber(String? text);

@@ -2,14 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/content_block.dart';
 import 'package:dio/dio.dart';
-import 'package:keek_news/service/dio_html_client.dart';
+import 'package:keek_news/service/dio_html_service.dart';
 
 void main() {
-  late DioHtmlClient client;
+  late DioHtmlService client;
   setUp(() {
-    client = DioHtmlClient(dio: Dio(BaseOptions()), encoding: 'utf-8');
+    client = DioHtmlService(dio: Dio(BaseOptions()), encoding: 'utf-8');
   });
-  group('DioHtmlClient scan methods', () {
+  group('DioHtmlService scan methods', () {
     group('scan', () {
       test('should extract text as TextBlock', () {
         final doc = html_parser.parse(

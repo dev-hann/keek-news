@@ -4,17 +4,17 @@ import 'package:dartz/dartz.dart';
 import 'package:keek_news/model/download_progress.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
-import 'package:keek_news/service/apk_download_data_source.dart';
+import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
 
 class ApkInstallImpl implements ApkInstallRepo {
   ApkInstallImpl({
-    required ApkDownloadDataSource downloadDataSource,
+    required ApkDownloadService downloadDataSource,
     required ApkInstallerService installerService,
   }) : _downloadDataSource = downloadDataSource,
        _installerService = installerService;
 
-  final ApkDownloadDataSource _downloadDataSource;
+  final ApkDownloadService _downloadDataSource;
   final ApkInstallerService _installerService;
 
   StreamController<DownloadProgress>? _controller;

@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:keek_news/service/apk_download_data_source.dart';
+import 'package:keek_news/service/apk_download_service.dart';
 
-class ApkDownloadDataSourceImpl implements ApkDownloadDataSource {
-  ApkDownloadDataSourceImpl({
+class DioApkDownloadService implements ApkDownloadService {
+  DioApkDownloadService({
     required Dio dio,
     required ApkSavePathResolver resolveSavePath,
   }) : _dio = dio,

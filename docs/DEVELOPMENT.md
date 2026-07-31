@@ -51,11 +51,11 @@ flutter build ios --release       # iOS
 ```
 lib/
 ├── const/        design tokens, theme
-├── model/        entities + DTOs + failures (Equatable)
+├── model/        entities + failures (Equatable)
 ├── pages/        screens (*_view.dart)
 ├── provider/     Riverpod providers
-├── repository/   abstract (*_repo.dart) + impl (*_impl.dart), feature-grouped
-├── service/      datasources, adapters, parsers, DI (service_locator.dart)
+├── repository/   abstract (*_repo.dart) + impl (*_impl.dart), community-grouped
+├── service/      *_service.dart (abstract) + <tech>_*_service.dart (concrete) + DI
 ├── use_case/     business operations (*_use_case.dart)
 ├── utils/        pure helpers
 ├── widgets/      reusable UI

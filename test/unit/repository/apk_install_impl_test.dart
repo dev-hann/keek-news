@@ -1,15 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/repository/apk_install/apk_install_impl.dart';
-import 'package:keek_news/service/apk_download_data_source.dart';
+import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockApkInstallerService extends Mock implements ApkInstallerService {}
 
 /// Fake datasource whose download behaviour is controllable per test.
-class FakeApkDownloadDataSource implements ApkDownloadDataSource {
-  FakeApkDownloadDataSource({this.progressEvents = const []});
+class FakeApkDownloadService implements ApkDownloadService {
+  FakeApkDownloadService({this.progressEvents = const []});
 
   /// (received, total) pairs to emit before completing.
   final List<({int received, int total})> progressEvents;
@@ -51,7 +51,7 @@ void main() {
 
   group('ApkInstallImpl.download', () {
     test('should emit progress events then close on success', () async {
-      final ds = FakeApkDownloadDataSource(
+      final ds = FakeApkDownloadService(
         progressEvents: [
           (received: 0, total: 100),
           (received: 50, total: 100),
@@ -72,7 +72,7 @@ void main() {
     });
 
     test('should emit an error when the download fails', () async {
-      final ds = FakeApkDownloadDataSource();
+      final ds = FakeApkDownloadService();
       ds.errorToThrow = Exception('network down');
       repository = ApkInstallImpl(
         downloadDataSource: ds,
@@ -90,7 +90,7 @@ void main() {
     test(
       'should return Right(unit) when a file is saved and service succeeds',
       () async {
-        final ds = FakeApkDownloadDataSource()..savedPath = '/tmp/fake.apk';
+        final ds = FakeApkDownloadService()..savedPath = '/tmp/fake.apk';
         repository = ApkInstallImpl(
           downloadDataSource: ds,
           installerService: mockInstaller,
@@ -106,7 +106,7 @@ void main() {
     );
 
     test('should return Left when no APK has been downloaded', () async {
-      final ds = FakeApkDownloadDataSource(); // savedPath == null
+      final ds = FakeApkDownloadService(); // savedPath == null
       repository = ApkInstallImpl(
         downloadDataSource: ds,
         installerService: mockInstaller,
@@ -121,7 +121,7 @@ void main() {
     test(
       'should return Left when the installer service returns false',
       () async {
-        final ds = FakeApkDownloadDataSource()..savedPath = '/tmp/fake.apk';
+        final ds = FakeApkDownloadService()..savedPath = '/tmp/fake.apk';
         repository = ApkInstallImpl(
           downloadDataSource: ds,
           installerService: mockInstaller,
@@ -139,7 +139,7 @@ void main() {
 
   group('ApkInstallImpl.permissions', () {
     test('canRequestPackageInstalls delegates to service', () async {
-      final ds = FakeApkDownloadDataSource();
+      final ds = FakeApkDownloadService();
       repository = ApkInstallImpl(
         downloadDataSource: ds,
         installerService: mockInstaller,
@@ -156,7 +156,7 @@ void main() {
     test(
       'openInstallPermissionSettings returns Right when service opens',
       () async {
-        final ds = FakeApkDownloadDataSource();
+        final ds = FakeApkDownloadService();
         repository = ApkInstallImpl(
           downloadDataSource: ds,
           installerService: mockInstaller,
@@ -174,7 +174,7 @@ void main() {
 
   group('ApkInstallImpl.cancelDownload', () {
     test('should cancel the download datasource', () async {
-      final ds = FakeApkDownloadDataSource();
+      final ds = FakeApkDownloadService();
       repository = ApkInstallImpl(
         downloadDataSource: ds,
         installerService: mockInstaller,

@@ -3,17 +3,18 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/service/bookmark_local_data_source.dart';
+import 'package:keek_news/service/bookmark_local_service.dart';
+import 'package:keek_news/service/prefs_bookmark_local_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late SharedPreferences prefs;
-  late BookmarkLocalDataSource dataSource;
+  late BookmarkLocalService dataSource;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
-    dataSource = BookmarkLocalDataSourceImpl(prefs);
+    dataSource = PrefsBookmarkLocalService(prefs);
   });
 
   Bookmark bookmark({
@@ -32,7 +33,7 @@ void main() {
     );
   }
 
-  group('BookmarkLocalDataSource getAll', () {
+  group('BookmarkLocalService getAll', () {
     test('should return empty list when no stored value', () async {
       final result = await dataSource.getAll();
 
@@ -42,7 +43,7 @@ void main() {
     test('should return parsed bookmarks from stored JSON list', () async {
       final b = bookmark(id: '100', title: '제목');
       await prefs.setString(
-        BookmarkLocalDataSourceImpl.storageKey,
+        PrefsBookmarkLocalService.storageKey,
         jsonEncode([b.toJson()]),
       );
 
@@ -57,7 +58,7 @@ void main() {
       final a = bookmark(savedAtMillis: 1000);
       final b = bookmark(id: '2', savedAtMillis: 2000);
       await prefs.setString(
-        BookmarkLocalDataSourceImpl.storageKey,
+        PrefsBookmarkLocalService.storageKey,
         jsonEncode([a.toJson(), b.toJson()]),
       );
 
@@ -70,7 +71,7 @@ void main() {
 
     test('should return empty list when stored JSON is corrupted', () async {
       await prefs.setString(
-        BookmarkLocalDataSourceImpl.storageKey,
+        PrefsBookmarkLocalService.storageKey,
         'not-valid-json',
       );
 
@@ -83,7 +84,7 @@ void main() {
       final valid = bookmark().toJson();
       final broken = <String, dynamic>{'community': 'not_a_community'};
       await prefs.setString(
-        BookmarkLocalDataSourceImpl.storageKey,
+        PrefsBookmarkLocalService.storageKey,
         jsonEncode([valid, broken]),
       );
 
@@ -94,7 +95,7 @@ void main() {
     });
   });
 
-  group('BookmarkLocalDataSource exists', () {
+  group('BookmarkLocalService exists', () {
     test('should return true when key present', () async {
       final b = bookmark(id: '42');
       await dataSource.upsert(b);
@@ -119,7 +120,7 @@ void main() {
     });
   });
 
-  group('BookmarkLocalDataSource upsert', () {
+  group('BookmarkLocalService upsert', () {
     test('should add new bookmark to empty storage', () async {
       final b = bookmark();
 
@@ -182,7 +183,7 @@ void main() {
       final b = bookmark();
       await dataSource.upsert(b);
 
-      final fresh = BookmarkLocalDataSourceImpl(prefs);
+      final fresh = PrefsBookmarkLocalService(prefs);
       final result = await fresh.getAll();
 
       expect(result.length, 1);
@@ -190,7 +191,7 @@ void main() {
     });
   });
 
-  group('BookmarkLocalDataSource remove', () {
+  group('BookmarkLocalService remove', () {
     test('should delete bookmark by key', () async {
       await dataSource.upsert(bookmark());
       await dataSource.upsert(bookmark(id: '2'));

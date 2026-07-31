@@ -2,14 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
-import 'package:keek_news/service/bookmark_local_data_source.dart';
+import 'package:keek_news/service/bookmark_local_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockBookmarkLocalDataSource extends Mock
-    implements BookmarkLocalDataSource {}
+class MockBookmarkLocalService extends Mock implements BookmarkLocalService {}
 
 void main() {
-  late MockBookmarkLocalDataSource ds;
+  late MockBookmarkLocalService ds;
   late BookmarkImpl repo;
 
   Bookmark bookmark({
@@ -28,7 +27,7 @@ void main() {
   }
 
   setUp(() {
-    ds = MockBookmarkLocalDataSource();
+    ds = MockBookmarkLocalService();
     repo = BookmarkImpl(ds);
     registerFallbackValue(
       Bookmark(

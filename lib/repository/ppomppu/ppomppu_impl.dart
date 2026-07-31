@@ -11,13 +11,13 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/repository/ppomppu/ppomppu_repo.dart';
-import 'package:keek_news/service/html_client.dart';
+import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
 
 class PpomppuImpl implements PpomppuRepo {
   PpomppuImpl({required this.htmlClient});
 
-  final HtmlClient htmlClient;
+  final HtmlService htmlClient;
 
   @override
   CommunityId get communityId => CommunityId.ppomppu;

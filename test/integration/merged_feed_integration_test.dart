@@ -11,11 +11,11 @@ import 'package:keek_news/repository/dogdrip/dogdrip_impl.dart';
 import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
 import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
 import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
-import 'package:keek_news/service/html_client.dart';
+import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 
-class FixtureHtmlClient implements HtmlClient {
-  FixtureHtmlClient(this._fixtures);
+class FixtureHtmlService implements HtmlService {
+  FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 
   @override
@@ -73,13 +73,13 @@ void main() {
   setUpAll(() {
     final repos = <CommunityId, CommunityRepo>{
       CommunityId.humoruniv: HumorunivImpl(
-        htmlClient: FixtureHtmlClient({
+        htmlClient: FixtureHtmlService({
           'board/list.html': _readFixture('board_list_pds.html'),
           'board/read.html': _readFixture('pds_1415455.html'),
         }),
       ),
       CommunityId.todayhumor: TodayhumorImpl(
-        htmlClient: FixtureHtmlClient({
+        htmlClient: FixtureHtmlService({
           'list.php?table=humorbest': _readFixture(
             'todayhumor/list_humorbest_pc.html',
           ),
@@ -87,13 +87,13 @@ void main() {
         }),
       ),
       CommunityId.ppomppu: PpomppuImpl(
-        htmlClient: FixtureHtmlClient({
+        htmlClient: FixtureHtmlService({
           'zboard.php?id=humor': _readFixture('ppomppu/list_humor.html'),
           'view.php': _readFixture('ppomppu/detail_770409.html'),
         }),
       ),
       CommunityId.dogdrip: DogdripImpl(
-        htmlClient: FixtureHtmlClient({
+        htmlClient: FixtureHtmlService({
           'mid=dogdrip': _readFixture('dogdrip/list_dogdrip.html'),
         }),
       ),
@@ -168,10 +168,10 @@ void main() {
       final failingUseCase = GetMergedFeedUseCase(
         repos: {
           CommunityId.humoruniv: HumorunivImpl(
-            htmlClient: FixtureHtmlClient({}),
+            htmlClient: FixtureHtmlService({}),
           ),
           CommunityId.todayhumor: TodayhumorImpl(
-            htmlClient: FixtureHtmlClient({
+            htmlClient: FixtureHtmlService({
               'list.php': _readFixture('todayhumor/list_humorbest_pc.html'),
             }),
           ),

@@ -1,3 +1,3 @@
-abstract class GitHubRemoteDs {
+abstract class GitHubRemoteService {
   Future<String> fetchLatestRelease();
 }

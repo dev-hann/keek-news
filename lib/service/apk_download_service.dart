@@ -1,5 +1,5 @@
 /// Downloads the update APK to a local file with progress reporting.
-abstract class ApkDownloadDataSource {
+abstract class ApkDownloadService {
   /// Downloads [url] to a local file, invoking [onProgress] with
   /// (receivedBytes, totalBytes) as data arrives.
   ///

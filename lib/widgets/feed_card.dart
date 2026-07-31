@@ -268,7 +268,9 @@ class _ExpandableTextState extends State<_ExpandableText> {
               widget.text,
               style: style,
               maxLines: _expanded ? null : widget.maxLines,
-              overflow: TextOverflow.ellipsis,
+              overflow: _expanded
+                  ? TextOverflow.visible
+                  : TextOverflow.ellipsis,
             ),
             if (overflow)
               GestureDetector(

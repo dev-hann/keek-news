@@ -9,13 +9,13 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/repository/dogdrip/dogdrip_repo.dart';
-import 'package:keek_news/service/html_client.dart';
+import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
 
 class DogdripImpl implements DogdripRepo {
   DogdripImpl({required this.htmlClient});
 
-  final HtmlClient htmlClient;
+  final HtmlService htmlClient;
 
   @override
   CommunityId get communityId => CommunityId.dogdrip;

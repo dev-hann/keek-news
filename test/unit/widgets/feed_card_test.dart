@@ -363,6 +363,32 @@ void main() {
       expect(expandedHeight, greaterThan(collapsedHeight));
     });
 
+    testWidgets('long single-line body (no newlines) expands to full height', (
+      tester,
+    ) async {
+      final body = '매우긴본문입니다' * 200;
+      final detail = detailWith(blocks: [TextBlock(body)]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
+            ),
+          ),
+        ),
+      );
+      expect(find.text('더보기'), findsOneWidget);
+      final collapsedHeight = tester.getSize(find.text(body)).height;
+
+      await tester.tap(find.text('더보기'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('접기'), findsOneWidget);
+      expect(find.text('더보기'), findsNothing);
+      final expandedHeight = tester.getSize(find.text(body)).height;
+      expect(expandedHeight, greaterThan(collapsedHeight));
+    });
+
     testWidgets('접기 tap collapses body back to 더보기', (tester) async {
       final body = List.generate(15, (i) => '본문 ${i + 1}번 줄').join('\n');
       final detail = detailWith(blocks: [TextBlock(body)]);

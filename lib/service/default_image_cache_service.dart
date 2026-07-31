@@ -4,8 +4,8 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:path_provider/path_provider.dart';
 
-class ImageCacheServiceImpl implements ImageCacheService {
-  const ImageCacheServiceImpl();
+class DefaultImageCacheService implements ImageCacheService {
+  const DefaultImageCacheService();
 
   /// `flutter_cache_manager`'s `DefaultCacheManager` stores files under a
   /// folder named [DefaultCacheManager.key] ("libCachedImageData") inside the
