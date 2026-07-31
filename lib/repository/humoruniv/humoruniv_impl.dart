@@ -287,9 +287,8 @@ class HumorunivImpl implements HumorunivRepo {
 
   Comment _parseComment(dom.Element item, {required bool isBest}) {
     final author = htmlClient.textOf(item.querySelector('.hu_nick_txt'));
-
-    final bodyEl = item.querySelector('.comment_body');
     var content = '';
+    final bodyEl = item.querySelector('.comment_body');
     if (bodyEl != null) {
       final textEl = bodyEl.querySelector('.comment_text');
       if (textEl != null) {
@@ -315,7 +314,7 @@ class HumorunivImpl implements HumorunivRepo {
     var date = DateTime.fromMillisecondsSinceEpoch(0);
     for (final el in item.querySelectorAll('.etc')) {
       final text = el.text.trim();
-      final parsed = DateTime.tryParse(text);
+      final parsed = _parseCommentDate(text);
       if (parsed != null) {
         date = parsed;
         break;
@@ -345,6 +344,22 @@ class HumorunivImpl implements HumorunivRepo {
       isBest: isBest,
       mediaBlocks: mediaBlocks,
       replies: const [],
+    );
+  }
+
+  /// Extracts `YYYY-MM-DD [HH:MM:SS]` from humoruniv's noisy `.etc` text.
+  DateTime? _parseCommentDate(String text) {
+    final match = RegExp(
+      r'(\d{4})-(\d{1,2})-(\d{1,2})(?:[^\d]*?(\d{1,2}):(\d{2}):(\d{2}))?',
+    ).firstMatch(text);
+    if (match == null) return null;
+    return DateTime(
+      int.parse(match.group(1)!),
+      int.parse(match.group(2)!),
+      int.parse(match.group(3)!),
+      match.group(4) != null ? int.parse(match.group(4)!) : 0,
+      match.group(5) != null ? int.parse(match.group(5)!) : 0,
+      match.group(6) != null ? int.parse(match.group(6)!) : 0,
     );
   }
 }
