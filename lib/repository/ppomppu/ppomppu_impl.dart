@@ -13,6 +13,7 @@ import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/repository/ppomppu/ppomppu_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/utils/url_builder.dart';
 
 class PpomppuImpl implements PpomppuRepo {
   PpomppuImpl({required this.htmlClient});
@@ -265,7 +266,7 @@ class PpomppuImpl implements PpomppuRepo {
       if (item is! Map<String, dynamic>) continue;
       final id = (item['no'] as num?)?.toInt() ?? 0;
       final author = _stripTags(item['name'] as String? ?? '');
-      final content = _stripTags(item['memo'] as String? ?? '');
+      final parsed = _parseMemo(item['memo'] as String? ?? '');
       final voteBtn = item['vote_btn'];
       final recommend = voteBtn is Map<String, dynamic>
           ? (voteBtn['vote_count'] as num?)?.toInt() ?? 0
@@ -278,11 +279,12 @@ class PpomppuImpl implements PpomppuRepo {
         Comment(
           id: id,
           author: author,
-          content: content,
+          content: parsed.text,
           date: _mergeTime(postDate, time),
           recommendCount: recommend,
           isBest: false,
           replies: const [],
+          mediaBlocks: parsed.media,
         ),
       );
     }
@@ -292,6 +294,19 @@ class PpomppuImpl implements PpomppuRepo {
   String _stripTags(String html) {
     final text = html_parser.parseFragment(html).text ?? '';
     return text.replaceAll('\u00a0', ' ').trim();
+  }
+
+  ({String text, List<ContentBlock> media}) _parseMemo(String html) {
+    if (html.isEmpty) return (text: '', media: const []);
+    final frag = html_parser.parseFragment(html);
+    final media = <ContentBlock>[];
+    for (final img in frag.querySelectorAll('img')) {
+      final src = img.attributes['src'] ?? '';
+      if (src.isEmpty) continue;
+      media.add(ImageBlock(url: UrlBuilder.resolveAbsolute(communityId, src)));
+    }
+    final text = (frag.text ?? '').replaceAll('\u00a0', ' ').trim();
+    return (text: text, media: media);
   }
 
   DateTime _mergeTime(DateTime base, String? time) {

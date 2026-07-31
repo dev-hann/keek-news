@@ -11,6 +11,7 @@ import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/repository/dogdrip/dogdrip_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/utils/url_builder.dart';
 
 class DogdripImpl implements DogdripRepo {
   DogdripImpl({required this.htmlClient});
@@ -219,9 +220,8 @@ class DogdripImpl implements DogdripRepo {
     final idStr = item.id.replaceAll('comment_', '');
     final id = int.tryParse(idStr) ?? 0;
     final author = htmlClient.textOf(item.querySelector('a[class*="member_"]'));
-    final content = htmlClient.textOf(
-      item.querySelector('.rhymix_content, .xe_content'),
-    );
+    final contentEl = item.querySelector('.rhymix_content, .xe_content');
+    final content = htmlClient.textOf(contentEl);
 
     final timeText = item.querySelector('.text-muted')?.text ?? '';
     final date = _parseRelativeTime(timeText) ?? DateTime.now();
@@ -243,6 +243,18 @@ class DogdripImpl implements DogdripRepo {
       recommendCount: recommendCount,
       isBest: false,
       replies: const [],
+      mediaBlocks: _extractCommentMedia(contentEl),
     );
+  }
+
+  List<ContentBlock> _extractCommentMedia(dom.Element? contentEl) {
+    if (contentEl == null) return const [];
+    final media = <ContentBlock>[];
+    for (final img in contentEl.querySelectorAll('img')) {
+      final src = img.attributes['src'] ?? '';
+      if (src.isEmpty) continue;
+      media.add(ImageBlock(url: UrlBuilder.resolveAbsolute(communityId, src)));
+    }
+    return media;
   }
 }

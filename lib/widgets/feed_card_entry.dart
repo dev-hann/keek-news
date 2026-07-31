@@ -7,6 +7,7 @@ import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
 import 'package:keek_news/utils/url_builder.dart';
+import 'package:keek_news/widgets/comment_tile.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 
 class FeedCardEntry extends ConsumerWidget {
@@ -76,14 +77,45 @@ class FeedCardEntry extends ConsumerWidget {
   void _showComments(BuildContext context, PostDetail detail) {
     showModalBottomSheet<void>(
       context: context,
-      builder: (_) => Container(
-        padding: const EdgeInsets.all(16),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: detail.comments.length,
-          itemBuilder: (_, i) => ListTile(
-            title: Text(detail.comments[i].author),
-            subtitle: Text(detail.comments[i].content),
+      isScrollControlled: true,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          padding: const EdgeInsets.only(
+            top: AppSpacing.p8,
+            bottom: AppSpacing.p16,
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.p16,
+                  vertical: AppSpacing.p8,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '댓글 ${detail.commentCount}개',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView.builder(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.p16,
+                  ),
+                  itemCount: detail.comments.length,
+                  itemBuilder: (_, i) =>
+                      CommentTile(comment: detail.comments[i]),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
+import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/failures.dart';
@@ -10,6 +13,7 @@ import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/repository/todayhumor/todayhumor_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/utils/url_builder.dart';
 
 class TodayhumorImpl implements TodayhumorRepo {
   TodayhumorImpl({required this.htmlClient});
@@ -69,7 +73,7 @@ class TodayhumorImpl implements TodayhumorRepo {
         notRecommendCount: 0,
         viewCount: counts[1],
         commentCount: counts[2],
-        comments: const [],
+        comments: await _fetchComments(html),
         community: CommunityId.todayhumor,
       );
     } on ServerFailure {
@@ -239,5 +243,94 @@ class TodayhumorImpl implements TodayhumorRepo {
       int.tryParse(hitsMatch?.group(1) ?? '') ?? 0,
       int.tryParse(commentMatch?.group(1) ?? '') ?? 0,
     ];
+  }
+
+  Future<List<Comment>> _fetchComments(String viewHtml) async {
+    final parentTable = _extractJsVar(viewHtml, 'parent_table');
+    final parentId = _extractJsVar(viewHtml, 'parent_id');
+    if (parentTable == null || parentId == null) return const [];
+    try {
+      final raw = await htmlClient.get(
+        '/board/ajax_memo_list.php?parent_table=$parentTable'
+        '&parent_id=$parentId&last_memo_no=0',
+      );
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return const [];
+      final memos = decoded['memos'];
+      if (memos is! List) return const [];
+      return _buildCommentTree(memos);
+    } catch (e) {
+      debugPrint('TodayhumorImpl comments error: $e');
+      return const [];
+    }
+  }
+
+  String? _extractJsVar(String html, String name) {
+    final match = RegExp('var $name = "([^"]+)"').firstMatch(html);
+    return match?.group(1);
+  }
+
+  List<Comment> _buildCommentTree(List<dynamic> memos) {
+    final byParent = <int, List<Map<String, dynamic>>>{};
+    final topLevel = <Map<String, dynamic>>[];
+    for (final raw in memos) {
+      if (raw is! Map<String, dynamic>) continue;
+      if (raw['is_del'] == true || raw['is_system'] == true) continue;
+      final parent = _toInt(raw['parent_memo_no']);
+      if (parent == 0) {
+        topLevel.add(raw);
+      } else {
+        byParent.putIfAbsent(parent, () => []).add(raw);
+      }
+    }
+    return topLevel.map((m) => _toComment(m, byParent)).toList();
+  }
+
+  Comment _toComment(
+    Map<String, dynamic> m,
+    Map<int, List<Map<String, dynamic>>> byParent,
+  ) {
+    final no = _toInt(m['no']);
+    final parsed = _parseMemo((m['memo'] as String?) ?? '');
+    final replies = (byParent[no] ?? [])
+        .map((c) => _toComment(c, byParent))
+        .toList();
+    return Comment(
+      id: no,
+      author: (m['name'] as String?) ?? '',
+      content: parsed.text,
+      date: DateTime.tryParse((m['date'] as String?) ?? '') ?? DateTime.now(),
+      recommendCount: _toInt(m['ok']),
+      isBest: false,
+      replies: replies,
+      mediaBlocks: parsed.media,
+    );
+  }
+
+  ({String text, List<ContentBlock> media}) _parseMemo(String html) {
+    if (html.isEmpty) return (text: '', media: const []);
+    final withBreaks = html.replaceAll(
+      RegExp(r'<br\s*/?>', caseSensitive: false),
+      '\n',
+    );
+    final frag = html_parser.parseFragment(withBreaks);
+    final media = <ContentBlock>[];
+    for (final img in frag.querySelectorAll('img')) {
+      final src = img.attributes['src'] ?? '';
+      if (src.isEmpty) continue;
+      media.add(ImageBlock(url: UrlBuilder.resolveAbsolute(communityId, src)));
+    }
+    final text = (frag.text ?? '')
+        .replaceAll('\u00a0', ' ')
+        .replaceAll(RegExp(r'\n{3,}'), '\n\n')
+        .trim();
+    return (text: text, media: media);
+  }
+
+  int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 }
