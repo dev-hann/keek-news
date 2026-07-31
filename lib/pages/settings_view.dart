@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/provider/cache_management_provider.dart';
-import 'package:keek_news/provider/theme_provider.dart';
 import 'package:keek_news/provider/update_provider.dart';
-import 'package:keek_news/widgets/dark_mode_selector.dart';
 import 'package:keek_news/widgets/settings_group.dart';
 import 'package:keek_news/widgets/settings_tile.dart';
 import 'package:keek_news/widgets/update_banner.dart';
@@ -33,7 +31,6 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeProvider);
     final updateState = ref.watch(updateProvider);
     final cacheState = ref.watch(cacheManagementProvider);
 
@@ -49,21 +46,6 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
                   leading: const Icon(Icons.bookmark_outline),
                   title: '저장한 게시물',
                   onTap: () => _openBookmarks(context),
-                ),
-              ],
-            ),
-            SettingsGroup(
-              title: '화면',
-              children: [
-                SettingsTile(
-                  leading: const Icon(Icons.dark_mode_outlined),
-                  title: '다크 모드',
-                  trailing: DarkModeSelector(
-                    currentMode: themeMode,
-                    onChanged: (option) {
-                      ref.read(themeProvider.notifier).setThemeMode(option);
-                    },
-                  ),
                 ),
               ],
             ),

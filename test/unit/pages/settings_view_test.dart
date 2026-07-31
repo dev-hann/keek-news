@@ -16,7 +16,6 @@ import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
-import 'package:keek_news/widgets/dark_mode_selector.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -126,7 +125,6 @@ void main() {
       await tester.pumpWidget(buildApp());
 
       expect(find.text('저장함'), findsOneWidget);
-      expect(find.text('화면'), findsOneWidget);
       expect(find.text('미디어 & 데이터'), findsOneWidget);
       expect(find.text('정보'), findsOneWidget);
     });
@@ -144,18 +142,6 @@ void main() {
       final appBar = tester.widget<AppBar>(find.byType(AppBar));
       final title = (appBar.title! as Text).data;
       expect(title, '설정');
-    });
-
-    testWidgets('should display dark mode selector', (tester) async {
-      when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
-      );
-
-      await tester.pumpWidget(buildApp());
-
-      expect(find.byType(DarkModeSelector), findsOneWidget);
     });
 
     testWidgets('should display version info', (tester) async {

@@ -4,19 +4,9 @@ import 'package:keek_news/const/app_theme.dart';
 
 void main() {
   group('AppTheme', () {
-    test('light should return ThemeData with Material 3', () {
-      final theme = AppTheme.light();
-      expect(theme.useMaterial3, isTrue);
-    });
-
     test('dark should return ThemeData with Material 3', () {
       final theme = AppTheme.dark();
       expect(theme.useMaterial3, isTrue);
-    });
-
-    test('light should have non-null colorScheme', () {
-      final theme = AppTheme.light();
-      expect(theme.colorScheme, isNotNull);
     });
 
     test('dark should have non-null colorScheme', () {
@@ -24,19 +14,9 @@ void main() {
       expect(theme.colorScheme, isNotNull);
     });
 
-    test('light should have non-null textTheme', () {
-      final theme = AppTheme.light();
-      expect(theme.textTheme, isNotNull);
-    });
-
     test('dark should have non-null textTheme', () {
       final theme = AppTheme.dark();
       expect(theme.textTheme, isNotNull);
-    });
-
-    test('light brightness should be light', () {
-      final theme = AppTheme.light();
-      expect(theme.brightness, Brightness.light);
     });
 
     test('dark brightness should be dark', () {
@@ -45,17 +25,17 @@ void main() {
     });
 
     test('typography should have bodyLarge with height 1.6', () {
-      final theme = AppTheme.light();
+      final theme = AppTheme.dark();
       expect(theme.textTheme.bodyLarge?.height, 1.6);
     });
 
     test('typography should have bodyMedium with height 1.5', () {
-      final theme = AppTheme.light();
+      final theme = AppTheme.dark();
       expect(theme.textTheme.bodyMedium?.height, 1.5);
     });
 
     test('typography should have non-negative letter spacing', () {
-      final theme = AppTheme.light();
+      final theme = AppTheme.dark();
       final styles = [
         theme.textTheme.headlineLarge,
         theme.textTheme.headlineMedium,
