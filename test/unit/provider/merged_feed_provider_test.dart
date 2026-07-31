@@ -171,4 +171,51 @@ void main() {
       },
     );
   });
+
+  group('MergedFeedNotifier.refresh', () {
+    test('should replace items on success without showing skeleton', () async {
+      final firstPage = MergedPage(items: [item(id: '1')]);
+      final refreshedPage = MergedPage(
+        items: [
+          item(id: '2'),
+          item(id: '3'),
+        ],
+      );
+
+      var call = 0;
+      when(
+        () => mockUseCase.call(any()),
+      ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : refreshedPage));
+
+      final notifier = MergedFeedNotifier();
+      await notifier.fetch();
+
+      expect(notifier.state.isLoading, isFalse);
+      expect(notifier.state.items.map((e) => e.id), ['1']);
+
+      await notifier.refresh();
+
+      expect(notifier.state.items.map((e) => e.id), ['2', '3']);
+      expect(notifier.state.isLoading, isFalse);
+    });
+
+    test('should keep existing items when refresh fails', () async {
+      final firstPage = MergedPage(items: [item(id: '1')]);
+
+      var call = 0;
+      when(() => mockUseCase.call(any())).thenAnswer((_) async {
+        call++;
+        if (call == 1) return Right(firstPage);
+        return const Left(ServerFailure('network down'));
+      });
+
+      final notifier = MergedFeedNotifier();
+      await notifier.fetch();
+
+      await notifier.refresh();
+
+      expect(notifier.state.items.map((e) => e.id), ['1']);
+      expect(notifier.state.error, isNull);
+    });
+  });
 }

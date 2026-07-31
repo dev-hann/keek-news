@@ -63,9 +63,24 @@ class _HomeScreenState extends ConsumerState<HomeView> {
   }
 
   void _switchTab(int index) {
-    if (index == _tabIndex) return;
+    if (index == _tabIndex) {
+      _onTopTap();
+      return;
+    }
     setState(() => _tabIndex = index);
     if (_controller.hasClients) _controller.jumpTo(0);
+  }
+
+  void _onTopTap() {
+    if (_controller.hasClients && _controller.offset > 0) {
+      _controller.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    } else {
+      ref.read(mergedFeedProvider.notifier).refresh();
+    }
   }
 
   List<FeedItem> _filterItems(List<FeedItem> items) {
@@ -80,7 +95,11 @@ class _HomeScreenState extends ConsumerState<HomeView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(communities[_tabIndex].displayName),
+        title: GestureDetector(
+          onTap: _onTopTap,
+          behavior: HitTestBehavior.opaque,
+          child: Text(communities[_tabIndex].displayName),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),

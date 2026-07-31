@@ -58,6 +58,22 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
     _applyResult(result);
   }
 
+  /// Silently refreshes page 1 without flipping to the loading skeleton.
+  /// The current list stays visible during the fetch; on success it is
+  /// replaced, on error it is preserved (no destructive state change).
+  Future<void> refresh() async {
+    final result = await sl<GetMergedFeedUseCase>()(const MergedFeedParams());
+    result.fold(
+      (_) {},
+      (page) => state = MergedFeedState(
+        items: page.items,
+        cursor: page.next,
+        hasMore: page.next?.hasMore ?? false,
+        failedSources: page.failedSources,
+      ),
+    );
+  }
+
   Future<void> fetchNextPage() async {
     if (state.isLoadingMore || !state.hasMore || state.cursor == null) return;
 

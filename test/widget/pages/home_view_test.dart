@@ -169,8 +169,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
-    final title = (appBar.title! as Text).data;
-    expect(title, '웃긴대학');
+    final title = (appBar.title! as GestureDetector).child as Text;
+    expect(title.data, '웃긴대학');
   });
 
   testWidgets('should display settings gear action', (tester) async {
@@ -180,6 +180,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('설정'), findsOneWidget);
+  });
+
+  testWidgets('tapping AppBar title at top triggers silent refresh', (
+    tester,
+  ) async {
+    stubMergedPage(() => page(sampleItems()));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    verify(() => mockUseCase.call(any())).called(1);
+
+    await tester.tap(find.text('웃긴대학'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockUseCase.call(any())).called(1);
+  });
+
+  testWidgets('tapping active community tab triggers silent refresh', (
+    tester,
+  ) async {
+    stubMergedPage(() => page(sampleItems()));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    verify(() => mockUseCase.call(any())).called(1);
+
+    await tester.tap(find.text('웃대'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockUseCase.call(any())).called(1);
   });
 
   testWidgets('scroll near bottom triggers fetchNextPage with cursor', (
