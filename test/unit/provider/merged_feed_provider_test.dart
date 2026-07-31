@@ -1,0 +1,174 @@
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/failures.dart';
+import 'package:keek_news/model/feed_item.dart';
+import 'package:keek_news/model/merged_feed.dart';
+import 'package:keek_news/provider/merged_feed_provider.dart';
+import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:mocktail/mocktail.dart';
+
+import '../../helpers/merged_feed_helper.dart';
+
+void main() {
+  late MockMergedFeedUseCase mockUseCase;
+
+  setUpAll(registerMergedFeedFallbacks);
+
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    mockUseCase = MockMergedFeedUseCase();
+    if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
+      di.sl.unregister<GetMergedFeedUseCase>();
+    }
+    di.sl.registerLazySingleton<GetMergedFeedUseCase>(() => mockUseCase);
+  });
+
+  tearDown(di.sl.reset);
+
+  FeedItem item({
+    CommunityId community = CommunityId.humoruniv,
+    String id = '1',
+  }) {
+    return FeedItem(
+      community: community,
+      id: id,
+      title: 'title-$id',
+      url: 'u-$id',
+    );
+  }
+
+  group('MergedFeedNotifier.fetchNextPage', () {
+    test(
+      'should append new items and keep hasMore when cursor has token',
+      () async {
+        final firstPage = MergedPage(
+          items: [
+            item(),
+            item(id: '2'),
+          ],
+          next: const MergedCursor(
+            perSourceTokens: {CommunityId.humoruniv: '2'},
+          ),
+        );
+        final secondPage = MergedPage(
+          items: [item(id: '3')],
+          next: const MergedCursor(
+            perSourceTokens: {CommunityId.humoruniv: '3'},
+          ),
+        );
+
+        var call = 0;
+        when(
+          () => mockUseCase.call(any()),
+        ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : secondPage));
+
+        final notifier = MergedFeedNotifier();
+        await notifier.fetch();
+        await notifier.fetchNextPage();
+
+        expect(notifier.state.items.map((e) => e.id), ['1', '2', '3']);
+        expect(notifier.state.hasMore, isTrue);
+        expect(notifier.state.isLoadingMore, isFalse);
+      },
+    );
+
+    test('should set hasMore false when all source tokens are null', () async {
+      final firstPage = MergedPage(
+        items: [item()],
+        next: const MergedCursor(perSourceTokens: {CommunityId.humoruniv: '2'}),
+      );
+      final exhaustedPage = MergedPage(
+        items: [item(id: '2')],
+        next: const MergedCursor(
+          perSourceTokens: {CommunityId.humoruniv: null},
+        ),
+      );
+
+      var call = 0;
+      when(
+        () => mockUseCase.call(any()),
+      ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : exhaustedPage));
+
+      final notifier = MergedFeedNotifier();
+      await notifier.fetch();
+      await notifier.fetchNextPage();
+
+      expect(notifier.state.items, hasLength(2));
+      expect(notifier.state.hasMore, isFalse);
+    });
+
+    test('should dedup items already present by community:id', () async {
+      final firstPage = MergedPage(
+        items: [item()],
+        next: const MergedCursor(perSourceTokens: {CommunityId.humoruniv: '2'}),
+      );
+      final overlapPage = MergedPage(
+        items: [
+          item(),
+          item(id: '2'),
+        ],
+        next: const MergedCursor(perSourceTokens: {CommunityId.humoruniv: '3'}),
+      );
+
+      var call = 0;
+      when(
+        () => mockUseCase.call(any()),
+      ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : overlapPage));
+
+      final notifier = MergedFeedNotifier();
+      await notifier.fetch();
+      await notifier.fetchNextPage();
+
+      expect(notifier.state.items.map((e) => e.id), ['1', '2']);
+    });
+
+    test('should keep hasMore based on cursor on fetch failure', () async {
+      final firstPage = MergedPage(
+        items: [item()],
+        next: const MergedCursor(perSourceTokens: {CommunityId.humoruniv: '2'}),
+      );
+
+      var call = 0;
+      when(() => mockUseCase.call(any())).thenAnswer((_) async {
+        call++;
+        if (call == 1) return Right(firstPage);
+        return const Left(ServerFailure('network down'));
+      });
+
+      final notifier = MergedFeedNotifier();
+      await notifier.fetch();
+      await notifier.fetchNextPage();
+
+      expect(notifier.state.items.map((e) => e.id), ['1']);
+      expect(notifier.state.isLoadingMore, isFalse);
+      expect(notifier.state.hasMore, isTrue);
+    });
+
+    test(
+      'should not fetch when hasMore is false even if cursor present',
+      () async {
+        final firstPage = MergedPage(
+          items: [item()],
+          next: const MergedCursor(
+            perSourceTokens: {CommunityId.humoruniv: null},
+          ),
+        );
+
+        when(
+          () => mockUseCase.call(any()),
+        ).thenAnswer((_) async => Right(firstPage));
+
+        final notifier = MergedFeedNotifier();
+        await notifier.fetch();
+
+        verify(() => mockUseCase.call(any())).called(1);
+        expect(notifier.state.hasMore, isFalse);
+
+        await notifier.fetchNextPage();
+        verifyNever(() => mockUseCase.call(any()));
+      },
+    );
+  });
+}

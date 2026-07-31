@@ -5,31 +5,51 @@ import 'package:keek_news/model/merged_feed.dart';
 
 void main() {
   group('MergedCursor', () {
-    test('should create with oldestSeen and perSourceTokens', () {
-      final cursor = MergedCursor(
-        oldestSeen: DateTime(2026, 7, 26, 10),
-        perSourceTokens: const {
+    test('should create with perSourceTokens', () {
+      const cursor = MergedCursor(
+        perSourceTokens: {
           CommunityId.humoruniv: '2',
           CommunityId.todayhumor: null,
         },
       );
 
-      expect(cursor.oldestSeen, DateTime(2026, 7, 26, 10));
       expect(cursor.perSourceTokens[CommunityId.humoruniv], '2');
       expect(cursor.perSourceTokens[CommunityId.todayhumor], isNull);
     });
 
     test('should support value equality', () {
-      final a = MergedCursor(
-        oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: const {CommunityId.humoruniv: '1'},
-      );
-      final b = MergedCursor(
-        oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: const {CommunityId.humoruniv: '1'},
-      );
+      const a = MergedCursor(perSourceTokens: {CommunityId.humoruniv: '1'});
+      const b = MergedCursor(perSourceTokens: {CommunityId.humoruniv: '1'});
 
       expect(a, equals(b));
+    });
+
+    test('hasMore should be true when any token is non-null', () {
+      const cursor = MergedCursor(
+        perSourceTokens: {
+          CommunityId.humoruniv: '2',
+          CommunityId.todayhumor: null,
+        },
+      );
+
+      expect(cursor.hasMore, isTrue);
+    });
+
+    test('hasMore should be false when all tokens are null', () {
+      const cursor = MergedCursor(
+        perSourceTokens: {
+          CommunityId.humoruniv: null,
+          CommunityId.todayhumor: null,
+        },
+      );
+
+      expect(cursor.hasMore, isFalse);
+    });
+
+    test('hasMore should be false when tokens map is empty', () {
+      const cursor = MergedCursor(perSourceTokens: {});
+
+      expect(cursor.hasMore, isFalse);
     });
   });
 
@@ -43,12 +63,11 @@ void main() {
     });
 
     test('should create with cursor and failed sources', () {
-      final cursor = MergedCursor(
-        oldestSeen: DateTime(2026, 7, 26),
-        perSourceTokens: const {},
+      const cursor = MergedCursor(
+        perSourceTokens: {CommunityId.humoruniv: '1'},
       );
-      final page = MergedPage(
-        items: const [
+      const page = MergedPage(
+        items: [
           FeedItem(
             community: CommunityId.humoruniv,
             id: '1',
@@ -57,7 +76,7 @@ void main() {
           ),
         ],
         next: cursor,
-        failedSources: const {CommunityId.dogdrip},
+        failedSources: {CommunityId.dogdrip},
       );
 
       expect(page.items, hasLength(1));

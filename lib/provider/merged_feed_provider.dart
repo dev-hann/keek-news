@@ -66,20 +66,27 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
       MergedFeedParams(cursor: state.cursor),
     );
 
-    result.fold((_) => state = state.copyWith(isLoadingMore: false), (page) {
-      final existingIds = state.items
-          .map((e) => '${e.community}:${e.id}')
-          .toSet();
-      final newItems = page.items
-          .where((e) => !existingIds.contains('${e.community}:${e.id}'))
-          .toList();
-      state = MergedFeedState(
-        items: [...state.items, ...newItems],
-        cursor: page.next ?? state.cursor,
-        hasMore: page.next != null,
-        failedSources: page.failedSources,
-      );
-    });
+    result.fold(
+      (_) => state = state.copyWith(
+        isLoadingMore: false,
+        hasMore: state.cursor?.hasMore ?? false,
+      ),
+      (page) {
+        final existingIds = state.items
+            .map((e) => '${e.community}:${e.id}')
+            .toSet();
+        final newItems = page.items
+            .where((e) => !existingIds.contains('${e.community}:${e.id}'))
+            .toList();
+        final cursor = page.next ?? state.cursor;
+        state = MergedFeedState(
+          items: [...state.items, ...newItems],
+          cursor: cursor,
+          hasMore: cursor?.hasMore ?? false,
+          failedSources: page.failedSources,
+        );
+      },
+    );
   }
 
   void _applyResult(Either<Failure, MergedPage> result) {
@@ -88,7 +95,7 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
       (page) => state = MergedFeedState(
         items: page.items,
         cursor: page.next,
-        hasMore: page.next != null,
+        hasMore: page.next?.hasMore ?? false,
         failedSources: page.failedSources,
       ),
     );

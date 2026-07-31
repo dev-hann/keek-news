@@ -1,9 +1,7 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
-import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
@@ -117,6 +115,106 @@ void main() {
         () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
       );
       expect(result.isRight(), isTrue);
+    });
+
+    test(
+      'should keep null-timestamp items on paginated call (no time filter)',
+      () async {
+        const nullTsItem = FeedItem(
+          community: CommunityId.humoruniv,
+          id: '10',
+          title: 'no-ts',
+          url: 'u10',
+        );
+        when(() => humorunivRepo.fetchLatest(pageToken: '2')).thenAnswer(
+          (_) async =>
+              const CommunityListResult(items: [nullTsItem], pageToken: '3'),
+        );
+        when(
+          () => dogdripRepo.fetchLatest(pageToken: '2'),
+        ).thenAnswer((_) async => const CommunityListResult(items: []));
+
+        final result = await useCase(
+          const MergedFeedParams(
+            cursor: MergedCursor(
+              perSourceTokens: {
+                CommunityId.humoruniv: '2',
+                CommunityId.dogdrip: '2',
+              },
+            ),
+          ),
+        );
+
+        final page = result.getOrElse(() => throw StateError(''));
+        expect(page.items, hasLength(1));
+        expect(page.items.first.id, '10');
+      },
+    );
+
+    test(
+      'should pass per-source page token to each repo on pagination',
+      () async {
+        when(
+          () => humorunivRepo.fetchLatest(pageToken: '2'),
+        ).thenAnswer((_) async => const CommunityListResult(items: []));
+        when(
+          () => dogdripRepo.fetchLatest(pageToken: '5'),
+        ).thenAnswer((_) async => const CommunityListResult(items: []));
+
+        await useCase(
+          const MergedFeedParams(
+            cursor: MergedCursor(
+              perSourceTokens: {
+                CommunityId.humoruniv: '2',
+                CommunityId.dogdrip: '5',
+              },
+            ),
+          ),
+        );
+
+        verify(() => humorunivRepo.fetchLatest(pageToken: '2')).called(1);
+        verify(() => dogdripRepo.fetchLatest(pageToken: '5')).called(1);
+      },
+    );
+
+    test('should build next cursor from repo pageTokens', () async {
+      when(
+        () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer(
+        (_) async => const CommunityListResult(
+          items: [
+            FeedItem(
+              community: CommunityId.humoruniv,
+              id: '1',
+              title: 'h',
+              url: 'u',
+            ),
+          ],
+          pageToken: '2',
+        ),
+      );
+      when(
+        () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
+      ).thenAnswer(
+        (_) async => const CommunityListResult(
+          items: [
+            FeedItem(
+              community: CommunityId.dogdrip,
+              id: '2',
+              title: 'd',
+              url: 'u2',
+            ),
+          ],
+        ),
+      );
+
+      final result = await useCase(const MergedFeedParams());
+      final page = result.getOrElse(() => throw StateError(''));
+
+      expect(page.next, isNotNull);
+      expect(page.next!.perSourceTokens[CommunityId.humoruniv], '2');
+      expect(page.next!.perSourceTokens[CommunityId.dogdrip], isNull);
+      expect(page.next!.hasMore, isTrue);
     });
   });
 }

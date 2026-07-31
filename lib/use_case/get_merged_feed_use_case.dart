@@ -59,7 +59,6 @@ class GetMergedFeedUseCase {
       _merge(
         streams: streams,
         nextTokens: nextTokens,
-        olderThan: params.cursor?.oldestSeen,
         maxItems: params.perSource * active.length,
         failed: failed,
       ),
@@ -84,7 +83,6 @@ class GetMergedFeedUseCase {
   MergedPage _merge({
     required Map<CommunityId, List<FeedItem>> streams,
     required Map<CommunityId, String?> nextTokens,
-    required DateTime? olderThan,
     required int maxItems,
     required Set<CommunityId> failed,
   }) {
@@ -93,36 +91,15 @@ class GetMergedFeedUseCase {
       all.addAll(items);
     }
 
-    final filtered = olderThan == null
-        ? all
-        : all
-              .where(
-                (e) =>
-                    e.publishedAt != null && e.publishedAt!.isBefore(olderThan),
-              )
-              .toList();
-
-    final sorted = _sortByPublishedAtDescending(filtered);
+    final sorted = _sortByPublishedAtDescending(all);
 
     final limited = sorted.length > maxItems
         ? sorted.sublist(0, maxItems)
         : sorted;
 
-    if (limited.isEmpty) {
-      return MergedPage(items: limited, failedSources: failed);
-    }
-
-    final oldest = limited.last.publishedAt;
-    if (oldest == null) {
-      return MergedPage(items: limited, failedSources: failed);
-    }
-
     return MergedPage(
       items: limited,
-      next: MergedCursor(
-        oldestSeen: oldest,
-        perSourceTokens: Map.of(nextTokens),
-      ),
+      next: MergedCursor(perSourceTokens: Map.of(nextTokens)),
       failedSources: failed,
     );
   }

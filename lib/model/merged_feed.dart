@@ -3,14 +3,14 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
 
 class MergedCursor extends Equatable {
-  const MergedCursor({required this.oldestSeen, required this.perSourceTokens});
+  const MergedCursor({required this.perSourceTokens});
 
-  final DateTime oldestSeen;
   final Map<CommunityId, String?> perSourceTokens;
+
+  bool get hasMore => perSourceTokens.values.any((t) => t != null);
 
   @override
   List<Object?> get props => [
-    oldestSeen,
     ...perSourceTokens.entries.map((e) => [e.key, e.value]),
   ];
 }

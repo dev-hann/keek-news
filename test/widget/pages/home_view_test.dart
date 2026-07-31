@@ -199,7 +199,7 @@ void main() {
           viewCount: i,
         ),
       ),
-      next: MergedCursor(oldestSeen: DateTime(2024), perSourceTokens: const {}),
+      next: MergedCursor(perSourceTokens: const {CommunityId.humoruniv: '2'}),
     );
     final secondPage = MergedPage(
       items: List.generate(
