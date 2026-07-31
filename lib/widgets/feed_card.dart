@@ -128,7 +128,11 @@ class FeedCard extends StatelessWidget {
         children: [
           RecommendBadge(count: post.recommendCount),
           AppSpacing.sbW16,
-          CommentBadge(count: post.commentCount),
+          CommentBadge(
+            count: post.commentCount != 0
+                ? post.commentCount
+                : (detail?.commentCount ?? 0),
+          ),
           AppSpacing.sbW16,
           ViewBadge(count: post.viewCount),
           if (showActions) ...[

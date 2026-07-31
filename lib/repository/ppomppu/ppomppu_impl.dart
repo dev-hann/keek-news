@@ -13,6 +13,7 @@ import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/repository/ppomppu/ppomppu_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/utils/media_dedup.dart';
 import 'package:keek_news/utils/url_builder.dart';
 
 class PpomppuImpl implements PpomppuRepo {
@@ -180,14 +181,21 @@ class PpomppuImpl implements PpomppuRepo {
         .querySelectorAll('img')
         .map((img) => img.attributes['src'] ?? '')
         .where((src) => src.isNotEmpty)
+        .where((src) => !_isUiAsset(src))
         .map((src) => src.startsWith('//') ? 'https:$src' : src)
         .where(MediaClassifier.isLoadableImage)
         .toList();
   }
 
+  bool _isUiAsset(String src) {
+    final lower = src.toLowerCase();
+    return lower.contains('/images/') || lower.contains('/skin/');
+  }
+
   List<ContentBlock> _buildBlocks(dom.Element? content) {
     if (content == null) return const [];
     final blocks = <ContentBlock>[];
+    final seenVideoKeys = <String>{};
     for (final p in content.querySelectorAll('p')) {
       final videos = p.querySelectorAll('video');
       if (videos.isNotEmpty) {
@@ -196,7 +204,7 @@ class PpomppuImpl implements PpomppuRepo {
             final src = source.attributes['src'] ?? '';
             if (src.isNotEmpty && src.contains('.mp4')) {
               final full = src.startsWith('//') ? 'https:$src' : src;
-              if (!blocks.any((b) => b is VideoBlock && b.url == full)) {
+              if (seenVideoKeys.add(MediaDedup.filenameKey(full))) {
                 blocks.add(VideoBlock(url: full));
               }
             }
@@ -209,7 +217,7 @@ class PpomppuImpl implements PpomppuRepo {
       if (imgs.isNotEmpty) {
         for (final img in imgs) {
           final src = img.attributes['src'] ?? '';
-          if (src.isNotEmpty) {
+          if (src.isNotEmpty && !_isUiAsset(src)) {
             final full = src.startsWith('//') ? 'https:$src' : src;
             blocks.add(ImageBlock(url: full));
           }

@@ -11,6 +11,7 @@ import 'package:keek_news/repository/community_repo.dart';
 import 'package:keek_news/repository/dogdrip/dogdrip_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/utils/media_dedup.dart';
 import 'package:keek_news/utils/url_builder.dart';
 
 class DogdripImpl implements DogdripRepo {
@@ -65,7 +66,7 @@ class DogdripImpl implements DogdripRepo {
         recommendCount: 0,
         notRecommendCount: 0,
         viewCount: 0,
-        commentCount: 0,
+        commentCount: _extractCommentCount(doc),
         comments: _extractComments(doc),
         community: CommunityId.dogdrip,
       );
@@ -149,6 +150,11 @@ class DogdripImpl implements DogdripRepo {
     return doc.querySelector('div[class*="document_"]');
   }
 
+  int _extractCommentCount(dom.Document doc) {
+    final match = RegExp(r'(\d+)\s*개의\s*댓글').firstMatch(doc.body?.text ?? '');
+    return match != null ? int.parse(match.group(1)!) : 0;
+  }
+
   List<String> _extractImages(dom.Element? content) {
     if (content == null) return const [];
     return content
@@ -167,40 +173,33 @@ class DogdripImpl implements DogdripRepo {
   List<ContentBlock> _buildBlocks(dom.Element? content) {
     if (content == null) return const [];
     final blocks = <ContentBlock>[];
-    for (final p in content.querySelectorAll('p')) {
-      final videos = p.querySelectorAll('video');
+    final seenVideoKeys = <String>{};
+
+    for (final child in content.children) {
+      final videos = <dom.Element>[
+        if (child.localName == 'video') child,
+        ...child.querySelectorAll('video'),
+      ];
       if (videos.isNotEmpty) {
         for (final video in videos) {
-          for (final source in video.querySelectorAll('source')) {
-            final src = source.attributes['src'] ?? '';
-            if (src.isNotEmpty && src.contains('.mp4')) {
-              final full = src.startsWith('//')
-                  ? 'https:$src'
-                  : src.startsWith('/')
-                  ? 'https://www.dogdrip.net$src'
-                  : src;
-              if (!blocks.any((b) => b is VideoBlock && b.url == full)) {
-                blocks.add(VideoBlock(url: full));
-              }
-            }
-          }
+          if (_addVideo(blocks, video, seenVideoKeys)) break;
         }
         continue;
       }
 
-      final imgs = p.querySelectorAll('img');
+      final imgs = <dom.Element>[
+        if (child.localName == 'img') child,
+        ...child.querySelectorAll('img'),
+      ];
       if (imgs.isNotEmpty) {
         for (final img in imgs) {
           final src = img.attributes['src'] ?? '';
           if (src.isNotEmpty) {
-            final full = src.startsWith('/')
-                ? 'https://www.dogdrip.net$src'
-                : src;
-            blocks.add(ImageBlock(url: full));
+            blocks.add(ImageBlock(url: _resolveMedia(src)));
           }
         }
       } else {
-        final text = p.text.trim();
+        final text = child.text.trim();
         if (text.isNotEmpty &&
             !text.contains('browser does not support') &&
             !text.contains('브라우저')) {
@@ -208,7 +207,45 @@ class DogdripImpl implements DogdripRepo {
         }
       }
     }
+
+    if (blocks.isEmpty && content.text.trim().isNotEmpty) {
+      blocks.add(TextBlock(content.text.trim()));
+    }
     return blocks;
+  }
+
+  bool _addVideo(
+    List<ContentBlock> blocks,
+    dom.Element video,
+    Set<String> seenKeys,
+  ) {
+    final directSrc = video.attributes['src'] ?? '';
+    final mp4Src = (directSrc.isNotEmpty && directSrc.contains('.mp4'))
+        ? directSrc
+        : (video
+              .querySelectorAll('source')
+              .map((s) => s.attributes['src'] ?? '')
+              .firstWhere(
+                (s) => s.isNotEmpty && s.contains('.mp4'),
+                orElse: () => '',
+              ));
+    if (mp4Src.isEmpty) return false;
+    final full = _resolveMedia(mp4Src);
+    if (!seenKeys.add(MediaDedup.filenameKey(full))) return false;
+    final poster = video.attributes['poster'] ?? '';
+    blocks.add(
+      VideoBlock(
+        url: full,
+        thumbnailUrl: poster.isNotEmpty ? _resolveMedia(poster) : null,
+      ),
+    );
+    return true;
+  }
+
+  String _resolveMedia(String src) {
+    if (src.startsWith('//')) return 'https:$src';
+    if (src.startsWith('/')) return 'https://www.dogdrip.net$src';
+    return src;
   }
 
   List<Comment> _extractComments(dom.Document doc) {
