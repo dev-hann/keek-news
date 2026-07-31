@@ -4,6 +4,8 @@ import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/widgets/comment_tile.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
+import 'package:keek_news/widgets/video_thumbnail.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 Comment _comment({
   String author = '작성자',
@@ -28,6 +30,10 @@ Comment _comment({
 Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
+  setUp(() {
+    VisibilityDetectorController.instance.updateInterval = Duration.zero;
+  });
+
   group('CommentTile', () {
     testWidgets('renders author and content', (tester) async {
       await tester.pumpWidget(
@@ -73,6 +79,28 @@ void main() {
       );
 
       expect(find.byType(RetryableNetworkImage), findsOneWidget);
+    });
+
+    testWidgets('renders VideoBlock as a tappable video thumbnail', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          SingleChildScrollView(
+            child: CommentTile(
+              comment: _comment(
+                mediaBlocks: const [
+                  VideoBlock(url: 'https://example.com/c.mp4'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(VideoThumbnail), findsOneWidget);
+      expect(find.byIcon(Icons.play_circle_fill), findsOneWidget);
     });
 
     testWidgets('renders nested replies', (tester) async {
