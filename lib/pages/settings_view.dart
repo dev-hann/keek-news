@@ -5,7 +5,6 @@ import 'package:keek_news/provider/cache_management_provider.dart';
 import 'package:keek_news/provider/update_provider.dart';
 import 'package:keek_news/widgets/settings_group.dart';
 import 'package:keek_news/widgets/settings_tile.dart';
-import 'package:keek_news/widgets/update_banner.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,14 +18,23 @@ class SettingsView extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsView> {
+  String? _currentVersion;
+
   @override
   void initState() {
     super.initState();
-    // Load the current image cache size so the tile shows it on first paint.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(cacheManagementProvider.notifier).loadSize();
+      ref.read(updateProvider.notifier).checkForUpdate();
+      _loadVersion();
     });
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (!mounted) return;
+    setState(() => _currentVersion = 'v${info.version}');
   }
 
   @override
@@ -63,52 +71,11 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
             SettingsGroup(
               title: '정보',
               children: [
-                FutureBuilder<PackageInfo>(
-                  future: PackageInfo.fromPlatform(),
-                  builder: (context, snapshot) {
-                    final version = snapshot.hasData
-                        ? 'v${snapshot.data!.version}'
-                        : '...';
-                    return SettingsTile(
-                      leading: const Icon(Icons.info_outline),
-                      title: '버전',
-                      subtitle: version,
-                    );
-                  },
-                ),
-                UpdateBanner(
-                  status: updateState.status,
-                  newVersion: updateState.release?.version,
-                  downloadProgress: updateState.downloadProgress,
-                  hasApkDownloadUrl: updateState.release?.downloadUrl != null,
-                  onCheck: () {
-                    ref.read(updateProvider.notifier).checkForUpdate();
-                  },
-                  onUpdate: () {
-                    final notifier = ref.read(updateProvider.notifier);
-                    if (updateState.release?.downloadUrl != null) {
-                      notifier.downloadUpdate();
-                    } else {
-                      final url = updateState.release?.htmlUrl;
-                      if (url != null && url.isNotEmpty) {
-                        _openUpdateUrl(url);
-                      }
-                    }
-                  },
-                  onCancelDownload: () {
-                    ref.read(updateProvider.notifier).cancelDownload();
-                  },
-                  onInstall: () {
-                    ref.read(updateProvider.notifier).launchInstaller();
-                  },
-                  onRetryDownload: () {
-                    ref.read(updateProvider.notifier).downloadUpdate();
-                  },
-                  onOpenPermissionSettings: () {
-                    ref
-                        .read(updateProvider.notifier)
-                        .openInstallPermissionSettings();
-                  },
+                SettingsTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: '버전',
+                  subtitle: _versionSubtitle(updateState),
+                  trailing: _versionTrailing(context, updateState),
                 ),
                 SettingsTile(
                   leading: const Icon(Icons.description_outlined),
@@ -127,6 +94,91 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
         ),
       ),
     );
+  }
+
+  String _versionLabel() => _currentVersion ?? '...';
+
+  String _versionSubtitle(UpdateState state) {
+    final base = _versionLabel();
+    switch (state.status) {
+      case UpdateCheckStatus.idle:
+        return base;
+      case UpdateCheckStatus.checking:
+        return '$base · 확인 중…';
+      case UpdateCheckStatus.upToDate:
+        return '$base · 최신 버전';
+      case UpdateCheckStatus.available:
+        final newVersion = state.release?.version;
+        return newVersion == null || newVersion.isEmpty
+            ? base
+            : '$base · v$newVersion 사용 가능';
+      case UpdateCheckStatus.downloading:
+        final percent = state.downloadProgress?.percent ?? 0;
+        return '$base · 다운로드 $percent%';
+      case UpdateCheckStatus.downloadError:
+        return '$base · 다운로드 실패';
+      case UpdateCheckStatus.readyToInstall:
+        return '$base · 다운로드 완료';
+      case UpdateCheckStatus.installPermissionRequired:
+        return '$base · 설치 권한 필요';
+      case UpdateCheckStatus.error:
+        return '$base · 확인 실패';
+    }
+  }
+
+  Widget? _versionTrailing(BuildContext context, UpdateState state) {
+    switch (state.status) {
+      case UpdateCheckStatus.checking:
+        return const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        );
+      case UpdateCheckStatus.available:
+        return FilledButton(onPressed: _onUpdateTap, child: const Text('업데이트'));
+      case UpdateCheckStatus.downloading:
+        return TextButton(
+          onPressed: () => ref.read(updateProvider.notifier).cancelDownload(),
+          child: const Text('취소'),
+        );
+      case UpdateCheckStatus.downloadError:
+        return TextButton(
+          onPressed: () => ref.read(updateProvider.notifier).downloadUpdate(),
+          child: const Text('다시'),
+        );
+      case UpdateCheckStatus.readyToInstall:
+        return FilledButton(
+          onPressed: () => ref.read(updateProvider.notifier).launchInstaller(),
+          child: const Text('설치'),
+        );
+      case UpdateCheckStatus.installPermissionRequired:
+        return FilledButton(
+          onPressed: () =>
+              ref.read(updateProvider.notifier).openInstallPermissionSettings(),
+          child: const Text('설정 열기'),
+        );
+      case UpdateCheckStatus.error:
+        return TextButton(
+          onPressed: () => ref.read(updateProvider.notifier).checkForUpdate(),
+          child: const Text('다시'),
+        );
+      case UpdateCheckStatus.idle:
+      case UpdateCheckStatus.upToDate:
+        return null;
+    }
+  }
+
+  void _onUpdateTap() {
+    final notifier = ref.read(updateProvider.notifier);
+    final release = ref.read(updateProvider).release;
+    if (release?.downloadUrl != null) {
+      notifier.downloadUpdate();
+    } else {
+      final url = release?.htmlUrl;
+      if (url != null && url.isNotEmpty) {
+        _openUpdateUrl(url);
+      }
+    }
   }
 
   String _formatBytes(int? bytes) {

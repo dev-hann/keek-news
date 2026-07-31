@@ -55,6 +55,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
   bool _cancelled = false;
 
   Future<void> checkForUpdate() async {
+    if (state.status == UpdateCheckStatus.checking) return;
     state = const UpdateState(status: UpdateCheckStatus.checking);
 
     final result = await _checkForUpdate();

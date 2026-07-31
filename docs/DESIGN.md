@@ -82,7 +82,7 @@ Components follow Atomic Design:
 | Level | Responsibility | Examples |
 |-------|---------------|----------|
 | **Atom** | Single visual element, no domain knowledge | Avatar, CountBadge, FeedMedia, Thumbnail, SkeletonBox, LoadingIndicator |
-| **Molecule** | Combination of atoms, represents a domain concept | FeedCard, FeedImageCarousel, InlineVideoPlayer, CommentTile, SettingsGroup, DarkModeSelector, UpdateBanner |
+| **Molecule** | Combination of atoms, represents a domain concept | FeedCard, FeedImageCarousel, InlineVideoPlayer, CommentTile, SettingsGroup, DarkModeSelector |
 | **Organism** | Screen-level composition of molecules | (Feed composition currently lives in `presentation/widgets/` — e.g. `feed_list.dart` — because it wires providers + navigation. Core `organisms/` is intentionally empty for the single-screen Phase 1.) |
 
 ### Rules
@@ -103,7 +103,7 @@ The component library lives in `lib/core/widgets/`.
 
 **Atoms**: Avatar, CountBadge (Recommend/Comment/View/Best), FeedMedia, Thumbnail, SkeletonBox, LoadingIndicator.
 
-**Molecules**: FeedCard, FeedImageCarousel, InlineVideoPlayer, SectionHeader, SettingsGroup, SettingsTile, DarkModeSelector, UpdateBanner, StaleDataBanner, UserInfoRow.
+**Molecules**: FeedCard, FeedImageCarousel, InlineVideoPlayer, SectionHeader, SettingsGroup, SettingsTile, DarkModeSelector, StaleDataBanner, UserInfoRow.
 
 **Organisms**: none in `core/` for Phase 1 (feed composition is in `presentation/widgets/feed_list.dart`).
 
