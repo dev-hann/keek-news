@@ -179,37 +179,60 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     final visibleItems = _filterItems(feedState.items);
     _ensureDetailsLoaded(visibleItems, details);
 
+    final surface = Theme.of(context).colorScheme.surfaceContainer;
+
     return Scaffold(
-      appBar: AppBar(
-        title: GestureDetector(
-          onTap: _onTopTap,
-          behavior: HitTestBehavior.opaque,
-          child: Text(communities[_tabIndex].displayName),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(LucideIcons.settings),
-            tooltip: '설정',
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          CommunityTabBar(selectedIndex: _tabIndex, onChanged: _switchTab),
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () => _reloadFeed(silent: false),
-              child: _buildBody(
-                feedState,
-                visibleItems,
-                bookmarks,
-                details,
-                videoController,
+      body: RefreshIndicator(
+        onRefresh: () => _reloadFeed(silent: false),
+        child: CustomScrollView(
+          controller: _controller,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // Top app bar — floating + snap (scroll up anywhere shows it).
+            SliverAppBar(
+              title: GestureDetector(
+                onTap: _onTopTap,
+                behavior: HitTestBehavior.opaque,
+                child: Text(communities[_tabIndex].displayName),
               ),
+              actions: [
+                IconButton(
+                  icon: const Icon(LucideIcons.settings),
+                  tooltip: '설정',
+                  onPressed: () => context.push('/settings'),
+                ),
+              ],
+              floating: true,
+              snap: true,
+              backgroundColor: surface,
+              elevation: 0,
+              scrolledUnderElevation: 0,
             ),
-          ),
-        ],
+            // Community tab bar — floating + snap, secondary (no status bar).
+            SliverAppBar(
+              primary: false,
+              automaticallyImplyLeading: false,
+              titleSpacing: 0,
+              toolbarHeight: 44,
+              title: CommunityTabBar(
+                selectedIndex: _tabIndex,
+                onChanged: _switchTab,
+              ),
+              floating: true,
+              snap: true,
+              backgroundColor: surface,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+            ),
+            ..._buildSliverBody(
+              feedState,
+              visibleItems,
+              bookmarks,
+              details,
+              videoController,
+            ),
+          ],
+        ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _showScrollTop,
@@ -219,7 +242,7 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     );
   }
 
-  Widget _buildBody(
+  List<Widget> _buildSliverBody(
     MergedFeedState state,
     List<FeedItem> visibleItems,
     List<Bookmark> bookmarks,
@@ -227,50 +250,48 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     VideoPlaybackController videoController,
   ) {
     if (state.isLoading) {
-      return _buildSkeleton();
+      return [_sliverSkeleton()];
     }
     if (state.error != null) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          const SizedBox(height: 120),
-          ErrorStateView(
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: ErrorStateView(
             message: state.error!,
             onRetry: () => _reloadFeed(silent: false),
           ),
-        ],
-      );
+        ),
+      ];
     }
     if (visibleItems.isEmpty) {
-      return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          SizedBox(height: 120),
-          EmptyStateView(message: '게시글이 없습니다.'),
-        ],
-      );
+      return const [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyStateView(message: '게시글이 없습니다.'),
+        ),
+      ];
     }
 
     final extra = (state.hasMore || state.isLoadingMore) ? 1 : 0;
 
-    return ListView.builder(
-      controller: _controller,
-      physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: visibleItems.length + extra,
-      itemBuilder: (context, index) {
-        if (index == visibleItems.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: LoadingIndicator(),
+    return [
+      SliverList.builder(
+        itemCount: visibleItems.length + extra,
+        itemBuilder: (context, index) {
+          if (index == visibleItems.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: LoadingIndicator(),
+            );
+          }
+          final item = visibleItems[index];
+          final av = details[(community: item.community, id: item.id)];
+          return RepaintBoundary(
+            child: _buildCardFor(item, av, bookmarks, videoController),
           );
-        }
-        final item = visibleItems[index];
-        final av = details[(community: item.community, id: item.id)];
-        return RepaintBoundary(
-          child: _buildCardFor(item, av, bookmarks, videoController),
-        );
-      },
-    );
+        },
+      ),
+    ];
   }
 
   Widget _buildCardFor(
@@ -312,10 +333,9 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     );
   }
 
-  Widget _buildSkeleton() {
-    return ListView.builder(
+  Widget _sliverSkeleton() {
+    return SliverList.builder(
       itemCount: 4,
-      physics: const AlwaysScrollableScrollPhysics(),
       itemBuilder: (_, __) => const Padding(
         padding: EdgeInsets.only(bottom: 12),
         child: SkeletonFeedCard(),

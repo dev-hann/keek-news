@@ -179,7 +179,8 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    // Two SliverAppBars exist (top + tab bar). First is the title AppBar.
+    final appBar = tester.widgetList<AppBar>(find.byType(AppBar)).first;
     final title = (appBar.title! as GestureDetector).child! as Text;
     expect(title.data, '웃긴대학');
   });
@@ -251,9 +252,10 @@ void main() {
 
     expect(find.byType(FeedCard), findsWidgets);
 
+    // Feed renders inside a SliverList inside CustomScrollView (no ListView).
     final feedList = find.ancestor(
       of: find.byType(FeedCard).first,
-      matching: find.byType(ListView),
+      matching: find.byType(CustomScrollView),
     );
 
     for (var i = 0; i < 6; i++) {
