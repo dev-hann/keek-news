@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
 import 'package:keek_news/service/github_remote_service.dart';
 import 'package:mocktail/mocktail.dart';
@@ -37,12 +36,9 @@ void main() {
 
       final result = await repository.getLatestRelease();
 
-      expect(result.isRight(), true);
-      result.fold((_) => fail('Should be Right'), (release) {
-        expect(release.version, '1.2.0');
-        expect(release.htmlUrl, contains('v1.2.0'));
-        expect(release.downloadUrl, contains('.apk'));
-      });
+      expect(result.version, '1.2.0');
+      expect(result.htmlUrl, contains('v1.2.0'));
+      expect(result.downloadUrl, contains('.apk'));
     });
 
     test('should return UpdateFailure when API throws', () async {
@@ -50,25 +46,17 @@ void main() {
         () => mockRemoteDs.fetchLatestRelease(),
       ).thenThrow(Exception('Network error'));
 
-      final result = await repository.getLatestRelease();
-
-      expect(result.isLeft(), true);
-      result.fold((failure) {
-        expect(failure, isA<UpdateFailure>());
-      }, (_) => fail('Should be Left'));
+      expect(() => repository.getLatestRelease(), throwsA(isA<Exception>()));
     });
 
-    test('should return UpdateFailure when parser returns null', () async {
+    test('should throw FormatException when parser returns null', () async {
       when(
         () => mockRemoteDs.fetchLatestRelease(),
       ).thenAnswer((_) async => '{"tag_name": ""}');
 
-      final result = await repository.getLatestRelease();
-
-      expect(result.isLeft(), true);
-      result.fold(
-        (failure) => expect(failure, isA<UpdateFailure>()),
-        (_) => fail('Should be Left'),
+      expect(
+        () => repository.getLatestRelease(),
+        throwsA(isA<FormatException>()),
       );
     });
 
@@ -88,11 +76,7 @@ void main() {
 
         final result = await repository.getLatestRelease();
 
-        expect(result.isRight(), true);
-        result.fold(
-          (_) => fail('Should be Right'),
-          (release) => expect(release.downloadUrl, isNull),
-        );
+        expect(result.downloadUrl, isNull);
       },
     );
   });

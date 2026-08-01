@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart';
 import 'package:keek_news/model/download_progress.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
@@ -51,36 +49,27 @@ class ApkInstallImpl implements ApkInstallRepo {
   }
 
   @override
-  Future<Either<Failure, Unit>> launchInstaller() async {
+  Future<void> launchInstaller() async {
     final path = _downloadDataSource.savedPath;
     if (path == null) {
-      return const Left(UpdateFailure('No downloaded APK to install'));
+      throw StateError('No downloaded APK to install');
     }
-    try {
-      final launched = await _installerService.launchInstaller(path);
-      if (!launched) {
-        return const Left(UpdateFailure('Installer launch failed'));
-      }
-      return const Right(unit);
-    } catch (e) {
-      return Left(UpdateFailure(e.toString()));
+    final launched = await _installerService.launchInstaller(path);
+    if (!launched) {
+      throw StateError('Installer launch failed');
     }
   }
 
   @override
-  Future<bool> canRequestPackageInstalls() =>
-      _installerService.canRequestPackageInstalls();
+  Future<bool> canRequestPackageInstalls() {
+    return _installerService.canRequestPackageInstalls();
+  }
 
   @override
-  Future<Either<Failure, Unit>> openInstallPermissionSettings() async {
-    try {
-      final opened = await _installerService.openInstallPermissionSettings();
-      if (!opened) {
-        return const Left(UpdateFailure('Could not open install settings'));
-      }
-      return const Right(unit);
-    } catch (e) {
-      return Left(UpdateFailure(e.toString()));
+  Future<void> openInstallPermissionSettings() async {
+    final opened = await _installerService.openInstallPermissionSettings();
+    if (!opened) {
+      throw StateError('Could not open install settings');
     }
   }
 

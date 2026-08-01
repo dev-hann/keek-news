@@ -17,7 +17,8 @@ class BookmarkNotifier extends StateNotifier<List<Bookmark>> {
   final BookmarkUseCase _useCase;
 
   Future<void> load() async {
-    state = await _useCase.getAll();
+    final result = await _useCase.getAll();
+    result.fold((_) {}, (bookmarks) => state = bookmarks);
   }
 
   bool isBookmarked(CommunityId community, String id) {
@@ -27,24 +28,31 @@ class BookmarkNotifier extends StateNotifier<List<Bookmark>> {
   Future<bool> toggle(Bookmark bookmark) async {
     final already = isBookmarked(bookmark.community, bookmark.id);
     if (already) {
-      await _useCase.remove(bookmark.community, bookmark.id);
-      state = state
-          .where(
-            (b) => !(b.community == bookmark.community && b.id == bookmark.id),
-          )
-          .toList();
-      return false;
+      final result = await _useCase.remove(bookmark.community, bookmark.id);
+      return result.fold((_) => true, (_) {
+        state = state
+            .where(
+              (b) =>
+                  !(b.community == bookmark.community && b.id == bookmark.id),
+            )
+            .toList();
+        return false;
+      });
     } else {
-      await _useCase.add(bookmark);
-      state = [bookmark, ...state];
-      return true;
+      final result = await _useCase.add(bookmark);
+      return result.fold((_) => false, (_) {
+        state = [bookmark, ...state];
+        return true;
+      });
     }
   }
 
   Future<void> remove(CommunityId community, String id) async {
-    await _useCase.remove(community, id);
-    state = state
-        .where((b) => !(b.community == community && b.id == id))
-        .toList();
+    final result = await _useCase.remove(community, id);
+    result.fold((_) {}, (_) {
+      state = state
+          .where((b) => !(b.community == community && b.id == id))
+          .toList();
+    });
   }
 }

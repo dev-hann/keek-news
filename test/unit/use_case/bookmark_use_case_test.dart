@@ -35,7 +35,11 @@ void main() {
 
       final result = await useCase.getAll();
 
-      expect(result, equals(bookmarks));
+      expect(result.isRight(), isTrue);
+      result.fold(
+        (_) => fail('Expected Right'),
+        (list) => expect(list, equals(bookmarks)),
+      );
       verify(() => repo.getAll()).called(1);
     });
 
@@ -47,7 +51,7 @@ void main() {
 
       final result = await useCase.isBookmarked(CommunityId.humoruniv, '1');
 
-      expect(result, isTrue);
+      expect(result.getOrElse(() => false), isTrue);
       verify(() => repo.isBookmarked(CommunityId.humoruniv, '1')).called(1);
     });
 
@@ -56,8 +60,9 @@ void main() {
       when(() => repo.add(bookmark)).thenAnswer((_) async {});
       final useCase = BookmarkUseCase(repo);
 
-      await useCase.add(bookmark);
+      final result = await useCase.add(bookmark);
 
+      expect(result.isRight(), isTrue);
       verify(() => repo.add(bookmark)).called(1);
     });
 
@@ -67,8 +72,9 @@ void main() {
       ).thenAnswer((_) async {});
       final useCase = BookmarkUseCase(repo);
 
-      await useCase.remove(CommunityId.humoruniv, '7');
+      final result = await useCase.remove(CommunityId.humoruniv, '7');
 
+      expect(result.isRight(), isTrue);
       verify(() => repo.remove(CommunityId.humoruniv, '7')).called(1);
     });
   });

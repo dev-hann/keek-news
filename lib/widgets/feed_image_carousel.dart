@@ -4,7 +4,8 @@ import 'package:keek_news/const/app_durations.dart';
 import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/provider/feed_video_playback_provider.dart';
+import 'package:keek_news/model/video_id.dart';
+import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/utils/image_aspect_resolver.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
 import 'package:keek_news/widgets/media_count_badge.dart';
@@ -17,12 +18,14 @@ class FeedImageCarousel extends StatefulWidget {
     required this.postId,
     this.videoBlocks = const [],
     this.onImageTap,
+    this.videoController,
     super.key,
   });
   final List<String> imageUrls;
   final int postId;
   final List<VideoBlock> videoBlocks;
   final ValueChanged<int>? onImageTap;
+  final VideoPlaybackController? videoController;
 
   @override
   State<FeedImageCarousel> createState() => _FeedImageCarouselState();
@@ -144,6 +147,7 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
         block: widget.videoBlocks[index],
         autoplay: true,
         videoId: VideoId(postId: widget.postId, blockIndex: index),
+        controller: widget.videoController,
       );
     }
     final video = widget.videoBlocks[index];

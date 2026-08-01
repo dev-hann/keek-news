@@ -1,7 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/content_block.dart';
-import 'package:dio/dio.dart';
 import 'package:keek_news/service/dio_html_service.dart';
 
 void main() {
@@ -284,12 +284,13 @@ void main() {
             isNull,
             reason:
                 'url_enc thumbnails return 403 for any client; '
-                'must be null so the UI can fall back to local frame extraction',
+                'must be null so the UI can fall back to local '
+                'frame extraction',
           );
         },
       );
 
-      test('comment_mp4_expand with plaintext thumb.php thumbnail keeps it', () {
+      test('comment_mp4_expand keeps plaintext thumb.php thumbnail', () {
         final doc = html_parser.parse('''
             <div class="comment_body">
               <div class='comment_file'>

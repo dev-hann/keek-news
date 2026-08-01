@@ -1,19 +1,15 @@
-import 'package:dartz/dartz.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
-import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/repository/community_repo_impl.dart';
-import 'package:keek_news/repository/dogdrip/dogdrip_repo.dart';
+import 'package:keek_news/model/url_builder.dart';
+import 'package:keek_news/repository/community/html_community_repo.dart';
 import 'package:keek_news/service/html_service.dart';
-import 'package:keek_news/utils/url_builder.dart';
 
-class DogdripImpl extends CommunityRepoImpl implements DogdripRepo {
+class DogdripImpl extends HtmlCommunityRepo {
   DogdripImpl({required super.htmlClient});
 
   @override
@@ -29,35 +25,26 @@ class DogdripImpl extends CommunityRepoImpl implements DogdripRepo {
   int get listPageSize => 5;
 
   @override
-  Future<Either<Failure, PostDetail>> fetchDetail(String id) async {
-    try {
-      final html = await htmlClient.get('/$id');
-      final doc = html_parser.parse(html);
-      final contentEl = _findContent(doc);
+  Future<PostDetail> fetchDetail(String id) async {
+    final html = await htmlClient.get('/$id');
+    final doc = html_parser.parse(html);
+    final contentEl = _findContent(doc);
 
-      return Right(
-        PostDetail(
-          id: int.tryParse(id) ?? 0,
-          title: _extractTitle(doc),
-          author: _extractAuthor(doc),
-          date: DateTime.now(),
-          contentHtml: contentEl?.innerHtml ?? '',
-          contentBlocks: _buildBlocks(contentEl),
-          imageUrls: htmlClient.collectImageUrls(
-            contentEl,
-            community: communityId,
-          ),
-          recommendCount: 0,
-          notRecommendCount: 0,
-          viewCount: 0,
-          commentCount: _extractCommentCount(doc),
-          comments: _extractComments(doc),
-          community: CommunityId.dogdrip,
-        ),
-      );
-    } catch (e) {
-      return Left(toFailure(e));
-    }
+    return PostDetail(
+      id: int.tryParse(id) ?? 0,
+      title: _extractTitle(doc),
+      author: _extractAuthor(doc),
+      date: DateTime.now(),
+      contentHtml: contentEl?.innerHtml ?? '',
+      contentBlocks: _buildBlocks(contentEl),
+      imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
+      recommendCount: 0,
+      notRecommendCount: 0,
+      viewCount: 0,
+      commentCount: _extractCommentCount(doc),
+      comments: _extractComments(doc),
+      community: CommunityId.dogdrip,
+    );
   }
 
   @override

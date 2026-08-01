@@ -6,8 +6,7 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/service/service_locator.dart';
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
-import 'package:keek_news/use_case/get_post_detail_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
 
 class MergedFeedState {
   const MergedFeedState({
@@ -54,7 +53,9 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
 
   Future<void> fetch() async {
     state = const MergedFeedState(isLoading: true);
-    final result = await sl<GetMergedFeedUseCase>()(const MergedFeedParams());
+    final result = await sl<FeedUseCase>().getMergedFeed(
+      const MergedFeedParams(),
+    );
     _applyResult(result);
   }
 
@@ -62,7 +63,9 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
   /// The current list stays visible during the fetch; on success it is
   /// replaced, on error it is preserved (no destructive state change).
   Future<void> refresh() async {
-    final result = await sl<GetMergedFeedUseCase>()(const MergedFeedParams());
+    final result = await sl<FeedUseCase>().getMergedFeed(
+      const MergedFeedParams(),
+    );
     result.fold(
       (_) {},
       (page) => state = MergedFeedState(
@@ -78,7 +81,7 @@ class MergedFeedNotifier extends StateNotifier<MergedFeedState> {
     if (state.isLoadingMore || !state.hasMore || state.cursor == null) return;
 
     state = state.copyWith(isLoadingMore: true);
-    final result = await sl<GetMergedFeedUseCase>()(
+    final result = await sl<FeedUseCase>().getMergedFeed(
       MergedFeedParams(cursor: state.cursor),
     );
 
@@ -127,10 +130,37 @@ final mergedFeedProvider =
       return notifier;
     });
 
+typedef MergedDetailKey = ({CommunityId community, String id});
+
+typedef MergedDetailMap =
+    Map<MergedDetailKey, AsyncValue<Either<Failure, PostDetail>>>;
+
+class MergedDetailNotifier extends Notifier<MergedDetailMap> {
+  @override
+  MergedDetailMap build() => const {};
+
+  Future<void> fetchDetail(MergedDetailKey key) async {
+    if (state.containsKey(key)) {
+      final existing = state[key]!;
+      if (existing.isLoading || existing.hasValue) return;
+    }
+    state = {
+      ...state,
+      key: const AsyncValue<Either<Failure, PostDetail>>.loading(),
+    };
+    final result = await sl<FeedUseCase>().getPostDetail(
+      community: key.community,
+      id: key.id,
+    );
+    if (!state.containsKey(key)) return;
+    state = {
+      ...state,
+      key: AsyncValue<Either<Failure, PostDetail>>.data(result),
+    };
+  }
+}
+
 final mergedDetailProvider =
-    FutureProvider.family<
-      Either<Failure, PostDetail>,
-      ({CommunityId community, String id})
-    >((ref, key) {
-      return sl<GetPostDetailUseCase>()(community: key.community, id: key.id);
-    });
+    NotifierProvider<MergedDetailNotifier, MergedDetailMap>(
+      MergedDetailNotifier.new,
+    );

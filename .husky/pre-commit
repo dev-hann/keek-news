@@ -1,2 +1,2 @@
-flutter analyze --no-fatal-infos --no-fatal-warnings || exit 1
+flutter analyze || exit 1
 flutter test || exit 1

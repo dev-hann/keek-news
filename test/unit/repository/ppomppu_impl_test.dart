@@ -5,10 +5,8 @@ import 'package:html/dom.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/model/post_detail.dart';
-import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
+import 'package:keek_news/repository/community/ppomppu/ppomppu_impl.dart';
 import 'package:keek_news/service/html_service.dart';
-
-import '../../helpers/either_helper.dart';
 
 class _FixtureHtmlService extends HtmlService {
   _FixtureHtmlService(this._fixtures);
@@ -25,7 +23,7 @@ class _FixtureHtmlService extends HtmlService {
   @override
   int extractNumber(String? text) {
     if (text == null) return 0;
-    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+    final digits = text.replaceAll(RegExp('[^0-9]'), '');
     return int.tryParse(digits) ?? 0;
   }
 
@@ -60,8 +58,7 @@ PpomppuImpl _repo(String id, String fixtureFile) => PpomppuImpl(
 );
 
 Future<PostDetail> _detail(String id, String fixtureFile) async {
-  final either = await _repo(id, fixtureFile).fetchDetail(id);
-  return unwrapRight(either);
+  return _repo(id, fixtureFile).fetchDetail(id);
 }
 
 void main() {

@@ -68,7 +68,6 @@ void main() {
         (tester) async {
           final controller = RetryController(maxAttempts: 1);
           addTearDown(controller.dispose);
-          // 강제로 exhausted 상태로 진입
           controller.recordFailure();
           await tester.pump();
 

@@ -12,23 +12,12 @@ import 'package:keek_news/widgets/retryable_network_image.dart';
 
 /// Full-screen image viewer.
 ///
-/// Multiple images are paged horizontally with a [PageView]. Paging works two
-/// ways, so it is always reachable regardless of device gesture nuance:
-///   * **Swipe** left/right between images.
-///   * **Tap** the left/right third of the screen to go to the previous/next
-///     image (handy for reading long comics: scroll down, tap right to
-///     advance).
+/// Pages horizontally via [PageView] (swipe or tap left/right thirds). Long
+/// images scroll vertically; normal images use [InteractiveViewer] for zoom.
 ///
-/// Each page picks its interaction model from the image aspect ratio:
-///   * **Long** (taller-than-viewport at fit-width) images render in a vertical
-///     [SingleChildScrollView] so they can be read by scrolling down — native
-///     momentum scrolling, no pinch-zoom.
-///   * **Normal** images render in an [InteractiveViewer] for pinch-zoom/pan.
-///
-/// This deliberately avoids `photo_view` and avoids a swipe-down-to-dismiss
-/// [GestureDetector]: a vertical drag recognizer there competed with the
-/// [PageView]'s horizontal paging on real touches and made paging unreliable.
-/// Dismiss is via the close button or the system back gesture instead.
+/// Deliberately avoids `photo_view` and swipe-down-to-dismiss: a vertical drag
+/// recognizer competed with horizontal paging on real touches. Dismiss via the
+/// close button or system back gesture.
 class ImageViewerView extends StatefulWidget {
   const ImageViewerView({
     required this.imageUrls,
@@ -148,7 +137,7 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
     final multiple = widget.imageUrls.length > 1;
 
     final pageView = PageView.builder(
-      controller: _pageController!,
+      controller: _pageController,
       itemCount: widget.imageUrls.length,
       onPageChanged: (index) => setState(() {
         _currentIndex = index;

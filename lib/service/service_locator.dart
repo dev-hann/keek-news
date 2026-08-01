@@ -1,19 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/apk_install/apk_install_impl.dart';
-import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
+import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
-import 'package:keek_news/repository/cache/image_cache_repo.dart';
+import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/cache/image_cache_impl.dart';
-import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/repository/dogdrip/dogdrip_impl.dart';
-import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
-import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
-import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
-import 'package:keek_news/repository/update/update_repo.dart';
+import 'package:keek_news/repository/cache/image_cache_repo.dart';
+import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/repository/community/dogdrip/dogdrip_impl.dart';
+import 'package:keek_news/repository/community/humoruniv/humoruniv_impl.dart';
+import 'package:keek_news/repository/community/ppomppu/ppomppu_impl.dart';
+import 'package:keek_news/repository/community/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
+import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
 import 'package:keek_news/service/bookmark_local_service.dart';
@@ -26,11 +26,9 @@ import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/method_channel_apk_installer_service.dart';
 import 'package:keek_news/service/prefs_bookmark_local_service.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
-import 'package:keek_news/use_case/check_for_update_use_case.dart';
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
-import 'package:keek_news/use_case/get_post_detail_use_case.dart';
-import 'package:keek_news/use_case/install_apk_use_case.dart';
-import 'package:keek_news/use_case/manage_cache_use_case.dart';
+import 'package:keek_news/use_case/cache_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
+import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -84,10 +82,7 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<Map<CommunityId, CommunityRepo>>(() => repos);
 
   sl.registerLazySingleton(
-    () => GetMergedFeedUseCase(repos: sl<Map<CommunityId, CommunityRepo>>()),
-  );
-  sl.registerLazySingleton(
-    () => GetPostDetailUseCase(repos: sl<Map<CommunityId, CommunityRepo>>()),
+    () => FeedUseCase(repos: sl<Map<CommunityId, CommunityRepo>>()),
   );
 
   sl.registerLazySingleton<GitHubRemoteService>(DioGitHubRemoteService.new);
@@ -97,12 +92,6 @@ Future<void> configureDependencies() async {
   );
 
   final packageInfo = await PackageInfo.fromPlatform();
-  sl.registerLazySingleton(
-    () => CheckForUpdateUseCase(
-      repository: sl<UpdateRepo>(),
-      currentVersion: packageInfo.version,
-    ),
-  );
 
   sl.registerLazySingleton<ApkDownloadService>(
     () => DioApkDownloadService(
@@ -128,8 +117,12 @@ Future<void> configureDependencies() async {
       installerService: sl<ApkInstallerService>(),
     ),
   );
-  sl.registerLazySingleton<InstallApkUseCase>(
-    () => InstallApkUseCase(sl<ApkInstallRepo>()),
+  sl.registerLazySingleton(
+    () => UpdateUseCase(
+      updateRepo: sl<UpdateRepo>(),
+      apkRepo: sl<ApkInstallRepo>(),
+      currentVersion: packageInfo.version,
+    ),
   );
 
   sl.registerLazySingleton<BookmarkLocalService>(
@@ -143,7 +136,7 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<BookmarkUseCase>(
     () => BookmarkUseCase(sl<BookmarkRepo>()),
   );
-  sl.registerLazySingleton<ManageCacheUseCase>(
-    () => ManageCacheUseCase(sl<ImageCacheRepo>()),
+  sl.registerLazySingleton<CacheUseCase>(
+    () => CacheUseCase(sl<ImageCacheRepo>()),
   );
 }

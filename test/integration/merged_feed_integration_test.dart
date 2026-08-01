@@ -2,17 +2,16 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
+import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
-import 'package:keek_news/model/community.dart';
-import 'package:keek_news/model/merged_feed.dart';
-import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/repository/dogdrip/dogdrip_impl.dart';
-import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
-import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
-import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
+import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/repository/community/dogdrip/dogdrip_impl.dart';
+import 'package:keek_news/repository/community/humoruniv/humoruniv_impl.dart';
+import 'package:keek_news/repository/community/ppomppu/ppomppu_impl.dart';
+import 'package:keek_news/repository/community/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/service/html_service.dart';
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
 
 class FixtureHtmlService extends HtmlService {
   FixtureHtmlService(this._fixtures);
@@ -29,7 +28,7 @@ class FixtureHtmlService extends HtmlService {
   @override
   int extractNumber(String? text) {
     if (text == null) return 0;
-    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+    final digits = text.replaceAll(RegExp('[^0-9]'), '');
     return int.tryParse(digits) ?? 0;
   }
 
@@ -61,7 +60,7 @@ String _readFixture(String path) =>
     File('test/fixtures/$path').readAsStringSync();
 
 void main() {
-  late GetMergedFeedUseCase useCase;
+  late FeedUseCase useCase;
 
   setUpAll(() {
     final repos = <CommunityId, CommunityRepo>{
@@ -92,12 +91,12 @@ void main() {
       ),
     };
 
-    useCase = GetMergedFeedUseCase(repos: repos);
+    useCase = FeedUseCase(repos: repos);
   });
 
   group('Merged feed integration (real repos + fixture HTML)', () {
     test('should return items from multiple communities', () async {
-      final result = await useCase(const MergedFeedParams(perSource: 20));
+      final result = await useCase.getMergedFeed(const MergedFeedParams());
 
       expect(result.isRight(), isTrue);
       final page = result.getOrElse(() => throw StateError(''));
@@ -113,7 +112,7 @@ void main() {
     });
 
     test('should sort by publishedAt descending', () async {
-      final result = await useCase(const MergedFeedParams(perSource: 20));
+      final result = await useCase.getMergedFeed(const MergedFeedParams());
 
       final page = result.getOrElse(() => throw StateError(''));
       final ts = page.items
@@ -127,7 +126,7 @@ void main() {
     });
 
     test('should return items with titles and URLs', () async {
-      final result = await useCase(const MergedFeedParams(perSource: 20));
+      final result = await useCase.getMergedFeed(const MergedFeedParams());
 
       final page = result.getOrElse(() => throw StateError(''));
       for (final item in page.items) {
@@ -138,7 +137,7 @@ void main() {
     });
 
     test('should have cursor for pagination', () async {
-      final result = await useCase(const MergedFeedParams(perSource: 20));
+      final result = await useCase.getMergedFeed(const MergedFeedParams());
 
       final page = result.getOrElse(() => throw StateError(''));
       if (page.items.isNotEmpty) {
@@ -147,8 +146,8 @@ void main() {
     });
 
     test('should filter by enabled communities', () async {
-      final result = await useCase(
-        const MergedFeedParams(perSource: 20, enabled: {CommunityId.humoruniv}),
+      final result = await useCase.getMergedFeed(
+        const MergedFeedParams(enabled: {CommunityId.humoruniv}),
       );
 
       final page = result.getOrElse(() => throw StateError(''));
@@ -158,7 +157,7 @@ void main() {
     });
 
     test('should isolate failing repos', () async {
-      final failingUseCase = GetMergedFeedUseCase(
+      final failingUseCase = FeedUseCase(
         repos: {
           CommunityId.humoruniv: HumorunivImpl(
             htmlClient: FixtureHtmlService({}),
@@ -171,8 +170,8 @@ void main() {
         },
       );
 
-      final result = await failingUseCase(
-        const MergedFeedParams(perSource: 20),
+      final result = await failingUseCase.getMergedFeed(
+        const MergedFeedParams(),
       );
       expect(result.isRight(), isTrue);
 

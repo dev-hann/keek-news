@@ -17,7 +17,7 @@ class AppRelease extends Equatable {
     String? downloadUrl;
     final assets = json['assets'] as List<dynamic>?;
     if (assets != null && assets.isNotEmpty) {
-      for (final asset in assets) {
+      for (final asset in assets.cast<Map<String, dynamic>>()) {
         final name = asset['name'] as String? ?? '';
         if (name.endsWith('.apk')) {
           downloadUrl = asset['browser_download_url'] as String?;

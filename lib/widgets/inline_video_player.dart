@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keek_news/const/app_colors.dart';
 import 'package:keek_news/const/app_durations.dart';
 import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/provider/feed_video_playback_provider.dart';
+import 'package:keek_news/model/video_id.dart';
+import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_surface.dart';
 import 'package:video_player/video_player.dart';
@@ -259,22 +259,24 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
   }
 }
 
-class InlineVideoPlayer extends ConsumerStatefulWidget {
+class InlineVideoPlayer extends StatefulWidget {
   const InlineVideoPlayer({
     required this.block,
     this.autoplay = false,
     this.videoId,
+    this.controller,
     super.key,
   });
   final VideoBlock block;
   final bool autoplay;
   final VideoId? videoId;
+  final VideoPlaybackController? controller;
 
   @override
-  ConsumerState<InlineVideoPlayer> createState() => _InlineVideoPlayerState();
+  State<InlineVideoPlayer> createState() => _InlineVideoPlayerState();
 }
 
-class _InlineVideoPlayerState extends ConsumerState<InlineVideoPlayer>
+class _InlineVideoPlayerState extends State<InlineVideoPlayer>
     with _VideoPlayerControllerMixin<InlineVideoPlayer> {
   @override
   VideoBlock get videoBlock => widget.block;
@@ -282,8 +284,17 @@ class _InlineVideoPlayerState extends ConsumerState<InlineVideoPlayer>
   @override
   void initState() {
     super.initState();
-    ref.listenManual<VideoId?>(feedVideoPlaybackProvider, _onActiveChanged);
+    widget.controller?.activeVideo.addListener(_onActiveChanged);
     initController();
+  }
+
+  @override
+  void didUpdateWidget(covariant InlineVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.activeVideo.removeListener(_onActiveChanged);
+      widget.controller?.activeVideo.addListener(_onActiveChanged);
+    }
   }
 
   @override
@@ -293,7 +304,7 @@ class _InlineVideoPlayerState extends ConsumerState<InlineVideoPlayer>
       showPlayButton = false;
       final id = widget.videoId;
       if (id != null) {
-        ref.read(feedVideoPlaybackProvider.notifier).setActive(id);
+        widget.controller?.setActive(id);
       }
     }
   }
@@ -302,14 +313,15 @@ class _InlineVideoPlayerState extends ConsumerState<InlineVideoPlayer>
   void onPlay() {
     final id = widget.videoId;
     if (id != null) {
-      ref.read(feedVideoPlaybackProvider.notifier).setActive(id);
+      widget.controller?.setActive(id);
     }
   }
 
-  void _onActiveChanged(VideoId? previous, VideoId? next) {
+  void _onActiveChanged() {
     final id = widget.videoId;
     if (id == null) return;
-    if (next != id) {
+    final active = widget.controller?.activeVideo.value;
+    if (active != id) {
       pauseIfPlaying();
     }
   }
@@ -333,6 +345,12 @@ class _InlineVideoPlayerState extends ConsumerState<InlineVideoPlayer>
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.activeVideo.removeListener(_onActiveChanged);
+    super.dispose();
   }
 
   @override

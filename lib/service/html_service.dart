@@ -3,9 +3,9 @@ import 'package:html/parser.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
-import 'package:keek_news/utils/media_classifier.dart';
-import 'package:keek_news/utils/media_dedup.dart';
-import 'package:keek_news/utils/url_builder.dart';
+import 'package:keek_news/model/url_builder.dart';
+import 'package:keek_news/service/media_classifier.dart';
+import 'package:keek_news/service/media_dedup.dart';
 
 abstract class HtmlService {
   Future<String> get(String path);

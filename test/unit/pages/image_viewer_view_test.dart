@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
@@ -41,7 +43,6 @@ void main() {
     });
 
     testWidgets('renders InteractiveViewer for a normal image', (tester) async {
-      // viewport default 800x600 → viewportAspect 1.33; aspect 2.0 (wide) is NOT long.
       await tester.pumpWidget(
         const MaterialApp(
           home: ImageViewerView(
@@ -60,9 +61,8 @@ void main() {
       'long image page reserves bottom scroll space so the indicator does '
       'not obscure the bottom of the image',
       (tester) async {
-        // Default test viewport is 800x600; with extendBodyBehindAppBar the
-        // body fills it, so viewport height = 600. A 2000-tall long image
-        // without any bottom reserve would have maxScrollExtent = 1400.
+        // 800x600 viewport, extendBodyBehindAppBar → body height 600; a
+        // 2000-tall long image has maxScrollExtent = 1400 without reserve.
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerView(
@@ -93,7 +93,6 @@ void main() {
 
     testWidgets('renders vertical SingleChildScrollView for a long image '
         'instead of InteractiveViewer', (tester) async {
-      // aspect 0.5 (tall) < viewportAspect 1.33 → long image.
       await tester.pumpWidget(
         const MaterialApp(
           home: ImageViewerView(
@@ -127,11 +126,13 @@ void main() {
           home: const Scaffold(body: Text('root')),
         ),
       );
-      navigatorKey.currentState!.push(
-        MaterialPageRoute<void>(
-          builder: (_) => ImageViewerView(
-            imageUrls: const ['https://example.com/a.jpg'],
-            imageBuilder: (_) => const SizedBox.shrink(),
+      unawaited(
+        navigatorKey.currentState!.push(
+          MaterialPageRoute<void>(
+            builder: (_) => ImageViewerView(
+              imageUrls: const ['https://example.com/a.jpg'],
+              imageBuilder: (_) => const SizedBox.shrink(),
+            ),
           ),
         ),
       );
@@ -155,17 +156,18 @@ void main() {
           home: const Scaffold(body: Text('root')),
         ),
       );
-      navigatorKey.currentState!.push(
-        MaterialPageRoute<void>(
-          builder: (_) => ImageViewerView(
-            imageUrls: const ['https://example.com/a.jpg'],
-            imageBuilder: (_) => const SizedBox.shrink(),
+      unawaited(
+        navigatorKey.currentState!.push(
+          MaterialPageRoute<void>(
+            builder: (_) => ImageViewerView(
+              imageUrls: const ['https://example.com/a.jpg'],
+              imageBuilder: (_) => const SizedBox.shrink(),
+            ),
           ),
         ),
       );
       await tester.pumpAndSettle();
 
-      // A downward drag must NOT pop anymore; the viewer stays.
       await tester.fling(find.byType(PageView), const Offset(0, 250), 1000);
       await tester.pumpAndSettle();
 
@@ -255,7 +257,6 @@ void main() {
     testWidgets(
       'horizontal swipe advances pages when starting on a long image',
       (tester) async {
-        // Page 0 is long (aspect 0.5 < 1.33), page 1 is normal (aspect 2.0).
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerView(
@@ -275,7 +276,6 @@ void main() {
 
         expect(find.text('1/2'), findsOneWidget);
 
-        // Swipe left (negative dx) to advance to the next page.
         await tester.fling(find.byType(PageView), const Offset(-300, 0), 2000);
         await tester.pumpAndSettle();
 
@@ -290,7 +290,6 @@ void main() {
     testWidgets(
       'horizontal swipe advances pages when the next page is a long image',
       (tester) async {
-        // Page 0 is normal, page 1 is long.
         await tester.pumpWidget(
           MaterialApp(
             home: ImageViewerView(
@@ -334,9 +333,7 @@ void main() {
               'https://example.com/long.jpg': 0.5,
               'https://example.com/normal.jpg': 2.0,
             },
-            // Inject genuinely tall content so the long-image page's
-            // SingleChildScrollView is actually scrollable (matches a real
-            // loaded long image).
+            // Tall content so the long-image page is actually scrollable.
             imageBuilder: (url) {
               if (url.contains('long')) {
                 return Container(height: 2000, color: Colors.red);

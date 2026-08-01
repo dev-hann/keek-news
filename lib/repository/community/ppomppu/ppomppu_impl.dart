@@ -1,20 +1,16 @@
 import 'dart:convert';
 
-import 'package:dartz/dartz.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
-import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/repository/community_repo_impl.dart';
-import 'package:keek_news/repository/ppomppu/ppomppu_repo.dart';
+import 'package:keek_news/repository/community/html_community_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 
-class PpomppuImpl extends CommunityRepoImpl implements PpomppuRepo {
+class PpomppuImpl extends HtmlCommunityRepo {
   PpomppuImpl({required super.htmlClient});
 
   @override
@@ -30,38 +26,32 @@ class PpomppuImpl extends CommunityRepoImpl implements PpomppuRepo {
   int get listPageSize => 5;
 
   @override
-  Future<Either<Failure, PostDetail>> fetchDetail(String id) async {
-    try {
-      final html = await htmlClient.get('/zboard/view.php?id=humor&no=$id');
-      final doc = html_parser.parse(html);
-      final contentEl = doc.querySelector('.board-contents');
-      final date = _extractDate(doc);
-      final commentData = _extractCommentData(doc);
+  Future<PostDetail> fetchDetail(String id) async {
+    final html = await htmlClient.get('/zboard/view.php?id=humor&no=$id');
+    final doc = html_parser.parse(html);
+    final contentEl = doc.querySelector('.board-contents');
+    final date = _extractDate(doc);
+    final commentData = _extractCommentData(doc);
 
-      return Right(
-        PostDetail(
-          id: int.tryParse(id) ?? 0,
-          title: _extractTitle(doc),
-          author: _extractAuthor(doc),
-          date: date,
-          contentHtml: contentEl?.innerHtml ?? '',
-          contentBlocks: _buildBlocks(contentEl),
-          imageUrls: htmlClient.collectImageUrls(
-            contentEl,
-            community: communityId,
-            includeFilter: _isNotUiAsset,
-          ),
-          recommendCount: 0,
-          notRecommendCount: 0,
-          viewCount: _extractViewCount(doc),
-          commentCount: _extractCommentCount(commentData),
-          comments: _extractComments(commentData, date),
-          community: CommunityId.ppomppu,
-        ),
-      );
-    } catch (e) {
-      return Left(toFailure(e));
-    }
+    return PostDetail(
+      id: int.tryParse(id) ?? 0,
+      title: _extractTitle(doc),
+      author: _extractAuthor(doc),
+      date: date,
+      contentHtml: contentEl?.innerHtml ?? '',
+      contentBlocks: _buildBlocks(contentEl),
+      imageUrls: htmlClient.collectImageUrls(
+        contentEl,
+        community: communityId,
+        includeFilter: _isNotUiAsset,
+      ),
+      recommendCount: 0,
+      notRecommendCount: 0,
+      viewCount: _extractViewCount(doc),
+      commentCount: _extractCommentCount(commentData),
+      comments: _extractComments(commentData, date),
+      community: CommunityId.ppomppu,
+    );
   }
 
   @override
@@ -210,8 +200,9 @@ class PpomppuImpl extends CommunityRepoImpl implements PpomppuRepo {
       final recommend = voteBtn is Map<String, dynamic>
           ? htmlClient.toInt(voteBtn['vote_count'])
           : 0;
-      final time = (item['meta'] is Map<String, dynamic>)
-          ? (item['meta']!['time_display'] as String?)
+      final meta = item['meta'];
+      final time = meta is Map<String, dynamic>
+          ? (meta['time_display'] as String?)
           : null;
 
       result.add(

@@ -1,10 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/merged_feed.dart';
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockMergedFeedUseCase extends Mock implements GetMergedFeedUseCase {}
+class MockMergedFeedUseCase extends Mock implements FeedUseCase {}
 
 void registerMergedFeedFallbacks() {
   registerFallbackValue(const MergedFeedParams());
@@ -12,6 +11,6 @@ void registerMergedFeedFallbacks() {
 
 void setupMergedFeedMocks(MockMergedFeedUseCase mock) {
   when(
-    () => mock.call(any()),
+    () => mock.getMergedFeed(any()),
   ).thenAnswer((_) async => const Right(MergedPage(items: [])));
 }

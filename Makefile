@@ -2,11 +2,11 @@
 
 check:
 	dart format --set-exit-if-changed .
-	flutter analyze --no-fatal-infos --no-fatal-warnings
+	flutter analyze
 	flutter test
 
 analyze:
-	flutter analyze --no-fatal-infos --no-fatal-warnings
+	flutter analyze
 
 test:
 	flutter test

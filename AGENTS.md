@@ -24,11 +24,11 @@ Pre-commit hook (husky) enforces:
 
 ```bash
 dart format --set-exit-if-changed .
-flutter analyze --no-fatal-infos
+flutter analyze
 flutter test
 ```
 
-All must pass. Or use: `make check`
+All must pass. `flutter analyze` runs with **all severities fatal** — any info, warning, or error fails the commit. Or use: `make check`
 
 ## Commands
 
@@ -57,12 +57,16 @@ skill({ name: "feature-consensus" })
 ## Prohibited Actions
 
 - Using `late` keyword (use nullable types or constructor injection)
-- Adding comments unless explicitly requested
+- "what" comments that restate what the code already expresses (allowed: concise "why" comments for non-obvious behavior, design intent, or regression rationale; public APIs keep `///` dartdoc)
 - Committing code with failing tests or analyze errors
 - Skipping `make check` before committing
 - Adding a new community parser without fixture HTML + tests
 - Provider calling Repository/Service directly (skip UseCase)
 - Registering impl class in DI instead of abstract interface
+- Widget extending `ConsumerWidget`/`ConsumerStatefulWidget` (use `StatelessWidget`/`StatefulWidget`; inject data + `on*` callbacks)
+- `ref.watch`/`ref.read`/`ref.listen` or provider imports inside `lib/widgets/` or page-private widgets (provider access confined to `*_view.dart` page build)
+- Additional widget classes (besides the View + State pair) in a `*_view.dart` file (extract to `lib/widgets/`)
+- Non-`on*` callback names on widget constructors
 
 ## Commit Convention
 

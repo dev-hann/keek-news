@@ -5,6 +5,7 @@ import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/action_button.dart';
 import 'package:keek_news/widgets/avatar.dart';
@@ -23,6 +24,7 @@ class FeedCard extends StatelessWidget {
     this.onCopyTap,
     this.onBookmarkTap,
     this.isBookmarked = false,
+    this.videoController,
   });
   final FeedItem post;
   final PostDetail? detail;
@@ -32,6 +34,7 @@ class FeedCard extends StatelessWidget {
   final VoidCallback? onCopyTap;
   final VoidCallback? onBookmarkTap;
   final bool isBookmarked;
+  final VideoPlaybackController? videoController;
 
   bool get _hasImages => detail != null && detail!.imageUrls.isNotEmpty;
 
@@ -90,6 +93,7 @@ class FeedCard extends StatelessWidget {
           videoBlocks: _videoBlocks,
           onImageTap: onImageTap,
           postId: int.tryParse(post.id) ?? 0,
+          videoController: videoController,
         ),
       ];
     }

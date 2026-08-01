@@ -11,8 +11,7 @@ import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/pages/home_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
-import 'package:keek_news/use_case/get_post_detail_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:keek_news/widgets/error_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/skeleton_feed_card.dart';
@@ -22,11 +21,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../helpers/merged_feed_helper.dart';
 import '../../helpers/package_info_helper.dart';
 
-class MockPostDetailUseCase extends Mock implements GetPostDetailUseCase {}
-
 void main() {
   late MockMergedFeedUseCase mockUseCase;
-  late MockPostDetailUseCase mockPostDetail;
   late SharedPreferences prefs;
 
   setUpAll(() async {
@@ -39,18 +35,13 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
     mockUseCase = MockMergedFeedUseCase();
-    mockPostDetail = MockPostDetailUseCase();
     await di.configureDependencies();
-    if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
-      di.sl.unregister<GetMergedFeedUseCase>();
+    if (di.sl.isRegistered<FeedUseCase>()) {
+      di.sl.unregister<FeedUseCase>();
     }
-    if (di.sl.isRegistered<GetPostDetailUseCase>()) {
-      di.sl.unregister<GetPostDetailUseCase>();
-    }
-    di.sl.registerLazySingleton<GetMergedFeedUseCase>(() => mockUseCase);
-    di.sl.registerLazySingleton<GetPostDetailUseCase>(() => mockPostDetail);
+    di.sl.registerLazySingleton<FeedUseCase>(() => mockUseCase);
     when(
-      () => mockPostDetail.call(
+      () => mockUseCase.getPostDetail(
         community: any(named: 'community'),
         id: any(named: 'id'),
       ),
@@ -86,7 +77,7 @@ void main() {
 
   void stubMergedPage(MergedPage Function() factory) {
     when(
-      () => mockUseCase.call(any()),
+      () => mockUseCase.getMergedFeed(any()),
     ).thenAnswer((_) async => Right(factory()));
   }
 
@@ -133,7 +124,9 @@ void main() {
 
   testWidgets('should show skeleton feed cards while loading', (tester) async {
     final completer = Completer<Either<Failure, MergedPage>>();
-    when(() => mockUseCase.call(any())).thenAnswer((_) => completer.future);
+    when(
+      () => mockUseCase.getMergedFeed(any()),
+    ).thenAnswer((_) => completer.future);
 
     await tester.pumpWidget(buildApp());
     await tester.pump();
@@ -153,7 +146,7 @@ void main() {
 
   testWidgets('should show error message when fetch fails', (tester) async {
     when(
-      () => mockUseCase.call(any()),
+      () => mockUseCase.getMergedFeed(any()),
     ).thenAnswer((_) async => const Left(ServerFailure('error')));
 
     await tester.pumpWidget(buildApp());
@@ -169,7 +162,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
-    final title = (appBar.title! as GestureDetector).child as Text;
+    final title = (appBar.title! as GestureDetector).child! as Text;
     expect(title.data, '웃긴대학');
   });
 
@@ -190,12 +183,12 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    verify(() => mockUseCase.call(any())).called(1);
+    verify(() => mockUseCase.getMergedFeed(any())).called(1);
 
     await tester.tap(find.text('웃긴대학'));
     await tester.pumpAndSettle();
 
-    verify(() => mockUseCase.call(any())).called(1);
+    verify(() => mockUseCase.getMergedFeed(any())).called(1);
   });
 
   testWidgets('tapping active community tab triggers silent refresh', (
@@ -206,12 +199,12 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    verify(() => mockUseCase.call(any())).called(1);
+    verify(() => mockUseCase.getMergedFeed(any())).called(1);
 
     await tester.tap(find.text('웃대'));
     await tester.pumpAndSettle();
 
-    verify(() => mockUseCase.call(any())).called(1);
+    verify(() => mockUseCase.getMergedFeed(any())).called(1);
   });
 
   testWidgets('scroll near bottom triggers fetchNextPage with cursor', (
@@ -231,7 +224,7 @@ void main() {
           viewCount: i,
         ),
       ),
-      next: MergedCursor(perSourceTokens: const {CommunityId.humoruniv: '2'}),
+      next: const MergedCursor(perSourceTokens: {CommunityId.humoruniv: '2'}),
     );
     final secondPage = MergedPage(
       items: List.generate(
@@ -248,7 +241,7 @@ void main() {
 
     var call = 0;
     when(
-      () => mockUseCase.call(any()),
+      () => mockUseCase.getMergedFeed(any()),
     ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : secondPage));
 
     await tester.pumpWidget(buildApp());
@@ -267,7 +260,9 @@ void main() {
     }
     await tester.pump(const Duration(seconds: 1));
 
-    final captured = verify(() => mockUseCase.call(captureAny())).captured;
+    final captured = verify(
+      () => mockUseCase.getMergedFeed(captureAny()),
+    ).captured;
 
     expect(captured.length, greaterThanOrEqualTo(2));
     expect((captured[0] as MergedFeedParams).cursor, isNull);

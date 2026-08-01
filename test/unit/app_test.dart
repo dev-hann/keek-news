@@ -1,8 +1,8 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keek_news/app.dart';
 import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/pages/home_view.dart';
@@ -11,11 +11,10 @@ import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
-import 'package:keek_news/app.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
-import 'package:keek_news/use_case/check_for_update_use_case.dart';
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
+import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,8 +57,8 @@ void main() {
     if (di.sl.isRegistered<UpdateRepo>()) {
       di.sl.unregister<UpdateRepo>();
     }
-    if (di.sl.isRegistered<CheckForUpdateUseCase>()) {
-      di.sl.unregister<CheckForUpdateUseCase>();
+    if (di.sl.isRegistered<UpdateUseCase>()) {
+      di.sl.unregister<UpdateUseCase>();
     }
     if (di.sl.isRegistered<ApkInstallRepo>()) {
       di.sl.unregister<ApkInstallRepo>();
@@ -70,20 +69,21 @@ void main() {
     if (di.sl.isRegistered<BookmarkRepo>()) {
       di.sl.unregister<BookmarkRepo>();
     }
-    if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
-      di.sl.unregister<GetMergedFeedUseCase>();
+    if (di.sl.isRegistered<FeedUseCase>()) {
+      di.sl.unregister<FeedUseCase>();
     }
     di.sl.registerLazySingleton<UpdateRepo>(() => mockUpdateRepo);
     di.sl.registerLazySingleton(
-      () => CheckForUpdateUseCase(
-        repository: mockUpdateRepo,
+      () => UpdateUseCase(
+        updateRepo: mockUpdateRepo,
+        apkRepo: mockApkRepo,
         currentVersion: '1.0.0',
       ),
     );
     di.sl.registerLazySingleton<ApkInstallRepo>(() => mockApkRepo);
     di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
     di.sl.registerLazySingleton<BookmarkRepo>(() => fakeBookmarkRepo);
-    di.sl.registerLazySingleton<GetMergedFeedUseCase>(() => mockMergedUseCase);
+    di.sl.registerLazySingleton<FeedUseCase>(() => mockMergedUseCase);
   });
 
   tearDown(di.sl.reset);
@@ -95,9 +95,8 @@ void main() {
   group('appRouter', () {
     testWidgets('route / should render HomeView', (tester) async {
       when(() => mockUpdateRepo.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(
@@ -113,9 +112,8 @@ void main() {
 
     testWidgets('route /settings should render SettingsView', (tester) async {
       when(() => mockUpdateRepo.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       final settingsRouter = GoRouter(
@@ -136,9 +134,8 @@ void main() {
 
     testWidgets('route /bookmarks should render BookmarksView', (tester) async {
       when(() => mockUpdateRepo.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       final bookmarksRouter = GoRouter(

@@ -169,7 +169,7 @@ void main() {
     });
 
     test('should default counts to 0 when missing', () {
-      final b = Bookmark.fromJson({
+      final b = Bookmark.fromJson(const {
         'community': 'humoruniv',
         'id': '1',
         'title': 't',

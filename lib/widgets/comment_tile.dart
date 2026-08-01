@@ -161,7 +161,7 @@ class _MediaRow extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  VideoThumbnail(videoUrl: block.url, fit: BoxFit.cover),
+                  VideoThumbnail(videoUrl: block.url),
                   const Center(
                     child: Icon(
                       Icons.play_circle_fill,

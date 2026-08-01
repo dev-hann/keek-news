@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,15 +10,14 @@ import 'package:keek_news/pages/settings_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
-import 'package:keek_news/repository/cache/image_cache_repo.dart';
 import 'package:keek_news/repository/cache/image_cache_impl.dart';
+import 'package:keek_news/repository/cache/image_cache_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/bookmark_use_case.dart';
-import 'package:keek_news/use_case/check_for_update_use_case.dart';
-import 'package:keek_news/use_case/install_apk_use_case.dart';
-import 'package:keek_news/use_case/manage_cache_use_case.dart';
+import 'package:keek_news/use_case/cache_use_case.dart';
+import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -87,8 +85,8 @@ void main() {
     if (di.sl.isRegistered<UpdateRepo>()) {
       di.sl.unregister<UpdateRepo>();
     }
-    if (di.sl.isRegistered<CheckForUpdateUseCase>()) {
-      di.sl.unregister<CheckForUpdateUseCase>();
+    if (di.sl.isRegistered<UpdateUseCase>()) {
+      di.sl.unregister<UpdateUseCase>();
     }
     if (di.sl.isRegistered<ApkInstallRepo>()) {
       di.sl.unregister<ApkInstallRepo>();
@@ -105,29 +103,24 @@ void main() {
     if (di.sl.isRegistered<BookmarkUseCase>()) {
       di.sl.unregister<BookmarkUseCase>();
     }
-    if (di.sl.isRegistered<ManageCacheUseCase>()) {
-      di.sl.unregister<ManageCacheUseCase>();
-    }
-    if (di.sl.isRegistered<InstallApkUseCase>()) {
-      di.sl.unregister<InstallApkUseCase>();
+    if (di.sl.isRegistered<CacheUseCase>()) {
+      di.sl.unregister<CacheUseCase>();
     }
     di.sl.registerLazySingleton<UpdateRepo>(() => mockRepository);
     di.sl.registerLazySingleton(
-      () => CheckForUpdateUseCase(
-        repository: mockRepository,
+      () => UpdateUseCase(
+        updateRepo: mockRepository,
+        apkRepo: mockApkRepo,
         currentVersion: '1.0.0',
       ),
     );
     di.sl.registerLazySingleton<ApkInstallRepo>(() => mockApkRepo);
-    di.sl.registerLazySingleton<InstallApkUseCase>(
-      () => InstallApkUseCase(mockApkRepo),
-    );
     di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
     di.sl.registerLazySingleton<ImageCacheRepo>(
       () => ImageCacheImpl(fakeCacheService),
     );
-    di.sl.registerLazySingleton<ManageCacheUseCase>(
-      () => ManageCacheUseCase(di.sl<ImageCacheRepo>()),
+    di.sl.registerLazySingleton<CacheUseCase>(
+      () => CacheUseCase(di.sl<ImageCacheRepo>()),
     );
     di.sl.registerLazySingleton<BookmarkRepo>(() => fakeBookmarkRepo);
     di.sl.registerLazySingleton<BookmarkUseCase>(
@@ -145,9 +138,8 @@ void main() {
   group('SettingsView', () {
     testWidgets('should display all section titles', (tester) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -159,9 +151,8 @@ void main() {
 
     testWidgets('should display AppBar with 설정 title', (tester) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -174,9 +165,8 @@ void main() {
 
     testWidgets('should display version info', (tester) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -188,9 +178,8 @@ void main() {
       tester,
     ) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -204,9 +193,8 @@ void main() {
       tester,
     ) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -221,9 +209,8 @@ void main() {
       tester,
     ) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -235,9 +222,8 @@ void main() {
 
     testWidgets('renders the bookmarks tile in the 저장함 group', (tester) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -251,9 +237,8 @@ void main() {
       tester,
     ) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -267,9 +252,8 @@ void main() {
 
     testWidgets('auto-checks for update on entry', (tester) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -280,12 +264,10 @@ void main() {
 
     testWidgets('should show update available state', (tester) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(
-            version: '1.2.0',
-            htmlUrl: 'https://example.com',
-            downloadUrl: 'https://example.com/app.apk',
-          ),
+        (_) async => const AppRelease(
+          version: '1.2.0',
+          htmlUrl: 'https://example.com',
+          downloadUrl: 'https://example.com/app.apk',
         ),
       );
 
@@ -298,9 +280,8 @@ void main() {
 
     testWidgets('should show up to date state', (tester) async {
       when(() => mockRepository.getLatestRelease()).thenAnswer(
-        (_) async => const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
       await tester.pumpWidget(buildApp());
@@ -312,7 +293,7 @@ void main() {
     testWidgets('should show error state with retry', (tester) async {
       when(
         () => mockRepository.getLatestRelease(),
-      ).thenAnswer((_) async => const Left(UpdateFailure('Network error')));
+      ).thenAnswer((_) async => throw const UpdateFailure('Network error'));
 
       await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
@@ -322,7 +303,7 @@ void main() {
     });
 
     testWidgets('should show checking state', (tester) async {
-      final completer = Completer<Either<Failure, AppRelease>>();
+      final completer = Completer<AppRelease>();
       when(
         () => mockRepository.getLatestRelease(),
       ).thenAnswer((_) => completer.future);
@@ -333,9 +314,7 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       completer.complete(
-        const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
       await tester.pumpAndSettle();
     });
@@ -344,11 +323,9 @@ void main() {
       'should show feedback when browser fallback URL cannot be opened',
       (tester) async {
         when(() => mockRepository.getLatestRelease()).thenAnswer(
-          (_) async => const Right(
-            AppRelease(
-              version: '1.2.0',
-              htmlUrl: 'https://example.com/release',
-            ),
+          (_) async => const AppRelease(
+            version: '1.2.0',
+            htmlUrl: 'https://example.com/release',
           ),
         );
         fakeLauncher.canLaunchResult = false;

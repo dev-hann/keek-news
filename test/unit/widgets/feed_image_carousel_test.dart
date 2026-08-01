@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/provider/feed_video_playback_provider.dart';
+import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
@@ -100,14 +99,12 @@ void main() {
         thumbnailUrl: 'https://example.com/t.jpg',
       );
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: FeedImageCarousel(
-                imageUrls: ['img'],
-                videoBlocks: [block],
-                postId: 1,
-              ),
+        const MaterialApp(
+          home: Scaffold(
+            body: FeedImageCarousel(
+              imageUrls: ['img'],
+              videoBlocks: [block],
+              postId: 1,
             ),
           ),
         ),
@@ -142,14 +139,12 @@ void main() {
           thumbnailUrl: 'https://example.com/t.jpg',
         );
         await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(
-              home: Scaffold(
-                body: FeedImageCarousel(
-                  imageUrls: [],
-                  videoBlocks: [block],
-                  postId: 7,
-                ),
+          const MaterialApp(
+            home: Scaffold(
+              body: FeedImageCarousel(
+                imageUrls: [],
+                videoBlocks: [block],
+                postId: 7,
               ),
             ),
           ),
@@ -170,32 +165,29 @@ void main() {
       },
     );
 
-    testWidgets(
-      'video block without thumbnail renders VideoThumbnail (local frame fallback)',
-      (tester) async {
-        const block = VideoBlock(url: 'https://example.com/nthumb.mp4');
-        await tester.pumpWidget(
-          const ProviderScope(
-            child: MaterialApp(
-              home: Scaffold(
-                body: FeedImageCarousel(
-                  imageUrls: [],
-                  videoBlocks: [block],
-                  postId: 9,
-                ),
-              ),
+    testWidgets('video block without thumbnail renders VideoThumbnail '
+        '(local frame fallback)', (tester) async {
+      const block = VideoBlock(url: 'https://example.com/nthumb.mp4');
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: FeedImageCarousel(
+              imageUrls: [],
+              videoBlocks: [block],
+              postId: 9,
             ),
           ),
-        );
-        await tester.pump();
+        ),
+      );
+      await tester.pump();
 
-        expect(
-          find.byType(VideoThumbnail),
-          findsOneWidget,
-          reason:
-              'null-thumbnail videos must use VideoThumbnail for local frame extraction',
-        );
-      },
-    );
+      expect(
+        find.byType(VideoThumbnail),
+        findsOneWidget,
+        reason:
+            'null-thumbnail videos must use VideoThumbnail for local '
+            'frame extraction',
+      );
+    });
   });
 }

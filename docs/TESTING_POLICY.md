@@ -66,7 +66,7 @@ Isolated tests with dependencies mocked via `mocktail`.
 | Parser | HTML string → DTO | None (pure function) |
 | UseCase | Business logic, Either result | Repository |
 | Datasource / Adapter | Correct parser called, error handling | HtmlClient |
-| Repository impl | Mapping, error handling | Datasource |
+| Repository impl | Mapping | Datasource |
 | Provider | State management, async flow | Repository via DI |
 | Widget | Rendering, interaction | Provider overrides |
 

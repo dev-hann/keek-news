@@ -7,7 +7,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for layer boundaries. See [NAMING_CONVENT
 - Run `flutter analyze` before every commit. Zero errors.
 - No `late` keyword. Use nullable types or constructor injection.
 - Import order: `dart:` → `package:flutter` → `package:` → relative.
-- No comments unless explicitly requested.
+- No "what" comments (restating code). Concise "why" comments allowed for non-obvious behavior, design intent, or regression rationale. Public APIs keep `///` dartdoc.
 
 ## Model Rules
 
@@ -48,13 +48,18 @@ class NetworkFailure extends Failure { ... }
 class ParseFailure extends Failure { ... }
 ```
 
-Return pattern in repository:
+Error boundary lives in UseCase — repos return raw types and throw on failure:
+
 ```dart
-try {
-  final items = await _service.fetch();
-  return Right(items);
-} catch (e) {
-  return Left(ServerFailure(e.toString()));
+// Repository: raw return, no try-catch
+class BookmarkImpl implements BookmarkRepo {
+  @override
+  Future<List<Bookmark>> getAll() => _dataSource.getAll(); // throws on error
+}
+
+// UseCase: extends BaseUseCase, wraps with guard()
+class BookmarkUseCase extends BaseUseCase {
+  Future<Either<Failure, List<Bookmark>>> getAll() => guard(_repo.getAll);
 }
 ```
 

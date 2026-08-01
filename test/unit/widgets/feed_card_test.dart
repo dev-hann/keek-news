@@ -24,7 +24,6 @@ void main() {
       title: '게시글 제목',
       url: '/board/read.html?table=pds&number=1',
       author: '유머작가',
-      publishedAt: null,
       recommendCount: 42,
       commentCount: 10,
       viewCount: 500,

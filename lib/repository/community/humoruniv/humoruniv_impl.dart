@@ -1,20 +1,15 @@
-import 'package:dartz/dartz.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
-import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/repository/community_repo_impl.dart';
-import 'package:keek_news/repository/humoruniv/humoruniv_repo.dart';
-import 'package:keek_news/service/html_service.dart';
-import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/repository/community/html_community_repo.dart';
+import 'package:keek_news/service/media_classifier.dart';
 
-class HumorunivImpl extends CommunityRepoImpl implements HumorunivRepo {
+class HumorunivImpl extends HtmlCommunityRepo {
   const HumorunivImpl({required super.htmlClient});
 
   @override
@@ -42,41 +37,32 @@ class HumorunivImpl extends CommunityRepoImpl implements HumorunivRepo {
   }
 
   @override
-  Future<Either<Failure, PostDetail>> fetchDetail(String id) async {
-    try {
-      final html = await htmlClient.get(
-        '/board/read.html?table=pds&number=$id',
-      );
-      final doc = html_parser.parse(html);
+  Future<PostDetail> fetchDetail(String id) async {
+    final html = await htmlClient.get('/board/read.html?table=pds&number=$id');
+    final doc = html_parser.parse(html);
 
-      final contentEl = _findContentContainer(doc);
-      final ContentScanResult scanResult;
-      if (contentEl != null) {
-        scanResult = htmlClient.scanContentFull(doc, contentEl);
-      } else {
-        scanResult = const ContentScanResult(blocks: [], imageUrls: []);
-      }
-
-      return Right(
-        PostDetail(
-          id: int.tryParse(id) ?? 0,
-          title: _extractTitle(doc),
-          author: _extractAuthor(doc),
-          date: _extractDate(doc),
-          contentHtml: _extractContentHtml(doc),
-          contentBlocks: scanResult.blocks,
-          imageUrls: scanResult.imageUrls,
-          recommendCount: _extractRecommendCount(doc),
-          notRecommendCount: _extractNotRecommendCount(doc),
-          viewCount: _extractViewCount(doc),
-          commentCount: _extractCommentCount(doc),
-          comments: _extractComments(doc),
-          community: CommunityId.humoruniv,
-        ),
-      );
-    } catch (e) {
-      return Left(toFailure(e));
+    final contentEl = _findContentContainer(doc);
+    final ContentScanResult scanResult;
+    if (contentEl != null) {
+      scanResult = htmlClient.scanContentFull(doc, contentEl);
+    } else {
+      scanResult = const ContentScanResult(blocks: [], imageUrls: []);
     }
+
+    return PostDetail(
+      id: int.tryParse(id) ?? 0,
+      title: _extractTitle(doc),
+      author: _extractAuthor(doc),
+      date: _extractDate(doc),
+      contentHtml: _extractContentHtml(doc),
+      contentBlocks: scanResult.blocks,
+      imageUrls: scanResult.imageUrls,
+      recommendCount: _extractRecommendCount(doc),
+      notRecommendCount: _extractNotRecommendCount(doc),
+      viewCount: _extractViewCount(doc),
+      commentCount: _extractCommentCount(doc),
+      comments: _extractComments(doc),
+    );
   }
 
   @override

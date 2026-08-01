@@ -8,7 +8,7 @@
 | Service (concrete) | `<tech>_*_service.dart` | `dio_html_service.dart`, `method_channel_apk_installer_service.dart`, `prefs_bookmark_local_service.dart` |
 | Repository (abstract) | `*_repo.dart` | `bookmark_repo.dart`, `community_repo.dart` |
 | Repository (impl) | `*_impl.dart` | `bookmark_impl.dart`, `humoruniv_impl.dart` |
-| UseCase | `*_use_case.dart` | `get_merged_feed_use_case.dart`, `check_for_update_use_case.dart` |
+| UseCase | `*_use_case.dart` | `feed_use_case.dart`, `update_use_case.dart` |
 | Provider | `*_provider.dart` | `merged_feed_provider.dart` |
 | Model (entity) | singular noun | `feed_item.dart`, `post_detail.dart` |
 | Model (failure) | `failures.dart` | `failures.dart` |
@@ -21,11 +21,12 @@
 
 ```
 lib/
-  repository/<community>/    # <community>_repo.dart + <community>_impl.dart together
-  model/                     # entities + failures flat
+  repository/community/          # base contract (community_repo.dart) + shared HTML scraping base (html_community_repo.dart)
+    <community>/                 # <community>_impl.dart per community (e.g. dogdrip/dogdrip_impl.dart)
+  model/                         # entities + failures flat
 ```
 
-Each community gets its own folder under `repository/` (interface + impl together).
+Community scraping code groups under `repository/community/`. Each community has its own subfolder with `<community>_impl.dart` extending `HtmlCommunityRepo` (abstract HTML scraping base). Add `<community>_repo.dart` only when community-specific contract methods are needed.
 
 ---
 
@@ -35,7 +36,7 @@ Each community gets its own folder under `repository/` (interface + impl togethe
 |-------|---------------|---------------------|-------|
 | Service | `XxxService` | `<Tech>XxxService` | e.g. `HtmlService`/`DioHtmlService`, `ApkInstallerService`/`MethodChannelApkInstallerService` |
 | Repository | `XxxRepo` | `XxxImpl` | Use `implements` (not `extends`) |
-| UseCase | — | `XxxUseCase` | Suffix `UseCase` (e.g. `GetMergedFeedUseCase`) |
+| UseCase | — | `XxxUseCase` | Domain-facade: noun prefix (`FeedUseCase`, `BookmarkUseCase`), extends `BaseUseCase`, multiple named methods (no `call()`) |
 | Provider | — | `XxxNotifier` / `XxxProvider` | Riverpod Notifier/AsyncNotifier |
 | Model (entity) | — | `Xxx` | `extends Equatable`; persisted entities own `toJson`/`fromJson` directly |
 | Failure | `Failure` (abstract) | `ServerFailure`, `NetworkFailure`, ... | `extends Failure` |
@@ -59,3 +60,23 @@ Each community gets its own folder under `repository/` (interface + impl togethe
 | Request | `request*` | `requestPermission()` |
 | Initialize | `init*` | `init()` |
 | Update state | `update*` | `updateTheme()` |
+
+### Widget Callback Naming
+
+All action callbacks exposed by a widget use the `on*` prefix. The page implements them and wires them to providers.
+
+| Callback | Used for |
+|----------|----------|
+| `onTap` / `onPressed` | generic taps |
+| `onBookmarkTap` | bookmark toggle |
+| `onImageTap(int index)` | image/video carousel item tap |
+| `onCommentsTap` | open comments |
+| `onCopyTap` | copy link |
+
+```dart
+// ✅ Do
+FeedCard(onBookmarkTap: () => ref.read(bookmarkProvider.notifier).toggle(b));
+
+// ❌ Do not — non-on prefix or imperative handle* name
+FeedCard(handleBookmark: () => ...);
+```

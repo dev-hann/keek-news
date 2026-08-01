@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/provider/feed_video_playback_provider.dart';
+import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
 import 'package:keek_news/widgets/video_surface.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-Widget _wrapped(Widget child) => ProviderScope(
-  child: MaterialApp(home: Scaffold(body: child)),
-);
+Widget _wrapped(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
   setUp(() {

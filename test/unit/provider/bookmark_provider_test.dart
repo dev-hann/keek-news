@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/bookmark.dart';
@@ -50,7 +51,7 @@ void main() {
 
   group('BookmarkNotifier', () {
     test('initial state should be empty list', () {
-      when(() => useCase.getAll()).thenAnswer((_) async => const []);
+      when(() => useCase.getAll()).thenAnswer((_) async => const Right([]));
       final notifier = BookmarkNotifier(useCase);
 
       expect(notifier.state, isEmpty);
@@ -58,7 +59,7 @@ void main() {
 
     test('load should populate state from use case', () async {
       final bookmarks = [_bookmark(), _bookmark(id: '2')];
-      when(() => useCase.getAll()).thenAnswer((_) async => bookmarks);
+      when(() => useCase.getAll()).thenAnswer((_) async => Right(bookmarks));
       final notifier = BookmarkNotifier(useCase);
 
       await notifier.load();
@@ -71,7 +72,7 @@ void main() {
     test('isBookmarked should return true when bookmark in state', () async {
       when(
         () => useCase.getAll(),
-      ).thenAnswer((_) async => [_bookmark(id: '7')]);
+      ).thenAnswer((_) async => Right([_bookmark(id: '7')]));
       final notifier = BookmarkNotifier(useCase);
       await notifier.load();
 
@@ -81,7 +82,7 @@ void main() {
     test(
       'isBookmarked should return false when bookmark not in state',
       () async {
-        when(() => useCase.getAll()).thenAnswer((_) async => const []);
+        when(() => useCase.getAll()).thenAnswer((_) async => const Right([]));
         final notifier = BookmarkNotifier(useCase);
 
         expect(notifier.isBookmarked(CommunityId.humoruniv, '99'), isFalse);
@@ -91,8 +92,10 @@ void main() {
     test(
       'toggle should add bookmark when not present and return true',
       () async {
-        when(() => useCase.add(any())).thenAnswer((_) async {});
-        when(() => useCase.getAll()).thenAnswer((_) async => const []);
+        when(
+          () => useCase.add(any()),
+        ).thenAnswer((_) async => const Right(unit));
+        when(() => useCase.getAll()).thenAnswer((_) async => const Right([]));
         final notifier = BookmarkNotifier(useCase);
         await notifier.load();
 
@@ -107,10 +110,10 @@ void main() {
       'toggle should remove bookmark when present and return false',
       () async {
         final existing = _bookmark();
-        when(() => useCase.getAll()).thenAnswer((_) async => [existing]);
+        when(() => useCase.getAll()).thenAnswer((_) async => Right([existing]));
         when(
           () => useCase.remove(CommunityId.humoruniv, '1'),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async => const Right(unit));
         final notifier = BookmarkNotifier(useCase);
         await notifier.load();
 
@@ -122,8 +125,10 @@ void main() {
     );
 
     test('toggle add should update state with new bookmark at front', () async {
-      when(() => useCase.getAll()).thenAnswer((_) async => [_bookmark()]);
-      when(() => useCase.add(any())).thenAnswer((_) async {});
+      when(
+        () => useCase.getAll(),
+      ).thenAnswer((_) async => Right([_bookmark()]));
+      when(() => useCase.add(any())).thenAnswer((_) async => const Right(unit));
       final notifier = BookmarkNotifier(useCase);
       await notifier.load();
 
@@ -138,10 +143,12 @@ void main() {
       () async {
         final first = _bookmark();
         final second = _bookmark(id: '2');
-        when(() => useCase.getAll()).thenAnswer((_) async => [first, second]);
+        when(
+          () => useCase.getAll(),
+        ).thenAnswer((_) async => Right([first, second]));
         when(
           () => useCase.remove(CommunityId.humoruniv, '2'),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async => const Right(unit));
         final notifier = BookmarkNotifier(useCase);
         await notifier.load();
 
@@ -155,10 +162,12 @@ void main() {
     test('remove should delete bookmark from state by key', () async {
       final first = _bookmark();
       final second = _bookmark(id: '2');
-      when(() => useCase.getAll()).thenAnswer((_) async => [first, second]);
+      when(
+        () => useCase.getAll(),
+      ).thenAnswer((_) async => Right([first, second]));
       when(
         () => useCase.remove(CommunityId.humoruniv, '1'),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => const Right(unit));
       final notifier = BookmarkNotifier(useCase);
       await notifier.load();
 
@@ -173,7 +182,7 @@ void main() {
     test('should expose BookmarkNotifier wired to use case override', () async {
       when(
         () => useCase.getAll(),
-      ).thenAnswer((_) async => [_bookmark(id: '5')]);
+      ).thenAnswer((_) async => Right([_bookmark(id: '5')]));
       final container = makeContainer();
 
       await container.read(bookmarkProvider.notifier).load();

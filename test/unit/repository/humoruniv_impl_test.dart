@@ -4,10 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
-import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
+import 'package:keek_news/repository/community/humoruniv/humoruniv_impl.dart';
 import 'package:keek_news/service/html_service.dart';
-
-import '../../helpers/either_helper.dart';
 
 class _FixtureHtmlService extends HtmlService {
   _FixtureHtmlService(this._fixtures);
@@ -24,7 +22,7 @@ class _FixtureHtmlService extends HtmlService {
   @override
   int extractNumber(String? text) {
     if (text == null) return 0;
-    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+    final digits = text.replaceAll(RegExp('[^0-9]'), '');
     return int.tryParse(digits) ?? 0;
   }
 
@@ -63,7 +61,7 @@ void main() {
         }),
       );
 
-      final detail = unwrapRight(await repo.fetchDetail('1415455'));
+      final detail = await repo.fetchDetail('1415455');
 
       expect(detail.comments, isNotEmpty);
       for (final c in detail.comments) {
@@ -84,7 +82,7 @@ void main() {
         }),
       );
 
-      final detail = unwrapRight(await repo.fetchDetail('1415455'));
+      final detail = await repo.fetchDetail('1415455');
 
       final b0ss = detail.comments.firstWhere((c) => c.author == 'b0ss');
       expect(b0ss.date.year, 2026);
@@ -99,7 +97,7 @@ void main() {
         }),
       );
 
-      final detail = unwrapRight(await repo.fetchDetail('1415455'));
+      final detail = await repo.fetchDetail('1415455');
 
       final best = detail.comments.firstWhere((c) => c.author == '클로저스');
       expect(best.isBest, isTrue);

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/repository/apk_install/apk_install_impl.dart';
 import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
@@ -7,13 +6,11 @@ import 'package:mocktail/mocktail.dart';
 
 class MockApkInstallerService extends Mock implements ApkInstallerService {}
 
-/// Fake datasource whose download behaviour is controllable per test.
 class FakeApkDownloadService implements ApkDownloadService {
   FakeApkDownloadService({this.progressEvents = const []});
 
-  /// (received, total) pairs to emit before completing.
   final List<({int received, int total})> progressEvents;
-  Object? errorToThrow;
+  Exception? errorToThrow;
   bool cancelCalled = false;
 
   @override
@@ -87,54 +84,43 @@ void main() {
   });
 
   group('ApkInstallImpl.launchInstaller', () {
-    test(
-      'should return Right(unit) when a file is saved and service succeeds',
-      () async {
-        final ds = FakeApkDownloadService()..savedPath = '/tmp/fake.apk';
-        repository = ApkInstallImpl(
-          downloadDataSource: ds,
-          installerService: mockInstaller,
-        );
-        when(
-          () => mockInstaller.launchInstaller('/tmp/fake.apk'),
-        ).thenAnswer((_) async => true);
+    test('should complete when a file is saved and service succeeds', () async {
+      final ds = FakeApkDownloadService()..savedPath = '/tmp/fake.apk';
+      repository = ApkInstallImpl(
+        downloadDataSource: ds,
+        installerService: mockInstaller,
+      );
+      when(
+        () => mockInstaller.launchInstaller('/tmp/fake.apk'),
+      ).thenAnswer((_) async => true);
 
-        final result = await repository.launchInstaller();
+      await repository.launchInstaller();
 
-        expect(result.isRight(), true);
-      },
-    );
+      verify(() => mockInstaller.launchInstaller('/tmp/fake.apk')).called(1);
+    });
 
-    test('should return Left when no APK has been downloaded', () async {
-      final ds = FakeApkDownloadService(); // savedPath == null
+    test('should throw when no APK has been downloaded', () async {
+      final ds = FakeApkDownloadService();
       repository = ApkInstallImpl(
         downloadDataSource: ds,
         installerService: mockInstaller,
       );
 
-      final result = await repository.launchInstaller();
-
-      expect(result.isLeft(), true);
-      result.fold((f) => expect(f, isA<UpdateFailure>()), (_) => fail('Left'));
+      expect(() => repository.launchInstaller(), throwsA(isA<StateError>()));
     });
 
-    test(
-      'should return Left when the installer service returns false',
-      () async {
-        final ds = FakeApkDownloadService()..savedPath = '/tmp/fake.apk';
-        repository = ApkInstallImpl(
-          downloadDataSource: ds,
-          installerService: mockInstaller,
-        );
-        when(
-          () => mockInstaller.launchInstaller(any()),
-        ).thenAnswer((_) async => false);
+    test('should throw when the installer service returns false', () async {
+      final ds = FakeApkDownloadService()..savedPath = '/tmp/fake.apk';
+      repository = ApkInstallImpl(
+        downloadDataSource: ds,
+        installerService: mockInstaller,
+      );
+      when(
+        () => mockInstaller.launchInstaller(any()),
+      ).thenAnswer((_) async => false);
 
-        final result = await repository.launchInstaller();
-
-        expect(result.isLeft(), true);
-      },
-    );
+      expect(() => repository.launchInstaller(), throwsA(isA<StateError>()));
+    });
   });
 
   group('ApkInstallImpl.permissions', () {
@@ -150,11 +136,11 @@ void main() {
 
       final result = await repository.canRequestPackageInstalls();
 
-      expect(result, true);
+      expect(result, isTrue);
     });
 
     test(
-      'openInstallPermissionSettings returns Right when service opens',
+      'openInstallPermissionSettings completes when service opens',
       () async {
         final ds = FakeApkDownloadService();
         repository = ApkInstallImpl(
@@ -165,9 +151,9 @@ void main() {
           () => mockInstaller.openInstallPermissionSettings(),
         ).thenAnswer((_) async => true);
 
-        final result = await repository.openInstallPermissionSettings();
+        await repository.openInstallPermissionSettings();
 
-        expect(result.isRight(), true);
+        verify(() => mockInstaller.openInstallPermissionSettings()).called(1);
       },
     );
   });

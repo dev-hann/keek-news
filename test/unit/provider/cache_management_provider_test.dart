@@ -1,17 +1,18 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/provider/cache_management_provider.dart';
-import 'package:keek_news/use_case/manage_cache_use_case.dart';
+import 'package:keek_news/use_case/cache_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockManageCacheUseCase extends Mock implements ManageCacheUseCase {}
+class MockCacheUseCase extends Mock implements CacheUseCase {}
 
 void main() {
-  late MockManageCacheUseCase useCase;
+  late MockCacheUseCase useCase;
   late CacheManagementNotifier notifier;
 
   setUp(() {
-    useCase = MockManageCacheUseCase();
+    useCase = MockCacheUseCase();
     notifier = CacheManagementNotifier(useCase);
   });
 
@@ -24,7 +25,7 @@ void main() {
     });
 
     test('loadSize stores the reported cache size', () async {
-      when(useCase.getSizeBytes).thenAnswer((_) async => 4096);
+      when(useCase.getSizeBytes).thenAnswer((_) async => const Right(4096));
 
       await notifier.loadSize();
 
@@ -33,8 +34,8 @@ void main() {
     });
 
     test('clear empties the cache and refreshes the size', () async {
-      when(useCase.clear).thenAnswer((_) async {});
-      when(useCase.getSizeBytes).thenAnswer((_) async => 0);
+      when(useCase.clear).thenAnswer((_) async => const Right(unit));
+      when(useCase.getSizeBytes).thenAnswer((_) async => const Right(0));
 
       await notifier.clear();
 
@@ -48,8 +49,9 @@ void main() {
       var cleared = false;
       when(useCase.clear).thenAnswer((_) async {
         cleared = true;
+        return const Right(unit);
       });
-      when(useCase.getSizeBytes).thenAnswer((_) async => 0);
+      when(useCase.getSizeBytes).thenAnswer((_) async => const Right(0));
 
       final future = notifier.clear();
       expect(notifier.state.loading, true);

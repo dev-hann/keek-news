@@ -111,8 +111,8 @@ void main() {
       final titleWidget = tester.widget<Text>(find.text('제목'));
       final subtitleWidget = tester.widget<Text>(find.text('부제목'));
 
-      final titleWeight = titleWidget.style?.fontWeight?.index ?? 3;
-      final subtitleWeight = subtitleWidget.style?.fontWeight?.index ?? 3;
+      final titleWeight = titleWidget.style?.fontWeight?.value ?? 400;
+      final subtitleWeight = subtitleWidget.style?.fontWeight?.value ?? 400;
       expect(titleWeight >= subtitleWeight, isTrue);
     });
   });

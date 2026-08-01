@@ -110,7 +110,7 @@ void main() {
 
   group('AppRelease.fromJson', () {
     test('should strip v prefix from tag_name', () {
-      final release = AppRelease.fromJson({
+      final release = AppRelease.fromJson(const {
         'tag_name': 'v1.2.3',
         'html_url': 'https://github.com/x/y/releases/tag/v1.2.3',
       });
@@ -120,7 +120,7 @@ void main() {
     });
 
     test('should extract apk asset browser_download_url', () {
-      final release = AppRelease.fromJson({
+      final release = AppRelease.fromJson(const {
         'tag_name': '1.0.0',
         'html_url': 'https://example.com',
         'assets': [
@@ -136,7 +136,7 @@ void main() {
     });
 
     test('should set releaseNotes from body when non-empty', () {
-      final release = AppRelease.fromJson({
+      final release = AppRelease.fromJson(const {
         'tag_name': '1.0.0',
         'html_url': 'https://example.com',
         'body': '변경 내역',
@@ -146,7 +146,7 @@ void main() {
     });
 
     test('should null releaseNotes when body empty', () {
-      final release = AppRelease.fromJson({
+      final release = AppRelease.fromJson(const {
         'tag_name': '1.0.0',
         'html_url': 'https://example.com',
         'body': '',
@@ -156,7 +156,7 @@ void main() {
     });
 
     test('should default to empty version when tag_name missing', () {
-      final release = AppRelease.fromJson({'html_url': 'https://x'});
+      final release = AppRelease.fromJson(const {'html_url': 'https://x'});
 
       expect(release.version, isEmpty);
     });

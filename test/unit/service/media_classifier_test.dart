@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/service/media_classifier.dart';
 
 void main() {
   group('MediaClassifier', () {

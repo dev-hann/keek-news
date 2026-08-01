@@ -1,60 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/model/url_builder.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
-import 'package:keek_news/provider/merged_feed_provider.dart';
-import 'package:keek_news/utils/url_builder.dart';
+import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/widgets/comment_tile.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 
-class FeedCardEntry extends ConsumerWidget {
+class FeedCardEntry extends StatelessWidget {
   const FeedCardEntry({
     required this.post,
     required this.isBookmarked,
     required this.onBookmarkTap,
+    this.detail,
+    this.detailLoading = false,
+    this.controller,
     super.key,
   });
 
   final FeedItem post;
   final bool isBookmarked;
   final VoidCallback onBookmarkTap;
+  final PostDetail? detail;
+  final bool detailLoading;
+  final VideoPlaybackController? controller;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncDetail = ref.watch(
-      mergedDetailProvider((community: post.community, id: post.id)),
-    );
-
-    final detail = asyncDetail.whenOrNull(
-      data: (either) => either.fold((_) => null, (d) => d),
-    );
-    final hasImages = detail != null && detail.imageUrls.isNotEmpty;
-    final hasComments = detail != null && detail.comments.isNotEmpty;
+  Widget build(BuildContext context) {
+    final hasImages = detail != null && detail!.imageUrls.isNotEmpty;
+    final hasComments = detail != null && detail!.comments.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.p12),
       child: FeedCard(
         post: post,
         detail: detail,
-        detailLoading: asyncDetail.isLoading,
+        detailLoading: detailLoading,
+        videoController: controller,
         isBookmarked: isBookmarked,
         onImageTap: !hasImages
             ? null
             : (i) => Navigator.of(context).push<void>(
                 MaterialPageRoute<void>(
                   builder: (_) => ImageViewerView(
-                    imageUrls: detail.imageUrls,
+                    imageUrls: detail!.imageUrls,
                     initialIndex: i,
                   ),
                   fullscreenDialog: true,
                 ),
               ),
-        onCommentsTap: !hasComments
-            ? null
-            : () => _showComments(context, detail),
+        onCommentsTap: !hasComments ? null : () => _showComments(context),
         onCopyTap: () async {
           await Clipboard.setData(
             ClipboardData(
@@ -74,7 +71,9 @@ class FeedCardEntry extends ConsumerWidget {
     );
   }
 
-  void _showComments(BuildContext context, PostDetail detail) {
+  void _showComments(BuildContext context) {
+    final detail = this.detail;
+    if (detail == null) return;
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

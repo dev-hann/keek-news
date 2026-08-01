@@ -6,16 +6,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/model/download_progress.dart';
 import 'package:keek_news/model/failures.dart';
+import 'package:keek_news/model/update_check_result.dart';
 import 'package:keek_news/provider/update_provider.dart';
+import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
-import 'package:keek_news/use_case/check_for_update_use_case.dart';
-import 'package:keek_news/use_case/install_apk_use_case.dart';
+import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockUpdateRepository extends Mock implements UpdateRepo {}
 
-class MockInstallApkUseCase extends Mock implements InstallApkUseCase {}
+class _MockApkInstallRepo extends Mock implements ApkInstallRepo {}
+
+class MockUpdateUseCase extends Mock implements UpdateUseCase {}
 
 const _availableRelease = AppRelease(
   version: '1.2.0',
@@ -23,47 +26,39 @@ const _availableRelease = AppRelease(
   downloadUrl: 'https://example.com/app.apk',
 );
 
-UpdateNotifier _notifierWith({
-  required MockInstallApkUseCase installApk,
-  String currentVersion = '1.0.0',
-}) {
-  final checkRepo = MockUpdateRepository();
-  when(
-    checkRepo.getLatestRelease,
-  ).thenAnswer((_) async => const Right(_availableRelease));
-  return UpdateNotifier(
-    checkForUpdate: CheckForUpdateUseCase(
-      repository: checkRepo,
-      currentVersion: currentVersion,
+UpdateNotifier _notifierWith(MockUpdateUseCase useCase) {
+  when(() => useCase.checkForUpdate()).thenAnswer(
+    (_) async => const Right<Failure, UpdateCheckResult>(
+      UpdateCheckResult(
+        type: UpdateStatusType.updateAvailable,
+        release: _availableRelease,
+      ),
     ),
-    installApk: installApk,
   );
+  return UpdateNotifier(update: useCase);
 }
 
 void main() {
   late MockUpdateRepository mockRepository;
-  late MockInstallApkUseCase mockInstallApk;
+  late _MockApkInstallRepo mockApkRepo;
 
   setUp(() {
     mockRepository = MockUpdateRepository();
-    mockInstallApk = MockInstallApkUseCase();
+    mockApkRepo = _MockApkInstallRepo();
     if (di.sl.isRegistered<UpdateRepo>()) {
       di.sl.unregister<UpdateRepo>();
     }
-    if (di.sl.isRegistered<CheckForUpdateUseCase>()) {
-      di.sl.unregister<CheckForUpdateUseCase>();
-    }
-    if (di.sl.isRegistered<InstallApkUseCase>()) {
-      di.sl.unregister<InstallApkUseCase>();
+    if (di.sl.isRegistered<UpdateUseCase>()) {
+      di.sl.unregister<UpdateUseCase>();
     }
     di.sl.registerLazySingleton<UpdateRepo>(() => mockRepository);
     di.sl.registerLazySingleton(
-      () => CheckForUpdateUseCase(
-        repository: mockRepository,
+      () => UpdateUseCase(
+        updateRepo: mockRepository,
+        apkRepo: mockApkRepo,
         currentVersion: '1.0.0',
       ),
     );
-    di.sl.registerLazySingleton<InstallApkUseCase>(() => mockInstallApk);
   });
 
   tearDown(di.sl.reset);
@@ -142,7 +137,7 @@ void main() {
       );
       when(
         () => mockRepository.getLatestRelease(),
-      ).thenAnswer((_) async => const Right(release));
+      ).thenAnswer((_) async => release);
 
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -161,7 +156,7 @@ void main() {
       );
       when(
         () => mockRepository.getLatestRelease(),
-      ).thenAnswer((_) async => const Right(release));
+      ).thenAnswer((_) async => release);
 
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -175,7 +170,7 @@ void main() {
     test('should emit error on failure', () async {
       when(
         () => mockRepository.getLatestRelease(),
-      ).thenAnswer((_) async => const Left(UpdateFailure('Network error')));
+      ).thenAnswer((_) async => throw const UpdateFailure('Network error'));
 
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -195,7 +190,7 @@ void main() {
       );
       when(
         () => mockRepository.getLatestRelease(),
-      ).thenAnswer((_) async => const Right(release));
+      ).thenAnswer((_) async => release);
 
       final container = ProviderContainer();
       addTearDown(container.dispose);
@@ -209,7 +204,7 @@ void main() {
     });
 
     test('should emit checking while in progress', () async {
-      final completer = Completer<Either<Failure, AppRelease>>();
+      final completer = Completer<AppRelease>();
       when(
         () => mockRepository.getLatestRelease(),
       ).thenAnswer((_) => completer.future);
@@ -217,15 +212,13 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(updateProvider.notifier).checkForUpdate();
+      unawaited(container.read(updateProvider.notifier).checkForUpdate());
 
       final state = container.read(updateProvider);
       expect(state.status, UpdateCheckStatus.checking);
 
       completer.complete(
-        const Right(
-          AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
-        ),
+        const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
       await container.read(updateProvider.notifier).stream.first;
     });
@@ -235,8 +228,8 @@ void main() {
     test(
       'downloadUpdate emits downloading then readyToInstall on success',
       () async {
-        final installApk = MockInstallApkUseCase();
-        final notifier = _notifierWith(installApk: installApk);
+        final installApk = MockUpdateUseCase();
+        final notifier = _notifierWith(installApk);
         addTearDown(notifier.dispose);
 
         // Seed the available state first.
@@ -249,7 +242,7 @@ void main() {
         ).thenAnswer((_) => progressController.stream);
         when(
           installApk.canRequestPackageInstalls,
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) async => const Right(true));
         when(
           installApk.launchInstaller,
         ).thenAnswer((_) async => const Right(unit));
@@ -264,7 +257,7 @@ void main() {
         expect(notifier.state.downloadProgress?.percent, 50);
 
         await progressController.close();
-        // onDone transitions to readyToInstall then tries to launch the installer.
+        // onDone → readyToInstall, then tries to launch the installer.
         await Future<void>.delayed(Duration.zero);
 
         expect(notifier.state.status, UpdateCheckStatus.readyToInstall);
@@ -272,8 +265,8 @@ void main() {
     );
 
     test('downloadUpdate sets downloadError on stream error', () async {
-      final installApk = MockInstallApkUseCase();
-      final notifier = _notifierWith(installApk: installApk);
+      final installApk = MockUpdateUseCase();
+      final notifier = _notifierWith(installApk);
       addTearDown(notifier.dispose);
       await notifier.checkForUpdate();
 
@@ -293,8 +286,8 @@ void main() {
     test(
       'cancelDownload returns to available and cancels the use case',
       () async {
-        final installApk = MockInstallApkUseCase();
-        final notifier = _notifierWith(installApk: installApk);
+        final installApk = MockUpdateUseCase();
+        final notifier = _notifierWith(installApk);
         addTearDown(notifier.dispose);
         await notifier.checkForUpdate();
 
@@ -317,8 +310,8 @@ void main() {
     test(
       'launchInstaller can be re-invoked from readyToInstall (install retry)',
       () async {
-        final installApk = MockInstallApkUseCase();
-        final notifier = _notifierWith(installApk: installApk);
+        final installApk = MockUpdateUseCase();
+        final notifier = _notifierWith(installApk);
         addTearDown(notifier.dispose);
         await notifier.checkForUpdate();
 
@@ -328,7 +321,7 @@ void main() {
         ).thenAnswer((_) => progressController.stream);
         when(
           installApk.canRequestPackageInstalls,
-        ).thenAnswer((_) async => true);
+        ).thenAnswer((_) async => const Right(true));
         when(
           installApk.launchInstaller,
         ).thenAnswer((_) async => const Right(unit));
@@ -349,8 +342,8 @@ void main() {
     test(
       'without permission transitions to installPermissionRequired',
       () async {
-        final installApk = MockInstallApkUseCase();
-        final notifier = _notifierWith(installApk: installApk);
+        final installApk = MockUpdateUseCase();
+        final notifier = _notifierWith(installApk);
         addTearDown(notifier.dispose);
         await notifier.checkForUpdate();
 
@@ -360,7 +353,7 @@ void main() {
         ).thenAnswer((_) => progressController.stream);
         when(
           installApk.canRequestPackageInstalls,
-        ).thenAnswer((_) async => false);
+        ).thenAnswer((_) async => const Right(false));
 
         await notifier.downloadUpdate();
         await progressController.close();

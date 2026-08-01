@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keek_news/const/app_durations.dart';
-import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
+import 'package:keek_news/provider/feed_video_playback_provider.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
+import 'package:keek_news/service/video_playback_controller.dart';
+import 'package:keek_news/widgets/community_tab_bar.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
 import 'package:keek_news/widgets/error_state_view.dart';
 import 'package:keek_news/widgets/feed_card_entry.dart';
@@ -95,10 +98,35 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     return items.where((e) => e.community == selected).toList();
   }
 
+  void _ensureDetailsLoaded(List<FeedItem> items, MergedDetailMap details) {
+    for (final item in items) {
+      final key = (community: item.community, id: item.id);
+      if (!details.containsKey(key)) {
+        Future.microtask(
+          () => ref.read(mergedDetailProvider.notifier).fetchDetail(key),
+        );
+      }
+    }
+  }
+
+  PostDetail? _resolveDetail(MergedDetailMap details, FeedItem item) {
+    final av = details[(community: item.community, id: item.id)];
+    return av?.whenOrNull(data: (either) => either.fold((_) => null, (d) => d));
+  }
+
+  bool _resolveDetailLoading(MergedDetailMap details, FeedItem item) {
+    final av = details[(community: item.community, id: item.id)];
+    return av?.isLoading ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final feedState = ref.watch(mergedFeedProvider);
+    final bookmarks = ref.watch(bookmarkProvider);
+    final details = ref.watch(mergedDetailProvider);
+    final videoController = ref.watch(videoPlaybackControllerProvider);
     final visibleItems = _filterItems(feedState.items);
+    _ensureDetailsLoaded(visibleItems, details);
 
     return Scaffold(
       appBar: AppBar(
@@ -117,12 +145,18 @@ class _HomeScreenState extends ConsumerState<HomeView> {
       ),
       body: Column(
         children: [
-          _CommunityTabBar(selectedIndex: _tabIndex, onChanged: _switchTab),
+          CommunityTabBar(selectedIndex: _tabIndex, onChanged: _switchTab),
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async =>
                   ref.read(mergedFeedProvider.notifier).fetch(),
-              child: _buildBody(feedState, visibleItems),
+              child: _buildBody(
+                feedState,
+                visibleItems,
+                bookmarks,
+                details,
+                videoController,
+              ),
             ),
           ),
         ],
@@ -135,7 +169,13 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     );
   }
 
-  Widget _buildBody(MergedFeedState state, List<FeedItem> visibleItems) {
+  Widget _buildBody(
+    MergedFeedState state,
+    List<FeedItem> visibleItems,
+    List<Bookmark> bookmarks,
+    MergedDetailMap details,
+    VideoPlaybackController videoController,
+  ) {
     if (state.isLoading) {
       return _buildSkeleton();
     }
@@ -174,7 +214,38 @@ class _HomeScreenState extends ConsumerState<HomeView> {
             child: LoadingIndicator(),
           );
         }
-        return RepaintBoundary(child: _FeedCard(item: visibleItems[index]));
+        final item = visibleItems[index];
+        return RepaintBoundary(
+          child: FeedCardEntry(
+            post: item,
+            detail: _resolveDetail(details, item),
+            detailLoading: _resolveDetailLoading(details, item),
+            isBookmarked: bookmarks.any(
+              (b) => b.community == item.community && b.id == item.id,
+            ),
+            controller: videoController,
+            onBookmarkTap: () {
+              ref
+                  .read(bookmarkProvider.notifier)
+                  .toggle(
+                    Bookmark(
+                      community: item.community,
+                      id: item.id,
+                      title: item.title,
+                      url: item.url,
+                      author: item.author,
+                      thumbnailUrl: item.thumbnailUrl,
+                      previewText: item.previewText,
+                      publishedAt: item.publishedAt,
+                      recommendCount: item.recommendCount,
+                      commentCount: item.commentCount,
+                      viewCount: item.viewCount,
+                      savedAt: DateTime.now(),
+                    ),
+                  );
+            },
+          ),
+        );
       },
     );
   }
@@ -187,98 +258,6 @@ class _HomeScreenState extends ConsumerState<HomeView> {
         padding: EdgeInsets.only(bottom: AppSpacing.p12),
         child: SkeletonFeedCard(),
       ),
-    );
-  }
-}
-
-class _CommunityTabBar extends StatelessWidget {
-  const _CommunityTabBar({
-    required this.selectedIndex,
-    required this.onChanged,
-  });
-  final int selectedIndex;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      height: AppSizes.minTouchTarget,
-      color: theme.colorScheme.surfaceContainer,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.p8),
-        itemCount: communities.length,
-        itemBuilder: (context, index) {
-          final c = communities[index];
-          final selected = index == selectedIndex;
-          return GestureDetector(
-            onTap: () => onChanged(index),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.p16),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    width: 2,
-                    color: selected
-                        ? Color(c.brandColorArgb)
-                        : Colors.transparent,
-                  ),
-                ),
-              ),
-              child: Text(
-                c.shortName,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: selected
-                      ? Color(c.brandColorArgb)
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _FeedCard extends ConsumerWidget {
-  const _FeedCard({required this.item});
-  final FeedItem item;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final bookmarks = ref.watch(bookmarkProvider);
-    final isBookmarked = bookmarks.any(
-      (b) => b.community == item.community && b.id == item.id,
-    );
-
-    return FeedCardEntry(
-      post: item,
-      isBookmarked: isBookmarked,
-      onBookmarkTap: () {
-        ref
-            .read(bookmarkProvider.notifier)
-            .toggle(
-              Bookmark(
-                community: item.community,
-                id: item.id,
-                title: item.title,
-                url: item.url,
-                author: item.author,
-                thumbnailUrl: item.thumbnailUrl,
-                previewText: item.previewText,
-                publishedAt: item.publishedAt,
-                recommendCount: item.recommendCount,
-                commentCount: item.commentCount,
-                viewCount: item.viewCount,
-                savedAt: DateTime.now(),
-              ),
-            );
-      },
     );
   }
 }

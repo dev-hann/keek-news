@@ -41,3 +41,4 @@ linter:
   rules:
     public_member_api_docs: false
     one_member_abstracts: false
+    cascade_invocations: false

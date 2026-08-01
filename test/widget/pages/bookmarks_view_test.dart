@@ -1,17 +1,15 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/bookmark_use_case.dart';
-import 'package:keek_news/use_case/get_post_detail_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:mocktail/mocktail.dart';
@@ -56,10 +54,10 @@ void main() {
     );
     when(() => repo.getAll()).thenAnswer((_) async => const []);
     setupPostDetailFailureMock(mockPostDetail);
-    if (di.sl.isRegistered<GetPostDetailUseCase>()) {
-      di.sl.unregister<GetPostDetailUseCase>();
+    if (di.sl.isRegistered<FeedUseCase>()) {
+      di.sl.unregister<FeedUseCase>();
     }
-    di.sl.registerLazySingleton<GetPostDetailUseCase>(() => mockPostDetail);
+    di.sl.registerLazySingleton<FeedUseCase>(() => mockPostDetail);
     clipboardContent = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {

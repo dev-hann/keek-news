@@ -7,7 +7,7 @@ import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/service/html_service.dart';
-import 'package:keek_news/utils/media_classifier.dart';
+import 'package:keek_news/service/media_classifier.dart';
 
 class DioHtmlService extends HtmlService {
   DioHtmlService({required Dio dio, required String encoding})
@@ -46,7 +46,7 @@ class DioHtmlService extends HtmlService {
   @override
   int extractNumber(String? text) {
     if (text == null) return 0;
-    final digits = text.replaceAll(RegExp(r'[^0-9]'), '');
+    final digits = text.replaceAll(RegExp('[^0-9]'), '');
     return int.tryParse(digits) ?? 0;
   }
 
@@ -106,7 +106,7 @@ class DioHtmlService extends HtmlService {
           imageUrls.add(rawUrl);
         case MediaType.video:
           blocks.add(VideoBlock(url: rawUrl, thumbnailUrl: thumb));
-        default:
+        case _:
           break;
       }
     }
@@ -172,7 +172,7 @@ class DioHtmlService extends HtmlService {
               thumbnailUrl: 'https://img.youtube.com/vi/$ytId/hqdefault.jpg',
             ),
           );
-        default:
+        case _:
           break;
       }
     }
@@ -189,8 +189,7 @@ class DioHtmlService extends HtmlService {
     while (normalized.contains(':///')) {
       normalized = normalized.replaceFirst(':///', '://');
     }
-    normalized = normalized.replaceAllMapped(RegExp('(?<!:)/{2,}'), (m) => '/');
-    return normalized;
+    return normalized.replaceAllMapped(RegExp('(?<!:)/{2,}'), (m) => '/');
   }
 
   void _walkNodes(

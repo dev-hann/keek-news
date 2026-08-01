@@ -4,7 +4,9 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
-import 'package:keek_news/repository/community_repo.dart';
+import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/use_case/base_use_case.dart';
 
 class MergedFeedParams {
   const MergedFeedParams({
@@ -18,12 +20,14 @@ class MergedFeedParams {
   final Set<CommunityId> enabled;
 }
 
-class GetMergedFeedUseCase {
-  const GetMergedFeedUseCase({required this.repos});
+class FeedUseCase extends BaseUseCase {
+  const FeedUseCase({required this.repos});
 
   final Map<CommunityId, CommunityRepo> repos;
 
-  Future<Either<Failure, MergedPage>> call(MergedFeedParams params) async {
+  Future<Either<Failure, MergedPage>> getMergedFeed(
+    MergedFeedParams params,
+  ) async {
     final active = params.enabled.isEmpty
         ? repos
         : Map.fromEntries(
@@ -65,15 +69,26 @@ class GetMergedFeedUseCase {
     );
   }
 
+  Future<Either<Failure, PostDetail>> getPostDetail({
+    required CommunityId community,
+    required String id,
+  }) async {
+    final repo = repos[community];
+    if (repo == null) {
+      return Left(ServerFailure('No repo for $community'));
+    }
+    return guard(() => repo.fetchDetail(id));
+  }
+
   Future<_FetchOutcome> _fetchOne(
     CommunityId id,
     CommunityRepo repo,
     MergedCursor? cursor,
   ) async {
     final token = cursor?.perSourceTokens[id];
-    final result = await repo.fetchLatest(pageToken: token);
+    final result = await guard(() => repo.fetchLatest(pageToken: token));
     return result.fold((f) {
-      debugPrint('GetMergedFeedUseCase: repo $id failed: $f');
+      debugPrint('FeedUseCase: repo $id failed: $f');
       return _FetchOutcome.failed(id);
     }, (data) => _FetchOutcome(id, data.items, data.pageToken));
   }

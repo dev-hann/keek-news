@@ -6,7 +6,7 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
 import '../../helpers/merged_feed_helper.dart';
@@ -19,10 +19,10 @@ void main() {
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     mockUseCase = MockMergedFeedUseCase();
-    if (di.sl.isRegistered<GetMergedFeedUseCase>()) {
-      di.sl.unregister<GetMergedFeedUseCase>();
+    if (di.sl.isRegistered<FeedUseCase>()) {
+      di.sl.unregister<FeedUseCase>();
     }
-    di.sl.registerLazySingleton<GetMergedFeedUseCase>(() => mockUseCase);
+    di.sl.registerLazySingleton<FeedUseCase>(() => mockUseCase);
   });
 
   tearDown(di.sl.reset);
@@ -61,7 +61,7 @@ void main() {
 
         var call = 0;
         when(
-          () => mockUseCase.call(any()),
+          () => mockUseCase.getMergedFeed(any()),
         ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : secondPage));
 
         final notifier = MergedFeedNotifier();
@@ -88,7 +88,7 @@ void main() {
 
       var call = 0;
       when(
-        () => mockUseCase.call(any()),
+        () => mockUseCase.getMergedFeed(any()),
       ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : exhaustedPage));
 
       final notifier = MergedFeedNotifier();
@@ -114,7 +114,7 @@ void main() {
 
       var call = 0;
       when(
-        () => mockUseCase.call(any()),
+        () => mockUseCase.getMergedFeed(any()),
       ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : overlapPage));
 
       final notifier = MergedFeedNotifier();
@@ -131,7 +131,7 @@ void main() {
       );
 
       var call = 0;
-      when(() => mockUseCase.call(any())).thenAnswer((_) async {
+      when(() => mockUseCase.getMergedFeed(any())).thenAnswer((_) async {
         call++;
         if (call == 1) return Right(firstPage);
         return const Left(ServerFailure('network down'));
@@ -157,24 +157,24 @@ void main() {
         );
 
         when(
-          () => mockUseCase.call(any()),
+          () => mockUseCase.getMergedFeed(any()),
         ).thenAnswer((_) async => Right(firstPage));
 
         final notifier = MergedFeedNotifier();
         await notifier.fetch();
 
-        verify(() => mockUseCase.call(any())).called(1);
+        verify(() => mockUseCase.getMergedFeed(any())).called(1);
         expect(notifier.state.hasMore, isFalse);
 
         await notifier.fetchNextPage();
-        verifyNever(() => mockUseCase.call(any()));
+        verifyNever(() => mockUseCase.getMergedFeed(any()));
       },
     );
   });
 
   group('MergedFeedNotifier.refresh', () {
     test('should replace items on success without showing skeleton', () async {
-      final firstPage = MergedPage(items: [item(id: '1')]);
+      final firstPage = MergedPage(items: [item()]);
       final refreshedPage = MergedPage(
         items: [
           item(id: '2'),
@@ -184,7 +184,7 @@ void main() {
 
       var call = 0;
       when(
-        () => mockUseCase.call(any()),
+        () => mockUseCase.getMergedFeed(any()),
       ).thenAnswer((_) async => Right(call++ == 0 ? firstPage : refreshedPage));
 
       final notifier = MergedFeedNotifier();
@@ -200,10 +200,10 @@ void main() {
     });
 
     test('should keep existing items when refresh fails', () async {
-      final firstPage = MergedPage(items: [item(id: '1')]);
+      final firstPage = MergedPage(items: [item()]);
 
       var call = 0;
-      when(() => mockUseCase.call(any())).thenAnswer((_) async {
+      when(() => mockUseCase.getMergedFeed(any())).thenAnswer((_) async {
         call++;
         if (call == 1) return Right(firstPage);
         return const Left(ServerFailure('network down'));

@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/model/download_progress.dart';
 import 'package:keek_news/service/service_locator.dart';
-import 'package:keek_news/use_case/check_for_update_use_case.dart';
-import 'package:keek_news/use_case/install_apk_use_case.dart';
+import 'package:keek_news/use_case/update_use_case.dart';
 
 enum UpdateCheckStatus {
   idle,
@@ -41,15 +40,11 @@ class UpdateState {
 }
 
 class UpdateNotifier extends StateNotifier<UpdateState> {
-  UpdateNotifier({
-    required CheckForUpdateUseCase checkForUpdate,
-    required InstallApkUseCase installApk,
-  }) : _checkForUpdate = checkForUpdate,
-       _installApk = installApk,
-       super(const UpdateState());
+  UpdateNotifier({required UpdateUseCase update})
+    : _update = update,
+      super(const UpdateState());
 
-  final CheckForUpdateUseCase _checkForUpdate;
-  final InstallApkUseCase _installApk;
+  final UpdateUseCase _update;
 
   StreamSubscription<DownloadProgress>? _downloadSub;
   bool _cancelled = false;
@@ -58,7 +53,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
     if (state.status == UpdateCheckStatus.checking) return;
     state = const UpdateState(status: UpdateCheckStatus.checking);
 
-    final result = await _checkForUpdate();
+    final result = await _update.checkForUpdate();
 
     result.fold(
       (_) => state = const UpdateState(status: UpdateCheckStatus.error),
@@ -92,7 +87,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
       downloadProgress: const DownloadProgress(receivedBytes: 0, totalBytes: 0),
     );
 
-    _downloadSub = _installApk
+    _downloadSub = _update
         .download(url)
         .listen(
           (progress) {
@@ -128,7 +123,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
     _cancelled = true;
     await _downloadSub?.cancel();
     _downloadSub = null;
-    _installApk.cancelDownload();
+    _update.cancelDownload();
     final release = state.release;
     if (release != null) {
       state = UpdateState(
@@ -139,7 +134,8 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
   }
 
   /// Launches the system installer for the downloaded APK. If the app lacks
-  /// the install permission, transitions to [installPermissionRequired].
+  /// the install permission, transitions to the `installPermissionRequired`
+  /// state.
   Future<void> launchInstaller() async {
     final release = state.release;
     if (release == null) return;
@@ -147,7 +143,8 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
   }
 
   Future<void> _tryLaunchInstaller(AppRelease release) async {
-    final canInstall = await _installApk.canRequestPackageInstalls();
+    final canInstallResult = await _update.canRequestPackageInstalls();
+    final canInstall = canInstallResult.getOrElse(() => false);
     if (!canInstall) {
       state = UpdateState(
         status: UpdateCheckStatus.installPermissionRequired,
@@ -155,16 +152,16 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
       );
       return;
     }
-    await _installApk.launchInstaller();
-    // The system installer is now shown. If the user cancels or it fails, the
-    // banner remains in readyToInstall so they can retry without re-downloading.
+    await _update.launchInstaller();
+    // Installer shown. If the user cancels or it fails, the banner stays in
+    // readyToInstall so they can retry without re-downloading.
   }
 
   /// Opens the system settings page to grant the install permission. After the
   /// user returns, the banner stays in installPermissionRequired until they
   /// tap 설치 again.
   Future<void> openInstallPermissionSettings() async {
-    await _installApk.openInstallPermissionSettings();
+    await _update.openInstallPermissionSettings();
   }
 
   @override
@@ -175,8 +172,5 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
 }
 
 final updateProvider = StateNotifierProvider<UpdateNotifier, UpdateState>(
-  (ref) => UpdateNotifier(
-    checkForUpdate: sl<CheckForUpdateUseCase>(),
-    installApk: sl<InstallApkUseCase>(),
-  ),
+  (ref) => UpdateNotifier(update: sl<UpdateUseCase>()),
 );

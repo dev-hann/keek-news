@@ -1,21 +1,17 @@
 import 'dart:convert';
 
-import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
-import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/repository/community_repo_impl.dart';
-import 'package:keek_news/repository/todayhumor/todayhumor_repo.dart';
+import 'package:keek_news/repository/community/html_community_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 
-class TodayhumorImpl extends CommunityRepoImpl implements TodayhumorRepo {
+class TodayhumorImpl extends HtmlCommunityRepo {
   TodayhumorImpl({required super.htmlClient});
 
   @override
@@ -31,40 +27,32 @@ class TodayhumorImpl extends CommunityRepoImpl implements TodayhumorRepo {
   int get listPageSize => 10;
 
   @override
-  Future<Either<Failure, PostDetail>> fetchDetail(String id) async {
-    try {
-      final html = await htmlClient.get(
-        '/board/view.php?table=humorbest&no=$id',
-      );
-      final doc = html_parser.parse(html);
-      final contentEl = doc.querySelector('.viewContent');
-      final counts = _extractCounts(doc);
+  Future<PostDetail> fetchDetail(String id) async {
+    final html = await htmlClient.get('/board/view.php?table=humorbest&no=$id');
+    final doc = html_parser.parse(html);
+    final contentEl = doc.querySelector('.viewContent');
+    final counts = _extractCounts(doc);
 
-      return Right(
-        PostDetail(
-          id: int.tryParse(id) ?? 0,
-          title: _extractTitle(doc),
-          author: _extractAuthor(doc),
-          date: _extractDate(doc),
-          contentHtml: contentEl?.innerHtml ?? '',
-          contentBlocks: _buildBlocks(contentEl),
-          imageUrls: htmlClient.collectImageUrls(
-            contentEl,
-            community: communityId,
-            includeFilter: (src) =>
-                src.contains('todayhumor') || src.startsWith('http'),
-          ),
-          recommendCount: counts[0],
-          notRecommendCount: 0,
-          viewCount: counts[1],
-          commentCount: counts[2],
-          comments: await _fetchComments(html),
-          community: CommunityId.todayhumor,
-        ),
-      );
-    } catch (e) {
-      return Left(toFailure(e));
-    }
+    return PostDetail(
+      id: int.tryParse(id) ?? 0,
+      title: _extractTitle(doc),
+      author: _extractAuthor(doc),
+      date: _extractDate(doc),
+      contentHtml: contentEl?.innerHtml ?? '',
+      contentBlocks: _buildBlocks(contentEl),
+      imageUrls: htmlClient.collectImageUrls(
+        contentEl,
+        community: communityId,
+        includeFilter: (src) =>
+            src.contains('todayhumor') || src.startsWith('http'),
+      ),
+      recommendCount: counts[0],
+      notRecommendCount: 0,
+      viewCount: counts[1],
+      commentCount: counts[2],
+      comments: await _fetchComments(html),
+      community: CommunityId.todayhumor,
+    );
   }
 
   @override

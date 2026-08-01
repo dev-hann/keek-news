@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/utils/url_builder.dart';
+import 'package:keek_news/model/url_builder.dart';
 
 void main() {
   group('UrlBuilder.resolveAbsolute', () {

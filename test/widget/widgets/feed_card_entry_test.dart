@@ -1,38 +1,19 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
-import 'package:keek_news/provider/bookmark_provider.dart';
-import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
-import 'package:keek_news/service/service_locator.dart' as di;
-import 'package:keek_news/use_case/bookmark_use_case.dart';
-import 'package:keek_news/use_case/get_post_detail_use_case.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/feed_card_entry.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
-import 'package:mocktail/mocktail.dart';
-
-import '../../helpers/post_detail_helper.dart';
-
-class MockBookmarkRepository extends Mock implements BookmarkRepo {}
 
 void main() {
-  late MockPostDetailUseCase mockPostDetail;
-  late MockBookmarkRepository mockBookmarkRepo;
   String? clipboardContent;
 
   setUp(() {
-    mockPostDetail = MockPostDetailUseCase();
-    mockBookmarkRepo = MockBookmarkRepository();
-    when(() => mockBookmarkRepo.getAll()).thenAnswer((_) async => const []);
-    registerFallbackValue(CommunityId.humoruniv);
     clipboardContent = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (call) async {
@@ -46,17 +27,7 @@ void main() {
           }
           return null;
         });
-    if (di.sl.isRegistered<GetPostDetailUseCase>()) {
-      di.sl.unregister<GetPostDetailUseCase>();
-    }
-    di.sl.registerLazySingleton<GetPostDetailUseCase>(() => mockPostDetail);
-    if (di.sl.isRegistered<BookmarkRepo>()) {
-      di.sl.unregister<BookmarkRepo>();
-    }
-    di.sl.registerLazySingleton<BookmarkRepo>(() => mockBookmarkRepo);
   });
-
-  tearDown(di.sl.reset);
 
   const post = FeedItem(
     community: CommunityId.humoruniv,
@@ -64,7 +35,6 @@ void main() {
     title: '게시글 제목',
     url: '/board/read.html?table=pds&number=1',
     author: '유머작가',
-    publishedAt: null,
     recommendCount: 42,
     commentCount: 10,
     viewCount: 500,
@@ -91,64 +61,46 @@ void main() {
     );
   }
 
-  ProviderContainer makeContainer() {
-    final container = ProviderContainer(
-      overrides: [
-        bookmarkProvider.overrideWith(
-          (ref) => BookmarkNotifier(BookmarkUseCase(mockBookmarkRepo)),
-        ),
-      ],
-    );
-    addTearDown(container.dispose);
-    return container;
-  }
-
   Future<void> pumpEntry(
-    WidgetTester tester,
-    ProviderContainer container, {
+    WidgetTester tester, {
+    PostDetail? detail,
+    bool detailLoading = false,
     bool isBookmarked = false,
     VoidCallback? onBookmarkTap,
   }) async {
     await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          home: Scaffold(
-            body: ListView(
-              children: [
-                FeedCardEntry(
-                  post: post,
-                  isBookmarked: isBookmarked,
-                  onBookmarkTap: onBookmarkTap ?? () {},
-                ),
-              ],
-            ),
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            children: [
+              FeedCardEntry(
+                post: post,
+                detail: detail,
+                detailLoading: detailLoading,
+                isBookmarked: isBookmarked,
+                onBookmarkTap: onBookmarkTap ?? () {},
+              ),
+            ],
           ),
         ),
       ),
     );
-    await tester.pumpAndSettle(const Duration(milliseconds: 300));
+    await tester.pump();
   }
 
   group('FeedCardEntry', () {
     testWidgets('should render FeedCard with post metadata', (tester) async {
-      setupPostDetailFailureMock(mockPostDetail);
-
-      await pumpEntry(tester, makeContainer());
+      await pumpEntry(tester);
 
       expect(find.byType(FeedCard), findsOneWidget);
       expect(find.text('유머작가'), findsOneWidget);
     });
 
-    testWidgets('should load detail via mergedDetailProvider and show images', (
-      tester,
-    ) async {
-      setupPostDetailResponseMock(
-        mockPostDetail,
-        () => detailWith(imageUrls: const ['https://example.com/a.jpg']),
+    testWidgets('should show images when detail has imageUrls', (tester) async {
+      await pumpEntry(
+        tester,
+        detail: detailWith(imageUrls: const ['https://example.com/a.jpg']),
       );
-
-      await pumpEntry(tester, makeContainer());
 
       expect(find.byType(FeedImageCarousel), findsOneWidget);
     });
@@ -156,30 +108,28 @@ void main() {
     testWidgets('should show comment preview when detail has comments', (
       tester,
     ) async {
-      final detail = detailWith(
-        comments: [
-          Comment(
-            id: 1,
-            author: '댓글작성자',
-            content: '댓글 내용',
-            date: DateTime(2026, 5, 15),
-            recommendCount: 0,
-            isBest: false,
-            replies: const [],
-          ),
-        ],
+      await pumpEntry(
+        tester,
+        detail: detailWith(
+          comments: [
+            Comment(
+              id: 1,
+              author: '댓글작성자',
+              content: '댓글 내용',
+              date: DateTime(2026, 5, 15),
+              recommendCount: 0,
+              isBest: false,
+              replies: const [],
+            ),
+          ],
+        ),
       );
-      setupPostDetailResponseMock(mockPostDetail, () => detail);
-
-      await pumpEntry(tester, makeContainer());
 
       expect(find.textContaining('댓글'), findsOneWidget);
     });
 
     testWidgets('should reflect bookmarked state on the card', (tester) async {
-      setupPostDetailFailureMock(mockPostDetail);
-
-      await pumpEntry(tester, makeContainer(), isBookmarked: true);
+      await pumpEntry(tester, isBookmarked: true);
 
       expect(find.byIcon(Icons.bookmark), findsOneWidget);
     });
@@ -188,9 +138,7 @@ void main() {
       tester,
     ) async {
       var tapped = 0;
-      setupPostDetailFailureMock(mockPostDetail);
-
-      await pumpEntry(tester, makeContainer(), onBookmarkTap: () => tapped++);
+      await pumpEntry(tester, onBookmarkTap: () => tapped++);
 
       await tester.tap(find.byIcon(Icons.bookmark_border));
       expect(tapped, 1);
@@ -199,9 +147,7 @@ void main() {
     testWidgets('should copy post url and show snackbar when copy tapped', (
       tester,
     ) async {
-      setupPostDetailFailureMock(mockPostDetail);
-
-      await pumpEntry(tester, makeContainer());
+      await pumpEntry(tester);
 
       await tester.tap(find.byIcon(Icons.link));
       await tester.pump(const Duration(milliseconds: 300));
@@ -216,10 +162,7 @@ void main() {
     testWidgets('should pass detailLoading true while detail unresolved', (
       tester,
     ) async {
-      setupPostDetailFailureMock(mockPostDetail);
-
-      final container = makeContainer();
-      await pumpEntry(tester, container);
+      await pumpEntry(tester, detailLoading: true);
 
       expect(find.byType(FeedCard), findsOneWidget);
     });

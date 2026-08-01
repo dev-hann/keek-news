@@ -1,14 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/service/github_remote_service.dart';
+import 'package:keek_news/repository/community/community_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
-import 'package:keek_news/use_case/bookmark_use_case.dart';
-import 'package:keek_news/use_case/check_for_update_use_case.dart';
-import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
-import 'package:keek_news/use_case/get_post_detail_use_case.dart';
-import 'package:keek_news/use_case/install_apk_use_case.dart';
-import 'package:keek_news/use_case/manage_cache_use_case.dart';
+import 'package:keek_news/use_case/feed_use_case.dart';
+import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/package_info_helper.dart';
@@ -30,36 +25,29 @@ void main() {
       expect(repos.keys, contains(CommunityId.dogdrip));
     });
 
-    test('should register GetMergedFeedUseCase use case', () async {
+    test('should register FeedUseCase use case', () async {
       await di.configureDependencies();
-      expect(di.sl.isRegistered<GetMergedFeedUseCase>(), isTrue);
+      expect(di.sl.isRegistered<FeedUseCase>(), isTrue);
     });
 
-    test('should register GetPostDetailUseCase use case', () async {
+    test('should register FeedUseCase use case', () async {
       await di.configureDependencies();
-      expect(di.sl.isRegistered<GetPostDetailUseCase>(), isTrue);
+      expect(di.sl.isRegistered<FeedUseCase>(), isTrue);
     });
 
     test('should resolve all dependencies without throwing', () async {
       await di.configureDependencies();
-      expect(() => di.sl<Map<CommunityId, CommunityRepo>>(), returnsNormally);
-      expect(() => di.sl<GetMergedFeedUseCase>(), returnsNormally);
-      expect(() => di.sl<GetPostDetailUseCase>(), returnsNormally);
-      expect(() => di.sl<GitHubRemoteService>(), returnsNormally);
-      expect(() => di.sl<CheckForUpdateUseCase>(), returnsNormally);
-      expect(() => di.sl<InstallApkUseCase>(), returnsNormally);
-      expect(() => di.sl<BookmarkUseCase>(), returnsNormally);
-      expect(() => di.sl<ManageCacheUseCase>(), returnsNormally);
+      expect(di.sl<Map<CommunityId, CommunityRepo>>(), isNotNull);
+      expect(di.sl<FeedUseCase>(), isNotNull);
+      expect(di.sl<FeedUseCase>(), isNotNull);
+      expect(di.sl<UpdateUseCase>(), isNotNull);
     });
 
-    test(
-      'CheckForUpdateUseCase should read version from PackageInfo',
-      () async {
-        await di.configureDependencies();
-        final useCase = di.sl<CheckForUpdateUseCase>();
-        expect(useCase.currentVersion, isNotEmpty);
-        expect(useCase.currentVersion, equals('1.1.0'));
-      },
-    );
+    test('UpdateUseCase should read version from PackageInfo', () async {
+      await di.configureDependencies();
+      final useCase = di.sl<UpdateUseCase>();
+      expect(useCase.currentVersion, isNotEmpty);
+      expect(useCase.currentVersion, equals('1.1.0'));
+    });
   });
 }
