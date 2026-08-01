@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
+import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/service/dio_html_service.dart';
 
 DioHtmlService _newClient({Dio? dio}) => DioHtmlService(
@@ -10,7 +11,7 @@ DioHtmlService _newClient({Dio? dio}) => DioHtmlService(
 
 void main() {
   group('DioHtmlService', () {
-    test('should throw DioException when dio fails with bad URL', () {
+    test('should throw NetworkFailure when dio fails with bad URL', () {
       final client = _newClient(
         dio: Dio(
           BaseOptions(
@@ -20,7 +21,7 @@ void main() {
         ),
       );
 
-      expect(() => client.get('/test.html'), throwsA(isA<DioException>()));
+      expect(() => client.get('/test.html'), throwsA(isA<NetworkFailure>()));
     });
 
     test('should construct with provided dio config', () {
@@ -99,27 +100,6 @@ void main() {
       test('returns 0 when selector not found', () {
         final parent = Element.html('<div>nothing</div>');
         expect(client.statOf(parent, '.num'), 0);
-      });
-    });
-
-    group('parseDate', () {
-      final client = _newClient();
-
-      test('returns null for empty string', () {
-        expect(client.parseDate(''), isNull);
-      });
-
-      test('returns null for whitespace-only string', () {
-        expect(client.parseDate('   '), isNull);
-      });
-
-      test('parses ISO date string', () {
-        final result = client.parseDate('2026-07-30');
-        expect(result, DateTime(2026, 7, 30));
-      });
-
-      test('returns null for unparseable text', () {
-        expect(client.parseDate('not a date'), isNull);
       });
     });
   });

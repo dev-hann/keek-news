@@ -71,13 +71,11 @@ class GetMergedFeedUseCase {
     MergedCursor? cursor,
   ) async {
     final token = cursor?.perSourceTokens[id];
-    try {
-      final result = await repo.fetchLatest(pageToken: token);
-      return _FetchOutcome(id, result.items, result.pageToken);
-    } catch (e) {
-      debugPrint('GetMergedFeedUseCase: repo $id failed: $e');
+    final result = await repo.fetchLatest(pageToken: token);
+    return result.fold((f) {
+      debugPrint('GetMergedFeedUseCase: repo $id failed: $f');
       return _FetchOutcome.failed(id);
-    }
+    }, (data) => _FetchOutcome(id, data.items, data.pageToken));
   }
 
   MergedPage _merge({

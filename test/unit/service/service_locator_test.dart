@@ -1,17 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/community_repo.dart';
-import 'package:keek_news/repository/dogdrip/dogdrip_impl.dart';
-import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
-import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
-import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
-import 'package:keek_news/repository/update/update_impl.dart';
-import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 import 'package:keek_news/use_case/get_post_detail_use_case.dart';
+import 'package:keek_news/use_case/install_apk_use_case.dart';
+import 'package:keek_news/use_case/manage_cache_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/package_info_helper.dart';
@@ -25,15 +22,7 @@ void main() {
   tearDown(di.sl.reset);
 
   group('configureDependencies', () {
-    test('should register all 4 community repos', () async {
-      await di.configureDependencies();
-      expect(di.sl.isRegistered<HumorunivImpl>(), isTrue);
-      expect(di.sl.isRegistered<TodayhumorImpl>(), isTrue);
-      expect(di.sl.isRegistered<PpomppuImpl>(), isTrue);
-      expect(di.sl.isRegistered<DogdripImpl>(), isTrue);
-    });
-
-    test('should register CommunityRepo map', () async {
+    test('should register CommunityRepo map with 4 communities', () async {
       await di.configureDependencies();
       final repos = di.sl<Map<CommunityId, CommunityRepo>>();
       expect(repos.length, 4);
@@ -53,21 +42,14 @@ void main() {
 
     test('should resolve all dependencies without throwing', () async {
       await di.configureDependencies();
-      expect(() => di.sl<HumorunivImpl>(), returnsNormally);
-      expect(() => di.sl<TodayhumorImpl>(), returnsNormally);
-      expect(() => di.sl<PpomppuImpl>(), returnsNormally);
-      expect(() => di.sl<DogdripImpl>(), returnsNormally);
       expect(() => di.sl<Map<CommunityId, CommunityRepo>>(), returnsNormally);
       expect(() => di.sl<GetMergedFeedUseCase>(), returnsNormally);
       expect(() => di.sl<GetPostDetailUseCase>(), returnsNormally);
       expect(() => di.sl<GitHubRemoteService>(), returnsNormally);
-      expect(() => di.sl<UpdateRepo>(), returnsNormally);
       expect(() => di.sl<CheckForUpdateUseCase>(), returnsNormally);
-    });
-
-    test('UpdateRepo should be UpdateImpl', () async {
-      await di.configureDependencies();
-      expect(di.sl<UpdateRepo>(), isA<UpdateImpl>());
+      expect(() => di.sl<InstallApkUseCase>(), returnsNormally);
+      expect(() => di.sl<BookmarkUseCase>(), returnsNormally);
+      expect(() => di.sl<ManageCacheUseCase>(), returnsNormally);
     });
 
     test(

@@ -1,5 +1,7 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/repository/community_repo.dart';
@@ -44,17 +46,16 @@ void main() {
       );
       when(
         () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
-      ).thenAnswer((_) async => CommunityListResult(items: [item1]));
+      ).thenAnswer((_) async => Right(CommunityListResult(items: [item1])));
       when(
         () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
-      ).thenAnswer((_) async => CommunityListResult(items: [item2]));
+      ).thenAnswer((_) async => Right(CommunityListResult(items: [item2])));
 
       final result = await useCase(const MergedFeedParams());
 
       expect(result.isRight(), isTrue);
       final page = result.getOrElse(() => throw StateError(''));
       expect(page.items, hasLength(2));
-      // dogdrip's item is newer → should come first after sort
       expect(page.items.first.id, '2');
     });
 
@@ -68,10 +69,10 @@ void main() {
       );
       when(
         () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
-      ).thenThrow(Exception('humoruniv down'));
+      ).thenAnswer((_) async => const Left(ServerFailure('humoruniv down')));
       when(
         () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
-      ).thenAnswer((_) async => CommunityListResult(items: [item]));
+      ).thenAnswer((_) async => Right(CommunityListResult(items: [item])));
 
       final result = await useCase(const MergedFeedParams());
 
@@ -85,10 +86,10 @@ void main() {
     test('should return Left when all repos fail', () async {
       when(
         () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
-      ).thenThrow(Exception('down'));
+      ).thenAnswer((_) async => const Left(ServerFailure('down')));
       when(
         () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
-      ).thenThrow(Exception('down'));
+      ).thenAnswer((_) async => const Left(ServerFailure('down')));
 
       final result = await useCase(const MergedFeedParams());
 
@@ -105,7 +106,7 @@ void main() {
       );
       when(
         () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
-      ).thenAnswer((_) async => CommunityListResult(items: [item]));
+      ).thenAnswer((_) async => Right(CommunityListResult(items: [item])));
 
       final result = await useCase(
         const MergedFeedParams(enabled: {CommunityId.humoruniv}),
@@ -127,12 +128,13 @@ void main() {
           url: 'u10',
         );
         when(() => humorunivRepo.fetchLatest(pageToken: '2')).thenAnswer(
-          (_) async =>
-              const CommunityListResult(items: [nullTsItem], pageToken: '3'),
+          (_) async => const Right(
+            CommunityListResult(items: [nullTsItem], pageToken: '3'),
+          ),
         );
         when(
           () => dogdripRepo.fetchLatest(pageToken: '2'),
-        ).thenAnswer((_) async => const CommunityListResult(items: []));
+        ).thenAnswer((_) async => const Right(CommunityListResult(items: [])));
 
         final result = await useCase(
           const MergedFeedParams(
@@ -156,10 +158,10 @@ void main() {
       () async {
         when(
           () => humorunivRepo.fetchLatest(pageToken: '2'),
-        ).thenAnswer((_) async => const CommunityListResult(items: []));
+        ).thenAnswer((_) async => const Right(CommunityListResult(items: [])));
         when(
           () => dogdripRepo.fetchLatest(pageToken: '5'),
-        ).thenAnswer((_) async => const CommunityListResult(items: []));
+        ).thenAnswer((_) async => const Right(CommunityListResult(items: [])));
 
         await useCase(
           const MergedFeedParams(
@@ -181,30 +183,34 @@ void main() {
       when(
         () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
       ).thenAnswer(
-        (_) async => const CommunityListResult(
-          items: [
-            FeedItem(
-              community: CommunityId.humoruniv,
-              id: '1',
-              title: 'h',
-              url: 'u',
-            ),
-          ],
-          pageToken: '2',
+        (_) async => const Right(
+          CommunityListResult(
+            items: [
+              FeedItem(
+                community: CommunityId.humoruniv,
+                id: '1',
+                title: 'h',
+                url: 'u',
+              ),
+            ],
+            pageToken: '2',
+          ),
         ),
       );
       when(
         () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),
       ).thenAnswer(
-        (_) async => const CommunityListResult(
-          items: [
-            FeedItem(
-              community: CommunityId.dogdrip,
-              id: '2',
-              title: 'd',
-              url: 'u2',
-            ),
-          ],
+        (_) async => const Right(
+          CommunityListResult(
+            items: [
+              FeedItem(
+                community: CommunityId.dogdrip,
+                id: '2',
+                title: 'd',
+                url: 'u2',
+              ),
+            ],
+          ),
         ),
       );
 

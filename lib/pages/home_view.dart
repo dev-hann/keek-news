@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keek_news/const/app_durations.dart';
+import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
@@ -71,13 +73,18 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     if (_controller.hasClients) _controller.jumpTo(0);
   }
 
+  void _scrollToTop() {
+    if (!_controller.hasClients || _controller.offset <= 0) return;
+    _controller.animateTo(
+      0,
+      duration: AppDurations.medium,
+      curve: AppCurves.decelerate,
+    );
+  }
+
   void _onTopTap() {
     if (_controller.hasClients && _controller.offset > 0) {
-      _controller.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      _scrollToTop();
     } else {
       ref.read(mergedFeedProvider.notifier).refresh();
     }
@@ -122,18 +129,8 @@ class _HomeScreenState extends ConsumerState<HomeView> {
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _showScrollTop,
-        builder: (context, show, _) => ScrollToTopButton(
-          visible: show,
-          onTap: () {
-            if (_controller.hasClients) {
-              _controller.animateTo(
-                0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOut,
-              );
-            }
-          },
-        ),
+        builder: (context, show, _) =>
+            ScrollToTopButton(visible: show, onTap: _scrollToTop),
       ),
     );
   }
@@ -206,11 +203,11 @@ class _CommunityTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      height: 44,
+      height: AppSizes.minTouchTarget,
       color: theme.colorScheme.surfaceContainer,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.p8),
         itemCount: communities.length,
         itemBuilder: (context, index) {
           final c = communities[index];
@@ -218,7 +215,7 @@ class _CommunityTabBar extends StatelessWidget {
           return GestureDetector(
             onTap: () => onChanged(index),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.p16),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 border: Border(

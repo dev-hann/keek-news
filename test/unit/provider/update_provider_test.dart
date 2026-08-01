@@ -7,15 +7,15 @@ import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/model/download_progress.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/provider/update_provider.dart';
-import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
+import 'package:keek_news/use_case/install_apk_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockUpdateRepository extends Mock implements UpdateRepo {}
 
-class MockApkInstallRepository extends Mock implements ApkInstallRepo {}
+class MockInstallApkUseCase extends Mock implements InstallApkUseCase {}
 
 const _availableRelease = AppRelease(
   version: '1.2.0',
@@ -24,7 +24,7 @@ const _availableRelease = AppRelease(
 );
 
 UpdateNotifier _notifierWith({
-  required MockApkInstallRepository apkRepo,
+  required MockInstallApkUseCase installApk,
   String currentVersion = '1.0.0',
 }) {
   final checkRepo = MockUpdateRepository();
@@ -36,25 +36,25 @@ UpdateNotifier _notifierWith({
       repository: checkRepo,
       currentVersion: currentVersion,
     ),
-    apkInstallRepository: apkRepo,
+    installApk: installApk,
   );
 }
 
 void main() {
   late MockUpdateRepository mockRepository;
-  late MockApkInstallRepository mockApkRepo;
+  late MockInstallApkUseCase mockInstallApk;
 
   setUp(() {
     mockRepository = MockUpdateRepository();
-    mockApkRepo = MockApkInstallRepository();
+    mockInstallApk = MockInstallApkUseCase();
     if (di.sl.isRegistered<UpdateRepo>()) {
       di.sl.unregister<UpdateRepo>();
     }
     if (di.sl.isRegistered<CheckForUpdateUseCase>()) {
       di.sl.unregister<CheckForUpdateUseCase>();
     }
-    if (di.sl.isRegistered<ApkInstallRepo>()) {
-      di.sl.unregister<ApkInstallRepo>();
+    if (di.sl.isRegistered<InstallApkUseCase>()) {
+      di.sl.unregister<InstallApkUseCase>();
     }
     di.sl.registerLazySingleton<UpdateRepo>(() => mockRepository);
     di.sl.registerLazySingleton(
@@ -63,7 +63,7 @@ void main() {
         currentVersion: '1.0.0',
       ),
     );
-    di.sl.registerLazySingleton<ApkInstallRepo>(() => mockApkRepo);
+    di.sl.registerLazySingleton<InstallApkUseCase>(() => mockInstallApk);
   });
 
   tearDown(di.sl.reset);
@@ -235,8 +235,8 @@ void main() {
     test(
       'downloadUpdate emits downloading then readyToInstall on success',
       () async {
-        final apkRepo = MockApkInstallRepository();
-        final notifier = _notifierWith(apkRepo: apkRepo);
+        final installApk = MockInstallApkUseCase();
+        final notifier = _notifierWith(installApk: installApk);
         addTearDown(notifier.dispose);
 
         // Seed the available state first.
@@ -245,11 +245,13 @@ void main() {
 
         final progressController = StreamController<DownloadProgress>();
         when(
-          () => apkRepo.download('https://example.com/app.apk'),
+          () => installApk.download('https://example.com/app.apk'),
         ).thenAnswer((_) => progressController.stream);
-        when(apkRepo.canRequestPackageInstalls).thenAnswer((_) async => true);
         when(
-          apkRepo.launchInstaller,
+          installApk.canRequestPackageInstalls,
+        ).thenAnswer((_) async => true);
+        when(
+          installApk.launchInstaller,
         ).thenAnswer((_) async => const Right(unit));
 
         await notifier.downloadUpdate();
@@ -270,14 +272,14 @@ void main() {
     );
 
     test('downloadUpdate sets downloadError on stream error', () async {
-      final apkRepo = MockApkInstallRepository();
-      final notifier = _notifierWith(apkRepo: apkRepo);
+      final installApk = MockInstallApkUseCase();
+      final notifier = _notifierWith(installApk: installApk);
       addTearDown(notifier.dispose);
       await notifier.checkForUpdate();
 
       final progressController = StreamController<DownloadProgress>();
       when(
-        () => apkRepo.download(any()),
+        () => installApk.download(any()),
       ).thenAnswer((_) => progressController.stream);
 
       await notifier.downloadUpdate();
@@ -288,42 +290,47 @@ void main() {
       expect(notifier.state.status, UpdateCheckStatus.downloadError);
     });
 
-    test('cancelDownload returns to available and cancels the repo', () async {
-      final apkRepo = MockApkInstallRepository();
-      final notifier = _notifierWith(apkRepo: apkRepo);
-      addTearDown(notifier.dispose);
-      await notifier.checkForUpdate();
-
-      final progressController = StreamController<DownloadProgress>();
-      when(
-        () => apkRepo.download(any()),
-      ).thenAnswer((_) => progressController.stream);
-
-      await notifier.downloadUpdate();
-      expect(notifier.state.status, UpdateCheckStatus.downloading);
-
-      await notifier.cancelDownload();
-
-      expect(notifier.state.status, UpdateCheckStatus.available);
-      verify(apkRepo.cancelDownload).called(1);
-      await progressController.close();
-    });
-
     test(
-      'launchInstaller can be re-invoked from readyToInstall (install retry)',
+      'cancelDownload returns to available and cancels the use case',
       () async {
-        final apkRepo = MockApkInstallRepository();
-        final notifier = _notifierWith(apkRepo: apkRepo);
+        final installApk = MockInstallApkUseCase();
+        final notifier = _notifierWith(installApk: installApk);
         addTearDown(notifier.dispose);
         await notifier.checkForUpdate();
 
         final progressController = StreamController<DownloadProgress>();
         when(
-          () => apkRepo.download(any()),
+          () => installApk.download(any()),
         ).thenAnswer((_) => progressController.stream);
-        when(apkRepo.canRequestPackageInstalls).thenAnswer((_) async => true);
+
+        await notifier.downloadUpdate();
+        expect(notifier.state.status, UpdateCheckStatus.downloading);
+
+        await notifier.cancelDownload();
+
+        expect(notifier.state.status, UpdateCheckStatus.available);
+        verify(installApk.cancelDownload).called(1);
+        await progressController.close();
+      },
+    );
+
+    test(
+      'launchInstaller can be re-invoked from readyToInstall (install retry)',
+      () async {
+        final installApk = MockInstallApkUseCase();
+        final notifier = _notifierWith(installApk: installApk);
+        addTearDown(notifier.dispose);
+        await notifier.checkForUpdate();
+
+        final progressController = StreamController<DownloadProgress>();
         when(
-          apkRepo.launchInstaller,
+          () => installApk.download(any()),
+        ).thenAnswer((_) => progressController.stream);
+        when(
+          installApk.canRequestPackageInstalls,
+        ).thenAnswer((_) async => true);
+        when(
+          installApk.launchInstaller,
         ).thenAnswer((_) async => const Right(unit));
 
         await notifier.downloadUpdate();
@@ -335,23 +342,25 @@ void main() {
         // Simulate the user cancelling the system dialog then tapping 설치 again.
         await notifier.launchInstaller();
 
-        verify(apkRepo.launchInstaller).called(2);
+        verify(installApk.launchInstaller).called(2);
       },
     );
 
     test(
       'without permission transitions to installPermissionRequired',
       () async {
-        final apkRepo = MockApkInstallRepository();
-        final notifier = _notifierWith(apkRepo: apkRepo);
+        final installApk = MockInstallApkUseCase();
+        final notifier = _notifierWith(installApk: installApk);
         addTearDown(notifier.dispose);
         await notifier.checkForUpdate();
 
         final progressController = StreamController<DownloadProgress>();
         when(
-          () => apkRepo.download(any()),
+          () => installApk.download(any()),
         ).thenAnswer((_) => progressController.stream);
-        when(apkRepo.canRequestPackageInstalls).thenAnswer((_) async => false);
+        when(
+          installApk.canRequestPackageInstalls,
+        ).thenAnswer((_) async => false);
 
         await notifier.downloadUpdate();
         await progressController.close();
@@ -361,7 +370,7 @@ void main() {
           notifier.state.status,
           UpdateCheckStatus.installPermissionRequired,
         );
-        verifyNever(apkRepo.launchInstaller);
+        verifyNever(installApk.launchInstaller);
       },
     );
   });

@@ -11,7 +11,7 @@ class MergedCursor extends Equatable {
 
   @override
   List<Object?> get props => [
-    ...perSourceTokens.entries.map((e) => [e.key, e.value]),
+    ...perSourceTokens.entries.expand((e) => [e.key, e.value]),
   ];
 }
 

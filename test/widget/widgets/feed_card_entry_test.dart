@@ -12,6 +12,7 @@ import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/get_post_detail_use_case.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/feed_card_entry.dart';
@@ -93,7 +94,9 @@ void main() {
   ProviderContainer makeContainer() {
     final container = ProviderContainer(
       overrides: [
-        bookmarkRepositoryProvider.overrideWithValue(mockBookmarkRepo),
+        bookmarkProvider.overrideWith(
+          (ref) => BookmarkNotifier(BookmarkUseCase(mockBookmarkRepo)),
+        ),
       ],
     );
     addTearDown(container.dispose);

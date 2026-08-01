@@ -4,10 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/ppomppu/ppomppu_impl.dart';
 import 'package:keek_news/service/html_service.dart';
 
-class _FixtureHtmlService implements HtmlService {
+import '../../helpers/either_helper.dart';
+
+class _FixtureHtmlService extends HtmlService {
   _FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 
@@ -39,13 +42,6 @@ class _FixtureHtmlService implements HtmlService {
   }
 
   @override
-  DateTime? parseDate(String text) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return null;
-    return DateTime.tryParse(trimmed);
-  }
-
-  @override
   ContentScanResult scanContent(Element container) =>
       const ContentScanResult(blocks: [], imageUrls: []);
 
@@ -63,15 +59,17 @@ PpomppuImpl _repo(String id, String fixtureFile) => PpomppuImpl(
   htmlClient: _FixtureHtmlService({id: _read('ppomppu/$fixtureFile.html')}),
 );
 
+Future<PostDetail> _detail(String id, String fixtureFile) async {
+  final either = await _repo(id, fixtureFile).fetchDetail(id);
+  return unwrapRight(either);
+}
+
 void main() {
   group('PpomppuImpl.fetchDetail media', () {
     test(
       'duplicate CDN-mirror <source> tags collapse to one VideoBlock',
       () async {
-        final detail = await _repo(
-          '770512',
-          'detail_video_770512',
-        ).fetchDetail('770512');
+        final detail = await _detail('770512', 'detail_video_770512');
 
         final videos = detail.contentBlocks.whereType<VideoBlock>().toList();
         expect(videos, hasLength(1));
@@ -80,10 +78,7 @@ void main() {
     );
 
     test('UI asset images are excluded from imageUrls', () async {
-      final detail = await _repo(
-        '770409',
-        'detail_770409',
-      ).fetchDetail('770409');
+      final detail = await _detail('770409', 'detail_770409');
 
       expect(detail.imageUrls, isNotEmpty);
       for (final url in detail.imageUrls) {
@@ -98,10 +93,7 @@ void main() {
     });
 
     test('UI asset images are excluded from contentBlocks', () async {
-      final detail = await _repo(
-        '770409',
-        'detail_770409',
-      ).fetchDetail('770409');
+      final detail = await _detail('770409', 'detail_770409');
 
       final imgs = detail.contentBlocks.whereType<ImageBlock>().toList();
       expect(imgs, isNotEmpty);

@@ -5,7 +5,9 @@ import 'package:keek_news/const/app_durations.dart';
 import 'package:keek_news/const/app_radius.dart';
 import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/const/app_spacing.dart';
+import 'package:keek_news/utils/image_aspect_resolver.dart';
 import 'package:keek_news/utils/long_image.dart';
+import 'package:keek_news/widgets/media_count_badge.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 
 /// Full-screen image viewer.
@@ -58,8 +60,9 @@ class ImageViewerView extends StatefulWidget {
 }
 
 class _ImageViewerScreenState extends State<ImageViewerView> {
-  late final PageController _pageController;
-  late final TransformationController _transformController;
+  final TransformationController _transformController =
+      TransformationController();
+  PageController? _pageController;
 
   int _currentIndex = 0;
   bool _isZoomed = false;
@@ -70,8 +73,7 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
-    _transformController = TransformationController()
-      ..addListener(_onTransformChanged);
+    _transformController.addListener(_onTransformChanged);
     if (widget.knownAspects != null) {
       _aspects.addAll(widget.knownAspects!);
     }
@@ -82,8 +84,9 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
 
   @override
   void dispose() {
+    _transformController.removeListener(_onTransformChanged);
     _transformController.dispose();
-    _pageController.dispose();
+    _pageController?.dispose();
     super.dispose();
   }
 
@@ -96,21 +99,13 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
 
   void _resolveAspect(String url) {
     if (_aspects.containsKey(url)) return;
-    final stream = NetworkImage(url).resolve(const ImageConfiguration());
-    ImageStreamListener? listener;
-    listener = ImageStreamListener(
-      (info, _) {
-        if (!mounted || listener == null) return;
-        final aspect =
-            info.image.width.toDouble() / info.image.height.toDouble();
+    ImageAspectResolver.resolve(
+      url,
+      onResolved: (aspect) {
+        if (!mounted) return;
         setState(() => _aspects[url] = aspect);
-        stream.removeListener(listener);
-      },
-      onError: (Object _, StackTrace? __) {
-        if (listener != null) stream.removeListener(listener);
       },
     );
-    stream.addListener(listener);
   }
 
   bool _isLongImage(int index) {
@@ -141,7 +136,7 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
 
   void _goToPage(int index) {
     if (index < 0 || index >= widget.imageUrls.length) return;
-    _pageController.animateToPage(
+    _pageController!.animateToPage(
       index,
       duration: AppDurations.medium,
       curve: AppCurves.decelerate,
@@ -153,7 +148,7 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
     final multiple = widget.imageUrls.length > 1;
 
     final pageView = PageView.builder(
-      controller: _pageController,
+      controller: _pageController!,
       itemCount: widget.imageUrls.length,
       onPageChanged: (index) => setState(() {
         _currentIndex = index;
@@ -192,19 +187,11 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
                 left: 0,
                 right: 0,
                 child: Center(
-                  child: Container(
+                  child: MediaCountBadge(
+                    text: '${_currentIndex + 1}/${widget.imageUrls.length}',
+                    style: Theme.of(context).textTheme.labelLarge,
+                    borderRadius: AppRadius.borderRadiusXl,
                     padding: AppSpacing.edgeH12V6,
-                    decoration: const BoxDecoration(
-                      color: AppColors.imageViewerOverlay,
-                      borderRadius: AppRadius.borderRadiusXl,
-                    ),
-                    child: Text(
-                      '${_currentIndex + 1}/${widget.imageUrls.length}',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.imageViewerForeground,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                   ),
                 ),
               ),
@@ -251,7 +238,7 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
     return widget.imageBuilder?.call(url) ??
         RetryableNetworkImage(
           imageUrl: url,
-          placeholderColor: Colors.black,
+          placeholderColor: AppColors.mediaSurface,
           foregroundColor: AppColors.imageViewerForeground,
         );
   }

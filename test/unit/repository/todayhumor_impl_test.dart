@@ -9,7 +9,9 @@ import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/service/html_service.dart';
 
-class _FixtureHtmlService implements HtmlService {
+import '../../helpers/either_helper.dart';
+
+class _FixtureHtmlService extends HtmlService {
   _FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 
@@ -41,13 +43,6 @@ class _FixtureHtmlService implements HtmlService {
   }
 
   @override
-  DateTime? parseDate(String text) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return null;
-    return DateTime.tryParse(trimmed);
-  }
-
-  @override
   ContentScanResult scanContent(Element container) =>
       const ContentScanResult(blocks: [], imageUrls: []);
 
@@ -71,7 +66,7 @@ void main() {
         }),
       );
 
-      final detail = await repo.fetchDetail('483503');
+      final detail = unwrapRight(await repo.fetchDetail('483503'));
 
       // 17 memos total; skip 1 deleted + 2 system → 14 valid.
       // Top-level (parent_memo_no == 0) valid comments = 7.
@@ -120,7 +115,7 @@ void main() {
           }),
         );
 
-        final detail = await repo.fetchDetail('483503');
+        final detail = unwrapRight(await repo.fetchDetail('483503'));
 
         expect(detail.comments, hasLength(1));
         final comment = detail.comments.first;
@@ -138,7 +133,7 @@ void main() {
         }),
       );
 
-      final detail = await repo.fetchDetail('483503');
+      final detail = unwrapRight(await repo.fetchDetail('483503'));
 
       expect(detail.comments, isEmpty);
       expect(detail.community, CommunityId.todayhumor);

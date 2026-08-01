@@ -17,10 +17,6 @@ class GetPostDetailUseCase {
     if (repo == null) {
       return Left(ServerFailure('No repo for $community'));
     }
-    try {
-      return Right(await repo.fetchDetail(id));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
+    return repo.fetchDetail(id);
   }
 }

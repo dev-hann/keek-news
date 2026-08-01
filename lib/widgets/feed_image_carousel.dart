@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:keek_news/const/app_colors.dart';
 import 'package:keek_news/const/app_durations.dart';
-import 'package:keek_news/const/app_radius.dart';
 import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/provider/feed_video_playback_provider.dart';
+import 'package:keek_news/utils/image_aspect_resolver.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
+import 'package:keek_news/widgets/media_count_badge.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
 
@@ -73,22 +74,13 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
 
   void _measure(String url) {
     if (_aspectCache.containsKey(url)) return;
-    final stream = NetworkImage(url).resolve(const ImageConfiguration());
-    ImageStreamListener? listener;
-    listener = ImageStreamListener(
-      (info, _) {
-        if (!mounted || listener == null) return;
-        setState(() {
-          _aspectCache[url] =
-              info.image.width.toDouble() / info.image.height.toDouble();
-        });
-        stream.removeListener(listener);
-      },
-      onError: (exception, stackTrace) {
-        if (listener != null) stream.removeListener(listener);
+    ImageAspectResolver.resolve(
+      url,
+      onResolved: (aspect) {
+        if (!mounted) return;
+        setState(() => _aspectCache[url] = aspect);
       },
     );
-    stream.addListener(listener);
   }
 
   @override
@@ -126,20 +118,7 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
               top: AppSpacing.p8,
               right: AppSpacing.p8,
               child: IgnorePointer(
-                child: Container(
-                  padding: AppSpacing.edgeH8V4,
-                  decoration: const BoxDecoration(
-                    color: AppColors.imageViewerOverlay,
-                    borderRadius: AppRadius.borderRadiusLg,
-                  ),
-                  child: Text(
-                    '${_page + 1}/$total',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.imageViewerForeground,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+                child: MediaCountBadge(text: '${_page + 1}/$total'),
               ),
             ),
         ],

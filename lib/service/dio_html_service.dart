@@ -5,10 +5,11 @@ import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
+import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
 
-class DioHtmlService implements HtmlService {
+class DioHtmlService extends HtmlService {
   DioHtmlService({required Dio dio, required String encoding})
     : _dio = dio,
       _encoding = encoding;
@@ -18,9 +19,28 @@ class DioHtmlService implements HtmlService {
 
   @override
   Future<String> get(String path) async {
-    final response = await _dio.get<List<int>>(path);
-    final bytes = response.data ?? <int>[];
-    return CharsetConverter.decode(_encoding, Uint8List.fromList(bytes));
+    try {
+      final response = await _dio.get<List<int>>(path);
+      final bytes = response.data ?? <int>[];
+      return CharsetConverter.decode(_encoding, Uint8List.fromList(bytes));
+    } on DioException catch (e) {
+      throw _toFailure(e);
+    }
+  }
+
+  Failure _toFailure(DioException e) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.receiveTimeout:
+      case DioExceptionType.connectionError:
+        return NetworkFailure(e.message ?? e.type.name);
+      case DioExceptionType.badCertificate:
+      case DioExceptionType.badResponse:
+      case DioExceptionType.cancel:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.unknown:
+        return ServerFailure(e.message ?? e.type.name);
+    }
   }
 
   @override
@@ -41,13 +61,6 @@ class DioHtmlService implements HtmlService {
   int statOf(dom.Element? parent, String selector) {
     if (parent == null) return 0;
     return extractNumber(textOf(parent.querySelector(selector)));
-  }
-
-  @override
-  DateTime? parseDate(String text) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return null;
-    return DateTime.tryParse(trimmed);
   }
 
   @override

@@ -36,8 +36,8 @@ class RetryableNetworkImage extends StatefulWidget {
 
 class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
   RetryController? _ownedController;
-  late RetryController _controller;
-  late int _lastSeenAttempt;
+  RetryController? _controller;
+  int _lastSeenAttempt = 0;
 
   RetryController get _effectiveController {
     if (widget.controller != null) return widget.controller!;
@@ -52,8 +52,8 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
   void initState() {
     super.initState();
     _controller = _effectiveController;
-    _lastSeenAttempt = _controller.attempt;
-    _controller.addListener(_onControllerChanged);
+    _lastSeenAttempt = _controller!.attempt;
+    _controller!.addListener(_onControllerChanged);
   }
 
   @override
@@ -61,41 +61,41 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
     super.didUpdateWidget(oldWidget);
     final newController = _effectiveController;
     if (!identical(newController, _controller)) {
-      _controller.removeListener(_onControllerChanged);
+      _controller?.removeListener(_onControllerChanged);
       _controller = newController;
-      _lastSeenAttempt = _controller.attempt;
-      _controller.addListener(_onControllerChanged);
+      _lastSeenAttempt = _controller!.attempt;
+      _controller!.addListener(_onControllerChanged);
     }
     if (oldWidget.imageUrl != widget.imageUrl) {
-      _controller.resetForUrl(widget.imageUrl, currentUrl: oldWidget.imageUrl);
-      _lastSeenAttempt = _controller.attempt;
+      _controller!.resetForUrl(widget.imageUrl, currentUrl: oldWidget.imageUrl);
+      _lastSeenAttempt = _controller!.attempt;
     }
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onControllerChanged);
+    _controller?.removeListener(_onControllerChanged);
     _ownedController?.dispose();
     super.dispose();
   }
 
   void _onControllerChanged() {
     if (!mounted) return;
-    if (_controller.attempt != _lastSeenAttempt ||
-        _controller.isExhausted ||
-        !_controller.hasError) {
-      _lastSeenAttempt = _controller.attempt;
+    if (_controller!.attempt != _lastSeenAttempt ||
+        _controller!.isExhausted ||
+        !_controller!.hasError) {
+      _lastSeenAttempt = _controller!.attempt;
       setState(() {});
     }
   }
 
   void _onFailureDetected() {
     if (!mounted) return;
-    _controller.recordFailure();
+    _controller!.recordFailure();
   }
 
   void _onManualRetry() {
-    _controller.manualRetry();
+    _controller!.manualRetry();
   }
 
   @override
@@ -106,7 +106,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
     final foreground = widget.foregroundColor ?? colorScheme.onSurfaceVariant;
 
     final Widget content;
-    if (_controller.isExhausted) {
+    if (_controller!.isExhausted) {
       content = _RetryErrorView(
         icon: widget.errorIcon,
         foreground: foreground,
@@ -116,7 +116,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
       );
     } else {
       content = CachedNetworkImage(
-        key: ValueKey('${widget.imageUrl}#${_controller.attempt}'),
+        key: ValueKey('${widget.imageUrl}#${_controller!.attempt}'),
         imageUrl: widget.imageUrl,
         fit: widget.fit,
         width: widget.width,

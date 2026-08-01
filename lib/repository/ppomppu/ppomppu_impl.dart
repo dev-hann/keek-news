@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
+import 'package:dartz/dartz.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
@@ -10,50 +10,27 @@ import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community_repo.dart';
+import 'package:keek_news/repository/community_repo_impl.dart';
 import 'package:keek_news/repository/ppomppu/ppomppu_repo.dart';
 import 'package:keek_news/service/html_service.dart';
-import 'package:keek_news/utils/media_classifier.dart';
-import 'package:keek_news/utils/media_dedup.dart';
-import 'package:keek_news/utils/url_builder.dart';
 
-class PpomppuImpl implements PpomppuRepo {
-  PpomppuImpl({required this.htmlClient});
-
-  final HtmlService htmlClient;
+class PpomppuImpl extends CommunityRepoImpl implements PpomppuRepo {
+  PpomppuImpl({required super.htmlClient});
 
   @override
   CommunityId get communityId => CommunityId.ppomppu;
 
   @override
-  Future<CommunityListResult> fetchLatest({String? pageToken}) async {
-    try {
-      final page = pageToken ?? '1';
-      final html = await htmlClient.get(
-        '/zboard/zboard.php?id=humor&page=$page',
-      );
-      final doc = html_parser.parse(html);
-      final items = doc
-          .querySelectorAll('tr.baseList')
-          .map(_parseListRow)
-          .whereType<FeedItem>()
-          .toList();
-      final nextPage = (int.tryParse(page) ?? 0) + 1;
-      return CommunityListResult(
-        items: items,
-        pageToken: items.length >= 5 ? '$nextPage' : null,
-      );
-    } on ServerFailure {
-      rethrow;
-    } on NetworkFailure {
-      rethrow;
-    } catch (e) {
-      debugPrint('PpomppuImpl fetchLatest error: $e');
-      throw ServerFailure(e.toString());
-    }
-  }
+  String listPath(String page) => '/zboard/zboard.php?id=humor&page=$page';
 
   @override
-  Future<PostDetail> fetchDetail(String id) async {
+  String listRowSelector() => 'tr.baseList';
+
+  @override
+  int get listPageSize => 5;
+
+  @override
+  Future<Either<Failure, PostDetail>> fetchDetail(String id) async {
     try {
       final html = await htmlClient.get('/zboard/view.php?id=humor&no=$id');
       final doc = html_parser.parse(html);
@@ -61,32 +38,34 @@ class PpomppuImpl implements PpomppuRepo {
       final date = _extractDate(doc);
       final commentData = _extractCommentData(doc);
 
-      return PostDetail(
-        id: int.tryParse(id) ?? 0,
-        title: _extractTitle(doc),
-        author: _extractAuthor(doc),
-        date: date,
-        contentHtml: contentEl?.innerHtml ?? '',
-        contentBlocks: _buildBlocks(contentEl),
-        imageUrls: _extractImages(contentEl),
-        recommendCount: 0,
-        notRecommendCount: 0,
-        viewCount: _extractViewCount(doc),
-        commentCount: _extractCommentCount(commentData),
-        comments: _extractComments(commentData, date),
-        community: CommunityId.ppomppu,
+      return Right(
+        PostDetail(
+          id: int.tryParse(id) ?? 0,
+          title: _extractTitle(doc),
+          author: _extractAuthor(doc),
+          date: date,
+          contentHtml: contentEl?.innerHtml ?? '',
+          contentBlocks: _buildBlocks(contentEl),
+          imageUrls: htmlClient.collectImageUrls(
+            contentEl,
+            community: communityId,
+            includeFilter: _isNotUiAsset,
+          ),
+          recommendCount: 0,
+          notRecommendCount: 0,
+          viewCount: _extractViewCount(doc),
+          commentCount: _extractCommentCount(commentData),
+          comments: _extractComments(commentData, date),
+          community: CommunityId.ppomppu,
+        ),
       );
-    } on ServerFailure {
-      rethrow;
-    } on NetworkFailure {
-      rethrow;
     } catch (e) {
-      debugPrint('PpomppuImpl fetchDetail error: $e');
-      throw ServerFailure(e.toString());
+      return Left(toFailure(e));
     }
   }
 
-  FeedItem? _parseListRow(dom.Element row) {
+  @override
+  FeedItem? parseListRow(dom.Element row) {
     final titleLink = row.querySelector('a.baseList-title');
     final numbTd = row.querySelector('td.baseList-numb');
     if (titleLink == null || numbTd == null) return null;
@@ -112,8 +91,8 @@ class PpomppuImpl implements PpomppuRepo {
       url: href,
       author: htmlClient.textOf(nameSpan),
       publishedAt: _parseDate(dateTd?.attributes['title'], timeTd?.text),
-      recommendCount: int.tryParse(recTd?.text.trim() ?? '') ?? 0,
-      viewCount: int.tryParse(viewsTd?.text.trim() ?? '') ?? 0,
+      recommendCount: htmlClient.extractNumber(recTd?.text),
+      viewCount: htmlClient.extractNumber(viewsTd?.text),
       commentCount: _parseCommentCount(commentSpan?.text),
       thumbnailUrl: htmlClient.attrOf(imgIcon, 'src'),
     );
@@ -126,8 +105,7 @@ class PpomppuImpl implements PpomppuRepo {
   }
 
   String _extractNo(String href) {
-    final match = RegExp(r'no=(\d+)').firstMatch(href);
-    return match?.group(1) ?? '';
+    return htmlClient.extractQueryParam(href, 'no') ?? '';
   }
 
   DateTime? _parseDate(String? fullDate, String? time) {
@@ -175,64 +153,17 @@ class PpomppuImpl implements PpomppuRepo {
     return DateTime.now();
   }
 
-  List<String> _extractImages(dom.Element? content) {
-    if (content == null) return const [];
-    return content
-        .querySelectorAll('img')
-        .map((img) => img.attributes['src'] ?? '')
-        .where((src) => src.isNotEmpty)
-        .where((src) => !_isUiAsset(src))
-        .map((src) => src.startsWith('//') ? 'https:$src' : src)
-        .where(MediaClassifier.isLoadableImage)
-        .toList();
-  }
-
-  bool _isUiAsset(String src) {
+  bool _isNotUiAsset(String src) {
     final lower = src.toLowerCase();
-    return lower.contains('/images/') || lower.contains('/skin/');
+    return !lower.contains('/images/') && !lower.contains('/skin/');
   }
 
   List<ContentBlock> _buildBlocks(dom.Element? content) {
     if (content == null) return const [];
-    final blocks = <ContentBlock>[];
-    final seenVideoKeys = <String>{};
-    for (final p in content.querySelectorAll('p')) {
-      final videos = p.querySelectorAll('video');
-      if (videos.isNotEmpty) {
-        for (final video in videos) {
-          for (final source in video.querySelectorAll('source')) {
-            final src = source.attributes['src'] ?? '';
-            if (src.isNotEmpty && src.contains('.mp4')) {
-              final full = src.startsWith('//') ? 'https:$src' : src;
-              if (seenVideoKeys.add(MediaDedup.filenameKey(full))) {
-                blocks.add(VideoBlock(url: full));
-              }
-            }
-          }
-        }
-        continue;
-      }
-
-      final imgs = p.querySelectorAll('img');
-      if (imgs.isNotEmpty) {
-        for (final img in imgs) {
-          final src = img.attributes['src'] ?? '';
-          if (src.isNotEmpty && !_isUiAsset(src)) {
-            final full = src.startsWith('//') ? 'https:$src' : src;
-            blocks.add(ImageBlock(url: full));
-          }
-        }
-      } else {
-        final text = p.text.trim();
-        if (text.isNotEmpty &&
-            !text.contains('browser does not support') &&
-            !text.contains('브라우저') &&
-            text != '\u00a0') {
-          blocks.add(TextBlock(text));
-        }
-      }
-    }
-    return blocks;
+    return htmlClient.buildContentBlocks(
+      content.querySelectorAll('p'),
+      const ContentBlockConfig(community: CommunityId.ppomppu, skipNbsp: true),
+    );
   }
 
   int _extractViewCount(dom.Document doc) {
@@ -258,7 +189,7 @@ class PpomppuImpl implements PpomppuRepo {
 
   int _extractCommentCount(Map<String, dynamic>? data) {
     if (data == null) return 0;
-    return (data['total_comment'] as num?)?.toInt() ?? 0;
+    return htmlClient.toInt(data['total_comment']);
   }
 
   List<Comment> _extractComments(
@@ -272,12 +203,12 @@ class PpomppuImpl implements PpomppuRepo {
     final result = <Comment>[];
     for (final item in raw) {
       if (item is! Map<String, dynamic>) continue;
-      final id = (item['no'] as num?)?.toInt() ?? 0;
+      final id = htmlClient.toInt(item['no']);
       final author = _stripTags(item['name'] as String? ?? '');
       final parsed = _parseMemo(item['memo'] as String? ?? '');
       final voteBtn = item['vote_btn'];
       final recommend = voteBtn is Map<String, dynamic>
-          ? (voteBtn['vote_count'] as num?)?.toInt() ?? 0
+          ? htmlClient.toInt(voteBtn['vote_count'])
           : 0;
       final time = (item['meta'] is Map<String, dynamic>)
           ? (item['meta']!['time_display'] as String?)
@@ -300,21 +231,11 @@ class PpomppuImpl implements PpomppuRepo {
   }
 
   String _stripTags(String html) {
-    final text = html_parser.parseFragment(html).text ?? '';
-    return text.replaceAll('\u00a0', ' ').trim();
+    return htmlClient.parseFragmentMemo(html, community: communityId).text;
   }
 
   ({String text, List<ContentBlock> media}) _parseMemo(String html) {
-    if (html.isEmpty) return (text: '', media: const []);
-    final frag = html_parser.parseFragment(html);
-    final media = <ContentBlock>[];
-    for (final img in frag.querySelectorAll('img')) {
-      final src = img.attributes['src'] ?? '';
-      if (src.isEmpty) continue;
-      media.add(ImageBlock(url: UrlBuilder.resolveAbsolute(communityId, src)));
-    }
-    final text = (frag.text ?? '').replaceAll('\u00a0', ' ').trim();
-    return (text: text, media: media);
+    return htmlClient.parseFragmentMemo(html, community: communityId);
   }
 
   DateTime _mergeTime(DateTime base, String? time) {

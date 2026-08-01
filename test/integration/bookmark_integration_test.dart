@@ -7,6 +7,7 @@ import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
 import 'package:keek_news/service/bookmark_local_service.dart';
 import 'package:keek_news/service/prefs_bookmark_local_service.dart';
+import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -36,6 +37,14 @@ void main() {
     );
   }
 
+  ProviderContainer containerWith(BookmarkRepo repo) => ProviderContainer(
+    overrides: [
+      bookmarkProvider.overrideWith(
+        (ref) => BookmarkNotifier(BookmarkUseCase(repo)),
+      ),
+    ],
+  );
+
   group('Bookmark integration', () {
     test('save bookmark persists across repository instances', () async {
       final bm = bookmark(id: '100');
@@ -52,9 +61,7 @@ void main() {
     test(
       'toggle add then remove via notifier updates state and storage',
       () async {
-        final container = ProviderContainer(
-          overrides: [bookmarkRepositoryProvider.overrideWithValue(repository)],
-        );
+        final container = containerWith(repository);
         addTearDown(container.dispose);
 
         await container.read(bookmarkProvider.notifier).load();
@@ -73,9 +80,7 @@ void main() {
         expect(removed, isFalse);
         expect(container.read(bookmarkProvider), isEmpty);
 
-        final freshContainer = ProviderContainer(
-          overrides: [bookmarkRepositoryProvider.overrideWithValue(repository)],
-        );
+        final freshContainer = containerWith(repository);
         addTearDown(freshContainer.dispose);
         await freshContainer.read(bookmarkProvider.notifier).load();
         expect(freshContainer.read(bookmarkProvider), isEmpty);
@@ -83,9 +88,7 @@ void main() {
     );
 
     test('multiple bookmarks keep most-recent-saved-first order', () async {
-      final container = ProviderContainer(
-        overrides: [bookmarkRepositoryProvider.overrideWithValue(repository)],
-      );
+      final container = containerWith(repository);
       addTearDown(container.dispose);
 
       await container.read(bookmarkProvider.notifier).load();
@@ -98,9 +101,7 @@ void main() {
     });
 
     test('isBookmarked reflects state after toggle operations', () async {
-      final container = ProviderContainer(
-        overrides: [bookmarkRepositoryProvider.overrideWithValue(repository)],
-      );
+      final container = containerWith(repository);
       addTearDown(container.dispose);
       final notifier = container.read(bookmarkProvider.notifier);
       await notifier.load();
@@ -113,9 +114,7 @@ void main() {
     });
 
     test('remove by key deletes only the matching bookmark', () async {
-      final container = ProviderContainer(
-        overrides: [bookmarkRepositoryProvider.overrideWithValue(repository)],
-      );
+      final container = containerWith(repository);
       addTearDown(container.dispose);
       final notifier = container.read(bookmarkProvider.notifier);
       await notifier.load();

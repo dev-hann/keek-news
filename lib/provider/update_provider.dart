@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/model/download_progress.dart';
-import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/service/service_locator.dart';
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
+import 'package:keek_news/use_case/install_apk_use_case.dart';
 
 enum UpdateCheckStatus {
   idle,
@@ -43,13 +43,13 @@ class UpdateState {
 class UpdateNotifier extends StateNotifier<UpdateState> {
   UpdateNotifier({
     required CheckForUpdateUseCase checkForUpdate,
-    required ApkInstallRepo apkInstallRepository,
+    required InstallApkUseCase installApk,
   }) : _checkForUpdate = checkForUpdate,
-       _apkInstallRepository = apkInstallRepository,
+       _installApk = installApk,
        super(const UpdateState());
 
   final CheckForUpdateUseCase _checkForUpdate;
-  final ApkInstallRepo _apkInstallRepository;
+  final InstallApkUseCase _installApk;
 
   StreamSubscription<DownloadProgress>? _downloadSub;
   bool _cancelled = false;
@@ -92,7 +92,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
       downloadProgress: const DownloadProgress(receivedBytes: 0, totalBytes: 0),
     );
 
-    _downloadSub = _apkInstallRepository
+    _downloadSub = _installApk
         .download(url)
         .listen(
           (progress) {
@@ -128,7 +128,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
     _cancelled = true;
     await _downloadSub?.cancel();
     _downloadSub = null;
-    _apkInstallRepository.cancelDownload();
+    _installApk.cancelDownload();
     final release = state.release;
     if (release != null) {
       state = UpdateState(
@@ -147,7 +147,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
   }
 
   Future<void> _tryLaunchInstaller(AppRelease release) async {
-    final canInstall = await _apkInstallRepository.canRequestPackageInstalls();
+    final canInstall = await _installApk.canRequestPackageInstalls();
     if (!canInstall) {
       state = UpdateState(
         status: UpdateCheckStatus.installPermissionRequired,
@@ -155,7 +155,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
       );
       return;
     }
-    await _apkInstallRepository.launchInstaller();
+    await _installApk.launchInstaller();
     // The system installer is now shown. If the user cancels or it fails, the
     // banner remains in readyToInstall so they can retry without re-downloading.
   }
@@ -164,7 +164,7 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
   /// user returns, the banner stays in installPermissionRequired until they
   /// tap 설치 again.
   Future<void> openInstallPermissionSettings() async {
-    await _apkInstallRepository.openInstallPermissionSettings();
+    await _installApk.openInstallPermissionSettings();
   }
 
   @override
@@ -177,6 +177,6 @@ class UpdateNotifier extends StateNotifier<UpdateState> {
 final updateProvider = StateNotifierProvider<UpdateNotifier, UpdateState>(
   (ref) => UpdateNotifier(
     checkForUpdate: sl<CheckForUpdateUseCase>(),
-    apkInstallRepository: sl<ApkInstallRepo>(),
+    installApk: sl<InstallApkUseCase>(),
   ),
 );

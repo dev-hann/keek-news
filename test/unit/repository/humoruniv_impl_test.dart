@@ -7,7 +7,9 @@ import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/repository/humoruniv/humoruniv_impl.dart';
 import 'package:keek_news/service/html_service.dart';
 
-class _FixtureHtmlService implements HtmlService {
+import '../../helpers/either_helper.dart';
+
+class _FixtureHtmlService extends HtmlService {
   _FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 
@@ -39,13 +41,6 @@ class _FixtureHtmlService implements HtmlService {
   }
 
   @override
-  DateTime? parseDate(String text) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return null;
-    return DateTime.tryParse(trimmed);
-  }
-
-  @override
   ContentScanResult scanContent(Element container) =>
       const ContentScanResult(blocks: [], imageUrls: []);
 
@@ -68,7 +63,7 @@ void main() {
         }),
       );
 
-      final detail = await repo.fetchDetail('1415455');
+      final detail = unwrapRight(await repo.fetchDetail('1415455'));
 
       expect(detail.comments, isNotEmpty);
       for (final c in detail.comments) {
@@ -89,7 +84,7 @@ void main() {
         }),
       );
 
-      final detail = await repo.fetchDetail('1415455');
+      final detail = unwrapRight(await repo.fetchDetail('1415455'));
 
       final b0ss = detail.comments.firstWhere((c) => c.author == 'b0ss');
       expect(b0ss.date.year, 2026);
@@ -104,7 +99,7 @@ void main() {
         }),
       );
 
-      final detail = await repo.fetchDetail('1415455');
+      final detail = unwrapRight(await repo.fetchDetail('1415455'));
 
       final best = detail.comments.firstWhere((c) => c.author == '클로저스');
       expect(best.isBest, isTrue);

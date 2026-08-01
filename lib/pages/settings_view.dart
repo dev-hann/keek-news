@@ -176,7 +176,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
     } else {
       final url = release?.htmlUrl;
       if (url != null && url.isNotEmpty) {
-        _openUpdateUrl(url);
+        _launchUrl(url, errorMessage: '업데이트 페이지를 열 수 없습니다.');
       }
     }
   }
@@ -234,7 +234,10 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
     );
   }
 
-  Future<void> _openUpdateUrl(String url) async {
+  Future<void> _launchUrl(
+    String url, {
+    String errorMessage = '링크를 열 수 없습니다.',
+  }) async {
     final uri = Uri.parse(url);
     final launched =
         await canLaunchUrl(uri) &&
@@ -242,19 +245,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
     if (!launched && mounted) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('업데이트 페이지를 열 수 없습니다.')));
-    }
-  }
-
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    final launched =
-        await canLaunchUrl(uri) &&
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!launched && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('링크를 열 수 없습니다.')));
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     }
   }
 }

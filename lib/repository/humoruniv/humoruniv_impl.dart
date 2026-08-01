@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:dartz/dartz.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
@@ -9,46 +9,40 @@ import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community_repo.dart';
+import 'package:keek_news/repository/community_repo_impl.dart';
 import 'package:keek_news/repository/humoruniv/humoruniv_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/utils/media_classifier.dart';
 
-class HumorunivImpl implements HumorunivRepo {
-  const HumorunivImpl({required this.htmlClient});
-
-  final HtmlService htmlClient;
+class HumorunivImpl extends CommunityRepoImpl implements HumorunivRepo {
+  const HumorunivImpl({required super.htmlClient});
 
   @override
   CommunityId get communityId => CommunityId.humoruniv;
 
   @override
-  Future<CommunityListResult> fetchLatest({String? pageToken}) async {
-    try {
-      final page = int.tryParse(pageToken ?? '1') ?? 1;
-      final html = await htmlClient.get('/board/list.html?table=pds&pg=$page');
-      final doc = html_parser.parse(html);
+  String listPath(String page) =>
+      '/board/list.html?table=pds&pg=${int.tryParse(page) ?? 1}';
 
-      final items = doc
-          .querySelectorAll('div.post_item a.post_link')
-          .map(_parseListRow)
-          .whereType<FeedItem>()
-          .toList();
+  @override
+  String listRowSelector() => 'div.post_item a.post_link';
 
-      final totalPage = _extractTotalPage(doc);
-      final nextPage = page < totalPage ? '${page + 1}' : null;
-      return CommunityListResult(items: items, pageToken: nextPage);
-    } on ServerFailure {
-      rethrow;
-    } on NetworkFailure {
-      rethrow;
-    } catch (e) {
-      debugPrint('HumorunivImpl fetchLatest error: $e');
-      throw ServerFailure(e.toString());
-    }
+  @override
+  int get listPageSize => 0;
+
+  @override
+  String? computeNextPageToken(
+    dom.Document doc,
+    String currentPage,
+    List<FeedItem> items,
+  ) {
+    final page = int.tryParse(currentPage) ?? 1;
+    final totalPage = _extractTotalPage(doc);
+    return page < totalPage ? '${page + 1}' : null;
   }
 
   @override
-  Future<PostDetail> fetchDetail(String id) async {
+  Future<Either<Failure, PostDetail>> fetchDetail(String id) async {
     try {
       final html = await htmlClient.get(
         '/board/read.html?table=pds&number=$id',
@@ -60,38 +54,33 @@ class HumorunivImpl implements HumorunivRepo {
       if (contentEl != null) {
         scanResult = htmlClient.scanContentFull(doc, contentEl);
       } else {
-        scanResult = const ContentScanResult(
-          blocks: const [],
-          imageUrls: const [],
-        );
+        scanResult = const ContentScanResult(blocks: [], imageUrls: []);
       }
 
-      return PostDetail(
-        id: int.tryParse(id) ?? 0,
-        title: _extractTitle(doc),
-        author: _extractAuthor(doc),
-        date: _extractDate(doc),
-        contentHtml: _extractContentHtml(doc),
-        contentBlocks: scanResult.blocks,
-        imageUrls: scanResult.imageUrls,
-        recommendCount: _extractRecommendCount(doc),
-        notRecommendCount: _extractNotRecommendCount(doc),
-        viewCount: _extractViewCount(doc),
-        commentCount: _extractCommentCount(doc),
-        comments: _extractComments(doc),
-        community: CommunityId.humoruniv,
+      return Right(
+        PostDetail(
+          id: int.tryParse(id) ?? 0,
+          title: _extractTitle(doc),
+          author: _extractAuthor(doc),
+          date: _extractDate(doc),
+          contentHtml: _extractContentHtml(doc),
+          contentBlocks: scanResult.blocks,
+          imageUrls: scanResult.imageUrls,
+          recommendCount: _extractRecommendCount(doc),
+          notRecommendCount: _extractNotRecommendCount(doc),
+          viewCount: _extractViewCount(doc),
+          commentCount: _extractCommentCount(doc),
+          comments: _extractComments(doc),
+          community: CommunityId.humoruniv,
+        ),
       );
-    } on ServerFailure {
-      rethrow;
-    } on NetworkFailure {
-      rethrow;
     } catch (e) {
-      debugPrint('HumorunivImpl fetchDetail error: $e');
-      throw ServerFailure(e.toString());
+      return Left(toFailure(e));
     }
   }
 
-  FeedItem? _parseListRow(dom.Element anchor) {
+  @override
+  FeedItem? parseListRow(dom.Element anchor) {
     final number = anchor.attributes['data-number'] ?? '';
     final id = int.tryParse(number) ?? 0;
     if (id == 0) return null;
@@ -244,9 +233,7 @@ class HumorunivImpl implements HumorunivRepo {
       h2s = doc.querySelectorAll('h2 .comment_num');
     }
     if (h2s.isEmpty) return 0;
-    final text = h2s.first.text.trim();
-    final match = RegExp(r'\[(\d+)\]').firstMatch(text);
-    return match != null ? int.parse(match.group(1)!) : 0;
+    return htmlClient.extractBracketedInt(h2s.first.text);
   }
 
   List<Comment> _extractComments(dom.Document doc) {

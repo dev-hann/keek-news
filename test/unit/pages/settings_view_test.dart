@@ -11,10 +11,15 @@ import 'package:keek_news/pages/settings_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
+import 'package:keek_news/repository/cache/image_cache_repo.dart';
+import 'package:keek_news/repository/cache/image_cache_impl.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/check_for_update_use_case.dart';
+import 'package:keek_news/use_case/install_apk_use_case.dart';
+import 'package:keek_news/use_case/manage_cache_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -91,8 +96,20 @@ void main() {
     if (di.sl.isRegistered<ImageCacheService>()) {
       di.sl.unregister<ImageCacheService>();
     }
+    if (di.sl.isRegistered<ImageCacheRepo>()) {
+      di.sl.unregister<ImageCacheRepo>();
+    }
     if (di.sl.isRegistered<BookmarkRepo>()) {
       di.sl.unregister<BookmarkRepo>();
+    }
+    if (di.sl.isRegistered<BookmarkUseCase>()) {
+      di.sl.unregister<BookmarkUseCase>();
+    }
+    if (di.sl.isRegistered<ManageCacheUseCase>()) {
+      di.sl.unregister<ManageCacheUseCase>();
+    }
+    if (di.sl.isRegistered<InstallApkUseCase>()) {
+      di.sl.unregister<InstallApkUseCase>();
     }
     di.sl.registerLazySingleton<UpdateRepo>(() => mockRepository);
     di.sl.registerLazySingleton(
@@ -102,8 +119,20 @@ void main() {
       ),
     );
     di.sl.registerLazySingleton<ApkInstallRepo>(() => mockApkRepo);
+    di.sl.registerLazySingleton<InstallApkUseCase>(
+      () => InstallApkUseCase(mockApkRepo),
+    );
     di.sl.registerLazySingleton<ImageCacheService>(() => fakeCacheService);
+    di.sl.registerLazySingleton<ImageCacheRepo>(
+      () => ImageCacheImpl(fakeCacheService),
+    );
+    di.sl.registerLazySingleton<ManageCacheUseCase>(
+      () => ManageCacheUseCase(di.sl<ImageCacheRepo>()),
+    );
     di.sl.registerLazySingleton<BookmarkRepo>(() => fakeBookmarkRepo);
+    di.sl.registerLazySingleton<BookmarkUseCase>(
+      () => BookmarkUseCase(fakeBookmarkRepo),
+    );
   });
 
   tearDown(di.sl.reset);

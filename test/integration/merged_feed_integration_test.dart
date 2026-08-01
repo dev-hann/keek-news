@@ -14,7 +14,7 @@ import 'package:keek_news/repository/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/use_case/get_merged_feed_use_case.dart';
 
-class FixtureHtmlService implements HtmlService {
+class FixtureHtmlService extends HtmlService {
   FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 
@@ -43,13 +43,6 @@ class FixtureHtmlService implements HtmlService {
   int statOf(Element? parent, String selector) {
     if (parent == null) return 0;
     return extractNumber(textOf(parent.querySelector(selector)));
-  }
-
-  @override
-  DateTime? parseDate(String text) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return null;
-    return DateTime.tryParse(trimmed);
   }
 
   @override
