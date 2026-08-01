@@ -1,7 +1,7 @@
 name: keek_news
 description: "킥뉴스 — 다중 커뮤니티 통합 유머 피드"
 publish_to: 'none'
-version: 3.5.0+45
+version: 3.5.1+46
 
 environment:
   sdk: ^3.11.5
