@@ -1,19 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_colors.dart';
-import 'package:keek_news/const/app_durations.dart';
-import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_surface.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 const Duration _kControlsHideDelay = Duration(seconds: 3);
 const double _kPauseThreshold = 0.4;
+const double _kMinTouchTarget = 44;
+const double _kIconLarge = 24;
+const Color _scrimForeground = Colors.white;
+const Color _mediaSurface = Colors.black;
+const Color _imagePlaceholder = Color(0xFF1a1a1a);
 
 mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
   VideoPlayerController? controller;
@@ -130,9 +133,9 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
         ),
         padding: const EdgeInsets.all(12),
         child: Icon(
-          isPlaying ? Icons.pause : Icons.play_arrow,
+          isPlaying ? LucideIcons.pause : LucideIcons.play,
           size: 40,
-          color: AppColors.imageViewerForeground,
+          color: _scrimForeground,
         ),
       ),
     );
@@ -140,12 +143,12 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
 
   Widget buildError() {
     return const ColoredBox(
-      color: AppColors.imagePlaceholder,
+      color: _imagePlaceholder,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, color: Colors.white54, size: 32),
+            Icon(LucideIcons.alertCircle, color: Colors.white54, size: 32),
             SizedBox(height: 8),
             Text('동영상을 불러올 수 없습니다', style: TextStyle(color: Colors.white54)),
           ],
@@ -190,64 +193,64 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
           Row(
             children: [
               SizedBox(
-                width: AppSizes.minTouchTarget,
-                height: AppSizes.minTouchTarget,
+                width: _kMinTouchTarget,
+                height: _kMinTouchTarget,
                 child: IconButton(
                   tooltip: isPlaying ? '일시정지' : '재생',
                   icon: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: AppColors.imageViewerForeground,
-                    size: AppSizes.iconLarge,
+                    isPlaying ? LucideIcons.pause : LucideIcons.play,
+                    color: _scrimForeground,
+                    size: _kIconLarge,
                   ),
                   onPressed: isInitialized ? togglePlayPause : null,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: AppSizes.minTouchTarget,
-                    minHeight: AppSizes.minTouchTarget,
+                    minWidth: _kMinTouchTarget,
+                    minHeight: _kMinTouchTarget,
                   ),
                 ),
               ),
               Text(
                 '${formatDuration(position)} / ${formatDuration(duration)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.imageViewerForeground,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: _scrimForeground),
               ),
               const Spacer(),
               SizedBox(
-                width: AppSizes.minTouchTarget,
-                height: AppSizes.minTouchTarget,
+                width: _kMinTouchTarget,
+                height: _kMinTouchTarget,
                 child: IconButton(
                   tooltip: isMuted ? '음소거 해제' : '음소거',
                   icon: Icon(
-                    isMuted ? Icons.volume_off : Icons.volume_up,
-                    color: AppColors.imageViewerForeground,
-                    size: AppSizes.iconLarge,
+                    isMuted ? LucideIcons.volumeX : LucideIcons.volume2,
+                    color: _scrimForeground,
+                    size: _kIconLarge,
                   ),
                   onPressed: isInitialized ? toggleMute : null,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
-                    minWidth: AppSizes.minTouchTarget,
-                    minHeight: AppSizes.minTouchTarget,
+                    minWidth: _kMinTouchTarget,
+                    minHeight: _kMinTouchTarget,
                   ),
                 ),
               ),
               if (onFullscreen != null)
                 SizedBox(
-                  width: AppSizes.minTouchTarget,
-                  height: AppSizes.minTouchTarget,
+                  width: _kMinTouchTarget,
+                  height: _kMinTouchTarget,
                   child: IconButton(
                     tooltip: '전체 화면',
                     icon: const Icon(
-                      Icons.fullscreen,
-                      color: AppColors.imageViewerForeground,
-                      size: AppSizes.iconLarge,
+                      LucideIcons.maximize,
+                      color: _scrimForeground,
+                      size: _kIconLarge,
                     ),
                     onPressed: onFullscreen,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
-                      minWidth: AppSizes.minTouchTarget,
-                      minHeight: AppSizes.minTouchTarget,
+                      minWidth: _kMinTouchTarget,
+                      minHeight: _kMinTouchTarget,
                     ),
                   ),
                 ),
@@ -364,7 +367,7 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
       child: AspectRatio(
         aspectRatio: isInitialized ? controller!.value.aspectRatio : 16 / 9,
         child: ColoredBox(
-          color: AppColors.mediaSurface,
+          color: _mediaSurface,
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -378,8 +381,8 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
-                  placeholderColor: AppColors.mediaSurface,
-                  foregroundColor: AppColors.imageViewerForeground,
+                  placeholderColor: _mediaSurface,
+                  foregroundColor: _scrimForeground,
                 )
               else
                 _buildLoading(),
@@ -406,7 +409,7 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
 
   Widget _buildLoading() {
     return const ColoredBox(
-      color: AppColors.imagePlaceholder,
+      color: _imagePlaceholder,
       child: Center(child: CircularProgressIndicator(color: Colors.white)),
     );
   }
@@ -433,8 +436,7 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
           ignoring: !showControls,
           child: AnimatedOpacity(
             opacity: showControls ? 1.0 : 0.0,
-            duration: AppDurations.medium,
-            curve: AppCurves.standard,
+            duration: const Duration(milliseconds: 250),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -493,7 +495,7 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
     final duration = controller?.value.duration ?? Duration.zero;
 
     return Scaffold(
-      backgroundColor: AppColors.mediaSurface,
+      backgroundColor: _mediaSurface,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -505,7 +507,7 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
                     ? controller!.value.aspectRatio
                     : 16 / 9,
                 child: ColoredBox(
-                  color: AppColors.mediaSurface,
+                  color: _mediaSurface,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -521,8 +523,7 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
                         ignoring: !showControls,
                         child: AnimatedOpacity(
                           opacity: showControls ? 1.0 : 0.0,
-                          duration: AppDurations.medium,
-                          curve: AppCurves.standard,
+                          duration: const Duration(milliseconds: 250),
                           child: Stack(
                             fit: StackFit.expand,
                             children: [
@@ -588,20 +589,20 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
       child: Row(
         children: [
           SizedBox(
-            width: AppSizes.minTouchTarget,
-            height: AppSizes.minTouchTarget,
+            width: _kMinTouchTarget,
+            height: _kMinTouchTarget,
             child: IconButton(
               tooltip: '닫기',
               icon: const Icon(
-                Icons.close,
-                color: AppColors.imageViewerForeground,
-                size: AppSizes.iconLarge,
+                LucideIcons.x,
+                color: _scrimForeground,
+                size: _kIconLarge,
               ),
               onPressed: () => Navigator.of(context).pop(),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(
-                minWidth: AppSizes.minTouchTarget,
-                minHeight: AppSizes.minTouchTarget,
+                minWidth: _kMinTouchTarget,
+                minHeight: _kMinTouchTarget,
               ),
             ),
           ),

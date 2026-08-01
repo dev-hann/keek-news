@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/theme/shad_theme.dart';
 import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
 import 'package:keek_news/widgets/skeleton_box.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   setUp(() {
@@ -29,12 +32,12 @@ void main() {
       viewCount: 500,
     );
 
-    PostDetail detailWith({
+    LoadedPostDetail detailWith({
       List<String> imageUrls = const [],
       List<ContentBlock> blocks = const [],
       List<Comment> comments = const [],
       int commentCount = 0,
-    }) => PostDetail(
+    }) => LoadedPostDetail(
       id: 1,
       title: '게시글 제목',
       author: '유머작가',
@@ -50,11 +53,7 @@ void main() {
     );
 
     testWidgets('should display author and counts from list', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: FeedCard(post: post)),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(const FeedCard(post: post)));
       expect(find.text('유머작가'), findsOneWidget);
       expect(find.text('42'), findsWidgets);
       expect(find.text('10'), findsOneWidget);
@@ -62,11 +61,9 @@ void main() {
 
     testWidgets('should show skeleton while detail loading', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detailLoading: true),
-            ),
+        shadHarness(
+          const SingleChildScrollView(
+            child: FeedCard(post: post, detailLoading: true),
           ),
         ),
       );
@@ -81,11 +78,9 @@ void main() {
         ],
       );
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detail: detail),
-            ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
           ),
         ),
       );
@@ -98,11 +93,7 @@ void main() {
     ) async {
       final detail = detailWith(blocks: const [TextBlock('본문 내용')]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, detail: detail),
-          ),
-        ),
+        shadHarness(FeedCard(post: post, detail: detail)),
       );
       expect(find.byType(FeedImageCarousel), findsNothing);
       expect(find.text('본문 내용'), findsOneWidget);
@@ -113,11 +104,9 @@ void main() {
       (tester) async {
         final detail = detailWith(imageUrls: ['https://example.com/a.jpg']);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: FeedCard(post: post, detail: detail),
-              ),
+          shadHarness(
+            SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
             ),
           ),
         );
@@ -134,11 +123,9 @@ void main() {
       (tester) async {
         final detail = detailWith(blocks: const [TextBlock('본문 내용')]);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: FeedCard(post: post, detail: detail),
-              ),
+          shadHarness(
+            SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
             ),
           ),
         );
@@ -154,11 +141,9 @@ void main() {
     testWidgets('does not render a Divider between cards', (tester) async {
       final detail = detailWith(imageUrls: ['https://example.com/a.jpg']);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detail: detail),
-            ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
           ),
         ),
       );
@@ -167,11 +152,7 @@ void main() {
     });
 
     testWidgets('should show title in caption', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: FeedCard(post: post)),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(const FeedCard(post: post)));
       expect(find.text('게시글 제목'), findsOneWidget);
     });
 
@@ -186,11 +167,7 @@ void main() {
         author: 'a',
         recommendCount: 500,
       );
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: FeedCard(post: best)),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(const FeedCard(post: best)));
       expect(find.text('BEST'), findsOneWidget);
     });
 
@@ -212,11 +189,7 @@ void main() {
         ],
       );
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, detail: detail),
-          ),
-        ),
+        shadHarness(FeedCard(post: post, detail: detail)),
       );
       expect(find.text('댓글 5개 모두 보기'), findsOneWidget);
     });
@@ -227,14 +200,12 @@ void main() {
       var tapped = -1;
       final detail = detailWith(imageUrls: const ['https://example.com/a.jpg']);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(
-                post: post,
-                detail: detail,
-                onImageTap: (i) => tapped = i,
-              ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(
+              post: post,
+              detail: detail,
+              onImageTap: (i) => tapped = i,
             ),
           ),
         ),
@@ -251,11 +222,7 @@ void main() {
         url: '/u',
         publishedAt: DateTime(2026, 5, 15),
       );
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: FeedCard(post: post)),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(FeedCard(post: post)));
       expect(find.text(TimeAgo.format(DateTime(2026, 5, 15))), findsOneWidget);
     });
 
@@ -266,17 +233,15 @@ void main() {
           blocks: const [VideoBlock(url: 'https://example.com/v.mp4')],
         );
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: FeedCard(post: post, detail: detail),
-              ),
+          shadHarness(
+            SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
             ),
           ),
         );
         await tester.pump();
         expect(find.byType(FeedImageCarousel), findsOneWidget);
-        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byIcon(LucideIcons.play), findsOneWidget);
       },
     );
 
@@ -286,11 +251,9 @@ void main() {
         final longBody = List.filled(80, '매우 긴 본문입니다.').join(' ');
         final detail = detailWith(blocks: [TextBlock(longBody)]);
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: FeedCard(post: post, detail: detail),
-              ),
+          shadHarness(
+            SingleChildScrollView(
+              child: FeedCard(post: post, detail: detail),
             ),
           ),
         );
@@ -299,8 +262,8 @@ void main() {
           matching: find.byType(GestureDetector),
         );
         final size = tester.getSize(toggleFinder);
-        expect(size.height, greaterThanOrEqualTo(AppSizes.minTouchTarget));
-        expect(size.width, greaterThanOrEqualTo(AppSizes.minTouchTarget));
+        expect(size.height, greaterThanOrEqualTo(44));
+        expect(size.width, greaterThanOrEqualTo(44));
       },
     );
 
@@ -322,11 +285,9 @@ void main() {
         ],
       );
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detail: detail),
-            ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
           ),
         ),
       );
@@ -335,18 +296,16 @@ void main() {
         matching: find.byType(GestureDetector),
       );
       final size = tester.getSize(finder);
-      expect(size.height, greaterThanOrEqualTo(AppSizes.minTouchTarget));
+      expect(size.height, greaterThanOrEqualTo(44));
     });
 
     testWidgets('더보기 tap expands body and reveals 접기', (tester) async {
       final body = List.generate(15, (i) => '본문 ${i + 1}번 줄').join('\n');
       final detail = detailWith(blocks: [TextBlock(body)]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detail: detail),
-            ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
           ),
         ),
       );
@@ -368,11 +327,9 @@ void main() {
       final body = '매우긴본문입니다' * 200;
       final detail = detailWith(blocks: [TextBlock(body)]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detail: detail),
-            ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
           ),
         ),
       );
@@ -392,11 +349,9 @@ void main() {
       final body = List.generate(15, (i) => '본문 ${i + 1}번 줄').join('\n');
       final detail = detailWith(blocks: [TextBlock(body)]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detail: detail),
-            ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
           ),
         ),
       );
@@ -414,11 +369,9 @@ void main() {
     testWidgets('short body does not show 더보기', (tester) async {
       final detail = detailWith(blocks: const [TextBlock('짧은 본문입니다.')]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: FeedCard(post: post, detail: detail),
-            ),
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
           ),
         ),
       );
@@ -431,7 +384,10 @@ void main() {
         final body = List.filled(30, '一二三四五六七八九十').join(' ');
         final detail = detailWith(blocks: [TextBlock(body)]);
         await tester.pumpWidget(
-          MaterialApp(
+          ShadApp(
+            title: 'test',
+            themeMode: ThemeMode.dark,
+            darkTheme: AppShadTheme.dark(),
             home: MediaQuery(
               data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
               child: Scaffold(
@@ -463,14 +419,10 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, onCopyTap: () {}),
-          ),
-        ),
+        shadHarness(FeedCard(post: post, onCopyTap: () {})),
       );
 
-      expect(find.byIcon(Icons.link), findsOneWidget);
+      expect(find.byIcon(LucideIcons.link), findsOneWidget);
     });
 
     testWidgets('should call onCopyTap when copy button tapped', (
@@ -478,14 +430,10 @@ void main() {
     ) async {
       var tapped = 0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, onCopyTap: () => tapped++),
-          ),
-        ),
+        shadHarness(FeedCard(post: post, onCopyTap: () => tapped++)),
       );
 
-      await tester.tap(find.byIcon(Icons.link));
+      await tester.tap(find.byIcon(LucideIcons.link));
       expect(tapped, 1);
     });
 
@@ -493,14 +441,10 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, onBookmarkTap: () {}),
-          ),
-        ),
+        shadHarness(FeedCard(post: post, onBookmarkTap: () {})),
       );
 
-      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
     });
 
     testWidgets('should call onBookmarkTap when bookmark button tapped', (
@@ -508,14 +452,10 @@ void main() {
     ) async {
       var tapped = 0;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, onBookmarkTap: () => tapped++),
-          ),
-        ),
+        shadHarness(FeedCard(post: post, onBookmarkTap: () => tapped++)),
       );
 
-      await tester.tap(find.byIcon(Icons.bookmark_border));
+      await tester.tap(find.byIcon(LucideIcons.bookmark));
       expect(tapped, 1);
     });
 
@@ -523,60 +463,44 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, onBookmarkTap: () {}),
-          ),
-        ),
+        shadHarness(FeedCard(post: post, onBookmarkTap: () {})),
       );
 
-      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
-      expect(find.byIcon(Icons.bookmark), findsNothing);
+      expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmarkCheck), findsNothing);
     });
 
     testWidgets('should show filled bookmark when bookmarked', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(
-              post: post,
-              isBookmarked: true,
-              onBookmarkTap: () {},
-            ),
-          ),
+        shadHarness(
+          FeedCard(post: post, isBookmarked: true, onBookmarkTap: () {}),
         ),
       );
 
-      expect(find.byIcon(Icons.bookmark), findsOneWidget);
-      expect(find.byIcon(Icons.bookmark_border), findsNothing);
+      expect(find.byIcon(LucideIcons.bookmarkCheck), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmark), findsNothing);
     });
 
     testWidgets('should render both action buttons when callbacks provided', (
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FeedCard(post: post, onCopyTap: () {}, onBookmarkTap: () {}),
-          ),
+        shadHarness(
+          FeedCard(post: post, onCopyTap: () {}, onBookmarkTap: () {}),
         ),
       );
 
-      expect(find.byIcon(Icons.link), findsOneWidget);
-      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+      expect(find.byIcon(LucideIcons.link), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
     });
 
     testWidgets('should not render action buttons when callbacks omitted', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: FeedCard(post: post)),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(const FeedCard(post: post)));
 
-      expect(find.byIcon(Icons.link), findsNothing);
-      expect(find.byIcon(Icons.bookmark_border), findsNothing);
+      expect(find.byIcon(LucideIcons.link), findsNothing);
+      expect(find.byIcon(LucideIcons.bookmark), findsNothing);
     });
   });
 }

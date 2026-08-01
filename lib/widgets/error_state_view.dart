@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:keek_news/const/app_spacing.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ErrorStateView extends StatelessWidget {
   const ErrorStateView({required this.message, super.key, this.onRetry});
@@ -9,28 +8,30 @@ class ErrorStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
     return Center(
       child: Padding(
-        padding: AppSpacing.edgeAll24,
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.error_outline,
+              LucideIcons.alertCircle,
               size: 48,
-              color: Theme.of(context).colorScheme.error,
+              color: mTheme.colorScheme.error,
             ),
-            AppSpacing.sbH16,
+            const SizedBox(height: 16),
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              style: mTheme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.mutedForeground,
               ),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
-              AppSpacing.sbH16,
-              FilledButton.tonal(
+              const SizedBox(height: 16),
+              ShadButton.outline(
                 onPressed: onRetry,
                 child: const Text('다시 시도'),
               ),

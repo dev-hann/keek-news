@@ -2,9 +2,16 @@ import 'package:equatable/equatable.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/model/failures.dart';
 
-class PostDetail extends Equatable {
-  const PostDetail({
+sealed class PostDetail extends Equatable {
+  const PostDetail();
+  int get id;
+  CommunityId get community;
+}
+
+class LoadedPostDetail extends PostDetail {
+  const LoadedPostDetail({
     required this.id,
     required this.title,
     required this.author,
@@ -19,7 +26,11 @@ class PostDetail extends Equatable {
     required this.comments,
     this.community = CommunityId.humoruniv,
   });
+
+  @override
   final int id;
+  @override
+  final CommunityId community;
   final String title;
   final String author;
   final DateTime date;
@@ -31,7 +42,12 @@ class PostDetail extends Equatable {
   final int viewCount;
   final int commentCount;
   final List<Comment> comments;
-  final CommunityId community;
+
+  /// True when the page returned no parseable body, images, or comments —
+  /// almost always a block/interstitial (HTTP 200 + challenge HTML) rather
+  /// than a genuinely empty post.
+  bool get looksEmpty =>
+      contentBlocks.isEmpty && imageUrls.isEmpty && comments.isEmpty;
 
   @override
   List<Object?> get props => [
@@ -49,4 +65,21 @@ class PostDetail extends Equatable {
     comments,
     community,
   ];
+}
+
+class ErrorPostDetail extends PostDetail {
+  const ErrorPostDetail({
+    required this.id,
+    required this.community,
+    required this.failure,
+  });
+
+  @override
+  final int id;
+  @override
+  final CommunityId community;
+  final Failure failure;
+
+  @override
+  List<Object?> get props => [id, community, failure];
 }

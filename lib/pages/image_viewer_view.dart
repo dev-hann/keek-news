@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:keek_news/const/app_colors.dart';
-import 'package:keek_news/const/app_durations.dart';
-import 'package:keek_news/const/app_radius.dart';
-import 'package:keek_news/const/app_sizes.dart';
-import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/utils/image_aspect_resolver.dart';
 import 'package:keek_news/utils/long_image.dart';
 import 'package:keek_news/widgets/media_count_badge.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 /// Full-screen image viewer.
 ///
@@ -127,8 +123,8 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
     if (index < 0 || index >= widget.imageUrls.length) return;
     _pageController!.animateToPage(
       index,
-      duration: AppDurations.medium,
-      curve: AppCurves.decelerate,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.decelerate,
     );
   }
 
@@ -156,13 +152,13 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.imageViewerBackground,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: AppColors.imageViewerBackground,
+        backgroundColor: Colors.black,
         elevation: 0,
         leading: IconButton(
           tooltip: '닫기',
-          icon: const Icon(Icons.close, color: AppColors.imageViewerForeground),
+          icon: const Icon(LucideIcons.x, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -172,15 +168,18 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
             body,
             if (multiple)
               Positioned(
-                bottom: AppSizes.imageViewerIndicatorBottom,
+                bottom: 32,
                 left: 0,
                 right: 0,
                 child: Center(
                   child: MediaCountBadge(
                     text: '${_currentIndex + 1}/${widget.imageUrls.length}',
                     style: Theme.of(context).textTheme.labelLarge,
-                    borderRadius: AppRadius.borderRadiusXl,
-                    padding: AppSpacing.edgeH12V6,
+                    borderRadius: const BorderRadius.all(Radius.circular(16)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                   ),
                 ),
               ),
@@ -197,9 +196,7 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
       // footprint (offset + indicator height) so the user can scroll the
       // image's bottom edge above the overlay. SafeArea already consumes the
       // system bottom inset, so we only need the indicator's own footprint.
-      const bottomReserve =
-          AppSizes.imageViewerIndicatorBottom +
-          AppSizes.imageViewerIndicatorHeight;
+      const bottomReserve = 32 + 32;
       return SingleChildScrollView(
         child: SizedBox(
           width: MediaQuery.sizeOf(context).width,
@@ -207,7 +204,7 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _imageFor(url),
-              const SizedBox(height: bottomReserve),
+              SizedBox(height: bottomReserve.toDouble()),
             ],
           ),
         ),
@@ -227,8 +224,8 @@ class _ImageViewerScreenState extends State<ImageViewerView> {
     return widget.imageBuilder?.call(url) ??
         RetryableNetworkImage(
           imageUrl: url,
-          placeholderColor: AppColors.mediaSurface,
-          foregroundColor: AppColors.imageViewerForeground,
+          placeholderColor: Colors.black,
+          foregroundColor: Colors.white,
         );
   }
 }

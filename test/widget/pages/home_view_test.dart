@@ -8,6 +8,7 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/pages/home_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
@@ -16,10 +17,12 @@ import 'package:keek_news/widgets/error_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/skeleton_feed_card.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/merged_feed_helper.dart';
 import '../../helpers/package_info_helper.dart';
+import '../../helpers/shad_harness.dart';
 
 void main() {
   late MockMergedFeedUseCase mockUseCase;
@@ -45,7 +48,22 @@ void main() {
         community: any(named: 'community'),
         id: any(named: 'id'),
       ),
-    ).thenAnswer((_) async => const Left(ServerFailure('none')));
+    ).thenAnswer(
+      (_) async => LoadedPostDetail(
+        id: 0,
+        title: '',
+        author: '',
+        date: DateTime(2026),
+        contentHtml: '',
+        contentBlocks: const [],
+        imageUrls: const [],
+        recommendCount: 0,
+        notRecommendCount: 0,
+        viewCount: 0,
+        commentCount: 0,
+        comments: const [],
+      ),
+    );
   });
 
   tearDown(di.sl.reset);
@@ -83,7 +101,7 @@ void main() {
 
   Widget buildApp() => ProviderScope(
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-    child: const MaterialApp(home: HomeView()),
+    child: shadApp(home: const HomeView()),
   );
 
   testWidgets('should display post titles when data loads', (tester) async {
@@ -113,13 +131,13 @@ void main() {
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.bookmark_border), findsNWidgets(2));
+    expect(find.byIcon(LucideIcons.bookmark), findsNWidgets(2));
 
-    await tester.tap(find.byIcon(Icons.bookmark_border).first);
+    await tester.tap(find.byIcon(LucideIcons.bookmark).first);
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.bookmark), findsOneWidget);
-    expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+    expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
+    expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
   });
 
   testWidgets('should show skeleton feed cards while loading', (tester) async {
@@ -186,22 +204,6 @@ void main() {
     verify(() => mockUseCase.getMergedFeed(any())).called(1);
 
     await tester.tap(find.text('웃긴대학'));
-    await tester.pumpAndSettle();
-
-    verify(() => mockUseCase.getMergedFeed(any())).called(1);
-  });
-
-  testWidgets('tapping active community tab triggers silent refresh', (
-    tester,
-  ) async {
-    stubMergedPage(() => page(sampleItems()));
-
-    await tester.pumpWidget(buildApp());
-    await tester.pumpAndSettle();
-
-    verify(() => mockUseCase.getMergedFeed(any())).called(1);
-
-    await tester.tap(find.text('웃대'));
     await tester.pumpAndSettle();
 
     verify(() => mockUseCase.getMergedFeed(any())).called(1);

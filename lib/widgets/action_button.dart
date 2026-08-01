@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:keek_news/const/app_sizes.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ActionButton extends StatelessWidget {
   const ActionButton({
@@ -25,15 +24,11 @@ class ActionButton extends StatelessWidget {
       label: semanticsLabel,
       button: true,
       toggled: active,
-      child: IconButton(
-        icon: Icon(icon, size: AppSizes.iconMedium, color: color),
+      child: ShadIconButton.ghost(
+        icon: Icon(icon, size: 16, color: color),
         onPressed: onTap,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(
-          minWidth: AppSizes.minTouchTarget,
-          minHeight: AppSizes.minTouchTarget,
-        ),
-        splashRadius: AppSizes.minTouchTarget / 2,
+        width: 44,
+        height: 44,
       ),
     );
   }

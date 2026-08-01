@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_colors.dart';
-import 'package:keek_news/const/app_radius.dart';
-import 'package:keek_news/const/app_spacing.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+const Color _overlayBackground = Color(0x8A000000);
+const Color _overlayForeground = Color(0xFFFFFFFF);
 
 class MediaCountBadge extends StatelessWidget {
   const MediaCountBadge({
     required this.text,
     this.style,
-    this.borderRadius = AppRadius.borderRadiusLg,
-    this.padding = AppSpacing.edgeH8V4,
+    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+    this.padding = const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     super.key,
   });
 
@@ -20,16 +21,15 @@ class MediaCountBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final base = style ?? Theme.of(context).textTheme.labelSmall;
-    return Container(
+    return ShadBadge(
+      backgroundColor: _overlayBackground,
+      foregroundColor: _overlayForeground,
+      shape: RoundedRectangleBorder(borderRadius: borderRadius),
       padding: padding,
-      decoration: BoxDecoration(
-        color: AppColors.imageViewerOverlay,
-        borderRadius: borderRadius,
-      ),
       child: Text(
         text,
         style: base?.copyWith(
-          color: AppColors.imageViewerForeground,
+          color: _overlayForeground,
           fontWeight: FontWeight.w700,
         ),
       ),

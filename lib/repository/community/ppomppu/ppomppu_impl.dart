@@ -26,14 +26,14 @@ class PpomppuImpl extends HtmlCommunityRepo {
   int get listPageSize => 5;
 
   @override
-  Future<PostDetail> fetchDetail(String id) async {
+  Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/zboard/view.php?id=humor&no=$id');
     final doc = html_parser.parse(html);
     final contentEl = doc.querySelector('.board-contents');
     final date = _extractDate(doc);
     final commentData = _extractCommentData(doc);
 
-    return PostDetail(
+    return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),

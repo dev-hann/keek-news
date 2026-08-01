@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_elevation.dart';
-import 'package:keek_news/const/app_sizes.dart';
-import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/widgets/skeleton_box.dart';
 
 class SkeletonFeedCard extends StatelessWidget {
@@ -14,14 +11,14 @@ class SkeletonFeedCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     return Material(
       color: theme.colorScheme.surfaceContainer,
-      elevation: isDark ? AppElevation.level0 : AppElevation.level1,
+      elevation: isDark ? 0 : 1,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _header(),
           SkeletonBox(
             width: double.infinity,
-            height: AppSizes.feedMediaHeight(
+            height: _feedMediaHeight(
               screenHeight ?? MediaQuery.sizeOf(context).height,
             ),
             borderRadius: BorderRadius.zero,
@@ -35,21 +32,21 @@ class SkeletonFeedCard extends StatelessWidget {
 
   Widget _header() {
     return Padding(
-      padding: AppSpacing.edgeAll12,
+      padding: const EdgeInsets.all(12),
       child: Row(
         children: [
           SkeletonBox(
-            width: AppSizes.avatarSmall,
-            height: AppSizes.avatarSmall,
-            borderRadius: BorderRadius.circular(AppSizes.avatarSmall / 2),
+            width: 32,
+            height: 32,
+            borderRadius: BorderRadius.circular(16),
           ),
-          AppSpacing.sbW12,
+          const SizedBox(width: 12),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SkeletonBox(width: 180, height: 12),
-                AppSpacing.sbH8,
+                SizedBox(height: 8),
                 SkeletonBox(width: 120, height: 10),
               ],
             ),
@@ -61,14 +58,14 @@ class SkeletonFeedCard extends StatelessWidget {
 
   Widget _actionRow() {
     return const Padding(
-      padding: AppSpacing.edgeAll12,
+      padding: EdgeInsets.all(12),
       child: Row(
         children: [
-          SkeletonBox(width: AppSizes.iconLarge, height: AppSizes.iconLarge),
-          AppSpacing.sbW8,
+          SkeletonBox(width: 24, height: 24),
+          SizedBox(width: 8),
           SkeletonBox(width: 40, height: 12),
-          AppSpacing.sbW16,
-          SkeletonBox(width: AppSizes.iconLarge, height: AppSizes.iconLarge),
+          SizedBox(width: 16),
+          SkeletonBox(width: 24, height: 24),
           Spacer(),
           SkeletonBox(width: 60, height: 12),
         ],
@@ -78,15 +75,25 @@ class SkeletonFeedCard extends StatelessWidget {
 
   Widget _caption() {
     return const Padding(
-      padding: AppSpacing.edgeH16V8,
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SkeletonBox(width: double.infinity, height: 14),
-          AppSpacing.sbH8,
+          SizedBox(height: 8),
           SkeletonBox(width: 200, height: 12),
         ],
       ),
     );
   }
+}
+
+double _feedMediaHeight(double screenHeight) {
+  const ratio = 0.66;
+  const min = 420.0;
+  const max = 600.0;
+  final h = screenHeight * ratio;
+  if (h < min) return min;
+  if (h > max) return max;
+  return h;
 }

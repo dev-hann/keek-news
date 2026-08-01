@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_elevation.dart';
-import 'package:keek_news/const/app_sizes.dart';
-import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
@@ -12,6 +9,7 @@ import 'package:keek_news/widgets/avatar.dart';
 import 'package:keek_news/widgets/count_badge.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
 import 'package:keek_news/widgets/skeleton_box.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class FeedCard extends StatelessWidget {
   const FeedCard({
@@ -27,7 +25,7 @@ class FeedCard extends StatelessWidget {
     this.videoController,
   });
   final FeedItem post;
-  final PostDetail? detail;
+  final LoadedPostDetail? detail;
   final bool detailLoading;
   final ValueChanged<int>? onImageTap;
   final VoidCallback? onCommentsTap;
@@ -54,24 +52,22 @@ class FeedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Material(
-      color: colorScheme.surfaceContainer,
-      elevation: isDark ? AppElevation.level0 : AppElevation.level1,
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
+    return ShadCard(
+      backgroundColor: mTheme.colorScheme.surfaceContainer,
+      padding: EdgeInsets.zero,
+      border: ShadBorder.all(color: theme.colorScheme.border, width: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _header(textTheme, colorScheme),
+          _header(theme),
           ..._media(),
           _actions(),
-          _caption(textTheme, colorScheme),
+          _caption(theme, mTheme),
           if (detail != null && detail!.comments.isNotEmpty)
-            _commentPreview(textTheme, colorScheme),
-          if (post.publishedAt != null) _timestamp(textTheme, colorScheme),
+            _commentPreview(theme, mTheme),
+          if (post.publishedAt != null) _timestamp(theme, mTheme),
         ],
       ),
     );
@@ -79,12 +75,7 @@ class FeedCard extends StatelessWidget {
 
   List<Widget> _media() {
     if (detailLoading && !_hasImages && _videoBlocks.isEmpty) {
-      return [
-        const SkeletonBox(
-          width: double.infinity,
-          height: AppSizes.feedMediaMaxHeight,
-        ),
-      ];
+      return [const SkeletonBox(width: double.infinity, height: 600)];
     }
     if (_hasImages || _videoBlocks.isNotEmpty) {
       return [
@@ -100,25 +91,23 @@ class FeedCard extends StatelessWidget {
     return [];
   }
 
-  Widget _header(TextTheme textTheme, ColorScheme colorScheme) {
+  Widget _header(ShadThemeData theme) {
     final showBest = post.recommendCount >= 500;
     return Padding(
-      padding: AppSpacing.edgeH16V8,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           const Avatar(),
-          AppSpacing.sbW12,
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               post.author ?? '',
-              style: textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: theme.textTheme.p.copyWith(fontWeight: FontWeight.w600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (showBest) ...[AppSpacing.sbW8, const BestBadge()],
+          if (showBest) ...[const SizedBox(width: 8), const BestBadge()],
         ],
       ),
     );
@@ -127,28 +116,30 @@ class FeedCard extends StatelessWidget {
   Widget _actions() {
     final showActions = onCopyTap != null || onBookmarkTap != null;
     return Padding(
-      padding: AppSpacing.edgeH16V8,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
           RecommendBadge(count: post.recommendCount),
-          AppSpacing.sbW16,
+          const SizedBox(width: 16),
           CommentBadge(
             count: post.commentCount != 0
                 ? post.commentCount
                 : (detail?.commentCount ?? 0),
           ),
-          AppSpacing.sbW16,
+          const SizedBox(width: 16),
           ViewBadge(count: post.viewCount),
           if (showActions) ...[
             const Spacer(),
-            AppSpacing.sbW24,
+            const SizedBox(width: 24),
             ActionButton(
-              icon: Icons.link,
+              icon: LucideIcons.link,
               semanticsLabel: '링크 복사',
               onTap: onCopyTap,
             ),
             ActionButton(
-              icon: isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              icon: isBookmarked
+                  ? LucideIcons.bookmarkCheck
+                  : LucideIcons.bookmark,
               semanticsLabel: isBookmarked ? '저장 취소' : '저장',
               active: isBookmarked,
               onTap: onBookmarkTap,
@@ -159,24 +150,24 @@ class FeedCard extends StatelessWidget {
     );
   }
 
-  Widget _caption(TextTheme textTheme, ColorScheme colorScheme) {
+  Widget _caption(ShadThemeData theme, ThemeData mTheme) {
     final body = _bodyText;
     return Padding(
-      padding: AppSpacing.edgeH16,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             post.title,
-            style: textTheme.titleMedium?.copyWith(
+            style: mTheme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              color: colorScheme.onSurface,
+              color: theme.colorScheme.foreground,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           if (body != null && body.isNotEmpty) ...[
-            AppSpacing.sbH4,
+            const SizedBox(height: 4),
             _ExpandableText(body, maxLines: _hasImages ? 3 : 8),
           ],
         ],
@@ -184,7 +175,7 @@ class FeedCard extends StatelessWidget {
     );
   }
 
-  Widget _commentPreview(TextTheme textTheme, ColorScheme colorScheme) {
+  Widget _commentPreview(ShadThemeData theme, ThemeData mTheme) {
     final first = detail!.comments.first;
     return GestureDetector(
       onTap: onCommentsTap,
@@ -193,17 +184,17 @@ class FeedCard extends StatelessWidget {
         label: '댓글 미리보기 — 탭하여 모든 댓글 보기',
         button: true,
         child: Padding(
-          padding: AppSpacing.edgeH16V8,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 '댓글 ${detail!.commentCount}개 모두 보기',
-                style: textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                style: theme.textTheme.small.copyWith(
+                  color: theme.colorScheme.mutedForeground,
                 ),
               ),
-              AppSpacing.sbH4,
+              const SizedBox(height: 4),
               RichText(
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -211,11 +202,11 @@ class FeedCard extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: '${first.author} ',
-                      style: textTheme.labelSmall?.copyWith(
+                      style: theme.textTheme.small.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    TextSpan(text: first.content, style: textTheme.labelSmall),
+                    TextSpan(text: first.content, style: theme.textTheme.small),
                   ],
                 ),
               ),
@@ -226,17 +217,13 @@ class FeedCard extends StatelessWidget {
     );
   }
 
-  Widget _timestamp(TextTheme textTheme, ColorScheme colorScheme) {
+  Widget _timestamp(ShadThemeData theme, ThemeData mTheme) {
     return Padding(
-      padding: const EdgeInsets.only(
-        left: AppSpacing.p16,
-        top: AppSpacing.p4,
-        bottom: AppSpacing.p8,
-      ),
+      padding: const EdgeInsets.only(left: 16, top: 4, bottom: 8),
       child: Text(
         TimeAgo.format(post.publishedAt!),
-        style: textTheme.labelSmall?.copyWith(
-          color: colorScheme.onSurfaceVariant,
+        style: theme.textTheme.small.copyWith(
+          color: theme.colorScheme.mutedForeground,
         ),
       ),
     );
@@ -257,8 +244,10 @@ class _ExpandableTextState extends State<_ExpandableText> {
 
   @override
   Widget build(BuildContext context) {
-    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
+    final style = mTheme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.mutedForeground,
     );
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -290,15 +279,15 @@ class _ExpandableTextState extends State<_ExpandableText> {
                   child: Container(
                     alignment: Alignment.centerLeft,
                     constraints: const BoxConstraints(
-                      minHeight: AppSizes.minTouchTarget,
-                      minWidth: AppSizes.minTouchTarget,
+                      minHeight: 44,
+                      minWidth: 44,
                     ),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
                         _expanded ? '접기' : '더보기',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
+                        style: mTheme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

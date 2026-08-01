@@ -25,12 +25,12 @@ class DogdripImpl extends HtmlCommunityRepo {
   int get listPageSize => 5;
 
   @override
-  Future<PostDetail> fetchDetail(String id) async {
+  Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/$id');
     final doc = html_parser.parse(html);
     final contentEl = _findContent(doc);
 
-    return PostDetail(
+    return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),

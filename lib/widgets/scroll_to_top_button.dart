@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_durations.dart';
-import 'package:keek_news/const/app_spacing.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class ScrollToTopButton extends StatelessWidget {
   const ScrollToTopButton({
@@ -14,34 +13,22 @@ class ScrollToTopButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return IgnorePointer(
       ignoring: !visible,
       child: AnimatedOpacity(
         opacity: visible ? 1 : 0,
-        duration: AppDurations.fast,
-        curve: AppCurves.standard,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeInOut,
         child: Semantics(
           label: '맨 위로',
           button: true,
           child: Tooltip(
             message: '맨 위로',
-            child: Material(
-              color: colors.secondaryContainer,
-              shape: const CircleBorder(),
-              elevation: 2,
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: onTap,
-                child: SizedBox(
-                  width: AppSpacing.p40,
-                  height: AppSpacing.p40,
-                  child: Icon(
-                    Icons.arrow_upward_rounded,
-                    color: colors.onSecondaryContainer,
-                  ),
-                ),
-              ),
+            child: ShadIconButton(
+              icon: const Icon(LucideIcons.arrowUp),
+              onPressed: onTap,
+              width: 40,
+              height: 40,
             ),
           ),
         ),

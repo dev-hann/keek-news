@@ -7,7 +7,7 @@ import 'package:keek_news/model/post_detail.dart';
 void main() {
   group('PostDetail', () {
     test('should create with required fields', () {
-      final detail = PostDetail(
+      final detail = LoadedPostDetail(
         id: 123,
         title: '테스트 제목',
         author: '작성자',
@@ -34,7 +34,7 @@ void main() {
     });
 
     test('should support value equality when all fields match', () {
-      final a = PostDetail(
+      final a = LoadedPostDetail(
         id: 1,
         title: '제목',
         author: '작성자',
@@ -48,7 +48,7 @@ void main() {
         commentCount: 0,
         comments: const [],
       );
-      final b = PostDetail(
+      final b = LoadedPostDetail(
         id: 1,
         title: '제목',
         author: '작성자',
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('should not be equal when id differs', () {
-      final a = PostDetail(
+      final a = LoadedPostDetail(
         id: 1,
         title: 't',
         author: 'a',
@@ -82,7 +82,7 @@ void main() {
         commentCount: 0,
         comments: const [],
       );
-      final b = PostDetail(
+      final b = LoadedPostDetail(
         id: 2,
         title: 't',
         author: 'a',
@@ -101,7 +101,7 @@ void main() {
     });
 
     test('should not be equal when title differs', () {
-      final a = PostDetail(
+      final a = LoadedPostDetail(
         id: 1,
         title: 'a',
         author: 'a',
@@ -115,7 +115,7 @@ void main() {
         commentCount: 0,
         comments: const [],
       );
-      final b = PostDetail(
+      final b = LoadedPostDetail(
         id: 1,
         title: 'b',
         author: 'a',
@@ -134,7 +134,7 @@ void main() {
     });
 
     test('should not be equal when author differs', () {
-      final a = PostDetail(
+      final a = LoadedPostDetail(
         id: 1,
         title: 't',
         author: 'x',
@@ -148,7 +148,7 @@ void main() {
         commentCount: 0,
         comments: const [],
       );
-      final b = PostDetail(
+      final b = LoadedPostDetail(
         id: 1,
         title: 't',
         author: 'y',
@@ -167,7 +167,7 @@ void main() {
     });
 
     test('should not be equal when recommendCount differs', () {
-      final a = PostDetail(
+      final a = LoadedPostDetail(
         id: 1,
         title: 't',
         author: 'a',
@@ -181,7 +181,7 @@ void main() {
         commentCount: 0,
         comments: const [],
       );
-      final b = PostDetail(
+      final b = LoadedPostDetail(
         id: 1,
         title: 't',
         author: 'a',
@@ -200,7 +200,7 @@ void main() {
     });
 
     test('should default community to humoruniv', () {
-      final detail = PostDetail(
+      final detail = LoadedPostDetail(
         id: 1,
         title: 't',
         author: 'a',

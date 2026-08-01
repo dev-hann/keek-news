@@ -3,23 +3,26 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   group('ImageViewerView', () {
     testWidgets('renders close button for a single image', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: ImageViewerView(imageUrls: ['https://example.com/a.jpg']),
+        shadApp(
+          home: const ImageViewerView(imageUrls: ['https://example.com/a.jpg']),
         ),
       );
       await tester.pump();
-      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(find.byIcon(LucideIcons.x), findsOneWidget);
     });
 
     testWidgets('renders page indicator for multiple images', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: ImageViewerView(
+        shadApp(
+          home: const ImageViewerView(
             imageUrls: [
               'https://example.com/a.jpg',
               'https://example.com/b.jpg',
@@ -33,8 +36,8 @@ void main() {
 
     testWidgets('renders a PageView for paging between images', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: ImageViewerView(imageUrls: ['https://example.com/a.jpg']),
+        shadApp(
+          home: const ImageViewerView(imageUrls: ['https://example.com/a.jpg']),
         ),
       );
       await tester.pump();
@@ -44,8 +47,8 @@ void main() {
 
     testWidgets('renders InteractiveViewer for a normal image', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: ImageViewerView(
+        shadApp(
+          home: const ImageViewerView(
             imageUrls: ['https://example.com/a.jpg'],
             knownAspects: {'https://example.com/a.jpg': 2.0},
           ),
@@ -64,7 +67,7 @@ void main() {
         // 800x600 viewport, extendBodyBehindAppBar → body height 600; a
         // 2000-tall long image has maxScrollExtent = 1400 without reserve.
         await tester.pumpWidget(
-          MaterialApp(
+          shadApp(
             home: ImageViewerView(
               imageUrls: const ['https://example.com/long.jpg'],
               knownAspects: const {'https://example.com/long.jpg': 0.5},
@@ -94,8 +97,8 @@ void main() {
     testWidgets('renders vertical SingleChildScrollView for a long image '
         'instead of InteractiveViewer', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: ImageViewerView(
+        shadApp(
+          home: const ImageViewerView(
             imageUrls: ['https://example.com/a.jpg'],
             knownAspects: {'https://example.com/a.jpg': 0.5},
           ),
@@ -121,7 +124,7 @@ void main() {
     testWidgets('close button pops the screen', (tester) async {
       final navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-        MaterialApp(
+        shadApp(
           navigatorKey: navigatorKey,
           home: const Scaffold(body: Text('root')),
         ),
@@ -138,9 +141,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(find.byIcon(LucideIcons.x), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byIcon(LucideIcons.x));
       await tester.pumpAndSettle();
 
       expect(find.text('root'), findsOneWidget);
@@ -151,7 +154,7 @@ void main() {
     ) async {
       final navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-        MaterialApp(
+        shadApp(
           navigatorKey: navigatorKey,
           home: const Scaffold(body: Text('root')),
         ),
@@ -171,7 +174,7 @@ void main() {
       await tester.fling(find.byType(PageView), const Offset(0, 250), 1000);
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(find.byIcon(LucideIcons.x), findsOneWidget);
       expect(find.text('root'), findsNothing);
     });
 
@@ -179,7 +182,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        shadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/a.jpg',
@@ -207,7 +210,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        shadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/a.jpg',
@@ -236,7 +239,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        shadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/a.jpg',
@@ -258,7 +261,7 @@ void main() {
       'horizontal swipe advances pages when starting on a long image',
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          shadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/long.jpg',
@@ -291,7 +294,7 @@ void main() {
       'horizontal swipe advances pages when the next page is a long image',
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          shadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/normal.jpg',
@@ -323,7 +326,7 @@ void main() {
     testWidgets('REPRO: horizontal swipe on a genuinely tall long-image page '
         'advances to the next page', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        shadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/long.jpg',
@@ -365,7 +368,7 @@ void main() {
       '(dismiss must not steal it)',
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          shadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/normal.jpg',
@@ -406,7 +409,7 @@ void main() {
       'REPRO: slightly-diagonal swipe from a long image still pages back',
       (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          shadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/normal.jpg',

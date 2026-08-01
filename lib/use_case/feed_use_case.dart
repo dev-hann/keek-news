@@ -69,15 +69,30 @@ class FeedUseCase extends BaseUseCase {
     );
   }
 
-  Future<Either<Failure, PostDetail>> getPostDetail({
+  Future<PostDetail> getPostDetail({
     required CommunityId community,
     required String id,
   }) async {
     final repo = repos[community];
+    final parsedId = int.tryParse(id) ?? 0;
     if (repo == null) {
-      return Left(ServerFailure('No repo for $community'));
+      return ErrorPostDetail(
+        id: parsedId,
+        community: community,
+        failure: ServerFailure('No repo for $community'),
+      );
     }
-    return guard(() => repo.fetchDetail(id));
+    final result = await guard(() => repo.fetchDetail(id));
+    return result.fold(
+      (f) => ErrorPostDetail(id: parsedId, community: community, failure: f),
+      (LoadedPostDetail d) => d.looksEmpty
+          ? ErrorPostDetail(
+              id: d.id,
+              community: community,
+              failure: const ParseFailure('본문 없음 — 차단 또는 구조 변경'),
+            )
+          : d,
+    );
   }
 
   Future<_FetchOutcome> _fetchOne(

@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/widgets/settings_group.dart';
 import 'package:keek_news/widgets/settings_tile.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   group('SettingsGroup', () {
     testWidgets('should display title', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SettingsGroup(title: '화면 설정', children: [SizedBox()]),
-          ),
+        shadHarness(
+          const SettingsGroup(title: '화면 설정', children: [SizedBox()]),
         ),
       );
 
@@ -19,15 +20,13 @@ void main() {
 
     testWidgets('should display children', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SettingsGroup(
-              title: '테스트',
-              children: [
-                SettingsTile(title: '항목 1'),
-                SettingsTile(title: '항목 2'),
-              ],
-            ),
+        shadHarness(
+          const SettingsGroup(
+            title: '테스트',
+            children: [
+              SettingsTile(title: '항목 1'),
+              SettingsTile(title: '항목 2'),
+            ],
           ),
         ),
       );
@@ -39,41 +38,37 @@ void main() {
 
   group('SettingsTile', () {
     testWidgets('should display title', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: SettingsTile(title: '다크 모드')),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(const SettingsTile(title: '다크 모드')));
 
       expect(find.text('다크 모드'), findsOneWidget);
     });
 
     testWidgets('should display leading icon', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SettingsTile(title: '다크 모드', leading: Icon(Icons.dark_mode)),
-          ),
+        shadHarness(
+          const SettingsTile(title: '다크 모드', leading: Icon(LucideIcons.moon)),
         ),
       );
 
-      expect(find.byIcon(Icons.dark_mode), findsOneWidget);
+      expect(find.byIcon(LucideIcons.moon), findsOneWidget);
     });
 
     testWidgets('should display trailing switch and handle tap', (
       tester,
     ) async {
-      var switchValue = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SettingsTile(
-              title: '성인 콘텐츠',
-              trailing: Switch(
-                value: switchValue,
-                onChanged: (v) => switchValue = v,
-              ),
-            ),
+        shadHarness(
+          StatefulBuilder(
+            builder: (context, setState) {
+              var value = false;
+              return SettingsTile(
+                title: '성인 콘텐츠',
+                trailing: Switch(
+                  value: value,
+                  onChanged: (v) => setState(() => value = v),
+                ),
+              );
+            },
           ),
         ),
       );
@@ -84,11 +79,7 @@ void main() {
     testWidgets('should call onTap when tapped', (tester) async {
       var tapped = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SettingsTile(title: '읽은 기록', onTap: () => tapped = true),
-          ),
-        ),
+        shadHarness(SettingsTile(title: '읽은 기록', onTap: () => tapped = true)),
       );
 
       await tester.tap(find.text('읽은 기록'));
@@ -97,11 +88,7 @@ void main() {
 
     testWidgets('should display subtitle when provided', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SettingsTile(title: '버전', subtitle: 'v1.0.0'),
-          ),
-        ),
+        shadHarness(const SettingsTile(title: '버전', subtitle: 'v1.0.0')),
       );
 
       expect(find.text('v1.0.0'), findsOneWidget);

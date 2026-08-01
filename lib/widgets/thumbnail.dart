@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:keek_news/const/app_radius.dart';
-import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 enum ThumbnailSize { small, medium, large }
 
@@ -15,10 +13,15 @@ class Thumbnail extends StatelessWidget {
   final String? imageUrl;
   final ThumbnailSize size;
 
+  static const _smallDim = 48.0;
+  static const _mediumDim = 72.0;
+  static const _largeDim = 120.0;
+  static const _radius = BorderRadius.all(Radius.circular(4));
+
   double get _dimension => switch (size) {
-    ThumbnailSize.small => AppSizes.thumbnailSmall,
-    ThumbnailSize.medium => AppSizes.thumbnailMedium,
-    ThumbnailSize.large => AppSizes.thumbnailLarge,
+    ThumbnailSize.small => _smallDim,
+    ThumbnailSize.medium => _mediumDim,
+    ThumbnailSize.large => _largeDim,
   };
 
   @override
@@ -30,10 +33,10 @@ class Thumbnail extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: AppRadius.borderRadiusSm,
+            borderRadius: _radius,
           ),
           child: Icon(
-            Icons.image_outlined,
+            LucideIcons.image,
             size: _dimension * 0.4,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
@@ -46,7 +49,7 @@ class Thumbnail extends StatelessWidget {
       width: _dimension,
       height: _dimension,
       fit: BoxFit.cover,
-      borderRadius: AppRadius.borderRadiusSm,
+      borderRadius: _radius,
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_colors.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class CommentVideoViewer extends StatelessWidget {
   const CommentVideoViewer({required this.block, super.key});
@@ -15,7 +15,7 @@ class CommentVideoViewer extends StatelessWidget {
         ? block.width! / block.height!
         : 16 / 9;
     return Scaffold(
-      backgroundColor: AppColors.mediaSurface,
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Stack(
           children: [
@@ -29,7 +29,7 @@ class CommentVideoViewer extends StatelessWidget {
               top: 0,
               right: 0,
               child: IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(LucideIcons.x),
                 color: Colors.white,
                 onPressed: () => Navigator.of(context).pop(),
               ),

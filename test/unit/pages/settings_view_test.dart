@@ -15,11 +15,13 @@ import 'package:keek_news/repository/cache/image_cache_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/theme/shad_theme.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/cache_use_case.dart';
 import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -132,7 +134,12 @@ void main() {
 
   Widget buildApp() => ProviderScope(
     overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-    child: const MaterialApp(home: SettingsView()),
+    child: ShadApp(
+      title: 'test',
+      themeMode: ThemeMode.dark,
+      darkTheme: AppShadTheme.dark(),
+      home: const ScaffoldMessenger(child: SettingsView()),
+    ),
   );
 
   group('SettingsView', () {
@@ -230,7 +237,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('저장한 게시물'), findsOneWidget);
-      expect(find.byIcon(Icons.bookmark_outline), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
     });
 
     testWidgets('navigates to BookmarksView when bookmark tile tapped', (

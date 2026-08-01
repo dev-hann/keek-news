@@ -216,6 +216,53 @@ void main() {
         expect(result.blocks, isEmpty);
         expect(result.imageUrls, isEmpty);
       });
+
+      // Regression: humoruniv pds post 1419653 wraps GIF attachments as
+      // <div class='comment_img_div'><a href='javascript:comment_thumb_expand'>
+      //   <img class='comment_thumb_img' .../>
+      //   <div class='comment_thumb_notice'>GIF</div>
+      // </a></div>
+      // The notice badge text ("GIF") must NOT leak as a TextBlock, because
+      // the wrapper <a> is incorrectly treated as a simple-text element.
+      test(
+        'should not emit GIF/MP4 notice badge text from attachment wrapper',
+        () {
+          final doc = html_parser.parse('''
+            <div class="body_editor">
+              <div class="simple_attach_img_div">
+                <div class="comment_img_div">
+                  <a href="javascript:comment_thumb_expand('id', 'https://down.humoruniv.com/data/editor/a.gif', '//timg.humoruniv.com/thumb.php?url=https://down.humoruniv.com/data/editor/a.gif?SIZE=320x240', '320', '320', '', 'GIF', '');">
+                    <img src="//timg.humoruniv.com/thumb.php?url=https://down.humoruniv.com/data/editor/a.gif?SIZE=320x240" class="comment_thumb_img" OnClick=""/>
+                    <div class="comment_thumb_notice">GIF</div>
+                  </a>
+                  <div style="position:absolute;top:12px;left:12px;"><img src="/images/play_trans.png?tmp=3" width="40" height="40"/></div>
+                </div>
+              </div>
+              <div class="simple_attach_img_div">
+                <div class="comment_img_div pointer" OnClick="javascript:comment_mp4_expand('mp4_1_', 'https://down.humoruniv.com/data/editor/v.mp4', '//timg.humoruniv.com/thumb.php?url_enc=abc', '320', '320', '', 'MP4', '', '', '');">
+                  <img src="//timg.humoruniv.com/thumb.php?url_enc=abc" class="comment_thumb_img"/>
+                  <div class="comment_thumb_notice">MP4</div>
+                  <div style="position:absolute;top:12px;left:12px;"><img src="/images/play_trans.png?tmp=3" width="40" height="40"/></div>
+                </div>
+              </div>
+            </div>
+          ''');
+          final container = doc.querySelector('.body_editor')!;
+
+          final result = client.scanContent(container);
+
+          final leakedNotices = result.blocks
+              .whereType<TextBlock>()
+              .map((b) => b.text)
+              .where((t) => t == 'GIF' || t == 'MP4')
+              .toList();
+          expect(
+            leakedNotices,
+            isEmpty,
+            reason: 'GIF/MP4 attachment badges must not appear as body text',
+          );
+        },
+      );
     });
 
     group('scanCompact', () {

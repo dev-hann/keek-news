@@ -272,7 +272,8 @@ class DioHtmlService extends HtmlService {
       return;
     }
 
-    if (el.nodes.isEmpty || _isSimpleTextElement(el)) {
+    if (el.nodes.isEmpty ||
+        (_isSimpleTextElement(el) && !_hasMediaOrNoiseDescendant(el))) {
       final text = el.text.trim();
       if (text.isNotEmpty) {
         blocks.add(TextBlock(text));
@@ -500,6 +501,14 @@ class DioHtmlService extends HtmlService {
         name == 'font' ||
         name == 'strong' ||
         name == 'em';
+  }
+
+  bool _hasMediaOrNoiseDescendant(dom.Element el) {
+    return el.querySelector(
+          'img, video, iframe, .comment_thumb_notice, .comment_crop_href, '
+          '.comment_crop_href_mp4',
+        ) !=
+        null;
   }
 
   bool _isRichMixedContent(dom.Element el) {

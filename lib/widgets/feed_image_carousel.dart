@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_colors.dart';
-import 'package:keek_news/const/app_durations.dart';
-import 'package:keek_news/const/app_sizes.dart';
-import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/service/video_playback_controller.dart';
@@ -11,6 +7,7 @@ import 'package:keek_news/widgets/inline_video_player.dart';
 import 'package:keek_news/widgets/media_count_badge.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class FeedImageCarousel extends StatefulWidget {
   const FeedImageCarousel({
@@ -32,14 +29,11 @@ class FeedImageCarousel extends StatefulWidget {
 }
 
 class _FeedImageCarouselState extends State<FeedImageCarousel> {
+  static final _AspectCache _aspectCache = _AspectCache(maxEntries: 200);
+
   final PageController _controller = PageController();
   int _page = 0;
   int? _expandedVideoIndex;
-
-  /// Process-lifetime LRU cache of measured image aspect ratios so the
-  /// carousel can size itself correctly before images finish loading.
-  /// Bounded to avoid unbounded growth as the user scrolls the feed.
-  static final _AspectCache _aspectCache = _AspectCache(maxEntries: 200);
 
   int get _totalCount => widget.imageUrls.length + widget.videoBlocks.length;
 
@@ -93,10 +87,11 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
     final screenW = MediaQuery.sizeOf(context).width;
     final url = _currentMediaUrl;
     final aspect = (url != null ? _aspectCache[url] : null) ?? 1.0;
-    final height = (screenW / aspect).clamp(120.0, AppSizes.feedMediaMaxHeight);
+    const maxHeight = 600.0;
+    final height = (screenW / aspect).clamp(120.0, maxHeight);
 
     return AnimatedContainer(
-      duration: AppDurations.medium,
+      duration: const Duration(milliseconds: 250),
       width: double.infinity,
       height: height,
       child: Stack(
@@ -118,8 +113,8 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
           ),
           if (multiple)
             Positioned(
-              top: AppSpacing.p8,
-              right: AppSpacing.p8,
+              top: 8,
+              right: 8,
               child: IgnorePointer(
                 child: MediaCountBadge(text: '${_page + 1}/$total'),
               ),
@@ -158,13 +153,10 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
           RetryableNetworkImage(
             imageUrl: video.thumbnailUrl!,
             fit: BoxFit.cover,
-            placeholderColor: AppColors.mediaSurface,
+            placeholderColor: Colors.black,
           )
         else
-          VideoThumbnail(
-            videoUrl: video.url,
-            placeholderColor: AppColors.mediaSurface,
-          ),
+          VideoThumbnail(videoUrl: video.url, placeholderColor: Colors.black),
         Center(
           child: Semantics(
             label: '재생',
@@ -175,12 +167,12 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: const BoxDecoration(
-                  color: AppColors.imageViewerOverlay,
+                  color: Colors.black54,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.play_arrow,
-                  color: AppColors.imageViewerForeground,
+                  LucideIcons.play,
+                  color: Colors.white,
                   size: 40,
                 ),
               ),
@@ -192,9 +184,7 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
   }
 }
 
-/// Simple bounded LRU map: removes the least recently accessed entry when
-/// [maxEntries] is exceeded. Sufficient for the aspect cache where we only
-/// need [containsKey]/read/write.
+/// Simple bounded LRU map. Sufficient for the aspect cache.
 class _AspectCache {
   _AspectCache({required this.maxEntries});
   final int maxEntries;

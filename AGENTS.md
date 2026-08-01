@@ -15,8 +15,21 @@ Current scope: **웃긴자료 (pds) board only.** Communities: dogdrip, ppomppu,
 ## Key Files
 
 - `lib/service/service_locator.dart` — DI registration (GetIt: `configureDependencies()` + `sl`)
-- `lib/app.dart` — `KeekNewsApp` + inlined `appRouter` (GoRouter)
+- `lib/app.dart` — `KeekNewsApp` (ShadApp.router) + inlined `appRouter` (GoRouter) + ScaffoldMessenger injection
+- `lib/theme/shad_theme.dart` — `AppShadTheme.dark()` (ShadThemeData with orange color scheme)
 - `lib/main.dart` — entry, boots DI
+- `test/helpers/shad_harness.dart` — `shadHarness(body)` / `shadApp({home, navigatorKey})` widget test helpers
+
+## Design System
+
+This project uses `shadcn_ui` (^0.56.0) as its design system. See [docs/DESIGN.md](docs/DESIGN.md) for the full guide. Highlights:
+
+- App root: `ShadApp.router` (NOT `MaterialApp`). Material ThemeData is auto-derived.
+- Theme access: `ShadTheme.of(context).colorScheme.*` and `textTheme.*`.
+- Icons: `LucideIcons.foo` (via `package:shadcn_ui`). No Material `Icons.*`.
+- Spacing: raw literals (`EdgeInsets.all(16)`). No central spacing tokens.
+- Prefer shadcn primitives (`ShadCard`, `ShadButton`, `ShadBadge`, etc.) for new widgets.
+- For widget tests, use `shadHarness(body)` or `shadApp({home})` — plain `MaterialApp` lacks `ShadTheme`.
 
 ## Mandatory Checks Before Committing
 
@@ -28,7 +41,7 @@ flutter analyze
 flutter test
 ```
 
-All must pass. `flutter analyze` runs with **all severities fatal** — any info, warning, or error fails the commit. Or use: `make check`
+All must pass. `flutter analyze` runs with **all severities fatal** — any info, warning, or error fails the commit. `flutter test` must show **zero skipped** (the `~N` count must be 0) — unit/widget/integration tests are never skipped. The only opt-in category is smoke (`test/smoke/`, via `make smoke`). Or use: `make check`
 
 ## Commands
 
@@ -60,6 +73,7 @@ skill({ name: "feature-consensus" })
 - "what" comments that restate what the code already expresses (allowed: concise "why" comments for non-obvious behavior, design intent, or regression rationale; public APIs keep `///` dartdoc)
 - Committing code with failing tests or analyze errors
 - Skipping `make check` before committing
+- Skipping tests (`skip:`, `@Skip`) in unit/widget/integration tests — every test must pass. The only opt-in category is smoke tests under `test/smoke/` (gated by `SMOKE=1`, run via `make smoke`).
 - Adding a new community parser without fixture HTML + tests
 - Provider calling Repository/Service directly (skip UseCase)
 - Registering impl class in DI instead of abstract interface

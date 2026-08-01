@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_colors.dart';
 import 'package:keek_news/widgets/video_surface.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -79,9 +79,9 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
   @override
   Widget build(BuildContext context) {
     final placeholder = ColoredBox(
-      color: widget.placeholderColor ?? AppColors.mediaSurface,
+      color: widget.placeholderColor ?? Colors.black,
       child: const Center(
-        child: Icon(Icons.play_circle_outline, color: Colors.white54, size: 40),
+        child: Icon(LucideIcons.circlePlay, color: Colors.white54, size: 40),
       ),
     );
 

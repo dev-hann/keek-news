@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/widgets/retry_controller.dart';
+import 'package:keek_news/service/retry_controller.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   group('RetryableNetworkImage', () {
@@ -11,11 +14,9 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/test.jpg',
-              ),
+          shadHarness(
+            const RetryableNetworkImage(
+              imageUrl: 'https://example.com/test.jpg',
             ),
           ),
         );
@@ -32,12 +33,10 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/test.jpg',
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
+          shadHarness(
+            const RetryableNetworkImage(
+              imageUrl: 'https://example.com/test.jpg',
+              borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
           ),
         );
@@ -49,11 +48,9 @@ void main() {
         tester,
       ) async {
         await tester.pumpWidget(
-          const MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/test.jpg',
-              ),
+          shadHarness(
+            const RetryableNetworkImage(
+              imageUrl: 'https://example.com/test.jpg',
             ),
           ),
         );
@@ -72,18 +69,16 @@ void main() {
           await tester.pump();
 
           await tester.pumpWidget(
-            MaterialApp(
-              home: Scaffold(
-                body: RetryableNetworkImage(
-                  imageUrl: 'https://example.com/x.jpg',
-                  controller: controller,
-                ),
+            shadHarness(
+              RetryableNetworkImage(
+                imageUrl: 'https://example.com/x.jpg',
+                controller: controller,
               ),
             ),
           );
           await tester.pump();
 
-          expect(find.byIcon(Icons.refresh), findsOneWidget);
+          expect(find.byIcon(LucideIcons.refreshCw), findsOneWidget);
           expect(find.text('탭하여 재시도'), findsOneWidget);
         },
       );
@@ -95,20 +90,18 @@ void main() {
         await tester.pump();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/x.jpg',
-                controller: controller,
-                errorIcon: Icons.sentiment_dissatisfied,
-              ),
+          shadHarness(
+            RetryableNetworkImage(
+              imageUrl: 'https://example.com/x.jpg',
+              controller: controller,
+              errorIcon: Icons.sentiment_dissatisfied,
             ),
           ),
         );
         await tester.pump();
 
         expect(find.byIcon(Icons.sentiment_dissatisfied), findsOneWidget);
-        expect(find.byIcon(Icons.refresh), findsNothing);
+        expect(find.byIcon(LucideIcons.refreshCw), findsNothing);
       });
 
       testWidgets('uses custom foregroundColor for icon when provided', (
@@ -120,19 +113,17 @@ void main() {
         await tester.pump();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/x.jpg',
-                controller: controller,
-                foregroundColor: Colors.pink,
-              ),
+          shadHarness(
+            RetryableNetworkImage(
+              imageUrl: 'https://example.com/x.jpg',
+              controller: controller,
+              foregroundColor: Colors.pink,
             ),
           ),
         );
         await tester.pump();
 
-        final icon = tester.widget<Icon>(find.byIcon(Icons.refresh));
+        final icon = tester.widget<Icon>(find.byIcon(LucideIcons.refreshCw));
         expect(icon.color, Colors.pink);
       });
 
@@ -145,12 +136,10 @@ void main() {
         await tester.pump();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/x.jpg',
-                controller: controller,
-              ),
+          shadHarness(
+            RetryableNetworkImage(
+              imageUrl: 'https://example.com/x.jpg',
+              controller: controller,
             ),
           ),
         );
@@ -158,7 +147,7 @@ void main() {
         expect(controller.attempt, 0);
         expect(controller.isExhausted, isTrue);
 
-        await tester.tap(find.byIcon(Icons.refresh));
+        await tester.tap(find.byIcon(LucideIcons.refreshCw));
         await tester.pump();
 
         expect(controller.attempt, 0);
@@ -175,24 +164,20 @@ void main() {
         expect(controller.isExhausted, isTrue);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/old.jpg',
-                controller: controller,
-              ),
+          shadHarness(
+            RetryableNetworkImage(
+              imageUrl: 'https://example.com/old.jpg',
+              controller: controller,
             ),
           ),
         );
         await tester.pump();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/new.jpg',
-                controller: controller,
-              ),
+          shadHarness(
+            RetryableNetworkImage(
+              imageUrl: 'https://example.com/new.jpg',
+              controller: controller,
             ),
           ),
         );
@@ -216,12 +201,10 @@ void main() {
           addTearDown(controller.dispose);
 
           await tester.pumpWidget(
-            MaterialApp(
-              home: Scaffold(
-                body: RetryableNetworkImage(
-                  imageUrl: 'https://example.com/a.jpg',
-                  controller: controller,
-                ),
+            shadHarness(
+              RetryableNetworkImage(
+                imageUrl: 'https://example.com/a.jpg',
+                controller: controller,
               ),
             ),
           );
@@ -269,13 +252,11 @@ void main() {
         // with retryDelay=Duration.zero the CachedNetworkImage key should
         // advance on the very next frame after recordFailure().
         await tester.pumpWidget(
-          const MaterialApp(
-            home: Scaffold(
-              body: RetryableNetworkImage(
-                imageUrl: 'https://example.com/a.jpg',
-                maxAttempts: 5,
-                retryDelay: Duration.zero,
-              ),
+          shadHarness(
+            const RetryableNetworkImage(
+              imageUrl: 'https://example.com/a.jpg',
+              maxAttempts: 5,
+              retryDelay: Duration.zero,
             ),
           ),
         );

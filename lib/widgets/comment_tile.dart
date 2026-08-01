@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_radius.dart';
-import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/pages/comment_video_viewer.dart';
@@ -8,6 +6,7 @@ import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class CommentTile extends StatelessWidget {
   const CommentTile({required this.comment, this.depth = 0, super.key});
@@ -17,35 +16,25 @@ class CommentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.only(
-        left: depth * AppSpacing.p16,
-        top: AppSpacing.p8,
-        bottom: AppSpacing.p8,
-      ),
+      padding: EdgeInsets.only(left: depth * 16.0, top: 8, bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _Header(
-            comment: comment,
-            textTheme: textTheme,
-            colorScheme: colorScheme,
-          ),
+          _Header(comment: comment, theme: theme, mTheme: mTheme),
           if (comment.content.isNotEmpty) ...[
-            AppSpacing.sbH4,
+            const SizedBox(height: 4),
             Text(
               comment.content,
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
+              style: mTheme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.foreground,
               ),
             ),
           ],
           if (comment.mediaBlocks.isNotEmpty) ...[
-            AppSpacing.sbH8,
+            const SizedBox(height: 8),
             _MediaRow(comment: comment),
           ],
           for (final reply in comment.replies)
@@ -59,55 +48,55 @@ class CommentTile extends StatelessWidget {
 class _Header extends StatelessWidget {
   const _Header({
     required this.comment,
-    required this.textTheme,
-    required this.colorScheme,
+    required this.theme,
+    required this.mTheme,
   });
 
   final Comment comment;
-  final TextTheme textTheme;
-  final ColorScheme colorScheme;
+  final ShadThemeData theme;
+  final ThemeData mTheme;
 
   @override
   Widget build(BuildContext context) {
-    final metaStyle = textTheme.labelSmall?.copyWith(
-      color: colorScheme.onSurfaceVariant,
+    final metaStyle = theme.textTheme.small.copyWith(
+      color: theme.colorScheme.mutedForeground,
     );
     return Row(
       children: [
         if (comment.isBest) ...[
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.p6,
-              vertical: AppSpacing.p2,
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.primary,
-              borderRadius: AppRadius.borderRadiusSm,
+          ShadBadge(
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.primaryForeground,
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(4)),
             ),
             child: Text(
               '베스트',
-              style: textTheme.labelSmall?.copyWith(
-                color: colorScheme.onPrimary,
+              style: theme.textTheme.small.copyWith(
+                color: theme.colorScheme.primaryForeground,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          AppSpacing.sbW8,
+          const SizedBox(width: 8),
         ],
         Flexible(
           child: Text(
             comment.author,
-            style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+            style: mTheme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ),
         if (comment.recommendCount > 0) ...[
-          AppSpacing.sbW8,
+          const SizedBox(width: 8),
           Icon(
-            Icons.thumb_up_outlined,
+            LucideIcons.thumbsUp,
             size: 13,
-            color: colorScheme.onSurfaceVariant,
+            color: theme.colorScheme.mutedForeground,
           ),
           const SizedBox(width: 2),
           Text('${comment.recommendCount}', style: metaStyle),
@@ -125,11 +114,7 @@ class _MediaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppSpacing.p8,
-      runSpacing: AppSpacing.p8,
-      children: _buildChildren(context),
-    );
+    return Wrap(spacing: 8, runSpacing: 8, children: _buildChildren(context));
   }
 
   List<Widget> _buildChildren(BuildContext context) {
@@ -164,7 +149,7 @@ class _MediaRow extends StatelessWidget {
                   VideoThumbnail(videoUrl: block.url),
                   const Center(
                     child: Icon(
-                      Icons.play_circle_fill,
+                      LucideIcons.circlePlay,
                       color: Colors.white70,
                       size: 28,
                     ),
@@ -205,7 +190,7 @@ class _MediaBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: AppRadius.borderRadiusMd,
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
       child: SizedBox(width: 80, height: 80, child: child),
     );
   }

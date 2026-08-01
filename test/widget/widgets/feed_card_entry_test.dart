@@ -9,6 +9,9 @@ import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/feed_card_entry.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   String? clipboardContent;
@@ -40,12 +43,12 @@ void main() {
     viewCount: 500,
   );
 
-  PostDetail detailWith({
+  LoadedPostDetail detailWith({
     List<String> imageUrls = const [],
     List<Comment> comments = const [],
     List<ContentBlock> blocks = const [],
   }) {
-    return PostDetail(
+    return LoadedPostDetail(
       id: 1,
       title: '게시글 제목',
       author: '유머작가',
@@ -63,25 +66,23 @@ void main() {
 
   Future<void> pumpEntry(
     WidgetTester tester, {
-    PostDetail? detail,
+    LoadedPostDetail? detail,
     bool detailLoading = false,
     bool isBookmarked = false,
     VoidCallback? onBookmarkTap,
   }) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ListView(
-            children: [
-              FeedCardEntry(
-                post: post,
-                detail: detail,
-                detailLoading: detailLoading,
-                isBookmarked: isBookmarked,
-                onBookmarkTap: onBookmarkTap ?? () {},
-              ),
-            ],
-          ),
+      shadHarnessWithMessenger(
+        ListView(
+          children: [
+            FeedCardEntry(
+              post: post,
+              detail: detail,
+              detailLoading: detailLoading,
+              isBookmarked: isBookmarked,
+              onBookmarkTap: onBookmarkTap ?? () {},
+            ),
+          ],
         ),
       ),
     );
@@ -131,7 +132,7 @@ void main() {
     testWidgets('should reflect bookmarked state on the card', (tester) async {
       await pumpEntry(tester, isBookmarked: true);
 
-      expect(find.byIcon(Icons.bookmark), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmarkCheck), findsOneWidget);
     });
 
     testWidgets('should call onBookmarkTap when bookmark icon tapped', (
@@ -140,7 +141,7 @@ void main() {
       var tapped = 0;
       await pumpEntry(tester, onBookmarkTap: () => tapped++);
 
-      await tester.tap(find.byIcon(Icons.bookmark_border));
+      await tester.tap(find.byIcon(LucideIcons.bookmark));
       expect(tapped, 1);
     });
 
@@ -149,7 +150,7 @@ void main() {
     ) async {
       await pumpEntry(tester);
 
-      await tester.tap(find.byIcon(Icons.link));
+      await tester.tap(find.byIcon(LucideIcons.link));
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(

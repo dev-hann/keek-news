@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   group('EmptyStateView', () {
     testWidgets('should display message', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: EmptyStateView(message: '게시글이 없습니다')),
-        ),
+        shadHarness(const EmptyStateView(message: '게시글이 없습니다')),
       );
 
       expect(find.text('게시글이 없습니다'), findsOneWidget);
@@ -16,24 +17,20 @@ void main() {
 
     testWidgets('should display default icon', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: EmptyStateView(message: '비어있음')),
-        ),
+        shadHarness(const EmptyStateView(message: '비어있음')),
       );
 
-      expect(find.byIcon(Icons.inbox_outlined), findsOneWidget);
+      expect(find.byIcon(LucideIcons.inbox), findsOneWidget);
     });
 
     testWidgets('should display custom icon', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: EmptyStateView(message: '검색 결과 없음', icon: Icons.search_off),
-          ),
+        shadHarness(
+          const EmptyStateView(message: '검색 결과 없음', icon: LucideIcons.searchX),
         ),
       );
 
-      expect(find.byIcon(Icons.search_off), findsOneWidget);
+      expect(find.byIcon(LucideIcons.searchX), findsOneWidget);
     });
   });
 
@@ -42,12 +39,10 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: EmptyStateView(
-              title: '저장한 게시물이 없어요',
-              subtitle: '좋아하는 글을 북마크해 보세요',
-            ),
+        shadHarness(
+          const EmptyStateView(
+            title: '저장한 게시물이 없어요',
+            subtitle: '좋아하는 글을 북마크해 보세요',
           ),
         ),
       );
@@ -58,11 +53,7 @@ void main() {
 
     testWidgets('should style title larger than subtitle', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: EmptyStateView(title: '제목', subtitle: '부제목'),
-          ),
-        ),
+        shadHarness(const EmptyStateView(title: '제목', subtitle: '부제목')),
       );
 
       final titleWidget = tester.widget<Text>(find.text('제목'));
@@ -79,9 +70,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: EmptyStateView(title: '제목만 있음')),
-        ),
+        shadHarness(const EmptyStateView(title: '제목만 있음')),
       );
 
       expect(find.text('제목만 있음'), findsOneWidget);
@@ -91,9 +80,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: EmptyStateView(message: '레거시 메시지')),
-        ),
+        shadHarness(const EmptyStateView(message: '레거시 메시지')),
       );
 
       expect(find.text('레거시 메시지'), findsOneWidget);
@@ -101,11 +88,7 @@ void main() {
 
     testWidgets('should use title weight bolder than subtitle', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: EmptyStateView(title: '제목', subtitle: '부제목'),
-          ),
-        ),
+        shadHarness(const EmptyStateView(title: '제목', subtitle: '부제목')),
       );
 
       final titleWidget = tester.widget<Text>(find.text('제목'));

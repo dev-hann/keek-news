@@ -13,9 +13,11 @@ import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/theme/shad_theme.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/merged_feed_helper.dart';
@@ -102,7 +104,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: testOverrides(),
-          child: MaterialApp.router(routerConfig: appRouter),
+          child: ShadApp.router(
+            themeMode: ThemeMode.dark,
+            darkTheme: AppShadTheme.dark(),
+            routerConfig: appRouter,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -124,7 +130,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: testOverrides(),
-          child: MaterialApp.router(routerConfig: settingsRouter),
+          child: ShadApp.router(
+            themeMode: ThemeMode.dark,
+            darkTheme: AppShadTheme.dark(),
+            routerConfig: settingsRouter,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -146,7 +156,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: testOverrides(),
-          child: MaterialApp.router(routerConfig: bookmarksRouter),
+          child: ShadApp.router(
+            themeMode: ThemeMode.dark,
+            darkTheme: AppShadTheme.dark(),
+            routerConfig: bookmarksRouter,
+          ),
         ),
       );
       await tester.pumpAndSettle();

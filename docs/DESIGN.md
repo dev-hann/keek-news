@@ -2,148 +2,130 @@
 
 Visual design rules and direction for this project. See code files for specific values.
 
-> **Boundary**: This document covers HOW things LOOK (tokens, colors, typography, spacing, components).
+> **Boundary**: This document covers HOW things LOOK (theme, components, motion).
 > For WHAT features exist and HOW users interact with them, see [PRODUCT_PLAN.md](PRODUCT_PLAN.md).
 
 ## Design Principles
 
-1. **Content First** — UI chrome minimizes, content area maximizes. Every pixel of UI must justify its existence.
-2. **Visual Hierarchy** — Size, weight, and color contrast make title, thumbnail, and metrics instantly recognizable without reading. No scanning effort required.
-3. **Perceived Speed** — Skeleton screens, shimmer placeholders, and smooth animations create the illusion of speed. Motion tokens ensure consistent timing across all transitions.
-4. **Familiarity** — Follow standard Korean community app visual patterns (에브리타임, 디시인사이드, Reddit). Users should recognize the layout instantly.
-5. **Accessibility** — WCAG 2.1 AA compliance. Minimum 44pt touch targets. Screen reader support. Color-blind safe.
+1. **Content First** — UI chrome minimizes, content area maximizes.
+2. **Visual Hierarchy** — Size, weight, and color contrast make structure instantly recognizable.
+3. **Perceived Speed** — Skeleton screens, smooth animations create the illusion of speed.
+4. **Familiarity** — Follow standard Korean community app visual patterns.
+5. **Accessibility** — WCAG 2.1 AA compliance. 44pt touch targets. Screen reader support.
 
 ## Theme Strategy
 
-- **6 color themes** based on the original humoruniv.com site: Orange (default), Red, Blue, Green, Classic, Mono.
-- **Dark mode is an orthogonal toggle**, not a 7th theme. Every theme has both light and dark variants (12 total schemes).
-- All theming uses `flex_color_scheme`. See `lib/core/themes/app_schemes.dart` for color definitions and `lib/core/themes/app_theme.dart` for ThemeData assembly.
-- Theme switching is instant. No restart required.
+- **shadcn_ui** is the design system library. App theme assembled in `lib/theme/shad_theme.dart` using `ShadThemeData` with `ShadOrangeColorScheme.dark()`.
+- **Dark-only** for now. `ShadApp.router` is the root widget in `lib/app.dart`.
+- `ShadApp` derives Material `ThemeData` internally (via `materialThemeBuilder`), so `Theme.of(context)` keeps working for any Material widgets (url_launcher, webview_flutter, etc.).
+- `ScaffoldMessenger` is provided explicitly via the `builder` parameter in `KeekNewsApp` since `ShadApp` uses `WidgetsApp` (not `MaterialApp`).
 
-## Color Token Rules
+## Color Rules
 
-Token categories follow Material 3 semantic naming:
+shadcn color tokens are used throughout:
 
-- `primary`, `onPrimary`, `primaryContainer` — brand color and its derivatives
-- `surface`, `surfaceContainer`, `scaffold` — background layers
-- `onSurface`, `onSurfaceVariant` — text colors on surfaces
-- `outline` — dividers and borders
-- `error` — error states, destructive actions
+- `ShadTheme.of(context).colorScheme.primary` — brand color (orange)
+- `colorScheme.foreground` / `mutedForeground` — text on surfaces
+- `colorScheme.muted` — skeleton placeholder, neutral backgrounds
+- `colorScheme.border` — dividers and borders
+- `colorScheme.accent` — hover/pressed states
+- `colorScheme.destructive` — error states, destructive actions
+- `colorScheme.primaryForeground` — text on primary
 
 Rules:
-- `onPrimary` text MUST pass WCAG AA contrast against `primary`. If the brand color is too light for white text, use dark `onPrimary` text instead.
-- Domain-specific colors (e.g., "recommend") are aliases of semantic tokens, not separate first-class tokens. Document the alias in code comments.
-- All token values are defined in `lib/core/themes/app_colors.dart`.
+- White-on-dark video overlays use inline literals (`Colors.white`, `Colors.black54`) — these are scrim colors tied to video chrome, not theme tokens.
+- Domain-specific colors (recommend-tier thresholds) are inlined as private constants in `count_badge.dart`.
 
 ## Typography Rules
 
-Korean text requires different treatment than Latin text:
+shadcn text theme uses semantic names: `h1Large`, `h1`, `h2`, `h3`, `h4`, `p` (body), `blockquote`, `table`, `list`, `lead`, `large`, `small`, `muted`.
 
-- **Letter spacing**: Always `0` or positive. Negative letter-spacing is for Latin display type. Hangul is a block script — negative tracking causes character collision and reduces legibility.
-- **Line height**: 1.3–1.6x font size. Body text needs 1.5–1.6 for comfortable Korean reading.
-- **Font**: System default only (Noto Sans KR on Android, Apple SD Gothic Neo on iOS). No custom font loading — it adds app size and latency.
-- **Title vs body distinction**: Minimum 1pt size difference. Never share the same size between title and body roles.
+Material `Theme.of(context).textTheme.titleMedium` etc. still works for legacy widgets — it's auto-derivedived from shadcn's `textTheme.family` field by `ShadApp.materialTheme`.
 
-Token hierarchy: `headlineLarge` > `headlineMedium` > `titleLarge` > `titleMedium` > `titleSmall` > `bodyLarge` > `bodyMedium` > `bodySmall` > `labelLarge` > `labelMedium` > `labelSmall`.
-
-See `lib/core/themes/app_typography.dart` for specific sizes and weights.
+Korean text considerations (informational, not enforced by tokens):
+- Letter spacing: `0` or positive. Hangul is a block script.
+- Line height: 1.3–1.6x font size.
+- Font: System default (Noto Sans KR on Android, Apple SD Gothic Neo on iOS).
 
 ## Spacing and Layout Rules
 
-- **8pt grid system** with 4pt half-steps for fine adjustments. All spacing values MUST be multiples of 4.
-- **Minimum touch target**: 44pt (Apple HIG) to 48pt (Material). No interactive element smaller than 44pt in any dimension.
-- **Screen horizontal padding**: Defined by a single token. Applied consistently across all screens.
-- **Thumbnail sizes**: Three tiers — small, medium, large. Each tier has a fixed pixel value in `app_sizes.dart`.
+No central spacing tokens. Use raw literals (`EdgeInsets.all(16)`, `SizedBox(width: 8)`).
 
-See `lib/core/themes/app_spacing.dart` and `lib/core/themes/app_sizes.dart`.
+- **8pt grid** convention: prefer multiples of 4 (`4`, `8`, `12`, `16`, `24`).
+- **Minimum touch target**: 44pt. Hard-coded as `44` literal where needed.
+- **Screen horizontal padding**: `16` raw value.
+- **Thumbnail sizes**: Three tiers — `48`, `72`, `120`.
 
 ## Elevation Rules
 
-Five elevation levels defined in `lib/core/themes/app_elevation.dart`.
-
-- Light mode: standard shadow-based elevation.
-- Dark mode: tonal elevation (surface tint overlay, no shadows). This is Material 3 convention.
+Material `Theme.of(context).colorScheme.surfaceContainer` for card surfaces. Material `elevation` parameter used directly (typically `0` or `1`).
 
 ## Motion Rules
 
-- Three duration tokens (fast, medium, slow) and three easing curves (standard, decelerate, accelerate).
-- All animations MUST use these tokens. No hardcoded `Duration` or `Curves` in widget code.
-- Screen transitions: use platform-default (slide on iOS, fade on Android).
-- Shared element transitions for image tap → fullscreen viewer.
-
-See `lib/core/themes/app_durations.dart`.
+No central motion tokens. Use raw literals:
+- Fast: `Duration(milliseconds: 100)`
+- Medium: `Duration(milliseconds: 250)`
+- Slow: `Duration(milliseconds: 500)`
+- Curves: `Curves.easeInOut`, `Curves.decelerate`, `Curves.accelerate`
 
 ## Component Library Rules
 
-Components follow Atomic Design:
+Components live in `lib/widgets/`. Flat directory (no atoms/molecules/organisms split).
 
-### Hierarchy
+### Patterns
 
-| Level | Responsibility | Examples |
-|-------|---------------|----------|
-| **Atom** | Single visual element, no domain knowledge | Avatar, CountBadge, FeedMedia, Thumbnail, SkeletonBox, LoadingIndicator |
-| **Molecule** | Combination of atoms, represents a domain concept | FeedCard, FeedImageCarousel, InlineVideoPlayer, CommentTile, SettingsGroup, DarkModeSelector |
-| **Organism** | Screen-level composition of molecules | (Feed composition currently lives in `presentation/widgets/` — e.g. `feed_list.dart` — because it wires providers + navigation. Core `organisms/` is intentionally empty for the single-screen Phase 1.) |
+| Pattern | When | Example |
+|---------|------|---------|
+| Direct shadcn primitive | When shadcn has a 1:1 match | `Avatar` → `ShadAvatar` |
+| Hybrid wrapper | Wrap shadcn primitive + business logic | `ActionButton` → `ShadIconButton.ghost` + active toggle |
+| Custom composition | Compose multiple shadcn primitives + business plumbing | `FeedCard` → `ShadCard` + `ShadAvatar` + `ShadBadge` + `ShadButton.Icon` |
+| Pure plumbing | Video/image rendering where shadcn has no surface | `InlineVideoPlayer`, `VideoSurface`, `RetryableNetworkImage` — uses ShadTheme colors only |
 
 ### Rules
 
-- Atoms MUST NOT import from `domain/` or `data/`. They receive all data via constructor parameters.
-- Molecules may use domain entities for type safety in their interface, but MUST NOT contain business logic.
-- Organisms compose molecules and handle layout. They MAY connect to providers.
-- Every component MUST handle these states where applicable:
-  - **loading** — show skeleton/shimmer
-  - **loaded** — show content
-  - **error** — show error state with retry
-  - **empty** — show empty state with message
-- Component variants are defined as enum or constructor parameters, not separate widget classes.
+- Every interactive widget MUST expose `Semantics` labels.
+- Color is never the sole indicator of state. Pair with icon, text, or shape.
+- Component variants are constructor parameters, not separate widget classes.
+- No additional widget classes in `*_view.dart` files — extract to `lib/widgets/`.
 
-### Required Components
+### Widget Inventory (after shadcn migration)
 
-The component library lives in `lib/core/widgets/`.
+| Widget | shadcn primitive |
+|--------|-----------------|
+| `Avatar` | `ShadAvatar` |
+| `ActionButton` | `ShadIconButton.ghost` |
+| `CountBadge` family | `ShadBadge` |
+| `MediaCountBadge` | `ShadBadge` |
+| `ScrollToTopButton` | `ShadIconButton` |
+| `StaleDataBanner` | `ShadAlert` |
+| `SettingsTile` | `ShadTheme` colors (no shadcn ListTile primitive) |
+| `SettingsGroup` | `ShadSeparator` dividers |
+| `FeedCard` | `ShadCard` + composition |
+| `ErrorStateView` retry | `ShadButton.outline` |
+| `SkeletonBox` | Custom (shadcn Skeleton ❌ upstream) |
+| `InlineVideoPlayer` controls | Material `IconButton` (white-on-dark video chrome) |
 
-**Atoms**: Avatar, CountBadge (Recommend/Comment/View/Best), FeedMedia, Thumbnail, SkeletonBox, LoadingIndicator.
+## Icon System
 
-**Molecules**: FeedCard, FeedImageCarousel, InlineVideoPlayer, SectionHeader, SettingsGroup, SettingsTile, DarkModeSelector, StaleDataBanner, UserInfoRow.
+Icons use `lucide_icons_flutter` (re-exported by `shadcn_ui`).
 
-**Organisms**: none in `core/` for Phase 1 (feed composition is in `presentation/widgets/feed_list.dart`).
-
-**State widgets**: SkeletonFeedCard, EmptyStateView, ErrorStateView, NsfwWarningDialog.
+- Import via `import 'package:shadcn_ui/shadcn_ui.dart';` then use `LucideIcons.foo`.
+- No Material `Icons.*` references in widget code.
+- For state-variant icons (e.g., bookmark outline vs filled), use distinct lucide names: `LucideIcons.bookmark` (idle) vs `LucideIcons.bookmarkCheck` (active).
+- Video chrome uses `Icons.play_arrow` etc. only where lucide lacks equivalents — currently none, all migrated.
 
 ## Accessibility Requirements
 
-- All interactive elements have `Semantics` labels for TalkBack/VoiceOver.
-- Color is never the sole indicator of state. Pair with icon, text, or shape.
-- NSFW content: blur overlay by default. User opts in via settings toggle.
-- Content warning on first app launch.
-- Font size respects system accessibility settings where possible.
-
-## Adding New Tokens or Components
-
-When adding a new design token:
-1. Define it in the appropriate token file under `lib/core/themes/`.
-2. Write a unit test verifying the token exists and is non-null.
-3. Reference the token file in this document's section.
-
-When adding a new component:
-1. Determine its level (atom / molecule / organism).
-2. Define its variants and states before coding.
-3. Write widget tests for all variants and states (see [TESTING_POLICY.md](TESTING_POLICY.md)).
-4. Place it in the correct subdirectory under `lib/core/widgets/`.
+- All interactive elements have `Semantics` labels.
+- Color is never the sole indicator of state.
+- Font size respects system accessibility settings.
 
 ## Reference: Code File Locations
 
 | Concern | File |
 |---------|------|
-| Color tokens | `lib/core/themes/app_colors.dart` |
-| Typography tokens | `lib/core/themes/app_typography.dart` |
-| Spacing tokens | `lib/core/themes/app_spacing.dart` |
-| Radius tokens | `lib/core/themes/app_radius.dart` |
-| Size tokens | `lib/core/themes/app_sizes.dart` |
-| Elevation tokens | `lib/core/themes/app_elevation.dart` |
-| Motion tokens | `lib/core/themes/app_durations.dart` |
-| Theme color schemes | `lib/core/themes/app_schemes.dart` |
-| ThemeData assembly | `lib/core/themes/app_theme.dart` |
-| Atom widgets | `lib/core/widgets/atoms/` |
-| Molecule widgets | `lib/core/widgets/molecules/` |
-| Organism widgets | `lib/core/widgets/organisms/` |
-| State widgets | `lib/core/widgets/states/` |
+| Theme assembly | `lib/theme/shad_theme.dart` |
+| App root | `lib/app.dart` (`KeekNewsApp` + `appRouter`) |
+| Widgets | `lib/widgets/` (flat) |
+| Pages | `lib/pages/` |
+| Test harness helper | `test/helpers/shad_harness.dart` |

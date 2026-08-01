@@ -57,7 +57,7 @@ PpomppuImpl _repo(String id, String fixtureFile) => PpomppuImpl(
   htmlClient: _FixtureHtmlService({id: _read('ppomppu/$fixtureFile.html')}),
 );
 
-Future<PostDetail> _detail(String id, String fixtureFile) async {
+Future<LoadedPostDetail> _detail(String id, String fixtureFile) async {
   return _repo(id, fixtureFile).fetchDetail(id);
 }
 

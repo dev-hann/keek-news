@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_spacing.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class SettingsTile extends StatelessWidget {
   const SettingsTile({
@@ -24,25 +24,49 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
     final color = destructive
-        ? Theme.of(context).colorScheme.error
-        : Theme.of(context).colorScheme.onSurface;
-    return ListTile(
-      leading: leading == null
-          ? null
-          : IconTheme.merge(
-              data: IconThemeData(color: color),
-              child: leading!,
-            ),
-      title: Text(title, style: TextStyle(color: color)),
-      subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: trailing,
+        ? mTheme.colorScheme.error
+        : theme.colorScheme.foreground;
+    return GestureDetector(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.p16,
-        vertical: AppSpacing.p4,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            if (leading != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: IconTheme.merge(
+                  data: IconThemeData(color: color),
+                  child: leading!,
+                ),
+              ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(title, style: TextStyle(color: color)),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      style: theme.textTheme.small.copyWith(
+                        color: theme.colorScheme.mutedForeground,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (trailing != null) trailing!,
+          ],
+        ),
       ),
-      minVerticalPadding: AppSpacing.p8,
     );
   }
 }

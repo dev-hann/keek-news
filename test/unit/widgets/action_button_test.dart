@@ -1,57 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keek_news/const/app_sizes.dart';
 import 'package:keek_news/widgets/action_button.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
-  Widget harness({required Widget child, required ThemeData theme}) {
-    return MaterialApp(
-      theme: theme,
-      home: Scaffold(body: Center(child: child)),
-    );
-  }
-
   testWidgets('should render given icon', (tester) async {
     await tester.pumpWidget(
-      harness(
-        theme: ThemeData.light(),
-        child: const ActionButton(
-          icon: Icons.bookmark_border,
-          semanticsLabel: '저장',
-          onTap: null,
+      shadHarness(
+        const Center(
+          child: ActionButton(
+            icon: LucideIcons.bookmark,
+            semanticsLabel: '저장',
+            onTap: null,
+          ),
         ),
       ),
     );
 
-    expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+    expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
   });
 
   testWidgets('should call onTap when tapped', (tester) async {
-    var tapped = 0;
+    final tapped = [0];
     await tester.pumpWidget(
-      harness(
-        theme: ThemeData.light(),
-        child: ActionButton(
-          icon: Icons.link,
-          semanticsLabel: '링크 복사',
-          onTap: () => tapped++,
+      shadHarness(
+        Center(
+          child: ActionButton(
+            icon: LucideIcons.link,
+            semanticsLabel: '링크 복사',
+            onTap: () => tapped[0]++,
+          ),
         ),
       ),
     );
 
     await tester.tap(find.byType(ActionButton));
-    expect(tapped, 1);
+    expect(tapped[0], 1);
   });
 
   testWidgets('should not call onTap when disabled', (tester) async {
-    const tapped = 0;
+    final tapped = [0];
     await tester.pumpWidget(
-      harness(
-        theme: ThemeData.light(),
-        child: const ActionButton(
-          icon: Icons.link,
-          semanticsLabel: '링크 복사',
-          onTap: null,
+      shadHarness(
+        const Center(
+          child: ActionButton(
+            icon: LucideIcons.link,
+            semanticsLabel: '링크 복사',
+            onTap: null,
+          ),
         ),
       ),
     );
@@ -59,87 +57,92 @@ void main() {
     try {
       await tester.tap(find.byType(ActionButton), warnIfMissed: false);
     } catch (_) {}
-    expect(tapped, 0);
-  });
-
-  testWidgets('should use onSurfaceVariant color when not active', (
-    tester,
-  ) async {
-    final theme = ThemeData.light(useMaterial3: true);
-    await tester.pumpWidget(
-      harness(
-        theme: theme,
-        child: const ActionButton(
-          icon: Icons.bookmark_border,
-          semanticsLabel: '저장',
-          onTap: null,
-        ),
-      ),
-    );
-
-    final icon = tester.widget<Icon>(find.byIcon(Icons.bookmark_border));
-    expect(icon.color, theme.colorScheme.onSurfaceVariant);
-  });
-
-  testWidgets('should use primary color when active', (tester) async {
-    final theme = ThemeData.light(useMaterial3: true);
-    await tester.pumpWidget(
-      harness(
-        theme: theme,
-        child: const ActionButton(
-          icon: Icons.bookmark,
-          semanticsLabel: '저장 취소',
-          active: true,
-          onTap: null,
-        ),
-      ),
-    );
-
-    final icon = tester.widget<Icon>(find.byIcon(Icons.bookmark));
-    expect(icon.color, theme.colorScheme.primary);
-  });
-
-  testWidgets('should use iconMedium size', (tester) async {
-    await tester.pumpWidget(
-      harness(
-        theme: ThemeData.light(),
-        child: const ActionButton(
-          icon: Icons.link,
-          semanticsLabel: '링크 복사',
-          onTap: null,
-        ),
-      ),
-    );
-
-    final icon = tester.widget<Icon>(find.byIcon(Icons.link));
-    expect(icon.size, AppSizes.iconMedium);
+    expect(tapped[0], 0);
   });
 
   testWidgets('should enforce minimum 44pt touch target', (tester) async {
     await tester.pumpWidget(
-      harness(
-        theme: ThemeData.light(),
-        child: ActionButton(
-          icon: Icons.link,
-          semanticsLabel: '링크 복사',
-          onTap: () {},
+      shadHarness(
+        Center(
+          child: ActionButton(
+            icon: LucideIcons.link,
+            semanticsLabel: '링크 복사',
+            onTap: () {},
+          ),
         ),
       ),
     );
 
     final size = tester.getSize(find.byType(ActionButton));
-    expect(size.width, greaterThanOrEqualTo(AppSizes.minTouchTarget));
-    expect(size.height, greaterThanOrEqualTo(AppSizes.minTouchTarget));
+    expect(size.width, greaterThanOrEqualTo(44));
+    expect(size.height, greaterThanOrEqualTo(44));
+  });
+
+  testWidgets('should use onSurfaceVariant color when not active', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      shadHarness(
+        const Center(
+          child: ActionButton(
+            icon: LucideIcons.bookmark,
+            semanticsLabel: '저장',
+            onTap: null,
+          ),
+        ),
+      ),
+    );
+
+    final theme = Theme.of(tester.element(find.byType(ActionButton)));
+    final icon = tester.widget<Icon>(find.byIcon(LucideIcons.bookmark));
+    expect(icon.color, theme.colorScheme.onSurfaceVariant);
+  });
+
+  testWidgets('should use primary color when active', (tester) async {
+    await tester.pumpWidget(
+      shadHarness(
+        const Center(
+          child: ActionButton(
+            icon: LucideIcons.bookmark,
+            semanticsLabel: '저장 취소',
+            active: true,
+            onTap: null,
+          ),
+        ),
+      ),
+    );
+
+    final theme = Theme.of(tester.element(find.byType(ActionButton)));
+    final icon = tester.widget<Icon>(find.byIcon(LucideIcons.bookmark));
+    expect(icon.color, theme.colorScheme.primary);
+  });
+
+  testWidgets('should use iconMedium size', (tester) async {
+    await tester.pumpWidget(
+      shadHarness(
+        const Center(
+          child: ActionButton(
+            icon: LucideIcons.link,
+            semanticsLabel: '링크 복사',
+            onTap: null,
+          ),
+        ),
+      ),
+    );
+
+    final icon = tester.widget<Icon>(find.byIcon(LucideIcons.link));
+    expect(icon.size, 16);
   });
 
   testWidgets('should expose semantics label and button role', (tester) async {
     await tester.pumpWidget(
-      harness(
-        theme: ThemeData.light(),
-        child: const ActionButton(
-          icon: Icons.bookmark_border,
-          semanticsLabel: '저장',
-          onTap: null,
+      shadHarness(
+        const Center(
+          child: ActionButton(
+            icon: LucideIcons.bookmark,
+            semanticsLabel: '저장',
+            onTap: null,
+          ),
         ),
       ),
     );
@@ -149,13 +152,14 @@ void main() {
 
   testWidgets('should expose toggled semantics when active', (tester) async {
     await tester.pumpWidget(
-      harness(
-        theme: ThemeData.light(),
-        child: const ActionButton(
-          icon: Icons.bookmark,
-          semanticsLabel: '저장',
-          active: true,
-          onTap: null,
+      shadHarness(
+        const Center(
+          child: ActionButton(
+            icon: LucideIcons.bookmark,
+            semanticsLabel: '저장',
+            active: true,
+            onTap: null,
+          ),
         ),
       ),
     );

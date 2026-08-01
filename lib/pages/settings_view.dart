@@ -6,6 +6,7 @@ import 'package:keek_news/provider/update_provider.dart';
 import 'package:keek_news/widgets/settings_group.dart';
 import 'package:keek_news/widgets/settings_tile.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _repoUrl = 'https://github.com/dev-hann/happy-news';
@@ -51,7 +52,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
               title: '저장함',
               children: [
                 SettingsTile(
-                  leading: const Icon(Icons.bookmark_outline),
+                  leading: const Icon(LucideIcons.bookmark),
                   title: '저장한 게시물',
                   onTap: () => _openBookmarks(context),
                 ),
@@ -61,7 +62,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
               title: '미디어 & 데이터',
               children: [
                 SettingsTile(
-                  leading: const Icon(Icons.storage_outlined),
+                  leading: const Icon(LucideIcons.database),
                   title: '이미지 캐시',
                   subtitle: '캐시 용량 ${_formatBytes(cacheState.sizeBytes)}',
                   onTap: () => _confirmClearCache(context),
@@ -72,18 +73,18 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
               title: '정보',
               children: [
                 SettingsTile(
-                  leading: const Icon(Icons.info_outline),
+                  leading: const Icon(LucideIcons.info),
                   title: '버전',
                   subtitle: _versionSubtitle(updateState),
                   trailing: _versionTrailing(context, updateState),
                 ),
                 SettingsTile(
-                  leading: const Icon(Icons.description_outlined),
+                  leading: const Icon(LucideIcons.fileText),
                   title: '오픈소스 라이선스',
                   onTap: () => _showLicenses(context),
                 ),
                 SettingsTile(
-                  leading: const Icon(Icons.code_outlined),
+                  leading: const Icon(LucideIcons.code),
                   title: '소스 코드',
                   subtitle: 'GitHub',
                   onTap: () => _launchUrl(_repoUrl),

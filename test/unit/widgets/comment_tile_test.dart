@@ -5,7 +5,10 @@ import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/widgets/comment_tile.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+
+import '../../helpers/shad_harness.dart';
 
 Comment _comment({
   String author = '작성자',
@@ -27,7 +30,7 @@ Comment _comment({
   );
 }
 
-Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
+Widget _wrap(Widget child) => shadHarness(child);
 
 void main() {
   setUp(() {
@@ -100,7 +103,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(VideoThumbnail), findsOneWidget);
-      expect(find.byIcon(Icons.play_circle_fill), findsOneWidget);
+      expect(find.byIcon(LucideIcons.circlePlay), findsWidgets);
     });
 
     testWidgets('renders nested replies', (tester) async {

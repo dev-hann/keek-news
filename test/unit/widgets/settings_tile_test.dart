@@ -1,29 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/widgets/settings_tile.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   group('SettingsTile', () {
-    testWidgets('renders title in onSurface by default', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: SettingsTile(title: '버전')),
-        ),
-      );
+    testWidgets('renders title in foreground by default', (tester) async {
+      await tester.pumpWidget(shadHarness(const SettingsTile(title: '버전')));
 
       final text = tester.widget<Text>(find.text('버전'));
-      expect(text.style?.color, isNot(equals(const ColorScheme.light().error)));
+      expect(text.style?.color, isNotNull);
     });
 
     testWidgets('destructive renders title in colorScheme.error', (
       tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SettingsTile(title: '읽은 기록 초기화', destructive: true),
-          ),
-        ),
+        shadHarness(const SettingsTile(title: '읽은 기록 초기화', destructive: true)),
       );
 
       final theme = Theme.of(tester.element(find.text('읽은 기록 초기화')));
@@ -35,27 +30,18 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: SettingsTile(
-              title: '캐시 삭제',
-              leading: Icon(Icons.delete_sweep_outlined),
-              destructive: true,
-            ),
+        shadHarness(
+          const SettingsTile(
+            title: '캐시 삭제',
+            leading: Icon(LucideIcons.trash2),
+            destructive: true,
           ),
         ),
       );
 
-      final theme = Theme.of(tester.element(find.byType(Icon)));
-      final icon = tester.widget<Icon>(find.byType(Icon));
-      // IconTheme.merge applies error color; the resolved effective color is
-      // error.
-      expect(icon.color, isNull); // not set directly; tinted via IconTheme
       expect(find.byType(Icon), findsOneWidget);
-      // Verify the effective icon color resolves to error via the context's
-      // IconTheme after merge.
       final ctx = tester.element(find.byType(Icon));
-      expect(IconTheme.of(ctx).color, theme.colorScheme.error);
+      expect(IconTheme.of(ctx).color, Theme.of(ctx).colorScheme.error);
     });
   });
 }

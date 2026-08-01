@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
-import 'package:keek_news/const/app_colors.dart';
-import 'package:keek_news/const/app_radius.dart';
-import 'package:keek_news/const/app_sizes.dart';
-import 'package:keek_news/const/app_spacing.dart';
+const Color _recTierLow = Color(0xFF9E9E9E);
+const Color _recTierMid = Color(0xFFFF6D00);
+const Color _recTierHigh = Color(0xFF43A047);
+const Color _recTierHot = Color(0xFFE53935);
+
+Color _recommendColor(int count) {
+  if (count >= 100) return _recTierHot;
+  if (count >= 50) return _recTierHigh;
+  if (count >= 10) return _recTierMid;
+  return _recTierLow;
+}
+
+FontWeight _recommendWeight(int count) {
+  if (count >= 100) return FontWeight.w700;
+  if (count >= 50) return FontWeight.w600;
+  return FontWeight.w500;
+}
 
 class CountBadge extends StatelessWidget {
   const CountBadge({
@@ -20,20 +34,20 @@ class CountBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: AppSizes.iconMedium, color: effectiveColor),
-        AppSpacing.sbW4,
-        Text(
-          '$count',
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: effectiveColor,
-            fontWeight: fontWeight,
-          ),
-        ),
-      ],
+    final colorScheme = ShadTheme.of(context).colorScheme;
+    final effectiveColor = color ?? colorScheme.primary;
+    return ShadBadge(
+      backgroundColor: Colors.transparent,
+      foregroundColor: effectiveColor,
+      padding: EdgeInsets.zero,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: effectiveColor),
+          const SizedBox(width: 4),
+          Text('$count', style: TextStyle(fontWeight: fontWeight)),
+        ],
+      ),
     );
   }
 }
@@ -44,12 +58,11 @@ class RecommendBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return CountBadge(
       count: count,
-      icon: Icons.thumb_up,
-      color: AppColors.recommendColor(count, colorScheme),
-      fontWeight: AppColors.recommendWeight(count),
+      icon: LucideIcons.thumbsUp,
+      color: _recommendColor(count),
+      fontWeight: _recommendWeight(count),
     );
   }
 }
@@ -62,8 +75,8 @@ class CommentBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return CountBadge(
       count: count,
-      icon: Icons.chat_bubble_outline,
-      color: Theme.of(context).colorScheme.tertiary,
+      icon: LucideIcons.messageCircle,
+      color: ShadTheme.of(context).colorScheme.mutedForeground,
     );
   }
 }
@@ -76,8 +89,8 @@ class ViewBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return CountBadge(
       count: count,
-      icon: Icons.remove_red_eye,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      icon: LucideIcons.eye,
+      color: ShadTheme.of(context).colorScheme.mutedForeground,
     );
   }
 }
@@ -87,19 +100,14 @@ class BestBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: AppSpacing.edgeH8V4,
-      decoration: BoxDecoration(
-        color: AppColors.recommendColor(100, Theme.of(context).colorScheme),
-        borderRadius: AppRadius.borderRadiusSm,
+    return ShadBadge(
+      backgroundColor: _recommendColor(100),
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
-      child: Text(
-        'BEST',
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+      child: const Text('BEST', style: TextStyle(fontWeight: FontWeight.w700)),
     );
   }
 }

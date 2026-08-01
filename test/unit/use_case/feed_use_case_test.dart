@@ -1,8 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/community_repo.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
@@ -215,6 +218,109 @@ void main() {
       expect(page.next!.perSourceTokens[CommunityId.humoruniv], '2');
       expect(page.next!.perSourceTokens[CommunityId.dogdrip], isNull);
       expect(page.next!.hasMore, isTrue);
+    });
+  });
+
+  group('FeedUseCase.getPostDetail', () {
+    LoadedPostDetail loaded({
+      List<ContentBlock> blocks = const [],
+      List<String> imageUrls = const [],
+      List<Comment> comments = const [],
+    }) => LoadedPostDetail(
+      id: 1,
+      title: 't',
+      author: 'a',
+      date: DateTime(2026),
+      contentHtml: '',
+      contentBlocks: blocks,
+      imageUrls: imageUrls,
+      recommendCount: 0,
+      notRecommendCount: 0,
+      viewCount: 0,
+      commentCount: comments.length,
+      comments: comments,
+    );
+
+    test('returns LoadedPostDetail on successful non-empty detail', () async {
+      when(() => humorunivRepo.fetchDetail('1')).thenAnswer(
+        (_) async => loaded(imageUrls: const ['https://e.com/x.jpg']),
+      );
+
+      final result = await useCase.getPostDetail(
+        community: CommunityId.humoruniv,
+        id: '1',
+      );
+
+      expect(result, isA<LoadedPostDetail>());
+    });
+
+    test('returns ErrorPostDetail when repo throws', () async {
+      when(() => humorunivRepo.fetchDetail('1')).thenAnswer(
+        (_) async => throw const NetworkFailure('connection timed out'),
+      );
+
+      final result = await useCase.getPostDetail(
+        community: CommunityId.humoruniv,
+        id: '1',
+      );
+
+      expect(result, isA<ErrorPostDetail>());
+      final err = result as ErrorPostDetail;
+      expect(err.community, CommunityId.humoruniv);
+      expect(err.failure, isA<NetworkFailure>());
+      expect(err.id, 1);
+    });
+
+    test(
+      'returns ErrorPostDetail(ParseFailure) when detail looks empty (block)',
+      () async {
+        when(() => humorunivRepo.fetchDetail('1')).thenAnswer(
+          (_) async => loaded(), // empty content/images/comments
+        );
+
+        final result = await useCase.getPostDetail(
+          community: CommunityId.humoruniv,
+          id: '1',
+        );
+
+        expect(result, isA<ErrorPostDetail>());
+        expect((result as ErrorPostDetail).failure, isA<ParseFailure>());
+      },
+    );
+
+    test('returns ErrorPostDetail when community has no repo', () async {
+      final result = await useCase.getPostDetail(
+        community: CommunityId.ppomppu,
+        id: '1',
+      );
+
+      expect(result, isA<ErrorPostDetail>());
+      expect((result as ErrorPostDetail).failure, isA<ServerFailure>());
+    });
+
+    test('non-empty post with comments is not treated as block', () async {
+      when(() => humorunivRepo.fetchDetail('1')).thenAnswer(
+        (_) async => loaded(
+          comments: [
+            Comment(
+              id: 1,
+              author: 'a',
+              content: 'c',
+              date: DateTime(2026),
+              recommendCount: 0,
+              isBest: false,
+              replies: const [],
+            ),
+          ],
+        ),
+      );
+
+      final result = await useCase.getPostDetail(
+        community: CommunityId.humoruniv,
+        id: '1',
+      );
+
+      expect(result, isA<LoadedPostDetail>());
     });
   });
 }

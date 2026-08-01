@@ -57,7 +57,7 @@ DogdripImpl _repo(String id, String fixtureFile) => DogdripImpl(
   htmlClient: _FixtureHtmlService({id: _read('dogdrip/$fixtureFile.html')}),
 );
 
-Future<PostDetail> _detail(String id, String fixtureFile) async {
+Future<LoadedPostDetail> _detail(String id, String fixtureFile) async {
   return _repo(id, fixtureFile).fetchDetail(id);
 }
 

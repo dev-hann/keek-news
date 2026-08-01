@@ -90,3 +90,19 @@ either.fold(
 Base: `very_good_analysis` (see `analysis_options.yaml`).
 
 Run `make fix` to auto-format and apply safe lint fixes.
+
+## shadcn_ui Style Rules
+
+- App root is `ShadApp.router` (`lib/app.dart`), not `MaterialApp`. Material `ThemeData` is derived automatically by `ShadApp` so legacy Material widgets keep working.
+- `ScaffoldMessenger` is NOT auto-provided by `ShadApp` (it uses `WidgetsApp`). The app's `builder` callback wraps the child in `ScaffoldMessenger` to support snackbars.
+- Theme tokens come from `ShadTheme.of(context)`:
+  - `colorScheme.foreground` / `mutedForeground` — text
+  - `colorScheme.muted` — neutral/skeleton
+  - `colorScheme.primary` / `primaryForeground` — brand
+  - `colorScheme.border` — dividers
+  - `colorScheme.accent` — hover/pressed
+- Text styles use shadcn semantic names: `textTheme.p` (body), `textTheme.small`, `textTheme.h4`, etc. Material `Theme.of(context).textTheme.*` still works for legacy code.
+- Icons use `LucideIcons.foo` (re-exported via `package:shadcn_ui/shadcn_ui.dart`). No Material `Icons.*`.
+- Spacing is raw literals (`EdgeInsets.all(16)`), no central spacing tokens.
+- For new widgets, prefer shadcn primitives (`ShadCard`, `ShadButton`, `ShadBadge`, `ShadAvatar`, `ShadAlert`, `ShadSeparator`, `ShadIconButton`, `ShadSheet`, `ShadDialog`, `ShadTabs`). Compose multiple primitives when no 1:1 match exists.
+- For widget tests, use `shadHarness(body)` or `shadApp({home, navigatorKey})` from `test/helpers/shad_harness.dart`. Plain `MaterialApp` will not provide `ShadTheme`.

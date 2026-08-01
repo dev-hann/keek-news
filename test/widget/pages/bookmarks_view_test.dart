@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
@@ -13,8 +14,10 @@ import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../helpers/post_detail_helper.dart';
+import '../../helpers/shad_harness.dart';
 
 class MockBookmarkRepository extends Mock implements BookmarkRepo {}
 
@@ -33,6 +36,21 @@ Bookmark _bookmark({
     savedAt: DateTime(2026, 7, 30, 10),
   );
 }
+
+LoadedPostDetail _loadedDetail() => LoadedPostDetail(
+  id: 0,
+  title: '',
+  author: '',
+  date: DateTime(2026),
+  contentHtml: '',
+  contentBlocks: const [],
+  imageUrls: const [],
+  recommendCount: 0,
+  notRecommendCount: 0,
+  viewCount: 0,
+  commentCount: 0,
+  comments: const [],
+);
 
 void main() {
   late MockBookmarkRepository repo;
@@ -53,7 +71,7 @@ void main() {
       ),
     );
     when(() => repo.getAll()).thenAnswer((_) async => const []);
-    setupPostDetailFailureMock(mockPostDetail);
+    setupPostDetailResponseMock(mockPostDetail, _loadedDetail);
     if (di.sl.isRegistered<FeedUseCase>()) {
       di.sl.unregister<FeedUseCase>();
     }
@@ -96,7 +114,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: BookmarksView()),
+        child: shadApp(home: const ScaffoldMessenger(child: BookmarksView())),
       ),
     );
     await tester.pumpAndSettle(const Duration(milliseconds: 300));
@@ -125,7 +143,7 @@ void main() {
       final container = makeContainer();
       await pumpScreen(tester, container);
 
-      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmark), findsOneWidget);
     });
 
     testWidgets('should render FeedCard for each bookmark', (tester) async {
@@ -150,7 +168,7 @@ void main() {
       final container = makeContainer();
       await pumpScreen(tester, container, bookmarks: [_bookmark()]);
 
-      expect(find.byIcon(Icons.bookmark), findsOneWidget);
+      expect(find.byIcon(LucideIcons.bookmarkCheck), findsOneWidget);
     });
 
     testWidgets('should remove bookmark when bookmark icon tapped', (
@@ -163,7 +181,7 @@ void main() {
       ).thenAnswer((_) async {});
       await pumpScreen(tester, container, bookmarks: [bm]);
 
-      await tester.tap(find.byIcon(Icons.bookmark));
+      await tester.tap(find.byIcon(LucideIcons.bookmarkCheck));
       await tester.pumpAndSettle();
 
       verify(() => repo.remove(CommunityId.humoruniv, '1')).called(1);
@@ -179,7 +197,7 @@ void main() {
         bookmarks: [_bookmark(url: '/copied-url')],
       );
 
-      await tester.tap(find.byIcon(Icons.link));
+      await tester.tap(find.byIcon(LucideIcons.link));
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(clipboardContent, 'https://m.humoruniv.com/copied-url');
@@ -189,7 +207,7 @@ void main() {
       final container = makeContainer();
       await pumpScreen(tester, container, bookmarks: [_bookmark()]);
 
-      await tester.tap(find.byIcon(Icons.link));
+      await tester.tap(find.byIcon(LucideIcons.link));
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(SnackBar), findsOneWidget);

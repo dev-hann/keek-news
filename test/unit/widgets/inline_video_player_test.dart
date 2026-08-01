@@ -4,6 +4,7 @@ import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
 import 'package:keek_news/widgets/video_surface.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -19,7 +20,7 @@ void main() {
       const block = VideoBlock(url: 'https://example.com/video.mp4');
       await tester.pumpWidget(_wrapped(const InlineVideoPlayer(block: block)));
       await tester.pump();
-      expect(find.byIcon(Icons.play_arrow), findsWidgets);
+      expect(find.byIcon(LucideIcons.play), findsWidgets);
     });
 
     testWidgets('should show muted icon by default for VideoBlock', (
@@ -28,14 +29,14 @@ void main() {
       const block = VideoBlock(url: 'https://example.com/video.mp4');
       await tester.pumpWidget(_wrapped(const InlineVideoPlayer(block: block)));
       await tester.pump();
-      expect(find.byIcon(Icons.volume_off), findsOneWidget);
+      expect(find.byIcon(LucideIcons.volumeX), findsOneWidget);
     });
 
     testWidgets('should show fullscreen icon for VideoBlock', (tester) async {
       const block = VideoBlock(url: 'https://example.com/video.mp4');
       await tester.pumpWidget(_wrapped(const InlineVideoPlayer(block: block)));
       await tester.pump();
-      expect(find.byIcon(Icons.fullscreen), findsOneWidget);
+      expect(find.byIcon(LucideIcons.maximize), findsOneWidget);
     });
 
     testWidgets('should show time display for VideoBlock', (tester) async {
@@ -54,8 +55,8 @@ void main() {
       );
       await tester.pumpWidget(_wrapped(const InlineVideoPlayer(block: block)));
       await tester.pump();
-      expect(find.byIcon(Icons.volume_off), findsNothing);
-      expect(find.byIcon(Icons.fullscreen), findsNothing);
+      expect(find.byIcon(LucideIcons.volumeX), findsNothing);
+      expect(find.byIcon(LucideIcons.maximize), findsNothing);
       expect(find.text('0:00 / 0:00'), findsNothing);
     });
 
@@ -70,7 +71,7 @@ void main() {
           _wrapped(const InlineVideoPlayer(block: block)),
         );
         await tester.pump();
-        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+        expect(find.byIcon(LucideIcons.play), findsOneWidget);
       },
     );
 
@@ -89,7 +90,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.byType(InlineVideoPlayer), findsOneWidget);
-        expect(find.byIcon(Icons.fullscreen), findsOneWidget);
+        expect(find.byIcon(LucideIcons.maximize), findsOneWidget);
       },
     );
 

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/widgets/scroll_to_top_button.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   Widget harness({required VoidCallback onTap, bool visible = true}) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: ScrollToTopButton(onTap: onTap, visible: visible),
-        ),
+    return shadHarness(
+      Center(
+        child: ScrollToTopButton(onTap: onTap, visible: visible),
       ),
     );
   }
@@ -16,7 +17,7 @@ void main() {
   group('ScrollToTopButton', () {
     testWidgets('should display the up-arrow icon', (tester) async {
       await tester.pumpWidget(harness(onTap: () {}));
-      expect(find.byIcon(Icons.arrow_upward_rounded), findsOneWidget);
+      expect(find.byIcon(LucideIcons.arrowUp), findsOneWidget);
     });
 
     testWidgets('should be fully opaque when visible', (tester) async {

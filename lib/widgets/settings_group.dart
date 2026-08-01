@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_radius.dart';
-import 'package:keek_news/const/app_spacing.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class SettingsGroup extends StatelessWidget {
   const SettingsGroup({required this.title, required this.children, super.key});
@@ -9,36 +8,32 @@ class SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.p16,
-        vertical: AppSpacing.p8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(
-              left: AppSpacing.p4,
-              bottom: AppSpacing.p8,
-            ),
-            child: Text(title, style: Theme.of(context).textTheme.titleSmall),
+            padding: const EdgeInsets.only(left: 4, bottom: 8),
+            child: Text(title, style: mTheme.textTheme.titleSmall),
           ),
           Material(
-            color: Theme.of(context).colorScheme.surfaceContainer,
-            borderRadius: AppRadius.borderRadiusLg,
-            child: Column(children: _buildChildrenWithDividers()),
+            color: mTheme.colorScheme.surfaceContainer,
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            child: Column(children: _buildChildrenWithDividers(theme)),
           ),
         ],
       ),
     );
   }
 
-  List<Widget> _buildChildrenWithDividers() {
+  List<Widget> _buildChildrenWithDividers(ShadThemeData theme) {
     final result = <Widget>[];
     for (var i = 0; i < children.length; i++) {
       if (i > 0) {
-        result.add(const Divider(height: 1, indent: AppSpacing.p16));
+        result.add(ShadSeparator.horizontal(color: theme.colorScheme.border));
       }
       result.add(children[i]);
     }

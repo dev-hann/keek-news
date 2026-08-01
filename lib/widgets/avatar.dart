@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:keek_news/const/app_sizes.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class Avatar extends StatelessWidget {
   const Avatar({super.key, this.imageUrl, this.radius});
@@ -9,18 +8,15 @@ class Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final r = radius ?? AppSizes.avatarSmall / 2;
-    return CircleAvatar(
-      radius: r,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-      backgroundImage: imageUrl != null ? NetworkImage(imageUrl!) : null,
-      child: imageUrl == null
-          ? Icon(
-              Icons.person,
-              size: r,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            )
-          : null,
+    final r = radius ?? 32 / 2;
+    return ShadAvatar(
+      imageUrl,
+      size: Size.fromRadius(r),
+      placeholder: Icon(
+        LucideIcons.user,
+        size: r,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }

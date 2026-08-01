@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_sizes.dart';
-import 'package:keek_news/const/app_spacing.dart';
 import 'package:keek_news/model/community.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class CommunityTabBar extends StatelessWidget {
   const CommunityTabBar({
@@ -14,46 +13,30 @@ class CommunityTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      height: AppSizes.minTouchTarget,
-      color: theme.colorScheme.surfaceContainer,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.p8),
-        itemCount: communities.length,
-        itemBuilder: (context, index) {
-          final c = communities[index];
-          final selected = index == selectedIndex;
-          return GestureDetector(
-            onTap: () => onChanged(index),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.p16),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    width: 2,
-                    color: selected
-                        ? Color(c.brandColorArgb)
-                        : Colors.transparent,
-                  ),
-                ),
-              ),
-              child: Text(
-                c.shortName,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: selected
-                      ? Color(c.brandColorArgb)
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+    return ShadTabs<int>(
+      value: selectedIndex,
+      scrollable: true,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      onChanged: onChanged,
+      tabs: [
+        for (var i = 0; i < communities.length; i++)
+          ShadTab(
+            value: i,
+            height: 44,
+            backgroundColor: Colors.transparent,
+            selectedBackgroundColor: Colors.transparent,
+            hoverBackgroundColor: Colors.transparent,
+            selectedHoverBackgroundColor: Colors.transparent,
+            foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+            selectedForegroundColor: Color(communities[i].brandColorArgb),
+            textStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-          );
-        },
-      ),
+            child: Text(communities[i].shortName),
+          ),
+      ],
     );
   }
 }

@@ -132,8 +132,7 @@ final mergedFeedProvider =
 
 typedef MergedDetailKey = ({CommunityId community, String id});
 
-typedef MergedDetailMap =
-    Map<MergedDetailKey, AsyncValue<Either<Failure, PostDetail>>>;
+typedef MergedDetailMap = Map<MergedDetailKey, AsyncValue<PostDetail>>;
 
 class MergedDetailNotifier extends Notifier<MergedDetailMap> {
   @override
@@ -144,20 +143,18 @@ class MergedDetailNotifier extends Notifier<MergedDetailMap> {
       final existing = state[key]!;
       if (existing.isLoading || existing.hasValue) return;
     }
-    state = {
-      ...state,
-      key: const AsyncValue<Either<Failure, PostDetail>>.loading(),
-    };
-    final result = await sl<FeedUseCase>().getPostDetail(
+    state = {...state, key: const AsyncValue<PostDetail>.loading()};
+    final detail = await sl<FeedUseCase>().getPostDetail(
       community: key.community,
       id: key.id,
     );
     if (!state.containsKey(key)) return;
-    state = {
-      ...state,
-      key: AsyncValue<Either<Failure, PostDetail>>.data(result),
-    };
+    state = {...state, key: AsyncValue<PostDetail>.data(detail)};
   }
+
+  /// Clears all cached detail state so errored cards get a fresh fetch on the
+  /// next feed reload. Re-fetching happens lazily via ensureDetailsLoaded.
+  void clear() => state = const {};
 }
 
 final mergedDetailProvider =

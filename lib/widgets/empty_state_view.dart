@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-
-import 'package:keek_news/const/app_spacing.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class EmptyStateView extends StatelessWidget {
   const EmptyStateView({
     this.message,
     this.title,
     this.subtitle,
-    this.icon = Icons.inbox_outlined,
+    this.icon = LucideIcons.inbox,
     super.key,
   });
 
@@ -18,31 +17,32 @@ class EmptyStateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
     final effectiveTitle = title ?? message ?? '';
 
     return Center(
       child: Padding(
-        padding: AppSpacing.edgeAll24,
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),
-            AppSpacing.sbH16,
+            Icon(icon, size: 48, color: theme.colorScheme.mutedForeground),
+            const SizedBox(height: 16),
             Text(
               effectiveTitle,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
+              style: mTheme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.foreground,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
-              AppSpacing.sbH8,
+              const SizedBox(height: 8),
               Text(
                 subtitle!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                style: theme.textTheme.small.copyWith(
+                  color: theme.colorScheme.mutedForeground,
                 ),
                 textAlign: TextAlign.center,
               ),

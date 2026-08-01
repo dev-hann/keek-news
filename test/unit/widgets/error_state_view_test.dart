@@ -1,37 +1,29 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/widgets/error_state_view.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+
+import '../../helpers/shad_harness.dart';
 
 void main() {
   group('ErrorStateView', () {
     testWidgets('should display error message', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: ErrorStateView(message: '에러 발생')),
-        ),
+        shadHarness(const ErrorStateView(message: '에러 발생')),
       );
 
       expect(find.text('에러 발생'), findsOneWidget);
     });
 
     testWidgets('should display error icon', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: ErrorStateView(message: '에러')),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(const ErrorStateView(message: '에러')));
 
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.byIcon(LucideIcons.alertCircle), findsOneWidget);
     });
 
     testWidgets('should not show retry button when onRetry is null', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: ErrorStateView(message: '에러')),
-        ),
-      );
+      await tester.pumpWidget(shadHarness(const ErrorStateView(message: '에러')));
 
       expect(find.text('다시 시도'), findsNothing);
     });
@@ -40,11 +32,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ErrorStateView(message: '에러', onRetry: () {}),
-          ),
-        ),
+        shadHarness(ErrorStateView(message: '에러', onRetry: () {})),
       );
 
       expect(find.text('다시 시도'), findsOneWidget);
@@ -53,10 +41,8 @@ void main() {
     testWidgets('should call onRetry when retry button tapped', (tester) async {
       var retried = false;
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ErrorStateView(message: '에러', onRetry: () => retried = true),
-          ),
+        shadHarness(
+          ErrorStateView(message: '에러', onRetry: () => retried = true),
         ),
       );
 

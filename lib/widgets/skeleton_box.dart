@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:keek_news/const/app_sizes.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class SkeletonBox extends StatelessWidget {
   const SkeletonBox({super.key, this.width, this.height, this.borderRadius});
@@ -11,9 +11,9 @@ class SkeletonBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: width,
-      height: height ?? AppSizes.minTouchTarget,
+      height: height ?? 44,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: ShadTheme.of(context).colorScheme.muted,
         borderRadius: borderRadius ?? BorderRadius.zero,
       ),
     );

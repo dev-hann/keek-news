@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:keek_news/widgets/retry_controller.dart';
+import 'package:keek_news/service/retry_controller.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 
 class RetryableNetworkImage extends StatefulWidget {
   const RetryableNetworkImage({
@@ -10,7 +11,7 @@ class RetryableNetworkImage extends StatefulWidget {
     this.height,
     this.maxAttempts = 3,
     this.retryDelay = const Duration(milliseconds: 500),
-    this.errorIcon = Icons.refresh,
+    this.errorIcon = LucideIcons.refreshCw,
     this.placeholderColor,
     this.foregroundColor,
     this.borderRadius,
@@ -100,10 +101,12 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = ShadTheme.of(context);
+    final mTheme = Theme.of(context);
     final background =
-        widget.placeholderColor ?? colorScheme.surfaceContainerHighest;
-    final foreground = widget.foregroundColor ?? colorScheme.onSurfaceVariant;
+        widget.placeholderColor ?? mTheme.colorScheme.surfaceContainerHighest;
+    final foreground =
+        widget.foregroundColor ?? theme.colorScheme.mutedForeground;
 
     final Widget content;
     if (_controller!.isExhausted) {
@@ -175,6 +178,7 @@ class _RetryErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
     return Material(
       color: background,
       child: InkWell(
@@ -190,9 +194,7 @@ class _RetryErrorView extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '탭하여 재시도',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: foreground),
+                  style: theme.textTheme.small.copyWith(color: foreground),
                 ),
               ],
             ],

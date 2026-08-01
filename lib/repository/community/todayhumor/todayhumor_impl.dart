@@ -27,13 +27,13 @@ class TodayhumorImpl extends HtmlCommunityRepo {
   int get listPageSize => 10;
 
   @override
-  Future<PostDetail> fetchDetail(String id) async {
+  Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/board/view.php?table=humorbest&no=$id');
     final doc = html_parser.parse(html);
     final contentEl = doc.querySelector('.viewContent');
     final counts = _extractCounts(doc);
 
-    return PostDetail(
+    return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),

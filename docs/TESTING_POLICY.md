@@ -8,6 +8,19 @@ Every implementation step should be followed by `flutter test`. Write a test, se
 
 Run `make check` before committing — the husky pre-commit hook enforces `dart format` + `flutter analyze` + `flutter test` with zero errors.
 
+### No-Skip Rule (enforced)
+
+**Unit, widget, and integration tests must never be skipped and must all pass.** `flutter test` output must show `~0` (zero skipped). Do not use `skip:` or `@Skip` in:
+
+- `test/unit/`
+- `test/widget/`
+- `test/integration/`
+- `integration_test/`
+
+If a test is broken or flaky, **fix it** — do not skip it. A skipped test is a red flag equivalent to a failing test during code review.
+
+The **only** opt-in category is **smoke tests** (`test/smoke/`), gated by `SMOKE=1` and run via `make smoke`. Smoke is exempt because it hits live network endpoints and is intentionally not part of the default suite.
+
 ## TDD Cycle (recommended for logic)
 
 1. **RED** — Write a failing test. Run it. Confirm it fails.
@@ -109,7 +122,7 @@ Full app tests on a device/emulator. Use Provider overrides to inject determinis
 
 ### 5. Smoke Tests (`test/smoke/`)
 
-Real network tests verifying parsers against live servers. Guarded by `SMOKE=1` env var (skipped by default). Run: `SMOKE=1 flutter test test/smoke/`.
+Real network tests verifying parsers against live servers. The **only** test category permitted to use `skip:` — gated by `SMOKE=1` env var so the default `flutter test` suite reports `~0` skipped. Run: `SMOKE=1 flutter test test/smoke/` or `make smoke`. All other test levels are bound by the No-Skip Rule.
 
 ## Fixture Management
 
@@ -152,6 +165,7 @@ Parsers MUST never throw — always return a valid result.
 
 ## Test Anti-Patterns
 
+- **Skipping tests** (`skip:`, `@Skip`) in unit/widget/integration — banned by the No-Skip Rule. Fix or delete; never gate out.
 - **Mock echo**: Asserting the exact value set up in `when(...)`. Tests the mock.
 - **No assertions**: A test without `expect`.
 - **Tautology**: Asserting always-true conditions.

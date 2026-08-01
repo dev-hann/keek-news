@@ -7,7 +7,7 @@ abstract class CommunityRepo {
 
   Future<CommunityListResult> fetchLatest({String? pageToken});
 
-  Future<PostDetail> fetchDetail(String id);
+  Future<LoadedPostDetail> fetchDetail(String id);
 }
 
 class CommunityListResult {

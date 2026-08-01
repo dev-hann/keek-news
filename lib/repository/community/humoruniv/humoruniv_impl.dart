@@ -37,7 +37,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
   }
 
   @override
-  Future<PostDetail> fetchDetail(String id) async {
+  Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/board/read.html?table=pds&number=$id');
     final doc = html_parser.parse(html);
 
@@ -49,7 +49,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
       scanResult = const ContentScanResult(blocks: [], imageUrls: []);
     }
 
-    return PostDetail(
+    return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
