@@ -35,16 +35,32 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _mobileUA =
     'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/125.0.0.0 Mobile Safari/537.36';
+    'Chrome/138.0.0.0 Mobile Safari/537.36';
 
 const _desktopUA =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-    '(KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36';
+    '(KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36';
 
-Dio _dio({required String baseUrl, String ua = _mobileUA}) => Dio(
+const _browserHeaders = <String, String>{
+  'Accept':
+      'text/html,application/xhtml+xml,application/xml;q=0.9,'
+      'image/avif,image/webp,*/*;q=0.8',
+  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'same-origin',
+  'Sec-Fetch-User': '?1',
+  'Upgrade-Insecure-Requests': '1',
+};
+
+Dio _dio({
+  required String baseUrl,
+  String ua = _mobileUA,
+  Map<String, String> extraHeaders = const {},
+}) => Dio(
   BaseOptions(
     baseUrl: baseUrl,
-    headers: {'User-Agent': ua},
+    headers: {'User-Agent': ua, ...extraHeaders},
     responseType: ResponseType.bytes,
   ),
 );
@@ -56,19 +72,46 @@ Future<void> configureDependencies() async {
   sl.registerSingleton<SharedPreferences>(prefs);
 
   final humorunivHtml = DioHtmlService(
-    dio: _dio(baseUrl: 'https://m.humoruniv.com'),
+    dio: _dio(
+      baseUrl: 'https://m.humoruniv.com',
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://m.humoruniv.com/board/pds/',
+      },
+    ),
     encoding: 'euc-kr',
   );
   final todayhumorHtml = DioHtmlService(
-    dio: _dio(baseUrl: 'https://www.todayhumor.co.kr', ua: _desktopUA),
+    dio: _dio(
+      baseUrl: 'https://www.todayhumor.co.kr',
+      ua: _desktopUA,
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://www.todayhumor.co.kr/board/humorbest.php',
+      },
+    ),
     encoding: 'utf-8',
   );
   final ppomppuHtml = DioHtmlService(
-    dio: _dio(baseUrl: 'https://www.ppomppu.co.kr', ua: _desktopUA),
+    dio: _dio(
+      baseUrl: 'https://www.ppomppu.co.kr',
+      ua: _desktopUA,
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://www.ppomppu.co.kr/zboard/zboard.php?id=humor',
+      },
+    ),
     encoding: 'euc-kr',
   );
   final dogdripHtml = DioHtmlService(
-    dio: _dio(baseUrl: 'https://www.dogdrip.net', ua: _desktopUA),
+    dio: _dio(
+      baseUrl: 'https://www.dogdrip.net',
+      ua: _desktopUA,
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://www.dogdrip.net/index.php?mid=dogdrip',
+      },
+    ),
     encoding: 'utf-8',
   );
 

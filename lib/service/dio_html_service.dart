@@ -9,22 +9,46 @@ import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/service/html_service.dart';
 import 'package:keek_news/service/media_classifier.dart';
 
+typedef CharsetDecode =
+    Future<String> Function(String encoding, Uint8List bytes);
+
+Future<String> _defaultCharsetDecode(String encoding, Uint8List bytes) =>
+    CharsetConverter.decode(encoding, bytes);
+
 class DioHtmlService extends HtmlService {
-  DioHtmlService({required Dio dio, required String encoding})
-    : _dio = dio,
-      _encoding = encoding;
+  DioHtmlService({
+    required Dio dio,
+    required String encoding,
+    List<Duration> retryDelays = const [
+      Duration(milliseconds: 500),
+      Duration(milliseconds: 1500),
+    ],
+    CharsetDecode decode = _defaultCharsetDecode,
+  }) : _dio = dio,
+       _encoding = encoding,
+       _retryDelays = retryDelays,
+       _decode = decode;
 
   final Dio _dio;
   final String _encoding;
+  final List<Duration> _retryDelays;
+  final CharsetDecode _decode;
 
   @override
   Future<String> get(String path) async {
-    try {
-      final response = await _dio.get<List<int>>(path);
-      final bytes = response.data ?? <int>[];
-      return CharsetConverter.decode(_encoding, Uint8List.fromList(bytes));
-    } on DioException catch (e) {
-      throw _toFailure(e);
+    for (var attempt = 0; ; attempt++) {
+      try {
+        final response = await _dio.get<List<int>>(path);
+        final bytes = response.data ?? <int>[];
+        return _decode(_encoding, Uint8List.fromList(bytes));
+      } on DioException catch (e) {
+        final canRetry =
+            e.type == DioExceptionType.badResponse &&
+            e.response?.statusCode == 503 &&
+            attempt < _retryDelays.length;
+        if (!canRetry) throw _toFailure(e);
+        await Future<void>.delayed(_retryDelays[attempt]);
+      }
     }
   }
 

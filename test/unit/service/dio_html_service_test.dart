@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:html/dom.dart';
@@ -8,6 +11,47 @@ DioHtmlService _newClient({Dio? dio}) => DioHtmlService(
   dio: dio ?? Dio(BaseOptions(baseUrl: 'https://example.test')),
   encoding: 'utf-8',
 );
+
+class _Canned {
+  const _Canned({this.statusCode = 200, this.body = ''});
+  final int statusCode;
+  final String body;
+}
+
+class _QueuedAdapter implements HttpClientAdapter {
+  _QueuedAdapter(this._responses);
+  final List<_Canned> _responses;
+  int _i = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final r = _responses[_i++];
+    final bytes = utf8.encode(r.body);
+    return ResponseBody(
+      Stream.value(Uint8List.fromList(bytes)),
+      r.statusCode,
+      headers: {
+        Headers.contentLengthHeader: ['${bytes.length}'],
+      },
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+Dio _dioWith(List<_Canned> responses) => Dio(
+  BaseOptions(
+    baseUrl: 'https://example.test',
+    responseType: ResponseType.bytes,
+  ),
+)..httpClientAdapter = _QueuedAdapter(responses);
+
+Future<String> _identityDecode(_, Uint8List bytes) async => utf8.decode(bytes);
 
 void main() {
   group('DioHtmlService', () {
@@ -101,6 +145,51 @@ void main() {
         final parent = Element.html('<div>nothing</div>');
         expect(client.statOf(parent, '.num'), 0);
       });
+    });
+  });
+
+  group('DioHtmlService 503 retry', () {
+    test('retries on 503 then succeeds', () async {
+      final client = DioHtmlService(
+        dio: _dioWith([
+          const _Canned(statusCode: 503),
+          const _Canned(statusCode: 503),
+          const _Canned(body: '<html>ok</html>'),
+        ]),
+        encoding: 'utf-8',
+        retryDelays: const [Duration.zero, Duration.zero],
+        decode: _identityDecode,
+      );
+
+      final html = await client.get('/test');
+
+      expect(html, '<html>ok</html>');
+    });
+
+    test('throws ServerFailure when all retries exhausted', () async {
+      final client = DioHtmlService(
+        dio: _dioWith([
+          const _Canned(statusCode: 503),
+          const _Canned(statusCode: 503),
+          const _Canned(statusCode: 503),
+        ]),
+        encoding: 'utf-8',
+        retryDelays: const [Duration.zero, Duration.zero],
+        decode: _identityDecode,
+      );
+
+      await expectLater(client.get('/test'), throwsA(isA<ServerFailure>()));
+    });
+
+    test('does not retry on non-503 client error', () async {
+      final client = DioHtmlService(
+        dio: _dioWith([const _Canned(statusCode: 404)]),
+        encoding: 'utf-8',
+        retryDelays: const [Duration.zero, Duration.zero],
+        decode: _identityDecode,
+      );
+
+      await expectLater(client.get('/test'), throwsA(isA<ServerFailure>()));
     });
   });
 }
