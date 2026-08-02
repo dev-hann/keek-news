@@ -104,4 +104,59 @@ void main() {
       expect(best.date, DateTime(2026, 6, 27, 18, 57, 7));
     });
   });
+
+  group('HumorunivImpl.fetchDetail NSFW placeholder leak', () {
+    // Post 1419769 has a best-comment whose image was AI-flagged by
+    // humoruniv's "너굴맨" moderation, producing a placeholder block
+    // (class .comment_file > #racy_show_*) with strings like
+    // "히든처리 되었습니다" / "너굴맨 설정" / "본문 너굴맨 한꺼번에 제거".
+    // The parser must NOT pull those into the comment content.
+    final forbidden = ['히든처리', '너굴맨', '이미지 보기', '너굴맨 설정', '본문 너굴맨', '한꺼번에 제거'];
+
+    late HumorunivImpl repo;
+    setUp(() {
+      repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1419769.html'),
+        }),
+      );
+    });
+
+    test(
+      'best-comment content does not contain NSFW placeholder text',
+      () async {
+        final detail = await repo.fetchDetail('1419769');
+
+        final best = detail.comments.where((c) => c.isBest).toList();
+        expect(
+          best,
+          isNotEmpty,
+          reason: 'fixture must contain at least one best comment',
+        );
+
+        for (final c in detail.comments) {
+          for (final keyword in forbidden) {
+            expect(
+              c.content,
+              isNot(contains(keyword)),
+              reason:
+                  'comment by "${c.author}" leaked placeholder "$keyword": '
+                  '${c.content}',
+            );
+          }
+        }
+      },
+    );
+
+    test('best-comment preserves real text alongside hidden media', () async {
+      final detail = await repo.fetchDetail('1419769');
+
+      final best = detail.comments.firstWhere((c) => c.isBest);
+      expect(
+        best.content,
+        contains('뭐야'),
+        reason: 'real best-comment text must survive: ${best.content}',
+      );
+    });
+  });
 }

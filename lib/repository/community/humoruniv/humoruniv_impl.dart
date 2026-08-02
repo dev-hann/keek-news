@@ -272,7 +272,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
             .querySelectorAll(
               '.recomm_btn, .btn_move, .comment_num, .comment_thumb_notice, '
               '.comment_img_div, .comment_crop_wrap, .comment_crop_href, '
-              '.comment_crop_href_mp4',
+              '.comment_crop_href_mp4, .comment_file',
             )
             .forEach((el) => el.remove());
         content = clone.text.trim();
