@@ -13,9 +13,10 @@ DioHtmlService _newClient({Dio? dio}) => DioHtmlService(
 );
 
 class _Canned {
-  const _Canned({this.statusCode = 200, this.body = ''});
+  const _Canned({this.statusCode = 200, this.body = '', this.headers});
   final int statusCode;
   final String body;
+  final Map<String, String>? headers;
 }
 
 class _QueuedAdapter implements HttpClientAdapter {
@@ -36,6 +37,8 @@ class _QueuedAdapter implements HttpClientAdapter {
       r.statusCode,
       headers: {
         Headers.contentLengthHeader: ['${bytes.length}'],
+        for (final entry in (r.headers ?? const {}).entries)
+          entry.key: [entry.value],
       },
     );
   }
@@ -171,14 +174,36 @@ void main() {
         dio: _dioWith([
           const _Canned(statusCode: 503),
           const _Canned(statusCode: 503),
-          const _Canned(statusCode: 503),
+          const _Canned(
+            statusCode: 503,
+            body: '<html>just a moment</html>',
+            headers: {
+              'server': 'cloudflare',
+              'cf-ray': 'abc-ICN',
+              'retry-after': '120',
+            },
+          ),
         ]),
         encoding: 'utf-8',
         retryDelays: const [Duration.zero, Duration.zero],
         decode: _identityDecode,
       );
 
-      await expectLater(client.get('/test'), throwsA(isA<ServerFailure>()));
+      ServerFailure? caught;
+      try {
+        await client.get('/716882815');
+      } on ServerFailure catch (e) {
+        caught = e;
+      }
+
+      expect(caught, isNotNull);
+      expect(caught!.http, isNotNull);
+      expect(caught.http!.statusCode, 503);
+      expect(caught.http!.headers['server'], 'cloudflare');
+      expect(caught.http!.headers['cf-ray'], 'abc-ICN');
+      expect(caught.http!.headers['retry-after'], '120');
+      expect(caught.http!.requestPath, '/716882815');
+      expect(caught.http!.bodySnippet, contains('just a moment'));
     });
 
     test('does not retry on non-503 client error', () async {
@@ -189,7 +214,41 @@ void main() {
         decode: _identityDecode,
       );
 
-      await expectLater(client.get('/test'), throwsA(isA<ServerFailure>()));
+      ServerFailure? caught;
+      try {
+        await client.get('/missing');
+      } on ServerFailure catch (e) {
+        caught = e;
+      }
+
+      expect(caught, isNotNull);
+      expect(caught!.http?.statusCode, 404);
+      expect(caught.http?.requestPath, '/missing');
+    });
+
+    test('does not capture http diagnostics on connection error', () async {
+      final client = DioHtmlService(
+        dio: Dio(
+          BaseOptions(
+            baseUrl: 'http://invalid.host.that.does.not.exist.example',
+            responseType: ResponseType.bytes,
+            connectTimeout: const Duration(seconds: 2),
+          ),
+        ),
+        encoding: 'utf-8',
+      );
+
+      NetworkFailure? caught;
+      try {
+        await client.get('/test');
+      } on NetworkFailure catch (e) {
+        caught = e;
+      } on ServerFailure {
+        // Some environments surface as ServerFailure; either is acceptable
+        // for this assertion since neither carries http diagnostics.
+      }
+
+      expect(caught?.http, isNull);
     });
   });
 }

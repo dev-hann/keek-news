@@ -65,6 +65,70 @@ void main() {
 
       expect(report, isNot(contains('앱버전')));
     });
+
+    test('omits diagnostics block when failure.http is null', () {
+      final report = formatErrorReport(
+        communityLabel: '개드립',
+        postId: '1',
+        url: 'u',
+        title: 't',
+        failure: const ServerFailure('x'),
+      );
+
+      expect(report, isNot(contains('진단')));
+      expect(report, isNot(contains('cf-ray')));
+    });
+
+    test('includes diagnostics block when failure.http is present', () {
+      final report = formatErrorReport(
+        communityLabel: '개드립',
+        postId: '716882815',
+        url: 'https://www.dogdrip.net/716882815',
+        title: 't',
+        failure: const ServerFailure(
+          '503 boom',
+          http: HttpDiagnostics(
+            statusCode: 503,
+            headers: {
+              'server': 'cloudflare',
+              'cf-ray': 'abc-ICN',
+              'cf-mitigated': 'challenge',
+              'retry-after': '120',
+            },
+            bodySnippet: '<html>just a moment</html>',
+            requestPath: '/716882815',
+          ),
+        ),
+      );
+
+      expect(report, contains('진단:'));
+      expect(report, contains('요청: /716882815'));
+      expect(report, contains('상태코드: 503'));
+      expect(report, contains('server: cloudflare'));
+      expect(report, contains('cf-ray: abc-ICN'));
+      expect(report, contains('cf-mitigated: challenge'));
+      expect(report, contains('retry-after: 120'));
+      expect(report, contains('본문 일부:'));
+      expect(report, contains('<html>just a moment</html>'));
+      expect(report, contains('진단 정보에는'));
+    });
+
+    test('omits header lines that are absent', () {
+      final report = formatErrorReport(
+        communityLabel: '개드립',
+        postId: '1',
+        url: 'u',
+        title: 't',
+        failure: const ServerFailure(
+          'x',
+          http: HttpDiagnostics(statusCode: 500),
+        ),
+      );
+
+      expect(report, contains('상태코드: 500'));
+      expect(report, isNot(contains('cf-ray')));
+      expect(report, isNot(contains('server:')));
+    });
   });
 
   group('formatErrorReport CommunityId displayName sanity', () {

@@ -1,7 +1,8 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:charset_converter/charset_converter.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
@@ -14,6 +15,18 @@ typedef CharsetDecode =
 
 Future<String> _defaultCharsetDecode(String encoding, Uint8List bytes) =>
     CharsetConverter.decode(encoding, bytes);
+
+const _diagnosticHeaderAllowlist = <String>{
+  'server',
+  'cf-ray',
+  'cf-mitigated',
+  'retry-after',
+  'content-type',
+  'date',
+};
+
+const _maxSnippetBytes = 2000;
+const _maxSnippetChars = 500;
 
 class DioHtmlService extends HtmlService {
   DioHtmlService({
@@ -53,18 +66,60 @@ class DioHtmlService extends HtmlService {
   }
 
   Failure _toFailure(DioException e) {
+    final diag = _buildDiagnostics(e);
+    if (diag != null) {
+      debugPrint(
+        '[HttpDiag] ${diag.statusCode ?? '?'} '
+        '${e.requestOptions.method} '
+        '${diag.requestPath ?? e.requestOptions.path} '
+        '${diag.headers['server'] ?? ''} '
+        '${diag.headers['cf-ray'] ?? ''}',
+      );
+    }
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.connectionError:
-        return NetworkFailure(e.message ?? e.type.name);
+        return NetworkFailure(e.message ?? e.type.name, http: diag);
       case DioExceptionType.badCertificate:
       case DioExceptionType.badResponse:
       case DioExceptionType.cancel:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.unknown:
-        return ServerFailure(e.message ?? e.type.name);
+        return ServerFailure(e.message ?? e.type.name, http: diag);
     }
+  }
+
+  HttpDiagnostics? _buildDiagnostics(DioException e) {
+    final response = e.response;
+    if (response == null) return null;
+
+    final picked = <String, String>{};
+    for (final name in _diagnosticHeaderAllowlist) {
+      final value = response.headers.value(name);
+      if (value != null && value.isNotEmpty) {
+        picked[name] = value;
+      }
+    }
+
+    final body = response.data;
+    var snippet = '';
+    if (body is List<int>) {
+      final truncated = body.length > _maxSnippetBytes
+          ? body.sublist(0, _maxSnippetBytes)
+          : body;
+      snippet = utf8.decode(truncated, allowMalformed: true);
+      if (snippet.length > _maxSnippetChars) {
+        snippet = snippet.substring(0, _maxSnippetChars);
+      }
+    }
+
+    return HttpDiagnostics(
+      statusCode: response.statusCode,
+      headers: picked,
+      bodySnippet: snippet,
+      requestPath: e.requestOptions.path,
+    );
   }
 
   @override

@@ -136,4 +136,84 @@ void main() {
       },
     );
   });
+
+  group('HttpDiagnostics', () {
+    test('defaults to empty values', () {
+      const diag = HttpDiagnostics();
+
+      expect(diag.statusCode, isNull);
+      expect(diag.headers, isEmpty);
+      expect(diag.bodySnippet, '');
+      expect(diag.requestPath, isNull);
+    });
+
+    test('supports value equality', () {
+      const a = HttpDiagnostics(
+        statusCode: 503,
+        headers: {'server': 'cloudflare'},
+        bodySnippet: 'body',
+        requestPath: '/716882815',
+      );
+      const b = HttpDiagnostics(
+        statusCode: 503,
+        headers: {'server': 'cloudflare'},
+        bodySnippet: 'body',
+        requestPath: '/716882815',
+      );
+
+      expect(a, equals(b));
+      expect(a.hashCode, equals(b.hashCode));
+    });
+
+    test('not equal when statusCode differs', () {
+      const a = HttpDiagnostics(statusCode: 503);
+      const b = HttpDiagnostics(statusCode: 500);
+
+      expect(a, isNot(equals(b)));
+    });
+
+    test('not equal when headers differ', () {
+      const a = HttpDiagnostics(headers: {'server': 'cloudflare'});
+      const b = HttpDiagnostics(headers: {'server': 'nginx'});
+
+      expect(a, isNot(equals(b)));
+    });
+  });
+
+  group('Failure.http field', () {
+    test('defaults to null when not provided', () {
+      const failure = ServerFailure('msg');
+
+      expect(failure.http, isNull);
+    });
+
+    test('carries HttpDiagnostics when provided', () {
+      const diag = HttpDiagnostics(statusCode: 503);
+      const failure = ServerFailure('msg', http: diag);
+
+      expect(failure.http, isNotNull);
+      expect(failure.http!.statusCode, 503);
+    });
+
+    test('equal when both http null', () {
+      const a = ServerFailure('msg');
+      const b = ServerFailure('msg');
+
+      expect(a, equals(b));
+    });
+
+    test('not equal when http differs', () {
+      const a = ServerFailure('msg', http: HttpDiagnostics(statusCode: 503));
+      const b = ServerFailure('msg', http: HttpDiagnostics(statusCode: 500));
+
+      expect(a, isNot(equals(b)));
+    });
+
+    test('not equal when one has http and other does not', () {
+      const a = ServerFailure('msg', http: HttpDiagnostics(statusCode: 503));
+      const b = ServerFailure('msg');
+
+      expect(a, isNot(equals(b)));
+    });
+  });
 }
