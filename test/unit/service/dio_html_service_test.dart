@@ -251,4 +251,45 @@ void main() {
       expect(caught?.http, isNull);
     });
   });
+
+  group('DioHtmlService default retry schedule', () {
+    test('default retryDelays has 4 entries (5 total attempts)', () {
+      final client = DioHtmlService(
+        dio: Dio(BaseOptions(baseUrl: 'https://example.test')),
+        encoding: 'utf-8',
+      );
+
+      expect(client.retryDelays, hasLength(4));
+    });
+
+    test('default backoff increases monotonically', () {
+      final client = DioHtmlService(
+        dio: Dio(BaseOptions(baseUrl: 'https://example.test')),
+        encoding: 'utf-8',
+      );
+
+      final delays = client.retryDelays;
+      for (var i = 1; i < delays.length; i++) {
+        expect(
+          delays[i],
+          greaterThan(delays[i - 1]),
+          reason: 'delay[$i] should exceed delay[${i - 1}]',
+        );
+      }
+    });
+
+    test('worst-case total wait stays under 30s', () {
+      final client = DioHtmlService(
+        dio: Dio(BaseOptions(baseUrl: 'https://example.test')),
+        encoding: 'utf-8',
+      );
+
+      final total = client.retryDelays.fold<int>(
+        0,
+        (acc, d) => acc + d.inMilliseconds,
+      );
+
+      expect(total, lessThan(30000));
+    });
+  });
 }

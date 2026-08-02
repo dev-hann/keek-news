@@ -33,8 +33,10 @@ class DioHtmlService extends HtmlService {
     required Dio dio,
     required String encoding,
     List<Duration> retryDelays = const [
-      Duration(milliseconds: 500),
-      Duration(milliseconds: 1500),
+      Duration(milliseconds: 800),
+      Duration(milliseconds: 2500),
+      Duration(milliseconds: 6000),
+      Duration(milliseconds: 15000),
     ],
     CharsetDecode decode = _defaultCharsetDecode,
   }) : _dio = dio,
@@ -46,6 +48,10 @@ class DioHtmlService extends HtmlService {
   final String _encoding;
   final List<Duration> _retryDelays;
   final CharsetDecode _decode;
+
+  /// Backoff schedule between 503 retries. Read-only so tests can assert the
+  /// default shape without exercising real waits.
+  List<Duration> get retryDelays => List.unmodifiable(_retryDelays);
 
   @override
   Future<String> get(String path) async {
