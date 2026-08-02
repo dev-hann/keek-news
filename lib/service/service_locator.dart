@@ -1,4 +1,6 @@
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:get_it/get_it.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/apk_install/apk_install_impl.dart';
@@ -57,13 +59,28 @@ Dio _dio({
   required String baseUrl,
   String ua = _mobileUA,
   Map<String, String> extraHeaders = const {},
-}) => Dio(
-  BaseOptions(
-    baseUrl: baseUrl,
-    headers: {'User-Agent': ua, ...extraHeaders},
-    responseType: ResponseType.bytes,
-  ),
-);
+  CookieJar? cookieJar,
+}) {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      headers: {'User-Agent': ua, ...extraHeaders},
+      responseType: ResponseType.bytes,
+    ),
+  );
+  if (cookieJar != null) {
+    dio.interceptors.add(CookieManager(cookieJar));
+  }
+  return dio;
+}
+
+/// Per-community persisted cookie jar so session cookies (PHPSESSID) and
+/// Cloudflare bot-management cookies (__cf_bm) survive across requests and
+/// app launches — closer to real browser behavior.
+Future<CookieJar> _newPersistedCookieJar(String name) async {
+  final dir = await getApplicationDocumentsDirectory();
+  return PersistCookieJar(storage: FileStorage('${dir.path}/cookies/$name'));
+}
 
 final sl = GetIt.instance;
 
@@ -78,6 +95,7 @@ Future<void> configureDependencies() async {
         ..._browserHeaders,
         'Referer': 'https://m.humoruniv.com/board/pds/',
       },
+      cookieJar: await _newPersistedCookieJar('humoruniv'),
     ),
     encoding: 'euc-kr',
   );
@@ -89,6 +107,7 @@ Future<void> configureDependencies() async {
         ..._browserHeaders,
         'Referer': 'https://www.todayhumor.co.kr/board/humorbest.php',
       },
+      cookieJar: await _newPersistedCookieJar('todayhumor'),
     ),
     encoding: 'utf-8',
   );
@@ -100,6 +119,7 @@ Future<void> configureDependencies() async {
         ..._browserHeaders,
         'Referer': 'https://www.ppomppu.co.kr/zboard/zboard.php?id=humor',
       },
+      cookieJar: await _newPersistedCookieJar('ppomppu'),
     ),
     encoding: 'euc-kr',
   );
@@ -111,6 +131,7 @@ Future<void> configureDependencies() async {
         ..._browserHeaders,
         'Referer': 'https://www.dogdrip.net/index.php?mid=dogdrip',
       },
+      cookieJar: await _newPersistedCookieJar('dogdrip'),
     ),
     encoding: 'utf-8',
   );

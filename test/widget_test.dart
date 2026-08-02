@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/merged_feed_helper.dart';
 import 'helpers/package_info_helper.dart';
+import 'helpers/path_provider_helper.dart';
 
 class MockUpdateRepository extends Mock implements UpdateRepo {}
 
@@ -27,6 +28,7 @@ void main() {
 
   setUpAll(() async {
     await setupPackageInfoMock();
+    setupPathProviderMock();
     registerMergedFeedFallbacks();
   });
 

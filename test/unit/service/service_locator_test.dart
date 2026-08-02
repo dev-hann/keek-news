@@ -7,11 +7,13 @@ import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/package_info_helper.dart';
+import '../../helpers/path_provider_helper.dart';
 
 void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     await setupPackageInfoMock();
+    setupPathProviderMock();
   });
 
   tearDown(di.sl.reset);
