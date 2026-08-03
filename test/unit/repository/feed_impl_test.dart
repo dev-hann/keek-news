@@ -59,6 +59,23 @@ void main() {
 
       expect(repo.canDisable(CommunityId.dogdrip), isFalse);
     });
+
+    test('returns true for a disabled community even when only 1 is enabled '
+        'regression: re-enabling locked out by old length>1 check', () {
+      when(() => storage.getStringList(_storageKey)).thenReturn(['dogdrip']);
+
+      expect(repo.canDisable(CommunityId.ppomppu), isTrue);
+      expect(repo.canDisable(CommunityId.humoruniv), isTrue);
+    });
+
+    test('returns true for every disabled community when all-but-one off', () {
+      when(() => storage.getStringList(_storageKey)).thenReturn(['dogdrip']);
+
+      for (final id in CommunityId.values) {
+        if (id == CommunityId.dogdrip) continue;
+        expect(repo.canDisable(id), isTrue, reason: '$id should be toggleable');
+      }
+    });
   });
 
   group('FeedImpl toggleCommunity', () {

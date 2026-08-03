@@ -19,7 +19,12 @@ class FeedImpl implements FeedRepo {
   }
 
   @override
-  bool canDisable(CommunityId id) => getEnabledCommunities().length > 1;
+  bool canDisable(CommunityId id) {
+    final enabled = getEnabledCommunities();
+    // A community that is currently off can always be turned back on; only the
+    // last enabled community is locked to prevent an empty feed.
+    return !enabled.contains(id) || enabled.length > 1;
+  }
 
   @override
   void toggleCommunity(CommunityId id) {
