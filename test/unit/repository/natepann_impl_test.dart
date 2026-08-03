@@ -127,5 +127,42 @@ void main() {
       );
       expect(detail.looksEmpty, isFalse);
     });
+
+    test(
+      'content blocks include text from the editor body (regression)',
+      () async {
+        // Old selector `.espresso_editor_view` (class) never matched — the
+        // wrapper has id, not class — so the parser fell back to #contentArea
+        // whose single child div was treated as one image cluster, dropping
+        // every TextBlock. Assert text survives so this does not regress.
+        final detail = await detailRepo().fetchDetail(id);
+
+        final textBlocks = detail.contentBlocks.whereType<TextBlock>().toList();
+        expect(
+          textBlocks,
+          isNotEmpty,
+          reason: 'editor body should yield interleaved text blocks',
+        );
+        expect(textBlocks.any((b) => b.text.contains('라이즈')), isTrue);
+      },
+    );
+
+    test('extracts comments (regression: old selector matched 0)', () async {
+      // Fixture has 2 best + 2 normal comments rendered as dl.cmt_item. Old
+      // selector (.cmt_post/.comment_item/li.comment) hit none of them.
+      final detail = await detailRepo().fetchDetail(id);
+
+      expect(
+        detail.comments,
+        hasLength(2),
+        reason:
+            'best and normal lists mirror the same two comments; '
+            'dedup by id should leave 2',
+      );
+      expect(detail.comments.any((c) => c.content.contains('비주얼')), isTrue);
+      expect(detail.comments.any((c) => c.content.contains('인외같다는')), isTrue);
+      expect(detail.comments.any((c) => c.isBest), isTrue);
+      expect(detail.comments.any((c) => c.recommendCount > 0), isTrue);
+    });
   });
 }

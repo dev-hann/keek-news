@@ -58,7 +58,15 @@ class NatepannImpl extends HtmlCommunityRepo {
   Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/talk/$id');
     final doc = html_parser.parse(html);
-    final contentEl = doc.querySelector('.espresso_editor_view, #contentArea');
+    // Prefer #espresso_editor_view (the real content wrapper whose direct
+    // children are the <p> tags). Fall back to #contentArea for older posts
+    // that lack the editor wrapper. Note: the editor wrapper uses id, not
+    // class, so a single querySelector('#espresso_editor_view, #contentArea')
+    // would pick the outer #contentArea first (document order) and yield a
+    // single wrapper div — losing all text blocks.
+    final contentEl =
+        doc.querySelector('#espresso_editor_view') ??
+        doc.querySelector('#contentArea');
 
     return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
@@ -109,27 +117,64 @@ class NatepannImpl extends HtmlCommunityRepo {
   }
 
   List<Comment> _extractComments(dom.Document doc) {
-    final items = doc.querySelectorAll('.cmt_post, .comment_item, li.comment');
-    return items.map(_parseComment).whereType<Comment>().toList();
+    // natepann renders best comments (inside .cmt_best) and the full thread
+    // (inside .cmt_list) separately. The .cmt_list items carry the real id
+    // attribute; best items do not, so we anchor on the normal list and flag
+    // each comment as best if its text also appears in .cmt_best.
+    final bestTexts = <String>{};
+    for (final best in doc.querySelectorAll('.cmt_best dl.cmt_item')) {
+      final txt = htmlClient.textOf(best.querySelector('.usertxt')).trim();
+      if (txt.isNotEmpty) bestTexts.add(txt);
+    }
+
+    final result = <Comment>[];
+    for (final item in doc.querySelectorAll('.cmt_list dl.cmt_item')) {
+      final comment = _parseComment(
+        item,
+        isBest: bestTexts.contains(
+          htmlClient.textOf(item.querySelector('.usertxt')).trim(),
+        ),
+      );
+      if (comment != null) result.add(comment);
+    }
+    return result;
   }
 
-  Comment? _parseComment(dom.Element item) {
-    final author = htmlClient.textOf(item.querySelector('.writer, .nick'));
-    final content = htmlClient.textOf(
-      item.querySelector('.cmt_txt, .text, .comment_text'),
+  Comment? _parseComment(dom.Element item, {required bool isBest}) {
+    final author = htmlClient.textOf(
+      item.querySelector('.nameui, .writer, .nick'),
     );
+    // .usertxt wraps an optional <img> + the actual <span>text</span>.
+    final content = htmlClient.textOf(item.querySelector('.usertxt'));
     if (content.isEmpty && author.isEmpty) return null;
 
     final id = htmlClient.extractNumber(item.id);
+    final recommend = htmlClient.statOf(item, '.n_good');
 
     return Comment(
       id: id,
       author: author,
       content: content,
-      date: DateTime.now(),
-      recommendCount: 0,
-      isBest: false,
+      date: _extractCommentDate(item) ?? DateTime.now(),
+      recommendCount: recommend,
+      isBest: isBest,
       replies: const [],
+    );
+  }
+
+  DateTime? _extractCommentDate(dom.Element item) {
+    // natepann wraps the timestamp in <i>2026.07.28 12:55</i>.
+    final text = item.querySelector('i')?.text.trim() ?? '';
+    final match = RegExp(
+      r'(\d{4})\.(\d{2})\.(\d{2})\s*(\d{2}):(\d{2})',
+    ).firstMatch(text);
+    if (match == null) return null;
+    return DateTime(
+      int.parse(match.group(1)!),
+      int.parse(match.group(2)!),
+      int.parse(match.group(3)!),
+      int.parse(match.group(4)!),
+      int.parse(match.group(5)!),
     );
   }
 }
