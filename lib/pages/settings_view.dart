@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:keek_news/model/community.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/provider/cache_management_provider.dart';
+import 'package:keek_news/provider/settings_provider.dart';
 import 'package:keek_news/provider/update_provider.dart';
 import 'package:keek_news/widgets/settings_group.dart';
 import 'package:keek_news/widgets/settings_tile.dart';
@@ -42,12 +44,45 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
   Widget build(BuildContext context) {
     final updateState = ref.watch(updateProvider);
     final cacheState = ref.watch(cacheManagementProvider);
+    final enabledCommunities = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('설정')),
       body: SafeArea(
         child: ListView(
           children: [
+            SettingsGroup(
+              title: '커뮤니티',
+              children: [
+                for (final c in communities)
+                  SettingsTile(
+                    leading: CircleAvatar(
+                      radius: 14,
+                      backgroundColor: Color(
+                        c.brandColorArgb,
+                      ).withValues(alpha: 0.15),
+                      child: ClipOval(
+                        child: Image.asset(
+                          c.iconAsset,
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const SizedBox(),
+                        ),
+                      ),
+                    ),
+                    title: c.displayName,
+                    trailing: ShadSwitch(
+                      value: enabledCommunities.contains(c.id),
+                      onChanged:
+                          ref.read(settingsProvider.notifier).canDisable(c.id)
+                          ? (v) =>
+                                ref.read(settingsProvider.notifier).toggle(c.id)
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
             SettingsGroup(
               title: '저장함',
               children: [

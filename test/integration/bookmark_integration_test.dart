@@ -5,20 +5,20 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
-import 'package:keek_news/service/bookmark_local_service.dart';
-import 'package:keek_news/service/prefs_bookmark_local_service.dart';
+import 'package:keek_news/service/local_storage_service.dart';
+import 'package:keek_news/service/prefs_local_storage_service.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late SharedPreferences prefs;
-  late BookmarkLocalService dataSource;
+  late LocalStorageService dataSource;
   late BookmarkRepo repository;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
-    dataSource = PrefsBookmarkLocalService(prefs);
+    dataSource = PrefsLocalStorageService(prefs);
     repository = BookmarkImpl(dataSource);
   });
 
@@ -50,7 +50,7 @@ void main() {
       final bm = bookmark(id: '100');
       await repository.add(bm);
 
-      final freshRepo = BookmarkImpl(PrefsBookmarkLocalService(prefs));
+      final freshRepo = BookmarkImpl(PrefsLocalStorageService(prefs));
       final all = await freshRepo.getAll();
 
       expect(all.length, 1);

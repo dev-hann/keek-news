@@ -1,6 +1,15 @@
 import 'package:equatable/equatable.dart';
 
-enum CommunityId { humoruniv, todayhumor, dogdrip, ppomppu }
+enum CommunityId {
+  humoruniv,
+  todayhumor,
+  dogdrip,
+  ppomppu,
+  fmkorea,
+  bobaedream,
+  ruliweb,
+  natepann,
+}
 
 class Community extends Equatable {
   const Community({
@@ -61,5 +70,37 @@ const communities = <Community>[
     brandColorArgb: 0xFFF59E0B,
     iconAsset: 'assets/icons/community_ppomppu.png',
     baseUrl: 'https://www.ppomppu.co.kr',
+  ),
+  Community(
+    id: CommunityId.fmkorea,
+    shortName: 'FMK',
+    displayName: 'FM코리아',
+    brandColorArgb: 0xFF3B82F6,
+    iconAsset: 'assets/icons/community_fmkorea.png',
+    baseUrl: 'https://www.fmkorea.com',
+  ),
+  Community(
+    id: CommunityId.bobaedream,
+    shortName: '보배',
+    displayName: '보배드림',
+    brandColorArgb: 0xFF22C55E,
+    iconAsset: 'assets/icons/community_bobaedream.png',
+    baseUrl: 'https://www.bobaedream.co.kr',
+  ),
+  Community(
+    id: CommunityId.ruliweb,
+    shortName: '루리',
+    displayName: '루리웹',
+    brandColorArgb: 0xFFE11D48,
+    iconAsset: 'assets/icons/community_ruliweb.png',
+    baseUrl: 'https://bbs.ruliweb.com',
+  ),
+  Community(
+    id: CommunityId.natepann,
+    shortName: '네이트',
+    displayName: '네이트판',
+    brandColorArgb: 0xFFEA580C,
+    iconAsset: 'assets/icons/community_natepann.png',
+    baseUrl: 'https://pann.nate.com',
   ),
 ];

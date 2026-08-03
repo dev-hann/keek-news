@@ -10,23 +10,29 @@ import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/cache/image_cache_impl.dart';
 import 'package:keek_news/repository/cache/image_cache_repo.dart';
 import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/repository/community/bobaedream/bobaedream_impl.dart';
 import 'package:keek_news/repository/community/dogdrip/dogdrip_impl.dart';
+import 'package:keek_news/repository/community/fmkorea/fmkorea_impl.dart';
 import 'package:keek_news/repository/community/humoruniv/humoruniv_impl.dart';
+import 'package:keek_news/repository/community/natepann/natepann_impl.dart';
 import 'package:keek_news/repository/community/ppomppu/ppomppu_impl.dart';
+import 'package:keek_news/repository/community/ruliweb/ruliweb_impl.dart';
 import 'package:keek_news/repository/community/todayhumor/todayhumor_impl.dart';
+import 'package:keek_news/repository/feed/feed_impl.dart';
+import 'package:keek_news/repository/feed/feed_repo.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
-import 'package:keek_news/service/bookmark_local_service.dart';
 import 'package:keek_news/service/default_image_cache_service.dart';
 import 'package:keek_news/service/dio_apk_download_service.dart';
 import 'package:keek_news/service/dio_github_remote_service.dart';
 import 'package:keek_news/service/dio_html_service.dart';
 import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/service/image_cache_service.dart';
+import 'package:keek_news/service/local_storage_service.dart';
 import 'package:keek_news/service/method_channel_apk_installer_service.dart';
-import 'package:keek_news/service/prefs_bookmark_local_service.dart';
+import 'package:keek_news/service/prefs_local_storage_service.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/cache_use_case.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
@@ -88,6 +94,11 @@ Future<void> configureDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
 
+  sl.registerLazySingleton<LocalStorageService>(
+    () => PrefsLocalStorageService(sl<SharedPreferences>()),
+  );
+  sl.registerLazySingleton<FeedRepo>(() => FeedImpl(sl<LocalStorageService>()));
+
   final humorunivHtml = DioHtmlService(
     dio: _dio(
       baseUrl: 'https://m.humoruniv.com',
@@ -136,17 +147,73 @@ Future<void> configureDependencies() async {
     encoding: 'utf-8',
   );
 
+  final fmkoreaHtml = DioHtmlService(
+    dio: _dio(
+      baseUrl: 'https://www.fmkorea.com',
+      ua: _desktopUA,
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://www.fmkorea.com/index.php?mid=humor',
+      },
+      cookieJar: await _newPersistedCookieJar('fmkorea'),
+    ),
+    encoding: 'utf-8',
+  );
+
+  final bobaedreamHtml = DioHtmlService(
+    dio: _dio(
+      baseUrl: 'https://www.bobaedream.co.kr',
+      ua: _desktopUA,
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://www.bobaedream.co.kr/list?code=humor',
+      },
+    ),
+    encoding: 'euc-kr',
+  );
+
+  final ruliwebHtml = DioHtmlService(
+    dio: _dio(
+      baseUrl: 'https://bbs.ruliweb.com',
+      ua: _desktopUA,
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://bbs.ruliweb.com/best/humor',
+      },
+    ),
+    encoding: 'utf-8',
+  );
+
+  final natepannHtml = DioHtmlService(
+    dio: _dio(
+      baseUrl: 'https://pann.nate.com',
+      ua: _desktopUA,
+      extraHeaders: {
+        ..._browserHeaders,
+        'Referer': 'https://pann.nate.com/talk',
+      },
+    ),
+    encoding: 'utf-8',
+  );
+
   final repos = <CommunityId, CommunityRepo>{
     CommunityId.humoruniv: HumorunivImpl(htmlClient: humorunivHtml),
     CommunityId.todayhumor: TodayhumorImpl(htmlClient: todayhumorHtml),
     CommunityId.ppomppu: PpomppuImpl(htmlClient: ppomppuHtml),
     CommunityId.dogdrip: DogdripImpl(htmlClient: dogdripHtml),
+    CommunityId.fmkorea: FmkoreaImpl(htmlClient: fmkoreaHtml),
+    CommunityId.bobaedream: BobaedreamImpl(htmlClient: bobaedreamHtml),
+    CommunityId.ruliweb: RuliwebImpl(htmlClient: ruliwebHtml),
+    CommunityId.natepann: NatepannImpl(htmlClient: natepannHtml),
   };
 
   sl.registerLazySingleton<Map<CommunityId, CommunityRepo>>(() => repos);
 
   sl.registerLazySingleton(
-    () => FeedUseCase(repos: sl<Map<CommunityId, CommunityRepo>>()),
+    () => FeedUseCase(
+      repos: sl<Map<CommunityId, CommunityRepo>>(),
+      feedRepo: sl<FeedRepo>(),
+    ),
   );
 
   sl.registerLazySingleton<GitHubRemoteService>(DioGitHubRemoteService.new);
@@ -189,12 +256,8 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  sl.registerLazySingleton<BookmarkLocalService>(
-    () => PrefsBookmarkLocalService(sl<SharedPreferences>()),
-  );
-
   sl.registerLazySingleton<BookmarkRepo>(
-    () => BookmarkImpl(sl<BookmarkLocalService>()),
+    () => BookmarkImpl(sl<LocalStorageService>()),
   );
 
   sl.registerLazySingleton<BookmarkUseCase>(

@@ -10,6 +10,7 @@ import 'package:keek_news/model/url_builder.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/provider/feed_video_playback_provider.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
+import 'package:keek_news/provider/settings_provider.dart';
 import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/utils/error_report.dart';
 import 'package:keek_news/widgets/community_tab_bar.dart';
@@ -101,8 +102,9 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     }
   }
 
-  List<FeedItem> _filterItems(List<FeedItem> items) {
-    final selected = communities[_tabIndex].id;
+  List<FeedItem> _filterItems(List<FeedItem> items, List<Community> visible) {
+    if (_tabIndex >= visible.length) return items;
+    final selected = visible[_tabIndex].id;
     return items.where((e) => e.community == selected).toList();
   }
 
@@ -176,7 +178,15 @@ class _HomeScreenState extends ConsumerState<HomeView> {
     final bookmarks = ref.watch(bookmarkProvider);
     final details = ref.watch(mergedDetailProvider);
     final videoController = ref.watch(videoPlaybackControllerProvider);
-    final visibleItems = _filterItems(feedState.items);
+    final enabled = ref.watch(settingsProvider);
+    final visibleCommunities = communities
+        .where((c) => enabled.contains(c.id))
+        .toList();
+    if (visibleCommunities.isEmpty) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_tabIndex >= visibleCommunities.length) _tabIndex = 0;
+    final visibleItems = _filterItems(feedState.items, visibleCommunities);
     _ensureDetailsLoaded(visibleItems, details);
 
     final surface = Theme.of(context).colorScheme.surfaceContainer;
@@ -188,12 +198,11 @@ class _HomeScreenState extends ConsumerState<HomeView> {
           controller: _controller,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Top app bar — floating + snap (scroll up anywhere shows it).
             SliverAppBar(
               title: GestureDetector(
                 onTap: _onTopTap,
                 behavior: HitTestBehavior.opaque,
-                child: Text(communities[_tabIndex].displayName),
+                child: Text(visibleCommunities[_tabIndex].displayName),
               ),
               actions: [
                 IconButton(
@@ -208,13 +217,13 @@ class _HomeScreenState extends ConsumerState<HomeView> {
               elevation: 0,
               scrolledUnderElevation: 0,
             ),
-            // Community tab bar — floating + snap, secondary (no status bar).
             SliverAppBar(
               primary: false,
               automaticallyImplyLeading: false,
               titleSpacing: 0,
               toolbarHeight: 44,
               title: CommunityTabBar(
+                communities: visibleCommunities,
                 selectedIndex: _tabIndex,
                 onChanged: _switchTab,
               ),

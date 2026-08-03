@@ -12,7 +12,11 @@ void main() {
         shadHarness(
           SizedBox(
             width: 400,
-            child: CommunityTabBar(selectedIndex: 0, onChanged: (_) {}),
+            child: CommunityTabBar(
+              communities: communities,
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );
@@ -29,7 +33,11 @@ void main() {
         shadHarness(
           SizedBox(
             width: 400,
-            child: CommunityTabBar(selectedIndex: 0, onChanged: (_) {}),
+            child: CommunityTabBar(
+              communities: communities,
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );
@@ -51,6 +59,7 @@ void main() {
           SizedBox(
             width: 400,
             child: CommunityTabBar(
+              communities: communities,
               selectedIndex: 0,
               onChanged: (i) => tapped[0] = i,
             ),
@@ -67,7 +76,11 @@ void main() {
         shadHarness(
           SizedBox(
             width: 400,
-            child: CommunityTabBar(selectedIndex: 1, onChanged: (_) {}),
+            child: CommunityTabBar(
+              communities: communities,
+              selectedIndex: 1,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );
@@ -84,7 +97,11 @@ void main() {
         shadHarness(
           SizedBox(
             width: 400,
-            child: CommunityTabBar(selectedIndex: 0, onChanged: (_) {}),
+            child: CommunityTabBar(
+              communities: communities,
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );
@@ -108,7 +125,11 @@ void main() {
         shadHarness(
           SizedBox(
             width: 400,
-            child: CommunityTabBar(selectedIndex: 0, onChanged: (_) {}),
+            child: CommunityTabBar(
+              communities: communities,
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );
@@ -129,7 +150,11 @@ void main() {
         shadHarness(
           SizedBox(
             width: 400,
-            child: CommunityTabBar(selectedIndex: 2, onChanged: (_) {}),
+            child: CommunityTabBar(
+              communities: communities,
+              selectedIndex: 2,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );
@@ -148,7 +173,11 @@ void main() {
         shadHarness(
           SizedBox(
             width: 400,
-            child: CommunityTabBar(selectedIndex: 0, onChanged: (_) {}),
+            child: CommunityTabBar(
+              communities: communities,
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
           ),
         ),
       );

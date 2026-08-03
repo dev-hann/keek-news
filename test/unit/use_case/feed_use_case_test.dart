@@ -7,26 +7,35 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/repository/feed/feed_repo.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockCommunityRepo extends Mock implements CommunityRepo {}
 
+class MockFeedRepo extends Mock implements FeedRepo {}
+
 void main() {
   late MockCommunityRepo humorunivRepo;
   late MockCommunityRepo dogdripRepo;
+  late MockFeedRepo feedRepo;
   late FeedUseCase useCase;
 
   setUp(() {
     humorunivRepo = MockCommunityRepo();
     dogdripRepo = MockCommunityRepo();
+    feedRepo = MockFeedRepo();
     when(() => humorunivRepo.communityId).thenReturn(CommunityId.humoruniv);
     when(() => dogdripRepo.communityId).thenReturn(CommunityId.dogdrip);
+    when(
+      () => feedRepo.getEnabledCommunities(),
+    ).thenReturn(CommunityId.values.toSet());
     useCase = FeedUseCase(
       repos: {
         CommunityId.humoruniv: humorunivRepo,
         CommunityId.dogdrip: dogdripRepo,
       },
+      feedRepo: feedRepo,
     );
   });
 
@@ -107,12 +116,13 @@ void main() {
         publishedAt: DateTime(2026, 7, 28),
       );
       when(
+        () => feedRepo.getEnabledCommunities(),
+      ).thenReturn({CommunityId.humoruniv});
+      when(
         () => humorunivRepo.fetchLatest(pageToken: any(named: 'pageToken')),
       ).thenAnswer((_) async => CommunityListResult(items: [item]));
 
-      final result = await useCase.getMergedFeed(
-        const MergedFeedParams(enabled: {CommunityId.humoruniv}),
-      );
+      final result = await useCase.getMergedFeed(const MergedFeedParams());
 
       verifyNever(
         () => dogdripRepo.fetchLatest(pageToken: any(named: 'pageToken')),

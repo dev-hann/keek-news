@@ -19,10 +19,10 @@ void main() {
   tearDown(di.sl.reset);
 
   group('configureDependencies', () {
-    test('should register CommunityRepo map with 4 communities', () async {
+    test('should register CommunityRepo map with 8 communities', () async {
       await di.configureDependencies();
       final repos = di.sl<Map<CommunityId, CommunityRepo>>();
-      expect(repos.length, 4);
+      expect(repos.length, 8);
       expect(repos.keys, contains(CommunityId.humoruniv));
       expect(repos.keys, contains(CommunityId.dogdrip));
     });

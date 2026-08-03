@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/app_release.dart';
+import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/pages/settings_view.dart';
@@ -12,9 +13,15 @@ import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/cache/image_cache_impl.dart';
 import 'package:keek_news/repository/cache/image_cache_repo.dart';
+import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/repository/feed/feed_impl.dart';
+import 'package:keek_news/repository/feed/feed_repo.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/image_cache_service.dart';
+import 'package:keek_news/service/local_storage_service.dart';
+import 'package:keek_news/service/prefs_local_storage_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:keek_news/theme/shad_theme.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/cache_use_case.dart';
@@ -128,6 +135,27 @@ void main() {
     di.sl.registerLazySingleton<BookmarkUseCase>(
       () => BookmarkUseCase(fakeBookmarkRepo),
     );
+    if (di.sl.isRegistered<LocalStorageService>()) {
+      di.sl.unregister<LocalStorageService>();
+    }
+    di.sl.registerLazySingleton<LocalStorageService>(
+      () => PrefsLocalStorageService(prefs),
+    );
+    if (di.sl.isRegistered<FeedRepo>()) {
+      di.sl.unregister<FeedRepo>();
+    }
+    di.sl.registerLazySingleton<FeedRepo>(
+      () => FeedImpl(di.sl<LocalStorageService>()),
+    );
+    if (di.sl.isRegistered<FeedUseCase>()) {
+      di.sl.unregister<FeedUseCase>();
+    }
+    di.sl.registerLazySingleton<FeedUseCase>(
+      () => FeedUseCase(
+        repos: const <CommunityId, CommunityRepo>{},
+        feedRepo: di.sl<FeedRepo>(),
+      ),
+    );
   });
 
   tearDown(di.sl.reset);
@@ -144,6 +172,11 @@ void main() {
 
   group('SettingsView', () {
     testWidgets('should display all section titles', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -151,12 +184,17 @@ void main() {
 
       await tester.pumpWidget(buildApp());
 
-      expect(find.text('저장함'), findsOneWidget);
-      expect(find.text('미디어 & 데이터'), findsOneWidget);
-      expect(find.text('정보'), findsOneWidget);
+      expect(find.text('저장함', skipOffstage: false), findsOneWidget);
+      expect(find.text('미디어 & 데이터', skipOffstage: false), findsOneWidget);
+      expect(find.text('정보', skipOffstage: false), findsOneWidget);
     });
 
     testWidgets('should display AppBar with 설정 title', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -171,6 +209,11 @@ void main() {
     });
 
     testWidgets('should display version info', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -184,6 +227,11 @@ void main() {
     testWidgets('should show real app version after load, not stale fallback', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -199,6 +247,11 @@ void main() {
     testWidgets('renders the new About tiles (licenses, source)', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -215,6 +268,11 @@ void main() {
     testWidgets('renders the image cache tile showing the cache size', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -228,6 +286,11 @@ void main() {
     });
 
     testWidgets('renders the bookmarks tile in the 저장함 group', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -243,6 +306,11 @@ void main() {
     testWidgets('navigates to BookmarksView when bookmark tile tapped', (
       tester,
     ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -258,6 +326,11 @@ void main() {
     });
 
     testWidgets('auto-checks for update on entry', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -270,6 +343,11 @@ void main() {
     });
 
     testWidgets('should show update available state', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async => const AppRelease(
           version: '1.2.0',
@@ -286,6 +364,11 @@ void main() {
     });
 
     testWidgets('should show up to date state', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(() => mockRepository.getLatestRelease()).thenAnswer(
         (_) async =>
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
@@ -298,6 +381,11 @@ void main() {
     });
 
     testWidgets('should show error state with retry', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       when(
         () => mockRepository.getLatestRelease(),
       ).thenAnswer((_) async => throw const UpdateFailure('Network error'));
@@ -310,6 +398,11 @@ void main() {
     });
 
     testWidgets('should show checking state', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       final completer = Completer<AppRelease>();
       when(
         () => mockRepository.getLatestRelease(),
@@ -329,6 +422,11 @@ void main() {
     testWidgets(
       'should show feedback when browser fallback URL cannot be opened',
       (tester) async {
+        tester.view.physicalSize = const Size(800, 1600);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
         when(() => mockRepository.getLatestRelease()).thenAnswer(
           (_) async => const AppRelease(
             version: '1.2.0',

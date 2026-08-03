@@ -4,10 +4,12 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 
 class CommunityTabBar extends StatelessWidget {
   const CommunityTabBar({
+    required this.communities,
     required this.selectedIndex,
     required this.onChanged,
     super.key,
   });
+  final List<Community> communities;
   final int selectedIndex;
   final ValueChanged<int> onChanged;
 

@@ -5,6 +5,7 @@ import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/model/post_detail.dart';
+import 'package:keek_news/provider/settings_provider.dart';
 import 'package:keek_news/service/service_locator.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
 
@@ -125,6 +126,7 @@ final mergedFeedProvider =
     StateNotifierProvider.autoDispose<MergedFeedNotifier, MergedFeedState>((
       ref,
     ) {
+      ref.watch(settingsProvider);
       final notifier = MergedFeedNotifier();
       notifier.fetch();
       return notifier;

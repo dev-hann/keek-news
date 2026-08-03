@@ -6,33 +6,35 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/repository/feed/feed_repo.dart';
 import 'package:keek_news/use_case/base_use_case.dart';
 
 class MergedFeedParams {
-  const MergedFeedParams({
-    this.perSource = 20,
-    this.cursor,
-    this.enabled = const {},
-  });
+  const MergedFeedParams({this.perSource = 20, this.cursor});
 
   final int perSource;
   final MergedCursor? cursor;
-  final Set<CommunityId> enabled;
 }
 
 class FeedUseCase extends BaseUseCase {
-  const FeedUseCase({required this.repos});
+  const FeedUseCase({required this.repos, required this.feedRepo});
 
   final Map<CommunityId, CommunityRepo> repos;
+  final FeedRepo feedRepo;
+
+  Set<CommunityId> getEnabledCommunities() => feedRepo.getEnabledCommunities();
+
+  bool canDisableCommunity(CommunityId id) => feedRepo.canDisable(id);
+
+  void toggleCommunity(CommunityId id) => feedRepo.toggleCommunity(id);
 
   Future<Either<Failure, MergedPage>> getMergedFeed(
     MergedFeedParams params,
   ) async {
-    final active = params.enabled.isEmpty
-        ? repos
-        : Map.fromEntries(
-            repos.entries.where((e) => params.enabled.contains(e.key)),
-          );
+    final enabled = feedRepo.getEnabledCommunities();
+    final active = Map.fromEntries(
+      repos.entries.where((e) => enabled.contains(e.key)),
+    );
 
     if (active.isEmpty) {
       return const Left(ServerFailure('No active community repos'));

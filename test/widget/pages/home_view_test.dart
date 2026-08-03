@@ -46,6 +46,9 @@ void main() {
     }
     di.sl.registerLazySingleton<FeedUseCase>(() => mockUseCase);
     when(
+      () => mockUseCase.getEnabledCommunities(),
+    ).thenAnswer((_) => CommunityId.values.toSet());
+    when(
       () => mockUseCase.getPostDetail(
         community: any(named: 'community'),
         id: any(named: 'id'),

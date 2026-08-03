@@ -10,8 +10,12 @@ import 'package:keek_news/repository/community/dogdrip/dogdrip_impl.dart';
 import 'package:keek_news/repository/community/humoruniv/humoruniv_impl.dart';
 import 'package:keek_news/repository/community/ppomppu/ppomppu_impl.dart';
 import 'package:keek_news/repository/community/todayhumor/todayhumor_impl.dart';
+import 'package:keek_news/repository/feed/feed_impl.dart';
+import 'package:keek_news/repository/feed/feed_repo.dart';
 import 'package:keek_news/service/html_service.dart';
+import 'package:keek_news/service/prefs_local_storage_service.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FixtureHtmlService extends HtmlService {
   FixtureHtmlService(this._fixtures);
@@ -56,14 +60,33 @@ class FixtureHtmlService extends HtmlService {
   List<ContentBlock> scanContentCompact(Element container) => const [];
 }
 
+class _HumorunivOnlyFeedRepo implements FeedRepo {
+  const _HumorunivOnlyFeedRepo();
+
+  @override
+  Set<CommunityId> getEnabledCommunities() => const {CommunityId.humoruniv};
+
+  @override
+  bool canDisable(CommunityId id) => false;
+
+  @override
+  void toggleCommunity(CommunityId id) {}
+}
+
 String _readFixture(String path) =>
     File('test/fixtures/$path').readAsStringSync();
 
 void main() {
+  late Map<CommunityId, CommunityRepo> repos;
+  late FeedRepo feedRepo;
   late FeedUseCase useCase;
 
-  setUpAll(() {
-    final repos = <CommunityId, CommunityRepo>{
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    feedRepo = FeedImpl(PrefsLocalStorageService(prefs));
+
+    repos = <CommunityId, CommunityRepo>{
       CommunityId.humoruniv: HumorunivImpl(
         htmlClient: FixtureHtmlService({
           'board/list.html': _readFixture('board_list_pds.html'),
@@ -91,7 +114,7 @@ void main() {
       ),
     };
 
-    useCase = FeedUseCase(repos: repos);
+    useCase = FeedUseCase(repos: repos, feedRepo: feedRepo);
   });
 
   group('Merged feed integration (real repos + fixture HTML)', () {
@@ -146,8 +169,12 @@ void main() {
     });
 
     test('should filter by enabled communities', () async {
-      final result = await useCase.getMergedFeed(
-        const MergedFeedParams(enabled: {CommunityId.humoruniv}),
+      final filteredUseCase = FeedUseCase(
+        repos: repos,
+        feedRepo: const _HumorunivOnlyFeedRepo(),
+      );
+      final result = await filteredUseCase.getMergedFeed(
+        const MergedFeedParams(),
       );
 
       final page = result.getOrElse(() => throw StateError(''));
@@ -168,6 +195,7 @@ void main() {
             }),
           ),
         },
+        feedRepo: feedRepo,
       );
 
       final result = await failingUseCase.getMergedFeed(

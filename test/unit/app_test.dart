@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keek_news/app.dart';
 import 'package:keek_news/model/app_release.dart';
+import 'package:keek_news/model/community.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/pages/home_view.dart';
 import 'package:keek_news/pages/settings_view.dart';
@@ -44,6 +45,7 @@ void main() {
     await setupPackageInfoMock();
     setupPathProviderMock();
     registerMergedFeedFallbacks();
+    registerFallbackValue(CommunityId.humoruniv);
   });
 
   setUp(() async {
@@ -57,6 +59,12 @@ void main() {
     setupMergedFeedMocks(mockMergedUseCase);
     when(() => fakeCacheService.getSizeBytes()).thenAnswer((_) async => 0);
     when(() => fakeBookmarkRepo.getAll()).thenAnswer((_) async => const []);
+    when(
+      () => mockMergedUseCase.getEnabledCommunities(),
+    ).thenAnswer((_) => CommunityId.values.toSet());
+    when(
+      () => mockMergedUseCase.canDisableCommunity(any()),
+    ).thenAnswer((_) => true);
     await di.configureDependencies();
     if (di.sl.isRegistered<UpdateRepo>()) {
       di.sl.unregister<UpdateRepo>();
