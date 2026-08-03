@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/model/feed_item.dart';
-import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 
@@ -140,7 +137,8 @@ class FmkoreaImpl extends HtmlCommunityRepo {
 
   String _extractAuthor(dom.Document doc) {
     final authorEl = doc.querySelector(
-      '.rd_nb .nick_name, .author .member, .rd_author, .rd_hd .btm_area .member_plate',
+      '.rd_nb .nick_name, .author .member, .rd_author,'
+      ' .rd_hd .btm_area .member_plate',
     );
     return htmlClient.textOf(authorEl);
   }
@@ -220,7 +218,6 @@ class FmkoreaImpl extends HtmlCommunityRepo {
       recommendCount: recommendCount,
       isBest: false,
       replies: const [],
-      mediaBlocks: const [],
     );
   }
 }

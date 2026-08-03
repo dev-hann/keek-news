@@ -3,9 +3,8 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/model/feed_item.dart';
-import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
 import 'package:keek_news/service/html_service.dart';
 
@@ -131,7 +130,6 @@ class NatepannImpl extends HtmlCommunityRepo {
       recommendCount: 0,
       isBest: false,
       replies: const [],
-      mediaBlocks: const [],
     );
   }
 }

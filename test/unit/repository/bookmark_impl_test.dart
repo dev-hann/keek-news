@@ -76,7 +76,7 @@ void main() {
 
   group('BookmarkImpl isBookmarked', () {
     test('should return true when composite key present', () async {
-      final b = bookmark(community: CommunityId.humoruniv, id: '1');
+      final b = bookmark();
       when(() => storage.getString(_storageKey)).thenReturn(encodeAll([b]));
 
       final result = await repo.isBookmarked(CommunityId.humoruniv, '1');
@@ -85,7 +85,7 @@ void main() {
     });
 
     test('should return false when composite key absent', () async {
-      final b = bookmark(community: CommunityId.humoruniv, id: '1');
+      final b = bookmark();
       when(() => storage.getString(_storageKey)).thenReturn(encodeAll([b]));
 
       final result = await repo.isBookmarked(CommunityId.humoruniv, '99');
@@ -106,7 +106,7 @@ void main() {
   group('BookmarkImpl add', () {
     test('should prepend new bookmark and persist as JSON', () async {
       final existing = bookmark(id: '2', title: 'old');
-      final incoming = bookmark(id: '1', title: 'new');
+      final incoming = bookmark(title: 'new');
       when(
         () => storage.getString(_storageKey),
       ).thenReturn(encodeAll([existing]));
@@ -130,8 +130,8 @@ void main() {
     });
 
     test('should replace existing bookmark with same key', () async {
-      final existing = bookmark(id: '1', title: 'old');
-      final incoming = bookmark(id: '1', title: 'updated');
+      final existing = bookmark(title: 'old');
+      final incoming = bookmark(title: 'updated');
       when(
         () => storage.getString(_storageKey),
       ).thenReturn(encodeAll([existing]));
