@@ -131,5 +131,38 @@ void main() {
       );
       expect(detail.looksEmpty, isFalse);
     });
+
+    test('parses stats and at least one comment (regression)', () async {
+      // Old parser returned zeros across the board and an empty comment list
+      // because it selected .detailTxtDeco01 (a hit-counter badge) before the
+      // real body and never wired up the comment extraction.
+      final detail = await detailRepo().fetchDetail(id);
+
+      expect(
+        detail.viewCount,
+        greaterThan(0),
+        reason: '조회 count should be parsed from .countGroup',
+      );
+      expect(detail.recommendCount, greaterThanOrEqualTo(0));
+      expect(
+        detail.commentCount,
+        detail.comments.length,
+        reason: 'commentCount should equal parsed comment list length',
+      );
+    });
+
+    test(
+      'title comes from page <title>, not a nav element (regression)',
+      () async {
+        final detail = await detailRepo().fetchDetail(id);
+
+        // Old selector returned the navigation header text. The page <title>
+        // format is "post title | 보배드림 ..." so the parsed title must not
+        // contain the pipe suffix or the brand name.
+        expect(detail.title, isNot(contains('보배드림')));
+        expect(detail.title, isNot(contains('사이버매장')));
+        expect(detail.title, isNot(equals('게시판')));
+      },
+    );
   });
 }

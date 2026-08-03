@@ -171,7 +171,9 @@ Future<void> configureDependencies() async {
         'Referer': 'https://www.bobaedream.co.kr/list?code=humor',
       },
     ),
-    encoding: 'euc-kr',
+    // bobaedream declares <meta charset=utf-8> and the server has served utf-8
+    // for years; the previous 'euc-kr' setting garbled every Korean character.
+    encoding: 'utf-8',
   );
 
   final ruliwebHtml = DioHtmlService(

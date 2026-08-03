@@ -1,5 +1,6 @@
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
+import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
@@ -63,32 +64,63 @@ class BobaedreamImpl extends HtmlCommunityRepo {
   Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/view?code=humor&No=$id');
     final doc = html_parser.parse(html);
-    final contentEl = doc.querySelector('.detailTxtDeco01, .bodyCont');
+    // .detailTxtDeco01 is a hit-counter badge rendered before the real body;
+    // .bodyCont holds the actual <p>/<img> content. Selecting .detailTxtDeco01
+    // first used to mask the real body entirely.
+    final contentEl = doc.querySelector('.bodyCont');
+    final countGroup = htmlClient.textOf(doc.querySelector('.countGroup'));
 
     return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
-      date: DateTime.now(),
+      date: _extractDate(countGroup) ?? DateTime.now(),
       contentHtml: contentEl?.innerHtml ?? '',
       contentBlocks: _buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
-      recommendCount: 0,
+      recommendCount: _parseInt(countGroup, r'추천\s*([\d,]+)'),
       notRecommendCount: 0,
-      viewCount: 0,
-      commentCount: 0,
-      comments: const [],
+      viewCount: _parseInt(countGroup, r'조회\s*([\d,]+)'),
+      commentCount: _extractCommentCount(doc),
+      comments: _extractComments(doc),
       community: CommunityId.bobaedream,
     );
   }
 
+  /// Title on bobaedream detail pages is not in a stable dedicated element;
+  /// the page <title> tag is "post title | 보배드림 ...". Strip the suffix.
   String _extractTitle(dom.Document doc) {
-    final el = doc.querySelector('a.bsubject, .bsubject, h3');
-    return htmlClient.textOf(el);
+    final raw = htmlClient.textOf(doc.querySelector('title'));
+    if (raw.isEmpty) return '';
+    final pipe = raw.indexOf(' | ');
+    return (pipe > 0 ? raw.substring(0, pipe) : raw).trim();
   }
 
   String _extractAuthor(dom.Document doc) {
-    return htmlClient.textOf(doc.querySelector('.author02, .author'));
+    return htmlClient.textOf(doc.querySelector('.nickName, .name, .author'));
+  }
+
+  DateTime? _extractDate(String countGroup) {
+    final m = RegExp(r'(\d{4})\.(\d{2})\.(\d{2})').firstMatch(countGroup);
+    if (m == null) return null;
+    return DateTime(
+      int.parse(m.group(1)!),
+      int.parse(m.group(2)!),
+      int.parse(m.group(3)!),
+    );
+  }
+
+  int _parseInt(String text, String pattern) {
+    final m = RegExp(pattern).firstMatch(text);
+    if (m == null) return 0;
+    return int.tryParse(m.group(1)!.replaceAll(',', '')) ?? 0;
+  }
+
+  int _extractCommentCount(dom.Document doc) {
+    final els = doc.querySelectorAll('[id^="small_cmt_"]');
+    if (els.isNotEmpty) return els.length;
+    final m = RegExp(r'댓글\s*\((\d+)\)').firstMatch(doc.body?.text ?? '');
+    return m == null ? 0 : int.tryParse(m.group(1)!) ?? 0;
   }
 
   List<ContentBlock> _buildBlocks(dom.Element? content) {
@@ -98,5 +130,33 @@ class BobaedreamImpl extends HtmlCommunityRepo {
       const ContentBlockConfig(community: CommunityId.bobaedream),
       fallbackText: content.text,
     );
+  }
+
+  /// Comments are wrapped in <dl> elements, each containing the comment text
+  /// inside <dd id="small_cmt_<id>"> and the author in .nickName/.name/.author.
+  List<Comment> _extractComments(dom.Document doc) {
+    final result = <Comment>[];
+    for (final textEl in doc.querySelectorAll('[id^="small_cmt_"]')) {
+      final dl = textEl.parent?.parent;
+      if (dl == null) continue;
+      final author = htmlClient.textOf(
+        dl.querySelector('.nickName, .name, .author'),
+      );
+      final content = htmlClient.textOf(textEl);
+      if (content.isEmpty && author.isEmpty) continue;
+      final id = htmlClient.extractNumber(textEl.id);
+      result.add(
+        Comment(
+          id: id,
+          author: author,
+          content: content,
+          date: DateTime.now(),
+          recommendCount: 0,
+          isBest: false,
+          replies: const [],
+        ),
+      );
+    }
+    return result;
   }
 }

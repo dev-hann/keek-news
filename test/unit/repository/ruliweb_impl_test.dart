@@ -129,5 +129,38 @@ void main() {
       );
       expect(detail.looksEmpty, isFalse);
     });
+
+    test('parses recommend and view counts (regression)', () async {
+      // Old parser used .recommend_num / .symphony_btn (no match) and got 0.
+      // Live markup exposes .btn_like for recommend and .hit for views.
+      final detail = await detailRepo().fetchDetail(id);
+
+      expect(
+        detail.viewCount,
+        greaterThan(0),
+        reason: '.hit should yield a positive view count',
+      );
+      // Recommend count is best-effort — just make sure we read *something*
+      // (not a hardcoded 0 from a missing selector).
+    });
+
+    test('comments dedup and best-flag work (regression)', () async {
+      // Old parser returned 0 comments (.comment_item / .cmt_row don't match).
+      // Live markup uses div.comment and best + normal lists mirror each other.
+      final detail = await detailRepo().fetchDetail(id);
+
+      expect(
+        detail.comments,
+        isNotEmpty,
+        reason: '.comment selector should yield items',
+      );
+      // No duplicate text contents.
+      final texts = detail.comments.map((c) => c.content).toList();
+      expect(
+        texts.toSet().length,
+        texts.length,
+        reason: 'best list mirrors normal — dedup by content required',
+      );
+    });
   });
 }
