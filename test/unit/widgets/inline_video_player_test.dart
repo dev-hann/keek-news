@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
+import 'package:keek_news/widgets/video_buffering_overlay.dart';
+import 'package:keek_news/widgets/video_error_view.dart';
 import 'package:keek_news/widgets/video_surface.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:video_player/video_player.dart';
@@ -113,6 +115,44 @@ void main() {
           BoxFit.contain,
           reason: 'video must use contain, never cover, to avoid cropping',
         );
+      },
+    );
+
+    testWidgets('shows VideoErrorView with retry affordance when init fails', (
+      tester,
+    ) async {
+      const block = VideoBlock(url: 'https://example.com/bad.mp4');
+      await tester.pumpWidget(_wrapped(const InlineVideoPlayer(block: block)));
+      await tester.pumpAndSettle();
+      expect(find.byType(VideoErrorView), findsOneWidget);
+      expect(find.text('동영상을 불러올 수 없습니다'), findsOneWidget);
+      expect(find.text('탭하여 재시도'), findsOneWidget);
+    });
+
+    testWidgets(
+      'tapping the error view does not crash and re-enters a recoverable state',
+      (tester) async {
+        const block = VideoBlock(url: 'https://example.com/bad.mp4');
+        await tester.pumpWidget(
+          _wrapped(const InlineVideoPlayer(block: block)),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(VideoErrorView), warnIfMissed: false);
+        await tester.pumpAndSettle();
+        expect(find.byType(InlineVideoPlayer), findsOneWidget);
+        expect(find.byType(VideoErrorView), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'mounts a VideoBufferingOverlay so the buffering state has a UI slot',
+      (tester) async {
+        const block = VideoBlock(url: 'https://example.com/v.mp4');
+        await tester.pumpWidget(
+          _wrapped(const InlineVideoPlayer(block: block)),
+        );
+        await tester.pump();
+        expect(find.byType(VideoBufferingOverlay), findsOneWidget);
       },
     );
   });

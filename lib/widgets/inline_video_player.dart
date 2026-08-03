@@ -5,6 +5,8 @@ import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
+import 'package:keek_news/widgets/video_buffering_overlay.dart';
+import 'package:keek_news/widgets/video_error_view.dart';
 import 'package:keek_news/widgets/video_surface.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:video_player/video_player.dart';
@@ -22,6 +24,7 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
   VideoPlayerController? controller;
   bool isInitialized = false;
   bool hasError = false;
+  bool isBuffering = false;
   bool showPlayButton = true;
   bool showControls = true;
   bool isMuted = true;
@@ -36,6 +39,15 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
 
   void onPlay() {}
 
+  void _onValueChange() {
+    final c = controller;
+    if (!mounted || c == null) return;
+    final buffering = c.value.isBuffering;
+    if (buffering != isBuffering) {
+      setState(() => isBuffering = buffering);
+    }
+  }
+
   void pauseIfPlaying() {
     final c = controller;
     if (isInitialized && c != null && c.value.isPlaying) {
@@ -45,10 +57,12 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
   }
 
   void initController({Duration? initialPosition}) {
-    controller = VideoPlayerController.networkUrl(Uri.parse(videoBlock.url))
+    final c = VideoPlayerController.networkUrl(Uri.parse(videoBlock.url));
+    controller = c
+      ..addListener(_onValueChange)
       ..initialize()
           .then((_) {
-            if (!mounted) return;
+            if (!mounted || controller != c) return;
             setState(() => isInitialized = true);
             controller!.setLooping(true);
             controller!.setVolume(isMuted ? 0 : 1);
@@ -59,8 +73,29 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
             startHideTimer();
           })
           .catchError((_) {
-            if (mounted) setState(() => hasError = true);
+            if (!mounted || controller != c) return;
+            setState(() => hasError = true);
           });
+  }
+
+  /// Disposes the current controller and re-initializes from scratch. Used by
+  /// the error view's "탭하여 재시도" affordance.
+  void retryInit() {
+    final old = controller;
+    if (old != null) {
+      old.removeListener(_onValueChange);
+      old.dispose();
+    }
+    if (!mounted) return;
+    setState(() {
+      controller = null;
+      hasError = false;
+      isInitialized = false;
+      isBuffering = false;
+      showPlayButton = true;
+      showControls = true;
+    });
+    initController();
   }
 
   void startHideTimer() {
@@ -112,6 +147,7 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
   @override
   void dispose() {
     hideTimer?.cancel();
+    controller?.removeListener(_onValueChange);
     controller?.dispose();
     super.dispose();
   }
@@ -136,22 +172,6 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
           isPlaying ? LucideIcons.pause : LucideIcons.play,
           size: 40,
           color: _scrimForeground,
-        ),
-      ),
-    );
-  }
-
-  Widget buildError() {
-    return const ColoredBox(
-      color: _imagePlaceholder,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(LucideIcons.alertCircle, color: Colors.white54, size: 32),
-            SizedBox(height: 8),
-            Text('동영상을 불러올 수 없습니다', style: TextStyle(color: Colors.white54)),
-          ],
         ),
       ),
     );
@@ -372,7 +392,7 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
             alignment: Alignment.center,
             children: [
               if (hasError)
-                buildError()
+                VideoErrorView(onRetry: retryInit)
               else if (isInitialized)
                 VideoSurface(controller: controller!)
               else if (widget.block.thumbnailUrl != null)
@@ -386,8 +406,7 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
                 )
               else
                 _buildLoading(),
-              if (!hasError && !isInitialized && !showPlayButton)
-                const CircularProgressIndicator(color: Colors.white),
+              VideoBufferingOverlay(visible: isBuffering),
               if (isGif)
                 _buildGifOverlay()
               else
@@ -512,13 +531,23 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
                     alignment: Alignment.center,
                     children: [
                       if (hasError)
-                        buildError()
+                        VideoErrorView(onRetry: retryInit)
                       else if (isInitialized)
                         VideoSurface(controller: controller!)
+                      else if (widget.block.thumbnailUrl != null)
+                        RetryableNetworkImage(
+                          imageUrl: widget.block.thumbnailUrl!,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          placeholderColor: _mediaSurface,
+                          foregroundColor: _scrimForeground,
+                        )
                       else
                         const Center(
                           child: CircularProgressIndicator(color: Colors.white),
                         ),
+                      VideoBufferingOverlay(visible: isBuffering),
                       IgnorePointer(
                         ignoring: !showControls,
                         child: AnimatedOpacity(
