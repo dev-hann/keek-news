@@ -13,6 +13,7 @@ import 'package:keek_news/pages/home_view.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/feed_use_case.dart';
+import 'package:keek_news/widgets/community_tab_bar.dart';
 import 'package:keek_news/widgets/error_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/skeleton_feed_card.dart';
@@ -213,6 +214,33 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => mockUseCase.getMergedFeed(any())).called(1);
+  });
+
+  testWidgets('hides CommunityTabBar when only one community enabled', (
+    tester,
+  ) async {
+    when(
+      () => mockUseCase.getEnabledCommunities(),
+    ).thenAnswer((_) => {CommunityId.humoruniv});
+    stubMergedPage(() => page(sampleItems()));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CommunityTabBar), findsNothing);
+    // Title still shows the single community's display name.
+    expect(find.text('웃긴대학'), findsWidgets);
+  });
+
+  testWidgets('shows CommunityTabBar when multiple communities enabled', (
+    tester,
+  ) async {
+    stubMergedPage(() => page(sampleItems()));
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CommunityTabBar), findsOneWidget);
   });
 
   testWidgets('scroll near bottom triggers fetchNextPage with cursor', (

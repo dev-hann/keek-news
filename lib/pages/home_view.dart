@@ -217,22 +217,23 @@ class _HomeScreenState extends ConsumerState<HomeView> {
               elevation: 0,
               scrolledUnderElevation: 0,
             ),
-            SliverAppBar(
-              primary: false,
-              automaticallyImplyLeading: false,
-              titleSpacing: 0,
-              toolbarHeight: 44,
-              title: CommunityTabBar(
-                communities: visibleCommunities,
-                selectedIndex: _tabIndex,
-                onChanged: _switchTab,
+            if (visibleCommunities.length > 1)
+              SliverAppBar(
+                primary: false,
+                automaticallyImplyLeading: false,
+                titleSpacing: 0,
+                toolbarHeight: 44,
+                title: CommunityTabBar(
+                  communities: visibleCommunities,
+                  selectedIndex: _tabIndex,
+                  onChanged: _switchTab,
+                ),
+                floating: true,
+                snap: true,
+                backgroundColor: surface,
+                elevation: 0,
+                scrolledUnderElevation: 0,
               ),
-              floating: true,
-              snap: true,
-              backgroundColor: surface,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-            ),
             ..._buildSliverBody(
               feedState,
               visibleItems,
