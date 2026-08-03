@@ -16,16 +16,20 @@ void main() {
     url: '/716784390',
   );
 
-  FeedErrorCard cardWith({required Failure failure, VoidCallback? onCopyTap}) =>
-      FeedErrorCard(
-        post: post,
-        errorDetail: ErrorPostDetail(
-          id: 716784390,
-          community: CommunityId.dogdrip,
-          failure: failure,
-        ),
-        onCopyTap: onCopyTap ?? () {},
-      );
+  FeedErrorCard cardWith({
+    required Failure failure,
+    VoidCallback? onCopyTap,
+    VoidCallback? onRetryTap,
+  }) => FeedErrorCard(
+    post: post,
+    errorDetail: ErrorPostDetail(
+      id: 716784390,
+      community: CommunityId.dogdrip,
+      failure: failure,
+    ),
+    onCopyTap: onCopyTap ?? () {},
+    onRetryTap: onRetryTap,
+  );
 
   group('FeedErrorCard', () {
     testWidgets('renders community label and failure headline', (tester) async {
@@ -79,6 +83,41 @@ void main() {
       );
 
       expect(find.text('싱글벙글'), findsNothing);
+    });
+
+    testWidgets('renders retry button when onRetryTap provided', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        shadHarness(
+          cardWith(failure: const NetworkFailure('x'), onRetryTap: () {}),
+        ),
+      );
+
+      expect(find.text('다시 시도'), findsOneWidget);
+    });
+
+    testWidgets('hides retry button when onRetryTap is null', (tester) async {
+      await tester.pumpWidget(
+        shadHarness(cardWith(failure: const NetworkFailure('x'))),
+      );
+
+      expect(find.text('다시 시도'), findsNothing);
+    });
+
+    testWidgets('invokes onRetryTap when retry button tapped', (tester) async {
+      var tapped = 0;
+      await tester.pumpWidget(
+        shadHarness(
+          cardWith(
+            failure: const NetworkFailure('x'),
+            onRetryTap: () => tapped++,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('다시 시도'));
+      expect(tapped, 1);
     });
   });
 }

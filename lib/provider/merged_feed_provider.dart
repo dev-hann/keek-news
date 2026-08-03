@@ -154,6 +154,14 @@ class MergedDetailNotifier extends Notifier<MergedDetailMap> {
     state = {...state, key: AsyncValue<PostDetail>.data(detail)};
   }
 
+  /// Clears one post's cached detail (e.g. a resolved error card) and refetches
+  /// it. Used by the "다시 시도" button on FeedErrorCard.
+  Future<void> retryDetail(MergedDetailKey key) async {
+    if (!state.containsKey(key)) return;
+    state = Map.of(state)..remove(key);
+    await fetchDetail(key);
+  }
+
   /// Clears all cached detail state so errored cards get a fresh fetch on the
   /// next feed reload. Re-fetching happens lazily via ensureDetailsLoaded.
   void clear() => state = const {};

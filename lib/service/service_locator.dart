@@ -9,8 +9,8 @@ import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/cache/image_cache_impl.dart';
 import 'package:keek_news/repository/cache/image_cache_repo.dart';
-import 'package:keek_news/repository/community/community_repo.dart';
 import 'package:keek_news/repository/community/bobaedream/bobaedream_impl.dart';
+import 'package:keek_news/repository/community/community_repo.dart';
 import 'package:keek_news/repository/community/dogdrip/dogdrip_impl.dart';
 import 'package:keek_news/repository/community/fmkorea/fmkorea_impl.dart';
 import 'package:keek_news/repository/community/humoruniv/humoruniv_impl.dart';
@@ -28,6 +28,7 @@ import 'package:keek_news/service/default_image_cache_service.dart';
 import 'package:keek_news/service/dio_apk_download_service.dart';
 import 'package:keek_news/service/dio_github_remote_service.dart';
 import 'package:keek_news/service/dio_html_service.dart';
+import 'package:keek_news/service/dio_retry_interceptor.dart';
 import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/local_storage_service.dart';
@@ -74,6 +75,7 @@ Dio _dio({
       responseType: ResponseType.bytes,
     ),
   );
+  dio.interceptors.add(RetryInterceptor(dio: dio));
   if (cookieJar != null) {
     dio.interceptors.add(CookieManager(cookieJar));
   }

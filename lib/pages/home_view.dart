@@ -322,13 +322,14 @@ class _HomeScreenState extends ConsumerState<HomeView> {
       );
     }
     if (av?.value case final ErrorPostDetail err) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: FeedErrorCard(
-          post: item,
-          errorDetail: err,
-          onCopyTap: () => _copyErrorReport(item, err),
-        ),
+      return FeedErrorCard(
+        post: item,
+        errorDetail: err,
+        onCopyTap: () => _copyErrorReport(item, err),
+        onRetryTap: () => ref.read(mergedDetailProvider.notifier).retryDetail((
+          community: item.community,
+          id: item.id,
+        )),
       );
     }
     // Loading or detail not yet requested: render the list-level card; the

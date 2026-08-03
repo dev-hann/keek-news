@@ -32,42 +32,23 @@ class DioHtmlService extends HtmlService {
   DioHtmlService({
     required Dio dio,
     required String encoding,
-    List<Duration> retryDelays = const [
-      Duration(milliseconds: 800),
-      Duration(milliseconds: 2500),
-      Duration(milliseconds: 6000),
-      Duration(milliseconds: 15000),
-    ],
     CharsetDecode decode = _defaultCharsetDecode,
   }) : _dio = dio,
        _encoding = encoding,
-       _retryDelays = retryDelays,
        _decode = decode;
 
   final Dio _dio;
   final String _encoding;
-  final List<Duration> _retryDelays;
   final CharsetDecode _decode;
-
-  /// Backoff schedule between 503 retries. Read-only so tests can assert the
-  /// default shape without exercising real waits.
-  List<Duration> get retryDelays => List.unmodifiable(_retryDelays);
 
   @override
   Future<String> get(String path) async {
-    for (var attempt = 0; ; attempt++) {
-      try {
-        final response = await _dio.get<List<int>>(path);
-        final bytes = response.data ?? <int>[];
-        return _decode(_encoding, Uint8List.fromList(bytes));
-      } on DioException catch (e) {
-        final canRetry =
-            e.type == DioExceptionType.badResponse &&
-            e.response?.statusCode == 503 &&
-            attempt < _retryDelays.length;
-        if (!canRetry) throw _toFailure(e);
-        await Future<void>.delayed(_retryDelays[attempt]);
-      }
+    try {
+      final response = await _dio.get<List<int>>(path);
+      final bytes = response.data ?? <int>[];
+      return _decode(_encoding, Uint8List.fromList(bytes));
+    } on DioException catch (e) {
+      throw _toFailure(e);
     }
   }
 
@@ -85,12 +66,12 @@ class DioHtmlService extends HtmlService {
     switch (e.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
+      case DioExceptionType.sendTimeout:
       case DioExceptionType.connectionError:
         return NetworkFailure(e.message ?? e.type.name, http: diag);
       case DioExceptionType.badCertificate:
       case DioExceptionType.badResponse:
       case DioExceptionType.cancel:
-      case DioExceptionType.sendTimeout:
       case DioExceptionType.unknown:
         return ServerFailure(e.message ?? e.type.name, http: diag);
     }

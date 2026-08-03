@@ -76,6 +76,10 @@ class BookmarksView extends ConsumerWidget {
         post: item,
         errorDetail: err,
         onCopyTap: () => _copyErrorReport(context, item, err),
+        onRetryTap: () => ref.read(mergedDetailProvider.notifier).retryDetail((
+          community: item.community,
+          id: item.id,
+        )),
       );
     }
     return FeedCardEntry(

@@ -6,13 +6,14 @@ import 'package:keek_news/model/post_detail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 /// Replaces a FeedCard when its detail failed to load. Stateless — the copy
-/// action is wired by the host page via onCopyTap (keeps side effects out of
-/// the widget, per project convention).
+/// and retry actions are wired by the host page via onCopyTap / onRetryTap
+/// (keeps side effects out of the widget, per project convention).
 class FeedErrorCard extends StatelessWidget {
   const FeedErrorCard({
     required this.post,
     required this.errorDetail,
     required this.onCopyTap,
+    this.onRetryTap,
     super.key,
   });
 
@@ -20,52 +21,70 @@ class FeedErrorCard extends StatelessWidget {
   final ErrorPostDetail errorDetail;
   final VoidCallback onCopyTap;
 
+  /// When null, the "다시 시도" button is hidden (e.g. list-level errors with
+  /// no per-post retry path).
+  final VoidCallback? onRetryTap;
+
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
     final mTheme = Theme.of(context);
     final colorScheme = mTheme.colorScheme;
-    return Material(
-      color: colorScheme.surfaceContainer,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _communityLabel(),
-              style: theme.textTheme.small.copyWith(
-                color: theme.colorScheme.mutedForeground,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  LucideIcons.alertCircle,
-                  color: colorScheme.error,
-                  size: 20,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: colorScheme.surfaceContainer,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _communityLabel(),
+                style: theme.textTheme.small.copyWith(
+                  color: theme.colorScheme.mutedForeground,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '불러오기 실패 — ${_reason()}',
-                    style: mTheme.textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    LucideIcons.alertCircle,
+                    color: colorScheme.error,
+                    size: 20,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: onCopyTap,
-                icon: const Icon(LucideIcons.copy, size: 18),
-                label: const Text('오류 정보 복사'),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '불러오기 실패 — ${_reason()}',
+                      style: mTheme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onRetryTap != null)
+                      TextButton.icon(
+                        onPressed: onRetryTap,
+                        icon: const Icon(LucideIcons.refreshCw, size: 18),
+                        label: const Text('다시 시도'),
+                      ),
+                    TextButton.icon(
+                      onPressed: onCopyTap,
+                      icon: const Icon(LucideIcons.copy, size: 18),
+                      label: const Text('오류 정보 복사'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

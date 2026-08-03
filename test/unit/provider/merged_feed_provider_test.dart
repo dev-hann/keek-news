@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/merged_feed.dart';
+import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/feed_use_case.dart';
@@ -14,7 +16,10 @@ import '../../helpers/merged_feed_helper.dart';
 void main() {
   late MockMergedFeedUseCase mockUseCase;
 
-  setUpAll(registerMergedFeedFallbacks);
+  setUpAll(() {
+    registerMergedFeedFallbacks();
+    registerFallbackValue(CommunityId.humoruniv);
+  });
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -216,6 +221,90 @@ void main() {
 
       expect(notifier.state.items.map((e) => e.id), ['1']);
       expect(notifier.state.error, isNull);
+    });
+  });
+
+  group('MergedDetailNotifier.retryDetail', () {
+    const key = (community: CommunityId.humoruniv, id: '1');
+
+    test('clears cached error and re-fetches on retry', () async {
+      var call = 0;
+      when(
+        () => mockUseCase.getPostDetail(
+          community: any(named: 'community'),
+          id: any(named: 'id'),
+        ),
+      ).thenAnswer((_) async {
+        call++;
+        if (call == 1) {
+          return const ErrorPostDetail(
+            id: 1,
+            community: CommunityId.humoruniv,
+            failure: NetworkFailure('flake'),
+          );
+        }
+        return LoadedPostDetail(
+          id: 1,
+          title: 't',
+          author: 'a',
+          date: DateTime(2026),
+          contentHtml: '',
+          contentBlocks: const [],
+          imageUrls: const [],
+          recommendCount: 0,
+          notRecommendCount: 0,
+          viewCount: 0,
+          commentCount: 0,
+          comments: const [],
+        );
+      });
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(mergedDetailProvider.notifier);
+
+      await notifier.fetchDetail(key);
+      expect(
+        container.read(mergedDetailProvider)[key]?.value,
+        isA<ErrorPostDetail>(),
+      );
+
+      await notifier.retryDetail(key);
+
+      expect(call, 2);
+      expect(
+        container.read(mergedDetailProvider)[key]?.value,
+        isA<LoadedPostDetail>(),
+      );
+    });
+
+    test('no-op when key not present', () async {
+      when(
+        () => mockUseCase.getPostDetail(
+          community: any(named: 'community'),
+          id: any(named: 'id'),
+        ),
+      ).thenAnswer(
+        (_) async => const ErrorPostDetail(
+          id: 1,
+          community: CommunityId.humoruniv,
+          failure: NetworkFailure('x'),
+        ),
+      );
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final notifier = container.read(mergedDetailProvider.notifier);
+
+      // Key was never fetched → retryDetail does nothing.
+      await notifier.retryDetail(key);
+
+      verifyNever(
+        () => mockUseCase.getPostDetail(
+          community: any(named: 'community'),
+          id: any(named: 'id'),
+        ),
+      );
     });
   });
 }

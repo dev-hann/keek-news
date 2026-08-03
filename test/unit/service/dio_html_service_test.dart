@@ -151,29 +151,14 @@ void main() {
     });
   });
 
-  group('DioHtmlService 503 retry', () {
-    test('retries on 503 then succeeds', () async {
+  group('DioHtmlService failure mapping', () {
+    // Retry behaviour lives in RetryInterceptor
+    // (see dio_retry_interceptor_test). DioHtmlService.get() only maps the
+    // final DioException to a typed Failure.
+
+    test('maps 503 to ServerFailure carrying http diagnostics', () async {
       final client = DioHtmlService(
         dio: _dioWith([
-          const _Canned(statusCode: 503),
-          const _Canned(statusCode: 503),
-          const _Canned(body: '<html>ok</html>'),
-        ]),
-        encoding: 'utf-8',
-        retryDelays: const [Duration.zero, Duration.zero],
-        decode: _identityDecode,
-      );
-
-      final html = await client.get('/test');
-
-      expect(html, '<html>ok</html>');
-    });
-
-    test('throws ServerFailure when all retries exhausted', () async {
-      final client = DioHtmlService(
-        dio: _dioWith([
-          const _Canned(statusCode: 503),
-          const _Canned(statusCode: 503),
           const _Canned(
             statusCode: 503,
             body: '<html>just a moment</html>',
@@ -185,7 +170,6 @@ void main() {
           ),
         ]),
         encoding: 'utf-8',
-        retryDelays: const [Duration.zero, Duration.zero],
         decode: _identityDecode,
       );
 
@@ -206,11 +190,10 @@ void main() {
       expect(caught.http!.bodySnippet, contains('just a moment'));
     });
 
-    test('does not retry on non-503 client error', () async {
+    test('maps non-503 client error to ServerFailure', () async {
       final client = DioHtmlService(
         dio: _dioWith([const _Canned(statusCode: 404)]),
         encoding: 'utf-8',
-        retryDelays: const [Duration.zero, Duration.zero],
         decode: _identityDecode,
       );
 
@@ -249,47 +232,6 @@ void main() {
       }
 
       expect(caught?.http, isNull);
-    });
-  });
-
-  group('DioHtmlService default retry schedule', () {
-    test('default retryDelays has 4 entries (5 total attempts)', () {
-      final client = DioHtmlService(
-        dio: Dio(BaseOptions(baseUrl: 'https://example.test')),
-        encoding: 'utf-8',
-      );
-
-      expect(client.retryDelays, hasLength(4));
-    });
-
-    test('default backoff increases monotonically', () {
-      final client = DioHtmlService(
-        dio: Dio(BaseOptions(baseUrl: 'https://example.test')),
-        encoding: 'utf-8',
-      );
-
-      final delays = client.retryDelays;
-      for (var i = 1; i < delays.length; i++) {
-        expect(
-          delays[i],
-          greaterThan(delays[i - 1]),
-          reason: 'delay[$i] should exceed delay[${i - 1}]',
-        );
-      }
-    });
-
-    test('worst-case total wait stays under 30s', () {
-      final client = DioHtmlService(
-        dio: Dio(BaseOptions(baseUrl: 'https://example.test')),
-        encoding: 'utf-8',
-      );
-
-      final total = client.retryDelays.fold<int>(
-        0,
-        (acc, d) => acc + d.inMilliseconds,
-      );
-
-      expect(total, lessThan(30000));
     });
   });
 }
