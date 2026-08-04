@@ -130,6 +130,46 @@ class DioHtmlService extends HtmlService {
   }
 
   @override
+  int statOfAny(dom.Element? parent, Iterable<String> selectors) {
+    if (parent == null) return 0;
+    for (final selector in selectors) {
+      final value = extractNumber(textOf(parent.querySelector(selector)));
+      if (value != 0) return value;
+    }
+    return 0;
+  }
+
+  @override
+  dom.Element? queryFirst(dom.Element? root, Iterable<String> selectors) {
+    if (root == null) return null;
+    for (final s in selectors) {
+      final hit = root.querySelector(s);
+      if (hit != null) return hit;
+    }
+    return null;
+  }
+
+  @override
+  String textOfAny(dom.Element? root, Iterable<String> selectors) {
+    return textOf(queryFirst(root, selectors));
+  }
+
+  @override
+  String? attrOfAny(
+    dom.Element? root,
+    Iterable<({String selector, String attr})> pairs,
+  ) {
+    if (root == null) return null;
+    for (final p in pairs) {
+      for (final el in root.querySelectorAll(p.selector)) {
+        final v = el.attributes[p.attr];
+        if (v != null && v.isNotEmpty) return v;
+      }
+    }
+    return null;
+  }
+
+  @override
   ContentScanResult scanContent(dom.Element container) {
     final blocks = <ContentBlock>[];
     final seenKeys = <String>{};

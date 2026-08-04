@@ -18,20 +18,20 @@ void main() {
   });
 
   group('FeedImpl getEnabledCommunities', () {
-    test('returns ALL communities when storage is null', () {
+    test('returns all visible communities when storage is null', () {
       when(() => storage.getStringList(_storageKey)).thenReturn(null);
 
       final result = repo.getEnabledCommunities();
 
-      expect(result, CommunityId.values.toSet());
+      expect(result, CommunityId.values.toSet().difference(hiddenCommunityIds));
     });
 
-    test('returns ALL communities when storage is empty', () {
+    test('returns all visible communities when storage is empty', () {
       when(() => storage.getStringList(_storageKey)).thenReturn(<String>[]);
 
       final result = repo.getEnabledCommunities();
 
-      expect(result, CommunityId.values.toSet());
+      expect(result, CommunityId.values.toSet().difference(hiddenCommunityIds));
     });
 
     test('decodes stored names into CommunityId set', () {
@@ -43,6 +43,22 @@ void main() {
 
       expect(result, {CommunityId.dogdrip, CommunityId.ppomppu});
     });
+
+    test(
+      'hidden communities are never returned even if persisted as enabled',
+      () {
+        // Regression: an older install may have toggled fmkorea on before it
+        // was hidden. The persisted name must not resurrect it in the feed.
+        when(
+          () => storage.getStringList(_storageKey),
+        ).thenReturn(['dogdrip', 'fmkorea']);
+
+        final result = repo.getEnabledCommunities();
+
+        expect(result, {CommunityId.dogdrip});
+        expect(result, isNot(contains(CommunityId.fmkorea)));
+      },
+    );
   });
 
   group('FeedImpl canDisable', () {

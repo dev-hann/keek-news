@@ -158,13 +158,23 @@ class HumorunivImpl extends HtmlCommunityRepo {
   }
 
   String _extractTitle(dom.Document doc) {
-    return htmlClient.textOf(doc.querySelector('title'));
+    return htmlClient.textOfAny(doc.body, const [
+      'title',
+      'h1.read_title',
+      '.read_title',
+      '#read_title',
+      '.view_title',
+    ]);
   }
 
   String _extractAuthor(dom.Document doc) {
-    return htmlClient.textOf(
-      doc.querySelector('#read_profile_td .hu_nick_txt'),
-    );
+    return htmlClient.textOfAny(doc.body, const [
+      '#read_profile_td .hu_nick_txt',
+      '.hu_nick_txt',
+      '.read_author',
+      '.author_name',
+      '.nick_name',
+    ]);
   }
 
   DateTime _extractDate(dom.Document doc) {
@@ -182,24 +192,44 @@ class HumorunivImpl extends HtmlCommunityRepo {
   }
 
   String _extractContentHtml(dom.Document doc) {
-    final bodyEditor = doc.querySelector('.body_editor');
-    if (bodyEditor != null) return bodyEditor.innerHtml;
-    final daumContent = doc.querySelector('.daum-wm-content');
-    return daumContent?.innerHtml ?? '';
+    final el = htmlClient.queryFirst(doc.body, const [
+      '.body_editor',
+      '.daum-wm-content',
+      '.view_content',
+      '.board-contents',
+      '[itemprop="articleBody"]',
+    ]);
+    return el?.innerHtml ?? '';
   }
 
   dom.Element? _findContentContainer(dom.Document doc) {
-    final bodyEditor = doc.querySelector('.body_editor');
-    if (bodyEditor != null) return bodyEditor;
-    return doc.querySelector('.daum-wm-content');
+    return htmlClient.queryFirst(doc.body, const [
+      '.body_editor',
+      '.daum-wm-content',
+      '.view_content',
+      '.board-contents',
+      '[itemprop="articleBody"]',
+    ]);
   }
 
   int _extractRecommendCount(dom.Document doc) {
-    return htmlClient.statOf(doc.body, '#ok_div');
+    return htmlClient.statOfAny(doc.body, const [
+      '#ok_div',
+      '.ok_div',
+      '#ok_count',
+      '.recommend_count',
+      '[id^="ok_div"]',
+    ]);
   }
 
   int _extractNotRecommendCount(dom.Document doc) {
-    return htmlClient.statOf(doc.body, '#not_ok_span');
+    return htmlClient.statOfAny(doc.body, const [
+      '#not_ok_span',
+      '.not_ok_span',
+      '#not_ok_count',
+      '.not_recommend_count',
+      '[id^="not_ok"]',
+    ]);
   }
 
   int _extractViewCount(dom.Document doc) {
@@ -214,12 +244,15 @@ class HumorunivImpl extends HtmlCommunityRepo {
   }
 
   int _extractCommentCount(dom.Document doc) {
-    var h2s = doc.querySelectorAll('#content_info h2 .comment_num');
-    if (h2s.isEmpty) {
-      h2s = doc.querySelectorAll('h2 .comment_num');
-    }
-    if (h2s.isEmpty) return 0;
-    return htmlClient.extractBracketedInt(h2s.first.text);
+    final hit = htmlClient.queryFirst(doc.body, const [
+      '#content_info h2 .comment_num',
+      'h2 .comment_num',
+      '.comment_num',
+      '#comment_count',
+      '[id^="comment_count"]',
+    ]);
+    if (hit == null) return 0;
+    return htmlClient.extractBracketedInt(hit.text);
   }
 
   List<Comment> _extractComments(dom.Document doc) {

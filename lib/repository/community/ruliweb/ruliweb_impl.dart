@@ -61,7 +61,7 @@ class RuliwebImpl extends HtmlCommunityRepo {
 
   @override
   Future<LoadedPostDetail> fetchDetail(String id) async {
-    final html = await htmlClient.get('/best/board/300143/read/$id');
+    final html = await htmlClient.get('/best/board/300143/read/$id?m=humor');
     final doc = html_parser.parse(html);
     // .view_content wraps <article><div>...<p/></div></article>. If we hand
     // the outer wrapper to buildContentBlocks it sees a single <article> and
@@ -81,7 +81,7 @@ class RuliwebImpl extends HtmlCommunityRepo {
       contentHtml: contentEl?.innerHtml ?? '',
       contentBlocks: _buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
-      recommendCount: htmlClient.statOf(doc.body, '.btn_like'),
+      recommendCount: htmlClient.statOf(doc.body, 'span.like'),
       notRecommendCount: 0,
       viewCount: htmlClient.statOf(doc.body, '.hit'),
       commentCount: _extractCommentCount(doc),

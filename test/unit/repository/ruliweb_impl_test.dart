@@ -8,8 +8,10 @@ import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/ruliweb/ruliweb_impl.dart';
 import 'package:keek_news/service/html_service.dart';
+import '../../helpers/html_service_helpers.dart';
 
-class _FixtureHtmlService extends HtmlService {
+class _FixtureHtmlService extends HtmlService
+    with HtmlServiceMultiCandidateMixin {
   _FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 
@@ -30,8 +32,8 @@ class _FixtureHtmlService extends HtmlService {
   @override
   int extractNumber(String? text) {
     if (text == null) return 0;
-    final match = RegExp(r'(\d+)').firstMatch(text);
-    return match != null ? int.parse(match.group(1)!) : 0;
+    final digits = text.replaceAll(RegExp('[^0-9]'), '');
+    return int.tryParse(digits) ?? 0;
   }
 
   @override
@@ -93,7 +95,7 @@ void main() {
   });
 
   group('RuliwebImpl.fetchDetail', () {
-    const id = '76184464';
+    const id = '76193577';
 
     RuliwebImpl detailRepo() => RuliwebImpl(
       htmlClient: _FixtureHtmlService({id: _read('ruliweb/detail.html')}),
@@ -110,7 +112,7 @@ void main() {
     test('parses non-empty title', () async {
       final detail = await detailRepo().fetchDetail(id);
 
-      expect(detail.title, isNotEmpty);
+      expect(detail.title, contains('아이템매니아'));
     });
 
     test('extracts author when present', () async {
@@ -131,8 +133,10 @@ void main() {
     });
 
     test('parses recommend and view counts (regression)', () async {
-      // Old parser used .recommend_num / .symphony_btn (no match) and got 0.
-      // Live markup exposes .btn_like for recommend and .hit for views.
+      // Old selector `.btn_like` matched the first comment's like button
+      // (document order) instead of the article header recommend, returning a
+      // per-comment number. Live header exposes <span class="like">N</span>.
+      // View count lives in <span class="hit hit_high">N</span>.
       final detail = await detailRepo().fetchDetail(id);
 
       expect(
@@ -140,8 +144,24 @@ void main() {
         greaterThan(0),
         reason: '.hit should yield a positive view count',
       );
-      // Recommend count is best-effort — just make sure we read *something*
-      // (not a hardcoded 0 from a missing selector).
+    });
+
+    test(
+      'recommend count comes from the article header, not a comment',
+      () async {
+        // Regression: `.btn_like` grabbed the first comment like (114). The
+        // article header recommend for this fixture is 55
+        // (`<span class="like">`).
+        final detail = await detailRepo().fetchDetail(id);
+
+        expect(detail.recommendCount, 55);
+      },
+    );
+
+    test('comment count is parsed from the comment_count badge', () async {
+      final detail = await detailRepo().fetchDetail(id);
+
+      expect(detail.commentCount, greaterThan(0));
     });
 
     test('comments dedup and best-flag work (regression)', () async {

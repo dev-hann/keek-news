@@ -103,7 +103,13 @@ class TodayhumorImpl extends HtmlCommunityRepo {
   }
 
   String _extractTitle(dom.Document doc) {
-    final el = doc.querySelector('.viewSubjectDiv');
+    final el = htmlClient.queryFirst(doc.body, const [
+      '.viewSubjectDiv',
+      '.view_subject',
+      '.subject',
+      'h1.view_subject',
+      '[itemprop="headline"]',
+    ]);
     final text = el?.text.trim() ?? '';
     final match = RegExp(
       '<!--EAP_SUBJECT-->(.*)<!--/EAP_SUBJECT-->',
@@ -112,7 +118,13 @@ class TodayhumorImpl extends HtmlCommunityRepo {
   }
 
   String _extractAuthor(dom.Document doc) {
-    final el = doc.querySelector('#viewPageWriterNameSpan');
+    final el = htmlClient.queryFirst(doc.body, const [
+      '#viewPageWriterNameSpan',
+      '.writer_name',
+      '.author',
+      '.nick_name',
+      '[itemprop="author"]',
+    ]);
     final nameAttr = el?.attributes['name'];
     if (nameAttr != null && nameAttr.isNotEmpty) return nameAttr;
     final b = el?.querySelector('b');
@@ -120,7 +132,12 @@ class TodayhumorImpl extends HtmlCommunityRepo {
   }
 
   DateTime _extractDate(dom.Document doc) {
-    final container = doc.querySelector('.writerInfoContents');
+    final container = htmlClient.queryFirst(doc.body, const [
+      '.writerInfoContents',
+      '.writer_info',
+      '.view_meta',
+      '.post_meta',
+    ]);
     final text = container?.text ?? '';
     final match = RegExp(
       r'(\d{4})/(\d{2})/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})',

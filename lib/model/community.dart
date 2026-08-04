@@ -38,6 +38,15 @@ class Community extends Equatable {
   List<Object?> get props => [id];
 }
 
+// Communities that are compiled in (parser + metadata retained for the day
+// they are re-enabled) but hidden from the UI and never fetched. Toggling a
+// community out of this set restores it everywhere with no migration.
+const hiddenCommunityIds = <CommunityId>{CommunityId.fmkorea};
+
+final visibleCommunities = communities
+    .where((c) => !hiddenCommunityIds.contains(c.id))
+    .toList(growable: false);
+
 const communities = <Community>[
   Community(
     id: CommunityId.humoruniv,

@@ -8,8 +8,10 @@ import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/natepann/natepann_impl.dart';
 import 'package:keek_news/service/html_service.dart';
+import '../../helpers/html_service_helpers.dart';
 
-class _FixtureHtmlService extends HtmlService {
+class _FixtureHtmlService extends HtmlService
+    with HtmlServiceMultiCandidateMixin {
   _FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 
@@ -30,8 +32,8 @@ class _FixtureHtmlService extends HtmlService {
   @override
   int extractNumber(String? text) {
     if (text == null) return 0;
-    final match = RegExp(r'(\d+)').firstMatch(text);
-    return match != null ? int.parse(match.group(1)!) : 0;
+    final digits = text.replaceAll(RegExp('[^0-9]'), '');
+    return int.tryParse(digits) ?? 0;
   }
 
   @override
@@ -108,7 +110,7 @@ void main() {
     test('parses non-empty title', () async {
       final detail = await detailRepo().fetchDetail(id);
 
-      expect(detail.title, isNotEmpty);
+      expect(detail.title, contains('컨포도'));
     });
 
     test('extracts author when present', () async {
@@ -163,6 +165,20 @@ void main() {
       expect(detail.comments.any((c) => c.content.contains('인외같다는')), isTrue);
       expect(detail.comments.any((c) => c.isBest), isTrue);
       expect(detail.comments.any((c) => c.recommendCount > 0), isTrue);
+    });
+
+    test('parses post stats from labeled .count spans (regression)', () async {
+      // Old selectors (.reco_num/.good_count/.read_num/.view_count/.cmt_count)
+      // matched nothing — recommend/view/commentCount all returned 0. Live
+      // markup renders stats as sibling <span class="count"> elements whose
+      // inner label (.tit or <em>) distinguishes them: 조회 2,086 / 추천수 6 /
+      // 반대수 4. commentCount is derived from the parsed comment list.
+      final detail = await detailRepo().fetchDetail(id);
+
+      expect(detail.viewCount, 2086);
+      expect(detail.recommendCount, 6);
+      expect(detail.notRecommendCount, 4);
+      expect(detail.commentCount, detail.comments.length);
     });
   });
 }

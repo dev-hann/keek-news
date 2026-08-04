@@ -17,7 +17,10 @@ import 'package:keek_news/service/prefs_local_storage_service.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FixtureHtmlService extends HtmlService {
+import '../helpers/html_service_helpers.dart';
+
+class FixtureHtmlService extends HtmlService
+    with HtmlServiceMultiCandidateMixin {
   FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 

@@ -102,21 +102,42 @@ class DogdripImpl extends HtmlCommunityRepo {
   }
 
   String _extractTitle(dom.Document doc) {
-    final h4 = doc.querySelector('h4 a.ed');
-    if (h4 != null) return h4.text.trim();
-    return htmlClient.textOf(doc.querySelector('h1'));
+    return htmlClient.textOfAny(doc.body, const [
+      'h4 a.ed',
+      'h1.title',
+      'h1',
+      '.document_title h1',
+      '[itemprop="name"]',
+      '[itemprop="headline"]',
+    ]);
   }
 
   String _extractAuthor(dom.Document doc) {
-    return htmlClient.textOf(doc.querySelector('a[class*="member_"]'));
+    return htmlClient.textOfAny(doc.body, const [
+      'a[class*="member_"]',
+      '.author .member',
+      '.document_author a',
+      '[itemprop="author"]',
+      '.nickname',
+    ]);
   }
 
   dom.Element? _findContent(dom.Document doc) {
-    return doc.querySelector('div[class*="document_"]');
+    return htmlClient.queryFirst(doc.body, const [
+      'div[class*="document_"]',
+      '.document_content',
+      '.rhymix_content',
+      '.xe_content',
+      '[itemprop="articleBody"]',
+    ]);
   }
 
   int _extractCommentCount(dom.Document doc) {
-    final match = RegExp(r'(\d+)\s*개의\s*댓글').firstMatch(doc.body?.text ?? '');
+    final text = doc.body?.text ?? '';
+    final match =
+        RegExp(r'(\d+)\s*개의\s*댓글').firstMatch(text) ??
+        RegExp(r'댓글\s*(\d+)').firstMatch(text) ??
+        RegExp(r'comment[s]?\s*[\(\[]?(\d+)').firstMatch(text);
     return match != null ? int.parse(match.group(1)!) : 0;
   }
 

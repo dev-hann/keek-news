@@ -118,11 +118,23 @@ class PpomppuImpl extends HtmlCommunityRepo {
   }
 
   String _extractTitle(dom.Document doc) {
-    return htmlClient.textOf(doc.querySelector('#topTitle h1'));
+    return htmlClient.textOfAny(doc.body, const [
+      '#topTitle h1',
+      '#topTitle .title',
+      '.board_title h1',
+      '.view_title h1',
+      'h1.title',
+    ]);
   }
 
   String _extractAuthor(dom.Document doc) {
-    return htmlClient.textOf(doc.querySelector('.topTitle-name a'));
+    return htmlClient.textOfAny(doc.body, const [
+      '.topTitle-name a',
+      '.topTitle-name',
+      '.author_name',
+      '.writer_name',
+      '.nick_name',
+    ]);
   }
 
   DateTime _extractDate(dom.Document doc) {
@@ -157,7 +169,10 @@ class PpomppuImpl extends HtmlCommunityRepo {
   }
 
   int _extractViewCount(dom.Document doc) {
-    for (final li in doc.querySelectorAll('#topTitle li')) {
+    final lis = doc.querySelectorAll(
+      '#topTitle li, .topTitle li, .view_meta li',
+    );
+    for (final li in lis) {
       final match = RegExp(r'조회수\s*(\d+)').firstMatch(li.text);
       if (match != null) return int.parse(match.group(1)!);
     }

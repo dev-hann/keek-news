@@ -12,10 +12,13 @@ class FeedImpl implements FeedRepo {
   @override
   Set<CommunityId> getEnabledCommunities() {
     final ids = _storage.getStringList(_enabledKey);
-    if (ids == null || ids.isEmpty) {
-      return CommunityId.values.toSet();
-    }
-    return ids.map((s) => CommunityId.values.byName(s)).toSet();
+    final persisted = ids == null || ids.isEmpty
+        ? CommunityId.values.toSet()
+        : ids.map((s) => CommunityId.values.byName(s)).toSet();
+    // Hidden communities are never fetchable: drop them from the default set
+    // (first run) and from any persisted selection so an older install that
+    // had one enabled quietly stops fetching it without a crash.
+    return persisted.difference(hiddenCommunityIds);
   }
 
   @override

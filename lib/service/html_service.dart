@@ -18,6 +18,25 @@ abstract class HtmlService {
 
   int statOf(Element? parent, String selector);
 
+  /// First non-zero stat across [selectors]; 0 when every candidate misses or
+  /// resolves to 0. Layer fallback selectors so a single community markup
+  /// change does not break a field — the next candidate picks it up.
+  int statOfAny(Element? parent, Iterable<String> selectors);
+
+  /// First matching element across [selectors], or null when all miss.
+  Element? queryFirst(Element? root, Iterable<String> selectors);
+
+  /// Trimmed text of the first hit across [selectors]; '' when all miss.
+  String textOfAny(Element? root, Iterable<String> selectors);
+
+  /// First non-empty attribute across [selector,attr] pairs. Within each
+  /// pair every matching element is examined so a single selector can host
+  /// multiple candidates (e.g. several anchors, only some populated).
+  String? attrOfAny(
+    Element? root,
+    Iterable<({String selector, String attr})> pairs,
+  );
+
   int extractBracketedInt(String? text) {
     if (text == null) return 0;
     final match = RegExp(r'\[(\d+)\]').firstMatch(text);

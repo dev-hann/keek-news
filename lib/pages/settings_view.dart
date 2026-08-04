@@ -54,7 +54,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
             SettingsGroup(
               title: '커뮤니티',
               children: [
-                for (final c in communities)
+                for (final c in visibleCommunities)
                   SettingsTile(
                     leading: CircleAvatar(
                       radius: 14,

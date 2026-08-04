@@ -8,8 +8,10 @@ import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/bobaedream/bobaedream_impl.dart';
 import 'package:keek_news/service/html_service.dart';
+import '../../helpers/html_service_helpers.dart';
 
-class _FixtureHtmlService extends HtmlService {
+class _FixtureHtmlService extends HtmlService
+    with HtmlServiceMultiCandidateMixin {
   _FixtureHtmlService(this._fixtures);
   final Map<String, String> _fixtures;
 

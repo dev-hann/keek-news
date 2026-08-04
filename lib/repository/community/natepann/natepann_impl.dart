@@ -67,6 +67,7 @@ class NatepannImpl extends HtmlCommunityRepo {
     final contentEl =
         doc.querySelector('#espresso_editor_view') ??
         doc.querySelector('#contentArea');
+    final comments = _extractComments(doc);
 
     return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
@@ -76,11 +77,11 @@ class NatepannImpl extends HtmlCommunityRepo {
       contentHtml: contentEl?.innerHtml ?? '',
       contentBlocks: _buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
-      recommendCount: _extractRecommend(doc),
-      notRecommendCount: 0,
-      viewCount: _extractViewCount(doc),
-      commentCount: _extractCommentCount(doc),
-      comments: _extractComments(doc),
+      recommendCount: _extractStat(doc, '추천'),
+      notRecommendCount: _extractStat(doc, '반대'),
+      viewCount: _extractStat(doc, '조회'),
+      commentCount: comments.length,
+      comments: comments,
       community: CommunityId.natepann,
     );
   }
@@ -95,16 +96,19 @@ class NatepannImpl extends HtmlCommunityRepo {
     return htmlClient.textOf(doc.querySelector('.writer, .nick, .user_info'));
   }
 
-  int _extractRecommend(dom.Document doc) {
-    return htmlClient.statOf(doc.body, '.reco_num, .good_count');
-  }
-
-  int _extractViewCount(dom.Document doc) {
-    return htmlClient.statOf(doc.body, '.read_num, .view_count');
-  }
-
-  int _extractCommentCount(dom.Document doc) {
-    return htmlClient.statOf(doc.body, '.cmt_count, .reply_count');
+  // natepann renders the post stats (조회/추천수/반대수) as sibling
+  // <span class="count"> elements distinguished only by an inner label
+  // (<span class="tit">조회</span> or <em>추천수</em>). A single CSS selector
+  // cannot tell them apart, so scan all .count spans and return the number
+  // held by the one whose text contains [label].
+  int _extractStat(dom.Document doc, String label) {
+    for (final el in doc.querySelectorAll('.count')) {
+      final text = htmlClient.textOf(el);
+      if (text.contains(label)) {
+        return htmlClient.extractNumber(text);
+      }
+    }
+    return 0;
   }
 
   List<ContentBlock> _buildBlocks(dom.Element? content) {

@@ -9,6 +9,20 @@ void main() {
       expect(ids, containsAll(CommunityId.values));
     });
 
+    test(
+      'visibleCommunities excludes hidden ids (fmkorea disabled, not removed)',
+      () {
+        expect(hiddenCommunityIds, contains(CommunityId.fmkorea));
+        final visibleIds = visibleCommunities.map((c) => c.id).toSet();
+        expect(visibleIds, isNot(contains(CommunityId.fmkorea)));
+        // Every non-hidden community remains visible.
+        for (final id in CommunityId.values) {
+          if (hiddenCommunityIds.contains(id)) continue;
+          expect(visibleIds, contains(id));
+        }
+      },
+    );
+
     test('should have non-empty shortName and displayName for each', () {
       for (final c in communities) {
         expect(c.shortName, isNotEmpty);
