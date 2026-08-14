@@ -74,7 +74,7 @@ abstract class HtmlService {
     return content
         .querySelectorAll('img')
         .where((img) => !ContentScanner.isNoiseImage(img))
-        .map((img) => ContentScanner.effectiveImageUrl(img))
+        .map(ContentScanner.effectiveImageUrl)
         .where((src) => src.isNotEmpty)
         .where(includeFilter ?? (_) => true)
         .map((src) => UrlBuilder.resolveAbsolute(community, src))

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
-import 'package:keek_news/model/merged_feed.dart';
 import 'package:keek_news/provider/app_version_provider.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/provider/feed_video_playback_provider.dart';
@@ -276,9 +275,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
               controller: videoController,
               appVersion: appVersion,
               onBookmarkTap: () => _toggleBookmark(item),
-              onRetryTap: () => ref
-                  .read(mergedDetailProvider.notifier)
-                  .retryDetail(key),
+              onRetryTap: () =>
+                  ref.read(mergedDetailProvider.notifier).retryDetail(key),
             ),
           );
         },

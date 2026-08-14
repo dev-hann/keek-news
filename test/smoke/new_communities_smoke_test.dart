@@ -45,25 +45,21 @@ void main() {
   // (HTTP 430 "에펨코리아 보안 시스템"), so this smoke is force-skipped until
   // the community is re-enabled. Re-enable by dropping the skip override.
   group('Smoke: FMKorea live fetch', () {
-    test(
-      'fetchLatest returns items and fetchDetail returns a title',
-      () async {
-        final repo = FmkoreaImpl(
-          htmlClient: _service('https://www.fmkorea.com', 'utf-8'),
-        );
-        final result = await repo.fetchLatest();
+    test('fetchLatest returns items and fetchDetail returns a title', () async {
+      final repo = FmkoreaImpl(
+        htmlClient: _service('https://www.fmkorea.com', 'utf-8'),
+      );
+      final result = await repo.fetchLatest();
 
-        expect(
-          result.items,
-          isNotEmpty,
-          reason: 'FMKorea list should not be empty',
-        );
+      expect(
+        result.items,
+        isNotEmpty,
+        reason: 'FMKorea list should not be empty',
+      );
 
-        final detail = await repo.fetchDetail(result.items.first.id);
-        expect(detail.title, isNotEmpty, reason: 'FMKorea detail title empty');
-      },
-      skip: 'fmkorea disabled (WAF 430); re-enable with the community',
-    );
+      final detail = await repo.fetchDetail(result.items.first.id);
+      expect(detail.title, isNotEmpty, reason: 'FMKorea detail title empty');
+    }, skip: 'fmkorea disabled (WAF 430); re-enable with the community');
   });
 
   group('Smoke: Bobaedream live fetch', () {

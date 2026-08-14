@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
@@ -42,15 +43,23 @@ Widget _card({PostDetail? detail, bool loading = false}) => shadHarness(
 
 void main() {
   group('FeedDetailCard', () {
-    testWidgets('renders loaded FeedCardEntry with post title', (
-      tester,
-    ) async {
+    testWidgets('renders loaded FeedCardEntry with post title', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(_card(detail: _loaded()));
 
       expect(find.text('싱글벙글'), findsWidgets);
     });
 
     testWidgets('renders error card when detail failed', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(
         _card(
           detail: const ErrorPostDetail(
@@ -66,6 +75,11 @@ void main() {
     });
 
     testWidgets('renders list-level entry while loading', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(_card(loading: true));
 
       expect(find.text('싱글벙글'), findsWidgets);
@@ -73,6 +87,11 @@ void main() {
     });
 
     testWidgets('renders entry when detail is null', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(_card());
 
       expect(find.text('싱글벙글'), findsWidgets);

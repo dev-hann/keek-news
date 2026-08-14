@@ -49,19 +49,19 @@ class LoadedPostDetail extends PostDetail {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        author,
-        date,
-        contentBlocks,
-        imageUrls,
-        recommendCount,
-        notRecommendCount,
-        viewCount,
-        commentCount,
-        comments,
-        community,
-      ];
+    id,
+    title,
+    author,
+    date,
+    contentBlocks,
+    imageUrls,
+    recommendCount,
+    notRecommendCount,
+    viewCount,
+    commentCount,
+    comments,
+    community,
+  ];
 }
 
 class ErrorPostDetail extends PostDetail {

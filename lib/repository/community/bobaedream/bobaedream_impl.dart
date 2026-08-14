@@ -5,7 +5,6 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
-import 'package:keek_news/service/html_service.dart';
 
 class BobaedreamImpl extends HtmlCommunityRepo {
   BobaedreamImpl({required super.htmlClient});
@@ -99,10 +98,7 @@ class BobaedreamImpl extends HtmlCommunityRepo {
   }
 
   DateTime? _extractDate(String countGroup) {
-    return parseDatePattern(
-      countGroup,
-      RegExp(r'(\d{4})\.(\d{2})\.(\d{2})'),
-    );
+    return parseDatePattern(countGroup, RegExp(r'(\d{4})\.(\d{2})\.(\d{2})'));
   }
 
   int _parseInt(String text, String pattern) {

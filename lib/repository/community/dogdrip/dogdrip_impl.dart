@@ -7,7 +7,6 @@ import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/model/url_builder.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
-import 'package:keek_news/service/html_service.dart';
 
 class DogdripImpl extends HtmlCommunityRepo {
   DogdripImpl({required super.htmlClient});
@@ -154,8 +153,7 @@ class DogdripImpl extends HtmlCommunityRepo {
 
     final timeText = item.querySelector('.text-muted')?.text ?? '';
     final date =
-        _parseRelativeTime(timeText) ??
-        DateTime.fromMillisecondsSinceEpoch(0);
+        _parseRelativeTime(timeText) ?? DateTime.fromMillisecondsSinceEpoch(0);
 
     var recommendCount = 0;
     final countEl = item.querySelector('.fa-thumbs-up');

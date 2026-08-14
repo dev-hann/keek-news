@@ -27,12 +27,11 @@ class TodayhumorImpl extends HtmlCommunityRepo {
   int get listPageSize => 10;
 
   @override
-  ContentBlockConfig get contentBlockConfig =>
-      const ContentBlockConfig(
-        community: CommunityId.todayhumor,
-        dedupStrategy: DedupStrategy.exactUrl,
-        resolveImageUrls: false,
-      );
+  ContentBlockConfig get contentBlockConfig => const ContentBlockConfig(
+    community: CommunityId.todayhumor,
+    dedupStrategy: DedupStrategy.exactUrl,
+    resolveImageUrls: false,
+  );
 
   @override
   Future<LoadedPostDetail> fetchDetail(String id) async {

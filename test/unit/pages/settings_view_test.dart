@@ -322,15 +322,13 @@ void main() {
         routes: [
           GoRoute(
             path: '/settings',
-            builder: (context, state) => const ScaffoldMessenger(
-              child: SettingsView(),
-            ),
+            builder: (context, state) =>
+                const ScaffoldMessenger(child: SettingsView()),
           ),
           GoRoute(
             path: '/bookmarks',
-            builder: (context, state) => const ScaffoldMessenger(
-              child: BookmarksView(),
-            ),
+            builder: (context, state) =>
+                const ScaffoldMessenger(child: BookmarksView()),
           ),
         ],
       );

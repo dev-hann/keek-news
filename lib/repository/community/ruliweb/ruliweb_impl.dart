@@ -5,7 +5,6 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
-import 'package:keek_news/service/html_service.dart';
 
 class RuliwebImpl extends HtmlCommunityRepo {
   RuliwebImpl({required super.htmlClient});

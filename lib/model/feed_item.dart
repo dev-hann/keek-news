@@ -17,17 +17,17 @@ class FeedItem extends Equatable {
   });
 
   factory FeedItem.fromBookmark(Bookmark b) => FeedItem(
-        community: b.community,
-        id: b.id,
-        title: b.title,
-        url: b.url,
-        author: b.author,
-        publishedAt: b.publishedAt,
-        recommendCount: b.recommendCount,
-        commentCount: b.commentCount,
-        viewCount: b.viewCount,
-        thumbnailUrl: b.thumbnailUrl,
-      );
+    community: b.community,
+    id: b.id,
+    title: b.title,
+    url: b.url,
+    author: b.author,
+    publishedAt: b.publishedAt,
+    recommendCount: b.recommendCount,
+    commentCount: b.commentCount,
+    viewCount: b.viewCount,
+    thumbnailUrl: b.thumbnailUrl,
+  );
 
   final CommunityId community;
   final String id;
@@ -42,15 +42,15 @@ class FeedItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        community,
-        id,
-        title,
-        url,
-        author,
-        publishedAt,
-        recommendCount,
-        commentCount,
-        viewCount,
-        thumbnailUrl,
-      ];
+    community,
+    id,
+    title,
+    url,
+    author,
+    publishedAt,
+    recommendCount,
+    commentCount,
+    viewCount,
+    thumbnailUrl,
+  ];
 }

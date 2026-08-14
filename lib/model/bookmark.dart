@@ -69,32 +69,32 @@ class Bookmark extends Equatable {
   String get key => '${community.name}:$id';
 
   Map<String, dynamic> toJson() => {
-        'community': community.name,
-        'id': id,
-        'title': title,
-        'url': url,
-        'savedAtMillis': savedAt.millisecondsSinceEpoch,
-        if (author != null) 'author': author,
-        if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
-        if (publishedAt != null)
-          'publishedAtMillis': publishedAt!.millisecondsSinceEpoch,
-        'recommendCount': recommendCount,
-        'commentCount': commentCount,
-        'viewCount': viewCount,
-      };
+    'community': community.name,
+    'id': id,
+    'title': title,
+    'url': url,
+    'savedAtMillis': savedAt.millisecondsSinceEpoch,
+    if (author != null) 'author': author,
+    if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+    if (publishedAt != null)
+      'publishedAtMillis': publishedAt!.millisecondsSinceEpoch,
+    'recommendCount': recommendCount,
+    'commentCount': commentCount,
+    'viewCount': viewCount,
+  };
 
   @override
   List<Object?> get props => [
-        community,
-        id,
-        title,
-        url,
-        savedAt,
-        author,
-        thumbnailUrl,
-        publishedAt,
-        recommendCount,
-        commentCount,
-        viewCount,
-      ];
+    community,
+    id,
+    title,
+    url,
+    savedAt,
+    author,
+    thumbnailUrl,
+    publishedAt,
+    recommendCount,
+    commentCount,
+    viewCount,
+  ];
 }

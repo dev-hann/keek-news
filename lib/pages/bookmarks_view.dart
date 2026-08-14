@@ -5,7 +5,6 @@ import 'package:keek_news/provider/app_version_provider.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/provider/feed_video_playback_provider.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
-import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
 import 'package:keek_news/widgets/feed_detail_card.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -52,9 +51,8 @@ class BookmarksView extends ConsumerWidget {
                   onBookmarkTap: () => ref
                       .read(bookmarkProvider.notifier)
                       .remove(bookmark.community, bookmark.id),
-                  onRetryTap: () => ref
-                      .read(mergedDetailProvider.notifier)
-                      .retryDetail(key),
+                  onRetryTap: () =>
+                      ref.read(mergedDetailProvider.notifier).retryDetail(key),
                 );
               },
             ),

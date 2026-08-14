@@ -3,7 +3,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/service/content_scanner.dart';
 
-ContentBlock? _firstImage(Iterable<ContentBlock> blocks) {
+ImageBlock? _firstImage(Iterable<ContentBlock> blocks) {
   for (final b in blocks) {
     if (b is ImageBlock) return b;
   }
@@ -26,8 +26,10 @@ void main() {
 
     test('skips spacer-named images without dimensions', () {
       final doc = html_parser.parse(
-        '<div><img src="https://cdn.example.com/spacer.gif">'
-        '<img src="https://cdn.example.com/photo.webp"></div>',
+        '<div> '
+        '<img src="https://cdn.example.com/spacer.gif" /> '
+        '<img src="https://cdn.example.com/photo.webp" /> '
+        '</div>',
       );
       final result = ContentScanner.scanContent(doc.body!);
 
@@ -38,7 +40,8 @@ void main() {
 
     test('prefers data-src over placeholder src for lazy images', () {
       final doc = html_parser.parse(
-        '<div><img src="blank.gif" data-src="https://cdn.example.com/a.jpg">'
+        '<div> '
+        '<img src="blank.gif" data-src="https://cdn.example.com/a.jpg"> '
         '</div>',
       );
       final result = ContentScanner.scanContent(doc.body!);
@@ -60,9 +63,10 @@ void main() {
     });
 
     test('link-dense chrome is not emitted as HtmlBlock', () {
-      final html = '''
-        <div><b><a href="/1">메뉴1</a> <a href="/2">메뉴2</a> '
-        <a href="/3">메뉴3</a> <a href="/4">메뉴4</a></b></div>
+      const html = '''
+        <div><b><a href="/1">navigation menu item one</a>
+        <a href="/2">navigation menu item two</a>
+        <a href="/3">navigation menu item three</a></b></div>
       ''';
       final doc = html_parser.parse(html);
       final result = ContentScanner.scanContent(doc.body!);
@@ -71,7 +75,7 @@ void main() {
     });
 
     test('genuine rich mixed content still becomes HtmlBlock', () {
-      final html = '''
+      const html = '''
         <div><b>본문 강조 텍스트가 충분히 길게 있는 문장입니다. '
         <a href="https://x.com">참고 링크</a> 그리고 마무리 문장.</b></div>
       ''';

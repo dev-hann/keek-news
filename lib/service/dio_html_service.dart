@@ -43,7 +43,7 @@ class DioHtmlService extends HtmlService {
     try {
       final response = await _dio.get<List<int>>(path);
       final bytes = response.data ?? <int>[];
-      return _decode(_encoding, Uint8List.fromList(bytes));
+      return await _decode(_encoding, Uint8List.fromList(bytes));
     } on DioException catch (e) {
       throw _toFailure(e);
     }
