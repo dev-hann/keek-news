@@ -51,10 +51,10 @@ class HumorunivImpl extends HtmlCommunityRepo {
 
     return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
+      community: CommunityId.humoruniv,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
       date: _extractDate(doc),
-      contentHtml: _extractContentHtml(doc),
       contentBlocks: scanResult.blocks,
       imageUrls: scanResult.imageUrls,
       recommendCount: _extractRecommendCount(doc),
@@ -189,17 +189,6 @@ class HumorunivImpl extends HtmlCommunityRepo {
       }
     }
     return DateTime.fromMillisecondsSinceEpoch(0);
-  }
-
-  String _extractContentHtml(dom.Document doc) {
-    final el = htmlClient.queryFirst(doc.body, const [
-      '.body_editor',
-      '.daum-wm-content',
-      '.view_content',
-      '.board-contents',
-      '[itemprop="articleBody"]',
-    ]);
-    return el?.innerHtml ?? '';
   }
 
   dom.Element? _findContentContainer(dom.Document doc) {
@@ -355,17 +344,11 @@ class HumorunivImpl extends HtmlCommunityRepo {
 
   /// Extracts `YYYY-MM-DD [HH:MM:SS]` from humoruniv's noisy `.etc` text.
   DateTime? _parseCommentDate(String text) {
-    final match = RegExp(
-      r'(\d{4})-(\d{1,2})-(\d{1,2})(?:[^\d]*?(\d{1,2}):(\d{2}):(\d{2}))?',
-    ).firstMatch(text);
-    if (match == null) return null;
-    return DateTime(
-      int.parse(match.group(1)!),
-      int.parse(match.group(2)!),
-      int.parse(match.group(3)!),
-      match.group(4) != null ? int.parse(match.group(4)!) : 0,
-      match.group(5) != null ? int.parse(match.group(5)!) : 0,
-      match.group(6) != null ? int.parse(match.group(6)!) : 0,
+    return parseDatePattern(
+      text,
+      RegExp(
+        r'(\d{4})-(\d{1,2})-(\d{1,2})(?:[^\d]*?(\d{1,2}):(\d{2}):(\d{2}))?',
+      ),
     );
   }
 }

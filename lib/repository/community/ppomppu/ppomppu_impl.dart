@@ -26,6 +26,17 @@ class PpomppuImpl extends HtmlCommunityRepo {
   int get listPageSize => 5;
 
   @override
+  ContentBlockConfig get contentBlockConfig =>
+      const ContentBlockConfig(community: CommunityId.ppomppu, skipNbsp: true);
+
+  @override
+  List<dom.Element> selectBlockElements(dom.Element content) =>
+      content.querySelectorAll('p');
+
+  @override
+  bool get blockFallbackText => false;
+
+  @override
   Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/zboard/view.php?id=humor&no=$id');
     final doc = html_parser.parse(html);
@@ -38,8 +49,7 @@ class PpomppuImpl extends HtmlCommunityRepo {
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
       date: date,
-      contentHtml: contentEl?.innerHtml ?? '',
-      contentBlocks: _buildBlocks(contentEl),
+      contentBlocks: buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(
         contentEl,
         community: communityId,
@@ -100,19 +110,11 @@ class PpomppuImpl extends HtmlCommunityRepo {
 
   DateTime? _parseDate(String? fullDate, String? time) {
     if (fullDate != null && fullDate.isNotEmpty) {
-      final match = RegExp(
-        r'(\d{2})\.(\d{2})\.(\d{2})\s+(\d{2}):(\d{2}):(\d{2})',
-      ).firstMatch(fullDate);
-      if (match != null) {
-        return DateTime(
-          2000 + int.parse(match.group(1)!),
-          int.parse(match.group(2)!),
-          int.parse(match.group(3)!),
-          int.parse(match.group(4)!),
-          int.parse(match.group(5)!),
-          int.parse(match.group(6)!),
-        );
-      }
+      return parseDatePattern(
+        fullDate,
+        RegExp(r'(\d{2})\.(\d{2})\.(\d{2})\s+(\d{2}):(\d{2}):(\d{2})'),
+        year2: true,
+      );
     }
     return null;
   }
@@ -139,33 +141,18 @@ class PpomppuImpl extends HtmlCommunityRepo {
 
   DateTime _extractDate(dom.Document doc) {
     for (final li in doc.querySelectorAll('#topTitle li')) {
-      final match = RegExp(
-        r'(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})',
-      ).firstMatch(li.text);
-      if (match != null) {
-        return DateTime(
-          int.parse(match.group(1)!),
-          int.parse(match.group(2)!),
-          int.parse(match.group(3)!),
-          int.parse(match.group(4)!),
-          int.parse(match.group(5)!),
-        );
-      }
+      final date = parseDatePattern(
+        li.text,
+        RegExp(r'(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})'),
+      );
+      if (date != null) return date;
     }
-    return DateTime.now();
+    return DateTime.fromMillisecondsSinceEpoch(0);
   }
 
   bool _isNotUiAsset(String src) {
     final lower = src.toLowerCase();
     return !lower.contains('/images/') && !lower.contains('/skin/');
-  }
-
-  List<ContentBlock> _buildBlocks(dom.Element? content) {
-    if (content == null) return const [];
-    return htmlClient.buildContentBlocks(
-      content.querySelectorAll('p'),
-      const ContentBlockConfig(community: CommunityId.ppomppu, skipNbsp: true),
-    );
   }
 
   int _extractViewCount(dom.Document doc) {

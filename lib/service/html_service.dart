@@ -4,6 +4,7 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/content_scan_result.dart';
 import 'package:keek_news/model/url_builder.dart';
+import 'package:keek_news/service/content_scanner.dart';
 import 'package:keek_news/service/media_classifier.dart';
 import 'package:keek_news/service/media_dedup.dart';
 
@@ -55,11 +56,14 @@ abstract class HtmlService {
     return 0;
   }
 
-  ContentScanResult scanContent(Element container);
+  ContentScanResult scanContent(Element container) =>
+      ContentScanner.scanContent(container);
 
-  ContentScanResult scanContentFull(Document doc, Element contentEl);
+  ContentScanResult scanContentFull(Document doc, Element contentEl) =>
+      ContentScanner.scanContentFull(doc, contentEl);
 
-  List<ContentBlock> scanContentCompact(Element container);
+  List<ContentBlock> scanContentCompact(Element container) =>
+      ContentScanner.scanContentCompact(container);
 
   List<String> collectImageUrls(
     Element? content, {
@@ -69,7 +73,8 @@ abstract class HtmlService {
     if (content == null) return const [];
     return content
         .querySelectorAll('img')
-        .map((img) => img.attributes['src'] ?? '')
+        .where((img) => !ContentScanner.isNoiseImage(img))
+        .map((img) => ContentScanner.effectiveImageUrl(img))
         .where((src) => src.isNotEmpty)
         .where(includeFilter ?? (_) => true)
         .map((src) => UrlBuilder.resolveAbsolute(community, src))
@@ -103,7 +108,8 @@ abstract class HtmlService {
       ];
       if (imgs.isNotEmpty) {
         for (final img in imgs) {
-          final src = img.attributes['src'] ?? '';
+          if (ContentScanner.isNoiseImage(img)) continue;
+          final src = ContentScanner.effectiveImageUrl(img);
           if (src.isEmpty) continue;
           if (config.isUiAsset != null && config.isUiAsset!(src)) continue;
           final url = config.resolveImageUrls

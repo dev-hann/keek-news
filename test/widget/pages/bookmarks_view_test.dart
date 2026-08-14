@@ -16,6 +16,7 @@ import 'package:keek_news/widgets/feed_card.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../helpers/package_info_helper.dart';
 import '../../helpers/post_detail_helper.dart';
 import '../../helpers/shad_harness.dart';
 
@@ -39,10 +40,10 @@ Bookmark _bookmark({
 
 LoadedPostDetail _loadedDetail() => LoadedPostDetail(
   id: 0,
+  community: CommunityId.humoruniv,
   title: '',
   author: '',
   date: DateTime(2026),
-  contentHtml: '',
   contentBlocks: const [],
   imageUrls: const [],
   recommendCount: 0,
@@ -58,6 +59,7 @@ void main() {
   String? clipboardContent;
 
   setUp(() {
+    setupPackageInfoMock();
     repo = MockBookmarkRepository();
     mockPostDetail = MockPostDetailUseCase();
     registerFallbackValue(CommunityId.humoruniv);

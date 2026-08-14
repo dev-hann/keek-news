@@ -27,6 +27,14 @@ class TodayhumorImpl extends HtmlCommunityRepo {
   int get listPageSize => 10;
 
   @override
+  ContentBlockConfig get contentBlockConfig =>
+      const ContentBlockConfig(
+        community: CommunityId.todayhumor,
+        dedupStrategy: DedupStrategy.exactUrl,
+        resolveImageUrls: false,
+      );
+
+  @override
   Future<LoadedPostDetail> fetchDetail(String id) async {
     final html = await htmlClient.get('/board/view.php?table=humorbest&no=$id');
     final doc = html_parser.parse(html);
@@ -38,8 +46,7 @@ class TodayhumorImpl extends HtmlCommunityRepo {
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
       date: _extractDate(doc),
-      contentHtml: contentEl?.innerHtml ?? '',
-      contentBlocks: _buildBlocks(contentEl),
+      contentBlocks: buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(
         contentEl,
         community: communityId,
@@ -89,16 +96,10 @@ class TodayhumorImpl extends HtmlCommunityRepo {
   }
 
   DateTime? _parseDate(String text) {
-    final match = RegExp(
-      r'(\d{2})/(\d{2})/(\d{2})\s+(\d{2}):(\d{2})',
-    ).firstMatch(text);
-    if (match == null) return null;
-    return DateTime(
-      2000 + int.parse(match.group(1)!),
-      int.parse(match.group(2)!),
-      int.parse(match.group(3)!),
-      int.parse(match.group(4)!),
-      int.parse(match.group(5)!),
+    return parseDatePattern(
+      text,
+      RegExp(r'(\d{2})/(\d{2})/(\d{2})\s+(\d{2}):(\d{2})'),
+      year2: true,
     );
   }
 
@@ -139,31 +140,11 @@ class TodayhumorImpl extends HtmlCommunityRepo {
       '.post_meta',
     ]);
     final text = container?.text ?? '';
-    final match = RegExp(
-      r'(\d{4})/(\d{2})/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})',
-    ).firstMatch(text);
-    if (match == null) return DateTime.now();
-    return DateTime(
-      int.parse(match.group(1)!),
-      int.parse(match.group(2)!),
-      int.parse(match.group(3)!),
-      int.parse(match.group(4)!),
-      int.parse(match.group(5)!),
-      int.parse(match.group(6)!),
-    );
-  }
-
-  List<ContentBlock> _buildBlocks(dom.Element? content) {
-    if (content == null) return const [];
-    return htmlClient.buildContentBlocks(
-      content.children,
-      const ContentBlockConfig(
-        community: CommunityId.todayhumor,
-        dedupStrategy: DedupStrategy.exactUrl,
-        resolveImageUrls: false,
-      ),
-      fallbackText: content.text,
-    );
+    return parseDatePattern(
+          text,
+          RegExp(r'(\d{4})/(\d{2})/(\d{2})\s+(\d{2}):(\d{2}):(\d{2})'),
+        ) ??
+        DateTime.fromMillisecondsSinceEpoch(0);
   }
 
   List<int> _extractCounts(dom.Document doc) {
@@ -233,7 +214,9 @@ class TodayhumorImpl extends HtmlCommunityRepo {
       id: no,
       author: (m['name'] as String?) ?? '',
       content: parsed.text,
-      date: DateTime.tryParse((m['date'] as String?) ?? '') ?? DateTime.now(),
+      date:
+          DateTime.tryParse((m['date'] as String?) ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       recommendCount: htmlClient.toInt(m['ok']),
       isBest: false,
       replies: replies,

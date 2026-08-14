@@ -9,10 +9,10 @@ void main() {
     test('should create with required fields', () {
       final detail = LoadedPostDetail(
         id: 123,
+        community: CommunityId.humoruniv,
         title: '테스트 제목',
         author: '작성자',
         date: DateTime(2026, 5, 15, 11),
-        contentHtml: '<p>내용</p>',
         contentBlocks: const [TextBlock('내용')],
         imageUrls: const ['https://example.com/img.jpg'],
         recommendCount: 86,
@@ -36,10 +36,10 @@ void main() {
     test('should support value equality when all fields match', () {
       final a = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: '제목',
         author: '작성자',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -50,10 +50,10 @@ void main() {
       );
       final b = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: '제목',
         author: '작성자',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -70,10 +70,10 @@ void main() {
     test('should not be equal when id differs', () {
       final a = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 't',
         author: 'a',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -84,10 +84,10 @@ void main() {
       );
       final b = LoadedPostDetail(
         id: 2,
+        community: CommunityId.humoruniv,
         title: 't',
         author: 'a',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -103,10 +103,10 @@ void main() {
     test('should not be equal when title differs', () {
       final a = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 'a',
         author: 'a',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -117,10 +117,10 @@ void main() {
       );
       final b = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 'b',
         author: 'a',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -136,10 +136,10 @@ void main() {
     test('should not be equal when author differs', () {
       final a = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 't',
         author: 'x',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -150,10 +150,10 @@ void main() {
       );
       final b = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 't',
         author: 'y',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -169,10 +169,10 @@ void main() {
     test('should not be equal when recommendCount differs', () {
       final a = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 't',
         author: 'a',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 10,
@@ -183,10 +183,10 @@ void main() {
       );
       final b = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 't',
         author: 'a',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 20,
@@ -199,13 +199,13 @@ void main() {
       expect(a, isNot(equals(b)));
     });
 
-    test('should default community to humoruniv', () {
-      final detail = LoadedPostDetail(
+    test('should not be equal when community differs', () {
+      final a = LoadedPostDetail(
         id: 1,
+        community: CommunityId.humoruniv,
         title: 't',
         author: 'a',
-        date: DateTime(2026, 7, 26),
-        contentHtml: '',
+        date: DateTime(2026),
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -214,7 +214,22 @@ void main() {
         commentCount: 0,
         comments: const [],
       );
-      expect(detail.community, CommunityId.humoruniv);
+      final b = LoadedPostDetail(
+        id: 1,
+        community: CommunityId.dogdrip,
+        title: 't',
+        author: 'a',
+        date: DateTime(2026),
+        contentBlocks: const [],
+        imageUrls: const [],
+        recommendCount: 0,
+        notRecommendCount: 0,
+        viewCount: 0,
+        commentCount: 0,
+        comments: const [],
+      );
+
+      expect(a, isNot(equals(b)));
     });
   });
 

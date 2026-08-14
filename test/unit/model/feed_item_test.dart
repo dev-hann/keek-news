@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
 
@@ -22,7 +23,6 @@ void main() {
       expect(item.commentCount, 0);
       expect(item.viewCount, 0);
       expect(item.thumbnailUrl, isNull);
-      expect(item.previewText, isNull);
     });
 
     test('should support value equality when all fields match', () {
@@ -81,6 +81,35 @@ void main() {
       );
 
       expect(a, isNot(equals(b)));
+    });
+
+    test('fromBookmark copies every mapped field', () {
+      final bookmark = Bookmark(
+        community: CommunityId.dogdrip,
+        id: '42',
+        title: 't',
+        url: 'u',
+        savedAt: DateTime(2026, 7, 30),
+        author: 'w',
+        thumbnailUrl: 'th',
+        publishedAt: DateTime(2026, 7, 28),
+        recommendCount: 5,
+        commentCount: 3,
+        viewCount: 10,
+      );
+
+      final item = FeedItem.fromBookmark(bookmark);
+
+      expect(item.community, CommunityId.dogdrip);
+      expect(item.id, '42');
+      expect(item.title, 't');
+      expect(item.url, 'u');
+      expect(item.author, 'w');
+      expect(item.thumbnailUrl, 'th');
+      expect(item.publishedAt, DateTime(2026, 7, 28));
+      expect(item.recommendCount, 5);
+      expect(item.commentCount, 3);
+      expect(item.viewCount, 10);
     });
   });
 }

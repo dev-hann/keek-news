@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/feed_item.dart';
 
 class Bookmark extends Equatable {
   const Bookmark({
@@ -10,12 +11,26 @@ class Bookmark extends Equatable {
     required this.savedAt,
     this.author,
     this.thumbnailUrl,
-    this.previewText,
     this.publishedAt,
     this.recommendCount = 0,
     this.commentCount = 0,
     this.viewCount = 0,
   });
+
+  factory Bookmark.fromFeedItem(FeedItem item, {required DateTime savedAt}) =>
+      Bookmark(
+        community: item.community,
+        id: item.id,
+        title: item.title,
+        url: item.url,
+        savedAt: savedAt,
+        author: item.author,
+        thumbnailUrl: item.thumbnailUrl,
+        publishedAt: item.publishedAt,
+        recommendCount: item.recommendCount,
+        commentCount: item.commentCount,
+        viewCount: item.viewCount,
+      );
 
   factory Bookmark.fromJson(Map<String, dynamic> json) {
     return Bookmark(
@@ -28,7 +43,6 @@ class Bookmark extends Equatable {
       ),
       author: json['author'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
-      previewText: json['previewText'] as String?,
       publishedAt: (json['publishedAtMillis'] as int?) == null
           ? null
           : DateTime.fromMillisecondsSinceEpoch(
@@ -47,7 +61,6 @@ class Bookmark extends Equatable {
   final DateTime savedAt;
   final String? author;
   final String? thumbnailUrl;
-  final String? previewText;
   final DateTime? publishedAt;
   final int recommendCount;
   final int commentCount;
@@ -56,34 +69,32 @@ class Bookmark extends Equatable {
   String get key => '${community.name}:$id';
 
   Map<String, dynamic> toJson() => {
-    'community': community.name,
-    'id': id,
-    'title': title,
-    'url': url,
-    'savedAtMillis': savedAt.millisecondsSinceEpoch,
-    if (author != null) 'author': author,
-    if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
-    if (previewText != null) 'previewText': previewText,
-    if (publishedAt != null)
-      'publishedAtMillis': publishedAt!.millisecondsSinceEpoch,
-    'recommendCount': recommendCount,
-    'commentCount': commentCount,
-    'viewCount': viewCount,
-  };
+        'community': community.name,
+        'id': id,
+        'title': title,
+        'url': url,
+        'savedAtMillis': savedAt.millisecondsSinceEpoch,
+        if (author != null) 'author': author,
+        if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+        if (publishedAt != null)
+          'publishedAtMillis': publishedAt!.millisecondsSinceEpoch,
+        'recommendCount': recommendCount,
+        'commentCount': commentCount,
+        'viewCount': viewCount,
+      };
 
   @override
   List<Object?> get props => [
-    community,
-    id,
-    title,
-    url,
-    savedAt,
-    author,
-    thumbnailUrl,
-    previewText,
-    publishedAt,
-    recommendCount,
-    commentCount,
-    viewCount,
-  ];
+        community,
+        id,
+        title,
+        url,
+        savedAt,
+        author,
+        thumbnailUrl,
+        publishedAt,
+        recommendCount,
+        commentCount,
+        viewCount,
+      ];
 }

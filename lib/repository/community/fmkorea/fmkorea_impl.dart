@@ -2,7 +2,6 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
@@ -84,9 +83,8 @@ class FmkoreaImpl extends HtmlCommunityRepo {
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
-      date: _extractDate(doc) ?? DateTime.now(),
-      contentHtml: contentEl?.innerHtml ?? '',
-      contentBlocks: _buildBlocks(contentEl),
+      date: _extractDate(doc) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      contentBlocks: buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
       recommendCount: _extractRecommendCount(doc),
       notRecommendCount: 0,
@@ -146,16 +144,9 @@ class FmkoreaImpl extends HtmlCommunityRepo {
   DateTime? _extractDate(dom.Document doc) {
     final timeEl = doc.querySelector('.rd_nb .date, .rd_time, .time');
     final text = htmlClient.textOf(timeEl);
-    final match = RegExp(
-      r'(\d{4})\.(\d{2})\.(\d{2})\s*(\d{2}):(\d{2})',
-    ).firstMatch(text);
-    if (match == null) return null;
-    return DateTime(
-      int.parse(match.group(1)!),
-      int.parse(match.group(2)!),
-      int.parse(match.group(3)!),
-      int.parse(match.group(4)!),
-      int.parse(match.group(5)!),
+    return parseDatePattern(
+      text,
+      RegExp(r'(\d{4})\.(\d{2})\.(\d{2})\s*(\d{2}):(\d{2})'),
     );
   }
 
@@ -174,15 +165,6 @@ class FmkoreaImpl extends HtmlCommunityRepo {
   int _extractCommentCount(dom.Document doc) {
     final cmtEl = doc.querySelector('.list_comment .replyNum, #cmt_count');
     return htmlClient.extractNumber(cmtEl?.text ?? '0');
-  }
-
-  List<ContentBlock> _buildBlocks(dom.Element? content) {
-    if (content == null) return const [];
-    return htmlClient.buildContentBlocks(
-      content.children,
-      const ContentBlockConfig(community: CommunityId.fmkorea),
-      fallbackText: content.text,
-    );
   }
 
   List<Comment> _extractComments(dom.Document doc) {
@@ -214,7 +196,7 @@ class FmkoreaImpl extends HtmlCommunityRepo {
       id: id,
       author: author,
       content: content,
-      date: DateTime.now(),
+      date: DateTime.fromMillisecondsSinceEpoch(0),
       recommendCount: recommendCount,
       isBest: false,
       replies: const [],

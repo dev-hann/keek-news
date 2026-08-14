@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/pages/bookmarks_view.dart';
+import 'package:keek_news/provider/app_version_provider.dart';
 import 'package:keek_news/provider/cache_management_provider.dart';
 import 'package:keek_news/provider/settings_provider.dart';
 import 'package:keek_news/provider/update_provider.dart';
 import 'package:keek_news/widgets/settings_group.dart';
 import 'package:keek_news/widgets/settings_tile.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,12 +17,10 @@ class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});
 
   @override
-  ConsumerState<SettingsView> createState() => _SettingsScreenState();
+  ConsumerState<SettingsView> createState() => _SettingsViewState();
 }
 
-class _SettingsScreenState extends ConsumerState<SettingsView> {
-  String? _currentVersion;
-
+class _SettingsViewState extends ConsumerState<SettingsView> {
   @override
   void initState() {
     super.initState();
@@ -30,14 +28,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
       if (!mounted) return;
       ref.read(cacheManagementProvider.notifier).loadSize();
       ref.read(updateProvider.notifier).checkForUpdate();
-      _loadVersion();
     });
-  }
-
-  Future<void> _loadVersion() async {
-    final info = await PackageInfo.fromPlatform();
-    if (!mounted) return;
-    setState(() => _currentVersion = 'v${info.version}');
   }
 
   @override
@@ -45,6 +36,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
     final updateState = ref.watch(updateProvider);
     final cacheState = ref.watch(cacheManagementProvider);
     final enabledCommunities = ref.watch(settingsProvider);
+    final currentVersion = ref.watch(appVersionProvider).valueOrNull;
 
     return Scaffold(
       appBar: AppBar(title: const Text('설정')),
@@ -110,7 +102,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
                 SettingsTile(
                   leading: const Icon(LucideIcons.info),
                   title: '버전',
-                  subtitle: _versionSubtitle(updateState),
+                  subtitle: _versionSubtitle(updateState, currentVersion),
                   trailing: _versionTrailing(context, updateState),
                 ),
                 SettingsTile(
@@ -132,10 +124,11 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
     );
   }
 
-  String _versionLabel() => _currentVersion ?? '...';
+  String _versionLabel(String? currentVersion) =>
+      currentVersion == null ? '...' : 'v$currentVersion';
 
-  String _versionSubtitle(UpdateState state) {
-    final base = _versionLabel();
+  String _versionSubtitle(UpdateState state, String? currentVersion) {
+    final base = _versionLabel(currentVersion);
     switch (state.status) {
       case UpdateCheckStatus.idle:
         return base;
@@ -226,9 +219,7 @@ class _SettingsScreenState extends ConsumerState<SettingsView> {
   }
 
   void _openBookmarks(BuildContext context) {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const BookmarksView()));
+    context.push('/bookmarks');
   }
 
   void _confirmClearCache(BuildContext context) {

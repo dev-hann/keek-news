@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
+import 'package:keek_news/model/feed_item.dart';
 
 void main() {
   group('Bookmark', () {
@@ -20,7 +21,6 @@ void main() {
       expect(bookmark.url, '/board/read.html?table=pds&number=100');
       expect(bookmark.author, isNull);
       expect(bookmark.thumbnailUrl, isNull);
-      expect(bookmark.previewText, isNull);
       expect(bookmark.publishedAt, isNull);
       expect(bookmark.recommendCount, 0);
       expect(bookmark.commentCount, 0);
@@ -37,7 +37,6 @@ void main() {
         url: 'u',
         author: 'writer',
         thumbnailUrl: 'thumb',
-        previewText: 'preview',
         publishedAt: DateTime(2026, 7, 28),
         recommendCount: 5,
         commentCount: 3,
@@ -51,7 +50,6 @@ void main() {
         url: 'u',
         author: 'writer',
         thumbnailUrl: 'thumb',
-        previewText: 'preview',
         publishedAt: DateTime(2026, 7, 28),
         recommendCount: 5,
         commentCount: 3,
@@ -133,6 +131,57 @@ void main() {
 
       expect(bookmark.key, 'dogdrip:42');
     });
+
+    test('fromFeedItem copies every mapped field and stamps savedAt', () {
+      final savedAt = DateTime(2026, 7, 30, 10);
+      final item = FeedItem(
+        community: CommunityId.dogdrip,
+        id: '42',
+        title: 't',
+        url: 'u',
+        author: 'w',
+        thumbnailUrl: 'th',
+        publishedAt: DateTime(2026, 7, 28),
+        recommendCount: 5,
+        commentCount: 3,
+        viewCount: 10,
+      );
+
+      final bookmark = Bookmark.fromFeedItem(item, savedAt: savedAt);
+
+      expect(bookmark.community, CommunityId.dogdrip);
+      expect(bookmark.id, '42');
+      expect(bookmark.title, 't');
+      expect(bookmark.url, 'u');
+      expect(bookmark.author, 'w');
+      expect(bookmark.thumbnailUrl, 'th');
+      expect(bookmark.publishedAt, DateTime(2026, 7, 28));
+      expect(bookmark.recommendCount, 5);
+      expect(bookmark.commentCount, 3);
+      expect(bookmark.viewCount, 10);
+      expect(bookmark.savedAt, savedAt);
+    });
+
+    test('fromFeedItem/fromBookmark round-trips', () {
+      final item = FeedItem(
+        community: CommunityId.humoruniv,
+        id: '1',
+        title: 't',
+        url: 'u',
+        author: 'w',
+        publishedAt: DateTime(2026, 7, 28),
+        recommendCount: 1,
+        commentCount: 2,
+        viewCount: 3,
+        thumbnailUrl: 'th',
+      );
+
+      final roundTripped = FeedItem.fromBookmark(
+        Bookmark.fromFeedItem(item, savedAt: DateTime(2026, 7, 30)),
+      );
+
+      expect(roundTripped, item);
+    });
   });
 
   group('Bookmark.fromJson', () {
@@ -145,7 +194,6 @@ void main() {
         'savedAtMillis': 1722324000000,
         'author': 'writer',
         'thumbnailUrl': 'thumb',
-        'previewText': 'preview',
         'publishedAtMillis': 1722240000000,
         'recommendCount': 5,
         'commentCount': 3,
@@ -161,7 +209,6 @@ void main() {
       expect(b.savedAt.millisecondsSinceEpoch, 1722324000000);
       expect(b.author, 'writer');
       expect(b.thumbnailUrl, 'thumb');
-      expect(b.previewText, 'preview');
       expect(b.publishedAt!.millisecondsSinceEpoch, 1722240000000);
       expect(b.recommendCount, 5);
       expect(b.commentCount, 3);
@@ -191,7 +238,6 @@ void main() {
         url: 'u',
         author: 'w',
         thumbnailUrl: 'th',
-        previewText: 'pv',
         publishedAt: DateTime(2026, 7, 28),
         recommendCount: 5,
         commentCount: 3,

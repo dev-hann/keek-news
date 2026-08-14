@@ -2,7 +2,6 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
@@ -77,9 +76,8 @@ class RuliwebImpl extends HtmlCommunityRepo {
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
-      date: DateTime.now(),
-      contentHtml: contentEl?.innerHtml ?? '',
-      contentBlocks: _buildBlocks(contentEl),
+      date: DateTime.fromMillisecondsSinceEpoch(0),
+      contentBlocks: buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
       recommendCount: htmlClient.statOf(doc.body, 'span.like'),
       notRecommendCount: 0,
@@ -104,15 +102,6 @@ class RuliwebImpl extends HtmlCommunityRepo {
   int _extractCommentCount(dom.Document doc) {
     // .comment_count text is "댓글 | 총 91 개" — extractNumber picks the digits.
     return htmlClient.statOf(doc.body, '.comment_count');
-  }
-
-  List<ContentBlock> _buildBlocks(dom.Element? content) {
-    if (content == null) return const [];
-    return htmlClient.buildContentBlocks(
-      content.children,
-      const ContentBlockConfig(community: CommunityId.ruliweb),
-      fallbackText: content.text,
-    );
   }
 
   List<Comment> _extractComments(dom.Document doc) {
@@ -141,7 +130,7 @@ class RuliwebImpl extends HtmlCommunityRepo {
           id: id,
           author: author,
           content: content,
-          date: DateTime.now(),
+          date: DateTime.fromMillisecondsSinceEpoch(0),
           recommendCount: 0,
           isBest: isBest,
           replies: const [],

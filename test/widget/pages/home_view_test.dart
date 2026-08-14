@@ -17,6 +17,7 @@ import 'package:keek_news/widgets/community_tab_bar.dart';
 import 'package:keek_news/widgets/error_state_view.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/skeleton_feed_card.dart';
+import 'package:keek_news/widgets/scroll_to_top_button.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,10 +58,10 @@ void main() {
     ).thenAnswer(
       (_) async => LoadedPostDetail(
         id: 0,
+        community: CommunityId.humoruniv,
         title: '',
         author: '',
         date: DateTime(2026),
-        contentHtml: '',
         contentBlocks: const [],
         imageUrls: const [],
         recommendCount: 0,
@@ -214,6 +215,47 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => mockUseCase.getMergedFeed(any())).called(1);
+  });
+
+  testWidgets('tapping scroll-to-top FAB triggers silent refresh', (
+    tester,
+  ) async {
+    stubMergedPage(
+      () => page(
+        List.generate(
+          20,
+          (i) => FeedItem(
+            community: CommunityId.humoruniv,
+            id: '${i + 1}',
+            title: '글 ${i + 1}',
+            url: '/u${i + 1}',
+            author: 'a',
+            recommendCount: i,
+            commentCount: i,
+            viewCount: i,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    verify(() => mockUseCase.getMergedFeed(any())).called(1);
+
+    final feedList = find.ancestor(
+      of: find.byType(FeedCard).first,
+      matching: find.byType(CustomScrollView),
+    );
+    await tester.drag(feedList, const Offset(0, -1500));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(ScrollToTopButton));
+    await tester.pumpAndSettle();
+
+    verify(() => mockUseCase.getMergedFeed(any())).called(1);
+    expect(find.byType(SkeletonFeedCard), findsNothing);
+    expect(find.text('글 1'), findsOneWidget);
   });
 
   testWidgets('hides CommunityTabBar when only one community enabled', (

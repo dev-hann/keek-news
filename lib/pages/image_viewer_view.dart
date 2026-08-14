@@ -41,10 +41,10 @@ class ImageViewerView extends StatefulWidget {
   final Widget Function(String url)? imageBuilder;
 
   @override
-  State<ImageViewerView> createState() => _ImageViewerScreenState();
+  State<ImageViewerView> createState() => _ImageViewerViewState();
 }
 
-class _ImageViewerScreenState extends State<ImageViewerView> {
+class _ImageViewerViewState extends State<ImageViewerView> {
   final TransformationController _transformController =
       TransformationController();
   PageController? _pageController;

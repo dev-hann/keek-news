@@ -3,8 +3,8 @@ import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-class CommentVideoViewer extends StatelessWidget {
-  const CommentVideoViewer({required this.block, super.key});
+class CommentVideoViewerView extends StatelessWidget {
+  const CommentVideoViewerView({required this.block, super.key});
 
   final VideoBlock block;
 

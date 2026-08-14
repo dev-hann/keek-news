@@ -177,6 +177,101 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
     );
   }
 
+  /// Shared media stage: error view → video surface → thumbnail → loading,
+  /// plus the buffering overlay and an optional per-mode [overlay] (GIF tap
+  /// target or the controls stack).
+  Widget buildMediaStack({Widget? overlay}) {
+    return AspectRatio(
+      aspectRatio: isInitialized ? controller!.value.aspectRatio : 16 / 9,
+      child: ColoredBox(
+        color: _mediaSurface,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (hasError)
+              VideoErrorView(onRetry: retryInit)
+            else if (isInitialized)
+              VideoSurface(controller: controller!)
+            else if (videoBlock.thumbnailUrl != null)
+              RetryableNetworkImage(
+                imageUrl: videoBlock.thumbnailUrl!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                placeholderColor: _mediaSurface,
+                foregroundColor: _scrimForeground,
+              )
+            else
+              _buildLoadingPlaceholder(),
+            VideoBufferingOverlay(visible: isBuffering),
+            if (overlay != null) overlay,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingPlaceholder() {
+    return const ColoredBox(
+      color: _imagePlaceholder,
+      child: Center(child: CircularProgressIndicator(color: Colors.white)),
+    );
+  }
+
+  /// Shared controls stack: tap layer, animated show/hide, center play icon,
+  /// bottom controls and an optional [topBar] (fullscreen close bar).
+  Widget buildControlsStack({
+    required Duration position,
+    required Duration duration,
+    VoidCallback? onFullscreen,
+    EdgeInsets bottomPadding = const EdgeInsets.all(4),
+    Widget? topBar,
+  }) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: isInitialized ? handleVideoTap : null,
+            behavior: HitTestBehavior.translucent,
+          ),
+        ),
+        IgnorePointer(
+          ignoring: !showControls,
+          child: AnimatedOpacity(
+            opacity: showControls ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 250),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (showPlayButton)
+                  Center(
+                    child: GestureDetector(
+                      onTap: isInitialized ? togglePlayPause : null,
+                      child: buildCenterPlayIcon(),
+                    ),
+                  ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: buildBottomControls(
+                    position,
+                    duration,
+                    onFullscreen: onFullscreen,
+                    bottomPadding: bottomPadding,
+                  ),
+                ),
+                if (topBar != null)
+                  Positioned(left: 0, right: 0, top: 0, child: topBar),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget buildBottomControls(
     Duration position,
     Duration duration, {
@@ -384,36 +479,14 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
 
     final player = GestureDetector(
       onTap: isInitialized ? handleVideoTap : null,
-      child: AspectRatio(
-        aspectRatio: isInitialized ? controller!.value.aspectRatio : 16 / 9,
-        child: ColoredBox(
-          color: _mediaSurface,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              if (hasError)
-                VideoErrorView(onRetry: retryInit)
-              else if (isInitialized)
-                VideoSurface(controller: controller!)
-              else if (widget.block.thumbnailUrl != null)
-                RetryableNetworkImage(
-                  imageUrl: widget.block.thumbnailUrl!,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                  placeholderColor: _mediaSurface,
-                  foregroundColor: _scrimForeground,
-                )
-              else
-                _buildLoading(),
-              VideoBufferingOverlay(visible: isBuffering),
-              if (isGif)
-                _buildGifOverlay()
-              else
-                _buildControlsOverlay(position, duration),
-            ],
-          ),
-        ),
+      child: buildMediaStack(
+        overlay: isGif
+            ? _buildGifOverlay()
+            : buildControlsStack(
+                position: position,
+                duration: duration,
+                onFullscreen: _enterFullscreen,
+              ),
       ),
     );
 
@@ -426,61 +499,11 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
     );
   }
 
-  Widget _buildLoading() {
-    return const ColoredBox(
-      color: _imagePlaceholder,
-      child: Center(child: CircularProgressIndicator(color: Colors.white)),
-    );
-  }
-
   Widget _buildGifOverlay() {
     if (!showPlayButton) return const SizedBox.shrink();
     return GestureDetector(
       onTap: isInitialized ? togglePlayPause : null,
       child: buildCenterPlayIcon(),
-    );
-  }
-
-  Widget _buildControlsOverlay(Duration position, Duration duration) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: isInitialized ? handleVideoTap : null,
-            behavior: HitTestBehavior.translucent,
-          ),
-        ),
-        IgnorePointer(
-          ignoring: !showControls,
-          child: AnimatedOpacity(
-            opacity: showControls ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 250),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (showPlayButton)
-                  Center(
-                    child: GestureDetector(
-                      onTap: isInitialized ? togglePlayPause : null,
-                      child: buildCenterPlayIcon(),
-                    ),
-                  ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: buildBottomControls(
-                    position,
-                    duration,
-                    onFullscreen: _enterFullscreen,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -515,87 +538,20 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
 
     return Scaffold(
       backgroundColor: _mediaSurface,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          GestureDetector(
-            onTap: isInitialized ? handleVideoTap : null,
-            child: Center(
-              child: AspectRatio(
-                aspectRatio: isInitialized
-                    ? controller!.value.aspectRatio
-                    : 16 / 9,
-                child: ColoredBox(
-                  color: _mediaSurface,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (hasError)
-                        VideoErrorView(onRetry: retryInit)
-                      else if (isInitialized)
-                        VideoSurface(controller: controller!)
-                      else if (widget.block.thumbnailUrl != null)
-                        RetryableNetworkImage(
-                          imageUrl: widget.block.thumbnailUrl!,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          placeholderColor: _mediaSurface,
-                          foregroundColor: _scrimForeground,
-                        )
-                      else
-                        const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        ),
-                      VideoBufferingOverlay(visible: isBuffering),
-                      IgnorePointer(
-                        ignoring: !showControls,
-                        child: AnimatedOpacity(
-                          opacity: showControls ? 1.0 : 0.0,
-                          duration: const Duration(milliseconds: 250),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              if (showPlayButton)
-                                Center(
-                                  child: GestureDetector(
-                                    onTap: isInitialized
-                                        ? togglePlayPause
-                                        : null,
-                                    child: buildCenterPlayIcon(),
-                                  ),
-                                ),
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                child: buildBottomControls(
-                                  position,
-                                  duration,
-                                  bottomPadding: EdgeInsets.only(
-                                    bottom:
-                                        MediaQuery.of(context).padding.bottom +
-                                        4,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                top: 0,
-                                child: _buildTopBar(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      body: Center(
+        child: GestureDetector(
+          onTap: isInitialized ? handleVideoTap : null,
+          child: buildMediaStack(
+            overlay: buildControlsStack(
+              position: position,
+              duration: duration,
+              bottomPadding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom + 4,
               ),
+              topBar: _buildTopBar(),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

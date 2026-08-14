@@ -34,9 +34,8 @@ class DogdripImpl extends HtmlCommunityRepo {
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
-      date: DateTime.now(),
-      contentHtml: contentEl?.innerHtml ?? '',
-      contentBlocks: _buildBlocks(contentEl),
+      date: DateTime.fromMillisecondsSinceEpoch(0),
+      contentBlocks: buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
       recommendCount: 0,
       notRecommendCount: 0,
@@ -141,15 +140,6 @@ class DogdripImpl extends HtmlCommunityRepo {
     return match != null ? int.parse(match.group(1)!) : 0;
   }
 
-  List<ContentBlock> _buildBlocks(dom.Element? content) {
-    if (content == null) return const [];
-    return htmlClient.buildContentBlocks(
-      content.children,
-      const ContentBlockConfig(community: CommunityId.dogdrip),
-      fallbackText: content.text,
-    );
-  }
-
   List<Comment> _extractComments(dom.Document doc) {
     final items = doc.querySelectorAll('div.comment-item');
     return items.map(_parseComment).whereType<Comment>().toList();
@@ -163,7 +153,9 @@ class DogdripImpl extends HtmlCommunityRepo {
     final content = htmlClient.textOf(contentEl);
 
     final timeText = item.querySelector('.text-muted')?.text ?? '';
-    final date = _parseRelativeTime(timeText) ?? DateTime.now();
+    final date =
+        _parseRelativeTime(timeText) ??
+        DateTime.fromMillisecondsSinceEpoch(0);
 
     var recommendCount = 0;
     final countEl = item.querySelector('.fa-thumbs-up');

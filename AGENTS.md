@@ -10,7 +10,7 @@ Guidelines for AI coding agents working on this project.
 - Testing: [docs/TESTING_POLICY.md](docs/TESTING_POLICY.md)
 - Product scope: [docs/PRODUCT_PLAN.md](docs/PRODUCT_PLAN.md), [docs/DESIGN.md](docs/DESIGN.md)
 
-Current scope: **웃긴자료 (pds) board only.** Communities: dogdrip, ppomppu, todayhumor, humoruniv.
+Current scope: **웃긴자료 (pds) board only.** Active communities: dogdrip, ppomppu, todayhumor, humoruniv, bobaedream, ruliweb, natepann. Hidden (compiled in, UI-hidden): fmkorea.
 
 ## Key Files
 

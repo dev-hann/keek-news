@@ -50,10 +50,10 @@ void main() {
   }) {
     return LoadedPostDetail(
       id: 1,
+      community: CommunityId.humoruniv,
       title: '게시글 제목',
       author: '유머작가',
       date: DateTime(2026, 5, 15),
-      contentHtml: '',
       contentBlocks: blocks,
       imageUrls: imageUrls,
       recommendCount: 42,

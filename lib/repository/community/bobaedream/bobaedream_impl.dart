@@ -2,7 +2,6 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
@@ -74,9 +73,8 @@ class BobaedreamImpl extends HtmlCommunityRepo {
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
-      date: _extractDate(countGroup) ?? DateTime.now(),
-      contentHtml: contentEl?.innerHtml ?? '',
-      contentBlocks: _buildBlocks(contentEl),
+      date: _extractDate(countGroup) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      contentBlocks: buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
       recommendCount: _parseInt(countGroup, r'추천\s*([\d,]+)'),
       notRecommendCount: 0,
@@ -101,12 +99,9 @@ class BobaedreamImpl extends HtmlCommunityRepo {
   }
 
   DateTime? _extractDate(String countGroup) {
-    final m = RegExp(r'(\d{4})\.(\d{2})\.(\d{2})').firstMatch(countGroup);
-    if (m == null) return null;
-    return DateTime(
-      int.parse(m.group(1)!),
-      int.parse(m.group(2)!),
-      int.parse(m.group(3)!),
+    return parseDatePattern(
+      countGroup,
+      RegExp(r'(\d{4})\.(\d{2})\.(\d{2})'),
     );
   }
 
@@ -121,15 +116,6 @@ class BobaedreamImpl extends HtmlCommunityRepo {
     if (els.isNotEmpty) return els.length;
     final m = RegExp(r'댓글\s*\((\d+)\)').firstMatch(doc.body?.text ?? '');
     return m == null ? 0 : int.tryParse(m.group(1)!) ?? 0;
-  }
-
-  List<ContentBlock> _buildBlocks(dom.Element? content) {
-    if (content == null) return const [];
-    return htmlClient.buildContentBlocks(
-      content.children,
-      const ContentBlockConfig(community: CommunityId.bobaedream),
-      fallbackText: content.text,
-    );
   }
 
   /// Comments are wrapped in <dl> elements, each containing the comment text
@@ -150,7 +136,7 @@ class BobaedreamImpl extends HtmlCommunityRepo {
           id: id,
           author: author,
           content: content,
-          date: DateTime.now(),
+          date: DateTime.fromMillisecondsSinceEpoch(0),
           recommendCount: 0,
           isBest: false,
           replies: const [],

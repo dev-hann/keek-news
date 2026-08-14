@@ -245,10 +245,10 @@ void main() {
         }
         return LoadedPostDetail(
           id: 1,
+          community: CommunityId.humoruniv,
           title: 't',
           author: 'a',
           date: DateTime(2026),
-          contentHtml: '',
           contentBlocks: const [],
           imageUrls: const [],
           recommendCount: 0,

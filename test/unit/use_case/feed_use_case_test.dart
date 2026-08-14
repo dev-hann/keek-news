@@ -238,10 +238,10 @@ void main() {
       List<Comment> comments = const [],
     }) => LoadedPostDetail(
       id: 1,
+      community: CommunityId.humoruniv,
       title: 't',
       author: 'a',
       date: DateTime(2026),
-      contentHtml: '',
       contentBlocks: blocks,
       imageUrls: imageUrls,
       recommendCount: 0,

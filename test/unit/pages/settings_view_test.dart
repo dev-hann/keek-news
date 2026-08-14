@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:keek_news/model/app_release.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
@@ -316,7 +317,34 @@ void main() {
             const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
       );
 
-      await tester.pumpWidget(buildApp());
+      final router = GoRouter(
+        initialLocation: '/settings',
+        routes: [
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const ScaffoldMessenger(
+              child: SettingsView(),
+            ),
+          ),
+          GoRoute(
+            path: '/bookmarks',
+            builder: (context, state) => const ScaffoldMessenger(
+              child: BookmarksView(),
+            ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+          child: ShadApp.router(
+            title: 'test',
+            themeMode: ThemeMode.dark,
+            darkTheme: AppShadTheme.dark(),
+            routerConfig: router,
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('저장한 게시물'));

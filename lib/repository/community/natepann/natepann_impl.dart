@@ -2,7 +2,6 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/community.dart';
-import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/repository/community/html_community_repo.dart';
@@ -73,9 +72,8 @@ class NatepannImpl extends HtmlCommunityRepo {
       id: int.tryParse(id) ?? 0,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
-      date: DateTime.now(),
-      contentHtml: contentEl?.innerHtml ?? '',
-      contentBlocks: _buildBlocks(contentEl),
+      date: DateTime.fromMillisecondsSinceEpoch(0),
+      contentBlocks: buildBlocks(contentEl),
       imageUrls: htmlClient.collectImageUrls(contentEl, community: communityId),
       recommendCount: _extractStat(doc, '추천'),
       notRecommendCount: _extractStat(doc, '반대'),
@@ -109,15 +107,6 @@ class NatepannImpl extends HtmlCommunityRepo {
       }
     }
     return 0;
-  }
-
-  List<ContentBlock> _buildBlocks(dom.Element? content) {
-    if (content == null) return const [];
-    return htmlClient.buildContentBlocks(
-      content.children,
-      const ContentBlockConfig(community: CommunityId.natepann),
-      fallbackText: content.text,
-    );
   }
 
   List<Comment> _extractComments(dom.Document doc) {
@@ -159,7 +148,7 @@ class NatepannImpl extends HtmlCommunityRepo {
       id: id,
       author: author,
       content: content,
-      date: _extractCommentDate(item) ?? DateTime.now(),
+      date: _extractCommentDate(item) ?? DateTime.fromMillisecondsSinceEpoch(0),
       recommendCount: recommend,
       isBest: isBest,
       replies: const [],
@@ -169,16 +158,9 @@ class NatepannImpl extends HtmlCommunityRepo {
   DateTime? _extractCommentDate(dom.Element item) {
     // natepann wraps the timestamp in <i>2026.07.28 12:55</i>.
     final text = item.querySelector('i')?.text.trim() ?? '';
-    final match = RegExp(
-      r'(\d{4})\.(\d{2})\.(\d{2})\s*(\d{2}):(\d{2})',
-    ).firstMatch(text);
-    if (match == null) return null;
-    return DateTime(
-      int.parse(match.group(1)!),
-      int.parse(match.group(2)!),
-      int.parse(match.group(3)!),
-      int.parse(match.group(4)!),
-      int.parse(match.group(5)!),
+    return parseDatePattern(
+      text,
+      RegExp(r'(\d{4})\.(\d{2})\.(\d{2})\s*(\d{2}):(\d{2})'),
     );
   }
 }

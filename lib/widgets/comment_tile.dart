@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/content_block.dart';
-import 'package:keek_news/pages/comment_video_viewer.dart';
+import 'package:keek_news/pages/comment_video_viewer_view.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
@@ -176,7 +176,7 @@ class _MediaRow extends StatelessWidget {
   void _openVideoViewer(BuildContext context, VideoBlock block) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => CommentVideoViewer(block: block),
+        builder: (_) => CommentVideoViewerView(block: block),
         fullscreenDialog: true,
       ),
     );
