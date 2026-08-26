@@ -178,4 +178,55 @@ void main() {
       expect(withImage.content, isNot(contains('gif')));
     });
   });
+
+  group('HumorunivImpl.fetchDetail reply-count badge + replies', () {
+    // Since the 2026-08 redesign the reply-count badge `span.comment_num`
+    // ("[N]") is nested INSIDE `.comment_more`, and reply `li`s
+    // (`sub_comm_bt`) sit after a malformed double `</li>` close.
+    test('reply-count badge [N] is stripped from parent content', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1419653.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1419653');
+
+      for (final c in detail.comments) {
+        expect(
+          RegExp(r'\[\d+\]').hasMatch(c.content),
+          isFalse,
+          reason: 'comment by "${c.author}" leaked reply badge: ${c.content}',
+        );
+      }
+
+      final badge = detail.comments.firstWhere((c) => c.id == 515531716);
+      expect(badge.author, '짤방댓글러');
+      expect(badge.content, startsWith('락덕후들이'));
+    });
+
+    test('nested replies attach to parent, not dropped', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1419653.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1419653');
+
+      final parent = detail.comments.firstWhere((c) => c.id == 515500234);
+      expect(
+        parent.replies,
+        isNotEmpty,
+        reason:
+            'parent 515500234 must keep its sub_comm_bt replies; '
+            'got ${parent.replies.length}',
+      );
+      expect(parent.replies.map((r) => r.author), contains('개똥이아부지'));
+      for (final reply in parent.replies) {
+        expect(reply.content, isNot(contains('전체보기')));
+        expect(reply.content, isNot(contains('[')));
+      }
+    });
+  });
 }

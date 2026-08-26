@@ -251,29 +251,37 @@ class HumorunivImpl extends HtmlCommunityRepo {
       comments.add(_parseComment(item, isBest: true));
     }
 
+    // humoruniv closes each parent <li> twice before its reply <li>s, so
+    // the html5 parser detaches replies from their parent in the DOM.
+    // Walk all comment <li>s in document order and attach each reply to
+    // the nearest preceding non-reply comment instead.
+    final replyElsByParent = <int, List<dom.Element>>{};
     for (final item in doc.querySelectorAll('li[id^="comment_li_"]')) {
       final isSub =
           item.classes.contains('sub_comm_bt') ||
           item.attributes['name'] == 'sub_comm_block';
-      if (isSub) continue;
-
-      final comment = _parseComment(item, isBest: false);
-      final replies = <Comment>[];
-      for (final sub in item.querySelectorAll('li.sub_comm_bt')) {
-        replies.add(_parseComment(sub, isBest: false));
+      if (isSub) {
+        if (comments.isNotEmpty) {
+          replyElsByParent.putIfAbsent(comments.length - 1, () => []).add(item);
+        }
+        continue;
       }
+      comments.add(_parseComment(item, isBest: false));
+    }
 
-      comments.add(
-        Comment(
-          id: comment.id,
-          author: comment.author,
-          content: comment.content,
-          date: comment.date,
-          recommendCount: comment.recommendCount,
-          isBest: comment.isBest,
-          mediaBlocks: comment.mediaBlocks,
-          replies: replies,
-        ),
+    for (final entry in replyElsByParent.entries) {
+      final parent = comments[entry.key];
+      comments[entry.key] = Comment(
+        id: parent.id,
+        author: parent.author,
+        content: parent.content,
+        date: parent.date,
+        recommendCount: parent.recommendCount,
+        isBest: parent.isBest,
+        mediaBlocks: parent.mediaBlocks,
+        replies: [
+          for (final el in entry.value) _parseComment(el, isBest: false),
+        ],
       );
     }
 
@@ -287,12 +295,18 @@ class HumorunivImpl extends HtmlCommunityRepo {
     if (bodyEl != null) {
       // 2026-08 redesign: humoruniv dropped `.comment_text` and wraps
       // bodies in `.comment_more`; the sibling `.comment_more_btn`
-      // ("...전체보기") is pure UI and must never reach content.
+      // ("...전체보기") is pure UI and must never reach content. The
+      // reply-count badge `.comment_num` ("[4]") is nested INSIDE
+      // `.comment_more`, so both must be stripped before reading text.
       final textEl =
           bodyEl.querySelector('.comment_text') ??
           bodyEl.querySelector('.comment_more');
       if (textEl != null) {
-        content = textEl.text.trim();
+        final clone = textEl.clone(true);
+        clone
+            .querySelectorAll('.comment_num, .comment_more_btn')
+            .forEach((el) => el.remove());
+        content = clone.text.trim();
       } else {
         final clone = bodyEl.clone(true);
         clone
