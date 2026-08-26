@@ -44,10 +44,15 @@ abstract final class ContentScanner {
 
       switch (mediaType) {
         case MediaType.image:
-          blocks.add(ImageBlock(url: rawUrl, thumbnailUrl: thumb));
+          if (_isSessionThumbUrl(rawUrl)) break;
+          blocks.add(
+            ImageBlock(url: rawUrl, thumbnailUrl: _usableThumb(thumb)),
+          );
           imageUrls.add(rawUrl);
         case MediaType.video:
-          blocks.add(VideoBlock(url: rawUrl, thumbnailUrl: thumb));
+          blocks.add(
+            VideoBlock(url: rawUrl, thumbnailUrl: _usableThumb(thumb)),
+          );
         case _:
           break;
       }
@@ -86,6 +91,7 @@ abstract final class ContentScanner {
 
       switch (mediaType) {
         case MediaType.image:
+          if (_isSessionThumbUrl(normalized)) break;
           blocks.add(
             ImageBlock(
               url: normalized,
@@ -99,7 +105,7 @@ abstract final class ContentScanner {
             VideoBlock(
               url: normalized,
               thumbnailUrl: entry.thumbUrl != null
-                  ? _normalizeUrl(entry.thumbUrl!)
+                  ? _usableThumb(_normalizeUrl(entry.thumbUrl!))
                   : null,
             ),
           );
@@ -125,6 +131,16 @@ abstract final class ContentScanner {
   static final RegExp _commentMp4ExpandPattern = RegExp(
     r"comment_mp4_expand\('[^']*',\s*'([^']+)'",
   );
+
+  /// humoruniv session-token thumbs (`thumb.php?url_enc=…`) expire with the
+  /// page session; keeping them yields broken image slots and dead video
+  /// posters after the token lapses. [MediaClassifier.isLoadableImage]
+  /// already rejects them for list collection — this extends the same rule
+  /// to content scanning so callers fall back to synthesized/static posters.
+  static bool _isSessionThumbUrl(String url) => url.contains('url_enc=');
+
+  static String? _usableThumb(String? thumb) =>
+      thumb != null && _isSessionThumbUrl(thumb) ? null : thumb;
 
   static String _normalizeUrl(String url) {
     if (url.isEmpty) return url;
@@ -179,10 +195,13 @@ abstract final class ContentScanner {
 
         switch (mediaType) {
           case MediaType.image:
+            if (_isSessionThumbUrl(normalized)) break;
             blocks.add(ImageBlock(url: normalized, thumbnailUrl: thumb));
             imageUrls.add(normalized);
           case MediaType.video:
-            blocks.add(VideoBlock(url: normalized, thumbnailUrl: thumb));
+            blocks.add(
+              VideoBlock(url: normalized, thumbnailUrl: _usableThumb(thumb)),
+            );
           case MediaType.audio:
             blocks.add(HtmlBlock('<a href="$normalized">$normalized</a>'));
           case MediaType.youtube:

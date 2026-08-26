@@ -85,4 +85,52 @@ void main() {
       expect(result.blocks.whereType<HtmlBlock>(), isNotEmpty);
     });
   });
+
+  group('ContentScanner session-token thumbs (url_enc)', () {
+    // humoruniv `thumb.php?url_enc=…` URLs embed a per-session token that
+    // expires after the page view; they must never become ImageBlocks
+    // (dead carousel slot) nor VideoBlock posters (dead video frame).
+    test('scanContent drops url_enc images and video posters', () {
+      const html = '''
+        <div>
+          <div class="comment_img_div" onclick="comment_mp4_expand('x',
+            'https://down.humoruniv.com/data/editor/a.mp4',
+            '//timg.humoruniv.com/thumb.php?url_enc=TOKEN123',
+            '348', '480', '', 'MP4', '', '', '');">
+            <img src='//timg.humoruniv.com/thumb.php?url_enc=TOKEN123'
+              class='comment_thumb_img'/>
+          </div>
+          <img src="https://down.humoruniv.com/data/editor/b.webp"/>
+        </div>
+      ''';
+      final doc = html_parser.parse(html);
+      final result = ContentScanner.scanContent(doc.body!);
+
+      final images = result.blocks.whereType<ImageBlock>().toList();
+      expect(images, hasLength(1));
+      expect(images.first.url, contains('b.webp'));
+      expect(result.imageUrls, hasLength(1));
+      expect(result.imageUrls.first, contains('b.webp'));
+
+      final videos = result.blocks.whereType<VideoBlock>().toList();
+      expect(videos, hasLength(1));
+      expect(videos.first.url, contains('a.mp4'));
+      expect(videos.first.thumbnailUrl, isNull);
+    });
+
+    test('scanContentCompact drops url_enc images and video posters', () {
+      const html = '''
+        <div>
+          <img src='//timg.humoruniv.com/thumb.php?url_enc=TOKEN123'/>
+          <img src="https://down.humoruniv.com/data/editor/b.webp"/>
+        </div>
+      ''';
+      final doc = html_parser.parse(html);
+      final blocks = ContentScanner.scanContentCompact(doc.body!);
+
+      final images = blocks.whereType<ImageBlock>().toList();
+      expect(images, hasLength(1));
+      expect(images.first.url, contains('b.webp'));
+    });
+  });
 }

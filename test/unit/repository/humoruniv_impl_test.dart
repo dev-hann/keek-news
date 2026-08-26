@@ -322,4 +322,66 @@ void main() {
       }
     });
   });
+
+  group('HumorunivImpl.fetchDetail url_enc session thumbs (1422694)', () {
+    // Body mp4 thumbs ship as `thumb.php?url_enc=<session-token>` images.
+    // Left in, the token image becomes a dead first carousel page (white
+    // retry card) and the video keeps an expiring poster. The scanner must
+    // drop both so the carousel is [real photo, video(synthesized poster)].
+    test('url_enc images never reach imageUrls or blocks', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'read.html': _read('pds_1422694.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1422694');
+
+      for (final url in detail.imageUrls) {
+        expect(
+          url,
+          isNot(contains('url_enc=')),
+          reason: 'session thumb leaked into imageUrls: $url',
+        );
+      }
+      for (final block in detail.contentBlocks) {
+        if (block is ImageBlock) {
+          expect(block.url, isNot(contains('url_enc=')));
+        }
+      }
+    });
+
+    test(
+      'carousel media is exactly one webp photo + one video with poster',
+      () async {
+        final repo = HumorunivImpl(
+          htmlClient: _ScanningHtmlService({
+            'read.html': _read('pds_1422694.html'),
+          }),
+        );
+
+        final detail = await repo.fetchDetail('1422694');
+
+        expect(detail.imageUrls, hasLength(1));
+        expect(
+          detail.imageUrls.single,
+          contains(
+            'e_s02d384002_4451848a5446823511254c0de5c803fe529e8f9d.webp',
+          ),
+        );
+
+        final videos = detail.contentBlocks.whereType<VideoBlock>().toList();
+        expect(videos, hasLength(1));
+        expect(
+          videos.single.url,
+          contains('e_s02d384001_8de4aca03a6231489ab7fb65899fc6a4e6dcc796.mp4'),
+        );
+        expect(
+          videos.single.thumbnailUrl,
+          'https://timg.humoruniv.com/thumb.php?url=${videos.single.url}',
+          reason: 'poster must be synthesized, not a session token',
+        );
+      },
+    );
+  });
 }
