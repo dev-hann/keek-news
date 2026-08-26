@@ -285,7 +285,12 @@ class HumorunivImpl extends HtmlCommunityRepo {
     var content = '';
     final bodyEl = item.querySelector('.comment_body');
     if (bodyEl != null) {
-      final textEl = bodyEl.querySelector('.comment_text');
+      // 2026-08 redesign: humoruniv dropped `.comment_text` and wraps
+      // bodies in `.comment_more`; the sibling `.comment_more_btn`
+      // ("...전체보기") is pure UI and must never reach content.
+      final textEl =
+          bodyEl.querySelector('.comment_text') ??
+          bodyEl.querySelector('.comment_more');
       if (textEl != null) {
         content = textEl.text.trim();
       } else {
@@ -294,7 +299,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
             .querySelectorAll(
               '.recomm_btn, .btn_move, .comment_num, .comment_thumb_notice, '
               '.comment_img_div, .comment_crop_wrap, .comment_crop_href, '
-              '.comment_crop_href_mp4, .comment_file',
+              '.comment_crop_href_mp4, .comment_file, .comment_more_btn',
             )
             .forEach((el) => el.remove());
         content = clone.text.trim();

@@ -77,7 +77,7 @@ void main() {
       }
     });
 
-    test('parses noisy regular comment date (b0ss -> 2026-06-27)', () async {
+    test('parses regular comment date (단수돌침대 -> 2026-06-27)', () async {
       final repo = HumorunivImpl(
         htmlClient: _FixtureHtmlService({
           'read.html': _read('pds_1415455.html'),
@@ -86,10 +86,8 @@ void main() {
 
       final detail = await repo.fetchDetail('1415455');
 
-      final b0ss = detail.comments.firstWhere((c) => c.author == 'b0ss');
-      expect(b0ss.date.year, 2026);
-      expect(b0ss.date.month, 6);
-      expect(b0ss.date.day, 27);
+      final comment = detail.comments.firstWhere((c) => c.author == '단수돌침대');
+      expect(comment.date, DateTime(2026, 6, 27, 18, 56, 44));
     });
 
     test('parses clean best comment date with time', () async {
@@ -107,58 +105,77 @@ void main() {
     });
   });
 
-  group('HumorunivImpl.fetchDetail NSFW placeholder leak', () {
-    // Post 1419769 has a best-comment whose image was AI-flagged by
-    // humoruniv's "너굴맨" moderation, producing a placeholder block
-    // (class .comment_file > #racy_show_*) with strings like
-    // "히든처리 되었습니다" / "너굴맨 설정" / "본문 너굴맨 한꺼번에 제거".
-    // The parser must NOT pull those into the comment content.
-    final forbidden = ['히든처리', '너굴맨', '이미지 보기', '너굴맨 설정', '본문 너굴맨', '한꺼번에 제거'];
-
-    late HumorunivImpl repo;
-    setUp(() {
-      repo = HumorunivImpl(
+  group('HumorunivImpl.fetchDetail comment_more redesign (2026-08)', () {
+    // 2026-08 humoruniv dropped `.comment_text` and now wraps comment
+    // bodies in `.comment_more` with a hidden-by-CSS sibling
+    // `.comment_more_btn` rendered as `...전체보기`. The expander markup
+    // ships in the HTML for EVERY comment, so the parser must read body
+    // text from `.comment_more` and never leak the button text.
+    test('comment content never leaks 전체보기 expander text', () async {
+      final repo = HumorunivImpl(
         htmlClient: _FixtureHtmlService({
           'read.html': _read('pds_1419769.html'),
         }),
       );
-    });
 
-    test(
-      'best-comment content does not contain NSFW placeholder text',
-      () async {
-        final detail = await repo.fetchDetail('1419769');
-
-        final best = detail.comments.where((c) => c.isBest).toList();
-        expect(
-          best,
-          isNotEmpty,
-          reason: 'fixture must contain at least one best comment',
-        );
-
-        for (final c in detail.comments) {
-          for (final keyword in forbidden) {
-            expect(
-              c.content,
-              isNot(contains(keyword)),
-              reason:
-                  'comment by "${c.author}" leaked placeholder "$keyword": '
-                  '${c.content}',
-            );
-          }
-        }
-      },
-    );
-
-    test('best-comment preserves real text alongside hidden media', () async {
       final detail = await repo.fetchDetail('1419769');
 
-      final best = detail.comments.firstWhere((c) => c.isBest);
-      expect(
-        best.content,
-        contains('뭐야'),
-        reason: 'real best-comment text must survive: ${best.content}',
+      expect(detail.comments, isNotEmpty);
+      for (final c in detail.comments) {
+        expect(
+          c.content,
+          isNot(contains('전체보기')),
+          reason: 'comment by "${c.author}" leaked the expander: ${c.content}',
+        );
+      }
+    });
+
+    test('long comment keeps full untruncated text', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1419653.html'),
+        }),
       );
+
+      final detail = await repo.fetchDetail('1419653');
+
+      final long = detail.comments.firstWhere((c) => c.id == 515532327);
+      expect(long.author, 'doksoori4');
+      expect(long.content, startsWith('내가 썼던 글'));
+      expect(
+        long.content.length,
+        greaterThan(500),
+        reason: 'comment_more text must be complete, got: ${long.content}',
+      );
+    });
+
+    test('short comment strips trailing expander dots', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1419653.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1419653');
+
+      final short = detail.comments.firstWhere((c) => c.id == 515531624);
+      expect(short.author, '포브스선정이딸');
+      expect(short.content, '어시..발?');
+    });
+
+    test('comment image markup stays out of content text', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1419653.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1419653');
+
+      final withImage = detail.comments.firstWhere((c) => c.id == 515500234);
+      expect(withImage.content, contains('노브레인형님'));
+      expect(withImage.content, isNot(contains('comment_crop')));
+      expect(withImage.content, isNot(contains('gif')));
     });
   });
 }

@@ -23,13 +23,19 @@
 <link rel="apple-touch-icon-precomposed" href="//m.humoruniv.com/apple-touch-icon.png" />
 <link rel="shortcut icon" href="/favicon.png?tmp=6">
 
-<link href="/default.css?tmp=20260514-2-20260628" rel="stylesheet" type="text/css" />
+<!-- for adsense -->
+<link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
+<link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin>
 
-<script type="text/javascript" src="/js/common_070619.js?tmp=20240219-1-20260628"></script>
-<script type="text/javascript" src="/js/websql.js?tmp=20260516-1-20260628"></script>
+<link href="/default.css?tmp=20260514-2-20260826" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="/js/common_070619.js?tmp=20260723-1-20260826"></script>
+<script type="text/javascript" src="/js/websql.js?tmp=20260516-1-20260826"></script>
 <script type="text/javascript" src="/js/jquery-1.11.1.min.js"></script>
 
-
+<style>
+	textarea, select, input[type="text"], input[type="file"], input[type="password"] {border: 1px solid #888;}
+</style>
 
 <script type="text/javascript">
 function confirm_login(){
@@ -39,25 +45,25 @@ function confirm_login(){
 }
 function change_color(color){
 	if(color == "red"){
-		document.write('<link rel="stylesheet" type="text/css" href="/theme.red.css?tmp=2017_6-20260628" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/theme.red.css?tmp=2017_6-20260826" />');
 		document.write('<meta name="theme-color" content="#ffbbbb">');
 		hu_setCookie("theme_color", color, 1000);
 	}else if(color == "black"){
-		document.write('<link rel="stylesheet" type="text/css" href="/theme.black.css?tmp=2017_6-20260628" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/theme.black.css?tmp=2017_6-20260826" />');
 		document.write('<meta name="theme-color" content="#000000">');
 		hu_setCookie("theme_color", color, 1000);
 	}else if(color == "blue"){
-		document.write('<link rel="stylesheet" type="text/css" href="/theme.blue.css?tmp=2017_6-20260628" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/theme.blue.css?tmp=2017_6-20260826" />');
 		document.write('<meta name="theme-color" content="#88CDE9">');
 		hu_setCookie("theme_color", color, 1000);
 	}else if(color == "orange"){
-		document.write('<link rel="stylesheet" type="text/css" href="/theme.orange.css?tmp=2019_9-2-20260628" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/theme.orange.css?tmp=2019_9-2-20260826" />');
 	}else if(color == "classic"){
-		document.write('<link rel="stylesheet" type="text/css" href="/theme.classic.css?tmp=2017_6-20260628" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/theme.classic.css?tmp=2017_6-20260826" />');
 		document.write('<meta name="theme-color" content="#aaf">');
 		hu_setCookie("theme_color", color, 1000);
 	}else if(color == "green"){
-		document.write('<link rel="stylesheet" type="text/css" href="/theme.green.css?tmp=2017_6-20260628" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/theme.green.css?tmp=2017_6-20260826" />');
 		document.write('<meta name="theme-color" content="#BCDD95">');
 		hu_setCookie("theme_color", color, 1000);
 	}else if(color == "dark"){
@@ -65,12 +71,12 @@ function change_color(color){
 
 		
 		
-					document.write('<link rel="stylesheet" type="text/css" href="/theme.dark.css?tmp=20260224-20260628" />');
+					document.write('<link rel="stylesheet" type="text/css" href="/theme.dark.css?tmp=20260224-20260826" />');
 			document.write('<meta name="theme-color" content="#666666">');
 		
 		hu_setCookie("theme_color", color, 1000);
 	}else{
-		document.write('<link rel="stylesheet" type="text/css" href="/theme.orange.css?tmp=2019_9-2-20260628" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/theme.orange.css?tmp=2019_9-2-20260826" />');
 	}
 }
 </script>
@@ -114,7 +120,7 @@ function ch2_submit(){
 	$("#"+ch2_id).show();
 
 	if(typeof $("#"+ch2_id).html() == "undefined"){
-		ch2_id = "c74f2";
+		ch2_id = "m6453";
 		$("#"+ch2_id).css('min-height','81px');
 		$("#"+ch2_id).addClass("bt1");
 	}
@@ -140,7 +146,7 @@ function ch4_submit(){
 	$("#"+ch4_id).show();
 
 	if(typeof $("#"+ch4_id).html() == "undefined"){
-		ch4_id = "c74f2";
+		ch4_id = "m6453";
 		$("#"+ch4_id).css('min-height','81px');
 		$("#"+ch4_id).show();
 	}
@@ -633,7 +639,6 @@ function show_adpost(ads, number_ch){
 
 
 
-<!-- 틀고정 -->
 
 <!-- 이스터 에그를 위한 부분 -->
 <script>
@@ -995,15 +1000,14 @@ function show_adpost(ads, number_ch){
 			}
 		 );
 	}
-</script>
-<style>
+</script><style>
 	.top_btn {padding:8px 10px 8px 10px;margin:0 0 0 4px;font-size:12px;color:#444;border-radius:2px;}
 	.top_btn_bottom {padding:8px 6px 8px 6px;margin:0 0 0 4px;font-size:12px;color:#444;border-radius:2px;}
 </style>
 
 <!-- 읽음 표시 -->
 <script>
-	set_read_mark('pds','1415455','1782632077');
+	set_read_mark('pds','1415455','1787742229');
 </script>
 
 <script>
@@ -1074,7 +1078,7 @@ function show_adpost(ads, number_ch){
 		<tr>
 			<td align="left" style="padding-left:5px;padding-right:0px;line-height:150%;">
 				<h2>
-							<a href="read.html?table=pds&number=1415455"><span style="color:#444;" class="color_dark">26일 어제, 태풍때문에 난리난 오사카</span></a> <span class="comment_num">[16]</span>
+							<a href="read.html?table=pds&number=1415455"><span style="color:#444;" class="color_dark">26일 어제, 태풍때문에 난리난 오사카</span></a> <span class="comment_num">[18]</span>
 			</h2>
 			</td>
 			<td width="130" align="right" style="padding-right:2px;">
@@ -1094,7 +1098,7 @@ function show_adpost(ads, number_ch){
 	<style>
 		.a0{position:relative;z-index:100000000;}
 		#t7 {position:absolute;top:0px;right:0px;}
-		#q5d5814t {position:absolute;top:0px;right:0px;}
+		#ode234v {position:absolute;top:0px;right:0px;}
 	</style>
 	<div class="a0">
 		<dd id="t7"></dd>
@@ -1107,7 +1111,7 @@ function show_adpost(ads, number_ch){
 					<table border=0 cellspacing=0 cellpadding=0 style="margin:5px 0 5px 0;">
 						<tr>
 							<td>
-								<a href="javascript:profile_on();"><img class='hu_icon' src='https://icon-file.humoruniv.com/bad2b2c9b5b9b3aab9ab.jpg?c=1' width='25' height='25' style='width:25px;height:25px;' loading='lazy'></a>
+								<a href="javascript:profile_on();"><img class='hu_icon' src='https://icon-neo.humoruniv.com/bad2b2c9b5b9b3aab9ab.jpg?c=1' width='25' height='25' style='width:25px;height:25px;' loading='lazy'></a>
 							</td>
 							<td width="5"></td>
 							<td>
@@ -1125,11 +1129,11 @@ function show_adpost(ads, number_ch){
 							<br><span class="etc">이동 2026-06-28 14:28:02 </span>
 												<br>
 
-						<span class="ok"><img src="/images/ic_ok.png" width="11" height="11"> <span id="ok_div">&#49;&#48;&#52;</span> </span>
+						<span class="ok"><img src="/images/ic_ok.png" width="11" height="11"> <span id="ok_div">&#50;&#50;&#57;</span> </span>
 						<span class="notok" style="margin-left:2px;"><img src="/images/ic_not_ok.png" width="11" height="11"> <span id="not_ok_span">0</span></span>
-						<span class="comment_num" style="margin-left:2px;"><img src="/images/ic_re.png" width="11" height="11"> 16</span>
+						<span class="comment_num" style="margin-left:2px;"><img src="/images/ic_re.png" width="11" height="11"> 18</span>
 
-											<span class="etc" style="margin-left:2px;"><img src="/images/ic_view.png?tmp=5" width="11" height="11" valign="absmiddle"> 9,219</span>
+											<span class="etc" style="margin-left:2px;"><img src="/images/ic_view.png?tmp=5" width="11" height="11" valign="absmiddle"> 24,918</span>
 										</p>
 
 <div id="read_profile_btn" style="margin:5px 0 10px 0;">
@@ -1168,11 +1172,12 @@ function show_adpost(ads, number_ch){
 </div>
 </td>
 <td>
-	<div id="q5d5814t" style="position:absolute;top:0px;right:0px;"></div>
+	<div id="ode234v" style="position:absolute;top:0px;right:0px;"></div>
 </td>
 
 	<td id="profile_right_td" align="right">
 		
+
 		
 	<style>
 		#read_profile_td{vertical-align:top;padding-top:10px;}
@@ -1250,7 +1255,7 @@ function show_adpost(ads, number_ch){
 <script type="text/javascript">
 	function profile_on(){
 		document.getElementById('profile').style.display="block";
-		$("#avatar_div").html('<iframe src="//avatar-file.humoruniv.com/avatar/avatar_2.php?user=%BA%D2%B2%C9%B5%B9%B3%AA%B9%AB" width="140" height="115" marginwidth="0" marginheight="0" scrolling="no" frameborder="0"></iframe>');
+		$("#avatar_div").html('<iframe src="//web.humoruniv.com/avatar/avatar.html?user=%BA%D2%B2%C9%B5%B9%B3%AA%B9%AB" width="140" height="115" marginwidth="0" marginheight="0" scrolling="no" frameborder="0"></iframe>');
 	}
 	function profile_off(){
 		document.getElementById('profile').style.display="none";
@@ -1277,7 +1282,7 @@ function show_adpost(ads, number_ch){
 		<tr>
 			<td width="160" align="center" style="padding:10px 0 10px 0;"><div id="avatar_div"></div>
 			<div style="margin-top:10px;">
-				<img class='hu_icon' src='https://icon-file.humoruniv.com/bad2b2c9b5b9b3aab9ab.jpg?c=1' width='25' height='25' style='width:25px;height:25px;' loading='lazy'>
+				<img class='hu_icon' src='https://icon-neo.humoruniv.com/bad2b2c9b5b9b3aab9ab.jpg?c=1' width='25' height='25' style='width:25px;height:25px;' loading='lazy'>
 				<span class=hu_nick_txt>불꽃돌나무</span>
 			</div>
 			</td>
@@ -1316,6 +1321,8 @@ function show_adpost(ads, number_ch){
 
 
 			
+
+
   
 		
 
@@ -1346,8 +1353,99 @@ function show_adpost(ads, number_ch){
 		</tr>
 	</table>
 	<div id="result_test_read_top"></div>
+				<script>
+			function read_top_adsense_replace(){
+				
 
-	
+								var str = "";
+				str = `
+				<div id="read_top_banner" style="display:inline-block;width:100%;">
+					<div class="box" style="clear:both;padding:0px 0 0px 0;">
+						<div id="read_top_banner_iframe" class="" style="margin:auto;">
+							<iframe src="/banner/pnut_join_320x100.html" width="320" height="100" frameborder="0" scrolling="no" allowtransparency="true" referrerpolicy="no-referrer" class=""></iframe>
+						</div>
+					</div>
+				</div>`;
+
+				const nofill_observer = document.querySelector('#read_top_adsense_public');
+				const result = document.querySelector('#result_test_read_top');
+
+				const observer = new ResizeObserver(entries => {
+				  for (let entry of entries) {
+					const {width, height} = entry.contentRect;
+					// hu_log(`너비: ${width} 높이: ${height}`);
+					if(height == 101){
+						$("#read_top_adsense_public_div").html(str)
+						observer.disconnect();
+					}
+				  }
+				});
+				observer.observe(nofill_observer);
+			}
+			read_top_adsense_replace();
+		</script>
+
+				<script>
+		function read_top_banner_replace(){
+			str = `
+				<div class="" style="clear:both;margin:7px 0 5px 0;">
+					
+
+
+
+
+<style>
+	#choo_read_top_wrap {margin:0px 0 0 0;}
+
+			#choo_read_top_wrap{background:#f2f5f7;}
+	</style>
+
+<div id="choo_read_top_wrap" class="gbg0 gbt1 gbb1">
+
+										<div id="choo_read_top" class="box gbb1" style="position:relative;width:100%;border-bottom:none !important;">
+	<div style="padding:0px 0px;">
+			<div style="padding:8px 8px;">
+				<table width="100%" cellpadding="0" cellspacing="0" style="padding:0;margin:0;">
+					<tr>
+						<td width="80" valign="top" align="right" style="padding:0px 0px;">
+							<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT05NjUyOTg0NDU0Jml0ZW1JZD0yODg1MzEwMTQ1NyZ2ZW5kb3JJdGVtSWQ9OTU3ODY4Mjc5MDQmdHJhY2VpZD1WMC0xMTMtMTRmNWMxZWViZTIzOTk3ZQ==&rd=/coupang/hu/read_top" target="_blank" rel="nofollow noreferrer noopener">
+								<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN80Ye80YeV0mpY5fRA5pnmg*jO5ZKmjYwO5vXm0LhmhfjOgFRVl*jmgonAJQEu3i3?SIZE=120x105?OPT=center"
+								width="80" height="70"
+								style="display:block;outline:1px solid #00000033;outline-offset:-1px;">
+							</a>
+
+						</td>
+						<td valign="top" align="left" style="padding:0px 10px 0px 10px;">
+							<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT05NjUyOTg0NDU0Jml0ZW1JZD0yODg1MzEwMTQ1NyZ2ZW5kb3JJdGVtSWQ9OTU3ODY4Mjc5MDQmdHJhY2VpZD1WMC0xMTMtMTRmNWMxZWViZTIzOTk3ZQ==&rd=/coupang/hu/read_top" target="_blank" rel="nofollow noreferrer noopener">
+								<div class="" style="min-height:52px;">
+									<div style="margin-top:3px;line-height:140%;min-height:32px;max-height:41px;overflow:hidden;max-width:250px;">
+										<span class="dark_text" style="font-size:14px;color:#444;">설맞이 아카이브 미적분 시즌 1 &#40;2027 수능&#41;</span>
+									</div>
+
+									<div style="margin-top:10px;">
+										<span class="o" style="font-size:13px;font-weight:bold;">22,500원</span>
+										<span class="dark_text" style="color:#444;font-size:13px;margin-left:5px;font-weight:bold;">쿠팡 인기상품</span>
+									</div>
+								</div>
+							</a>
+						</td>
+				</table>
+			</div>
+	</div>
+
+		<div style="position:absolute;top:5px;right:5px;">
+		<img src="/images/blt_ad.gif">
+	</div>
+	</div>
+</a>
+
+
+</div>				</div>
+				`;
+			$("#read_top_banner").html(str);
+		}
+		</script>
+
 
 	
 
@@ -1355,7 +1453,7 @@ function show_adpost(ads, number_ch){
 	<dd id="c563456"></dd>
 </div>
 
-<div id="z5d55p"></div>
+<div id="pde235l"></div>
 
 
 
@@ -1447,204 +1545,13 @@ function show_adpost(ads, number_ch){
 </div>
 
 
-
-
-
-
-
-
-<span id="v5d5811x"></span>
-<style>
-	#v5d5811x{display:block;}
-</style>
-
-	<style>
-	.min-h{min-height:141px;}
-</style>
-
-<div id="c74f2"></div>
-<form id="ch2_form" name="ch2_form" class="ch2_form" action="boardexp/run.html">
-	<input type="hidden" name="enc" value="nhbeTu1*czUmadwl7n3v836yTyhahfcUO2TTTS3HhOYA8O4dLHEnctC27J4K8ngGOt3v8j3U7OcJId$jOl6xc36yYtkhwdgln6TATl4H8f6mwjjlO3beahSGbJQahlblLl_0Iu69czUmaSH2Ol6AadwGhX6S8hY_npT7c6P2OdkJ86UBLl6ATlTV8fETad1ULOAnTnDGvy6abnb_LJTncj69czUmaSH3Ol6ZTpEw86UfO7BevHkCafbmcSPgbKNfxj3LsS69czUma6Hl7n_7stbzItkAaXbVOlUTwH1U7y6vsjbD7HgfcycEnyTAOhEpIpcmwXRf8yhlTShXs2LGTzAGOfbAOq1Qc7Ndby4_7OcJId$2Ol6xadCGTOQah2Hg7nUjIS19a2AmaHkCIJcVwXTZbncfYd4VsyApazbT7nc2HtHe83TpTKNw8ycfOycXs26CbzEwIybAOnYDc6QEcG1Tbu3AOhEvclYETpYKIybAO4skcpPlwybObuYVLjP5H4TpwXSf8ycfOycXctAywfUGYS1AO4EgcXHlZf6THfAlsl40cJcpazTZ7n6mwjjlOyUeanbL7XTAaXbVOlUYwu1U7d1S74AfLfUecSgGwzhE74YjLJTxwnAN8pAw8H_lL6w_anCGbX6aD26_n6ctajkNapQKhfseYuctanAzhO6Jb3AV7dj3wnAy7dkJaJQ5OSb4wH_uhO4AaXbVOlUTTS6*7dkaaHSfhtUjvDoo">
-	<input type="hidden" id="ch_form_color" name="color" value="">
-</form>
-
-<script type="text/javascript" src="https://ssl.pstatic.net/adimg3.search/adpost/js/adpost_show_ads_v2.min.js"></script>
-
-<div id="naver_adpost_wrap_fix" style="width:100%;padding:5px 0 2px 0;" class="gbt1 gbb0">
-		<div id="naver_adpost_wrap"></div>
-	</div>
-</div>
-
-
-<div id="e5d5815"></div>
-<div id="e5d5815_twice_e5d5815"></div>
-
-<eiv id="z326" class="bt1"></eiv>
-
-<script>
-	var ch2_id = "e5d5815";
-	var is_ch2_call = 1;
-	var is_ch4_call = 0;
-	var is_ch2_run = 0;
-	var is_ch2_form_submit = 0;
-	var adpost_code = "pds";
-	ch2('https://m.humoruniv.com/board/read.html?table=pds&number=1415455', '26일 어제, 태풍때문에 난리난 오사카','하수가 지나가는 곳에 빗물이 넘쳐서 하수관이 터지면서 도로도 터짐= 똥물이 도로로 들어옴카아ㅏ가각');
-</script>
-
-
-
-<script>
-function run2(){
-	document.cookie = "post_cook=ok; path=/; domain=humoruniv.com; ";
-	run4();
-}
-</script>
-
-
-
-<script>
-	var str = "";
-	var data = "";
-	function run4(){
-		data = ``;
-
-		if (data){
-			$("#"+"e5d5815").hide();
-			$("#"+"c74f2").hide();
-
-			//data = atob(data);
-			data = data.replace(/__blank__/gi, "");
-			data = data.replace(/__dot__/gi, ".");
-			data = data.replace(/__start__/gi, "<");
-			data = data.replace(/__end__/gi, ">");
-			data = data.replace(/__nbsp__/gi, " ");
-			data = data.replace(/__mark__/gi, ".");
-			data = data.replace(/__class__/gi, "class");
-
-			$("#v5d5811x").css("border-top", "1px solid #d5d4d3");
-			$("#v5d5811x").html( data );
-
-
-
-			var enc1 = $('#ls11_data').html();
-			if(typeof enc1 == "undefined"){
-				var enc1 = $('#ks11_data').html();
-				$(document).ready(function () {
-				  $(document).on("click", "[id=ks11]", function () {
-						me_go_blue(enc1, $(this));
-				  });
-				});				
-			}else{
-				$(document).ready(function () {
-				  $(document).on("click", "[id=ls11]", function () {
-						me_go_blue(enc1, $(this));
-				  });
-				});
-			}
-
-			var enc2 = $('#ls12_data').html();
-			if(typeof enc2 == "undefined"){
-				var enc2 = $('#ks12_data').html();
-				$(document).ready(function () {
-				  $(document).on("click", "[id=ks12]", function () {
-						me_go_blue(enc2, $(this));
-				  });
-				});
-			}else{
-				$(document).ready(function () {
-				  $(document).on("click", "[id=ls12]", function () {
-						me_go_blue(enc2, $(this));
-				  });
-				});
-			}
-
-			$(document).ready(function () {
-				setTimeout(function() {
-					var height = $( "#v5d5811x").css("height").replace("px", "");
-					if(typeof height != "string" || height == 0 || (height && 0 <= height && height <= 20) ){
-						document.cookie = "ad3_cook=ok; path=/; domain=humoruniv.com; ";
-						data = ``;
-						if(data){
-							$("#").hide();
-							$("#"+"e5d5815").hide();
-							$("#"+"c74f2").hide();
-							$("#"+"tzq3").hide();
-
-							data = data.replace(/__blank__/gi, "");
-							data = data.replace(/__dot__/gi, ".");
-							data = data.replace(/__start__/gi, "<");
-							data = data.replace(/__end__/gi, ">");
-							data = data.replace(/__nbsp__/gi, " ");
-							data = data.replace(/__mark__/gi, ".");
-							data = data.replace(/__class__/gi, "class");
-							data = data.replace(/__class__/gi, "class");
-
-							$("#z326").show();
-							$("#z326").html( data );
-						}
-					}
-				}, 50)
-			});
-		}
-	}
-</script>
-
-
-
-
-
-
-
-
-
-
-
-<script>
-function scrap_bigo_ok(cnt){
-	var obj = document.getElementById('scrap_bigo_form');
-	var url = obj.action;
-
-
-	if(!$("#scrap_bigo_form_idx").val()){
-		window.alert("삭제된 스크랩이거나 데이터 오류입니다.");
-		return;
-	}
-
-	var str = $("#scrap_bigo_input" + cnt).val();
-	$("#scrap_form_bigo").val(str);
-
-	$("#scrap_bigo_input1").val(str);
-	$("#scrap_bigo_input2").val(str);
-
-	$.post(url, $( "#scrap_bigo_form" ).serialize(), function ( data ) {
-		$( "#form_ajax_result" ).html( data );
-	});
-}
-function scrap_bigo_input_view(){
-	$('[id=scrap_bigo_desc]').hide();
-	$('[id=scrap_bigo_input_div]').show();
-	$('[id=scrap_bigo_desc_none]').hide();
-}
-function scrap_bigo_key_press_check(e, cnt){
-    if (e.keyCode == 13) {
-		scrap_bigo_ok(cnt);
-    }
-}
-function scrap_bigo_submit_check(){
-	scrap_bigo_ok();
-	return false;
-}
-</script>
-
-
-
 <!-- 일괄 다운로드 -->
 
 
 	
 
 <style>
-	#list_download{clear:both;margin:20px 0 10px 0;text-align:left;}
+	#list_download{clear:both;margin:0px 0 10px 0;text-align:left;}
 	#list_download td{padding:3px 5px;}
 	#list_download img{border:1px solid #ddd;}
 	#list_download #item_download{display:inline-block;}
@@ -1660,7 +1567,7 @@ function list_download_zip_toggle(){
 	$("#list_download_zip_div").slideToggle();
 }
 function download_all_wiatplz(){
-	var download_token = "1782632077_6015398"; // 고유 토큰
+	var download_token = "1787742229_6015398"; // 고유 토큰
 	var check_count = 0; // 감시 횟수 카운트
 
 	var html = '&nbsp;&nbsp;&nbsp;<img src="/images/waitplz.gif" width="16" height="16" > 압축중...'
@@ -1751,7 +1658,7 @@ function after_download_one_timeout(j){
 }
 
 function download_comment_best_wiatplz(){
-	var download_token = "1782632077_6015398_comment_best"; // 고유 토큰
+	var download_token = "1787742229_6015398_comment_best"; // 고유 토큰
 	var check_count = 0; // 감시 횟수 카운트
 
 	var html = '<table width=70 height=50 border=0 cellspacing=0 cellpadding=0><tr><td align=center valign=center><span class="gray"><img src="/images/waitplz.gif" width="16" height="16" ><div style="margin-top:5px;"><span class="gray">생성중... </span></div></td></tr></table>'
@@ -1813,14 +1720,14 @@ function after_download_comment_best_fail(){
 	<div class="" style="padding:10px 5px 5px 5px;text-align:left;">
 	<div id="list_download_zip_div" style="padding:10px 5px 30px 5px;display:none;text-align:center;">
 		<span id="download_all_span">
-			<a href="download_all.php?table=pds&number=1415455&download_token=1782632077_6015398&comment_best_ok=true" OnClick="return download_all_wiatplz();" target="hidden_frame">
+			<a href="download_all.php?table=pds&number=1415455&download_token=1787742229_6015398&comment_best_ok=true" OnClick="return download_all_wiatplz();" target="hidden_frame">
 				<span class="btn"><img src="/images/ic_zip.png?tmp=5" width="14" class="ad_bri" style="vertical-align: middle;margin-top:-1px;border:none;"> ZIP 파일 다운로드 (압축)</span>
 			</a>
 		</span>
 	</div>
 	
 	<div id="list_download_div" style="display:none;text-align:left;">
-					<a href="download_comment_best.php?table=pds&number=1415455&download_comment_best_token=1782632077_6015398_comment_best&comment_best_ok=true"
+					<a href="download_comment_best.php?table=pds&number=1415455&download_comment_best_token=1787742229_6015398_comment_best&comment_best_ok=true"
 			OnClick="download_comment_best_wiatplz();"
 							target="hidden_frame"
 					>
@@ -1840,7 +1747,7 @@ function after_download_comment_best_fail(){
 		
 										
 							
-		<a href="download.php?url=https://down.humoruniv.com/hwiparambbs/data/pds/a_w41b058001_8e1ab59cf79642555b73da5478a060f56fd4939e.mp4&table=pds&number=1415455&tail=001&download_token_one=1782632077_6015398_001" OnClick="return  download_one_wiatplz('1782632077_6015398_001');" target="hidden_frame" style="display:inline-block;">
+		<a href="download.php?url=https://down.humoruniv.com/hwiparambbs/data/pds/a_w41b058001_8e1ab59cf79642555b73da5478a060f56fd4939e.mp4&table=pds&number=1415455&tail=001&download_token_one=1787742229_6015398_001" OnClick="return  download_one_wiatplz('1787742229_6015398_001');" target="hidden_frame" style="display:inline-block;">
 			<div id="item_download"  class="pointer" style="width:72px;margin:3px 5px 3px 2px;"">
 				<div id="item_toggle_001" style="width:70px;text-align:center;">
 					<img src="https://timg.humoruniv.com/thumb.php?url=https://down.humoruniv.com/hwiparambbs/data/pds/a_w41b058001_8e1ab59cf79642555b73da5478a060f56fd4939e.mp4?SIZE=70x40" width="70" height="40" class="gbd1">
@@ -1853,6 +1760,198 @@ function after_download_comment_best_fail(){
 		</div> <!-- /download_div -->
 	</div>
 </div>
+
+
+
+
+
+
+
+
+<span id="ude211g"></span>
+<style>
+	#ude211g{display:block;}
+</style>
+
+	<style>
+	.min-h{min-height:141px;}
+</style>
+
+<div id="m6453"></div>
+<form id="ch2_form" name="ch2_form" class="ch2_form" action="boardexp/run.html">
+	<input type="hidden" name="enc" value="nhbeTu1*czUmadwl7n3v836yTyhahfcUO2TTTS3HhOYA8O4dLHEnctC27J4K8ngGOt3v8j3U7OcJId$jOl6xc36yYtkhwdgln6TATl4H8f6mwjjlO3beahSGbJQahlblLl_0Iu69czUmaSH2Ol6AadwGhX6S8hY_npT7c6P2OdkJ86UBLl6ATlTV8fETad1ULOAnTnDGvy6abnb_LJTncj69czUmaSH3Ol6ZTpEw86UfO7BevHkCafbmcSPgbKNfxj3LsS69czUma6Hl7n_7stbzItkAaXbVOlUTwH1U7y6vsjbD7HgfcycEnyTAOhEpIpcmwXRf8yhlTShXs2LGTzAGOfbAOq1Qc7Ndby4_7OcJId$2Ol6xadCGTOQah2Hg7nUjIS19a2AmaHkCIJcVwXTZbncfYd4VsyApazbT7nc2HtHe83TpTKNw8ycfOycXs26CbzEwIybAOnYDc6QEcG1Tbu3AOhEvclYETpYKIybAO4skcpPlwybObuYVLjP5H4TpwXSf8ycfOycXctAywfUGYS1AO4EgcXHlZf6THfAlsl40cJcpazTZ7n6mwjjlOyUeanbL7XTAaXbVOlUYwu1U7d1S74AfLfUecSgGwzhE74YjLJTxwnAN8pAw8H_lL6w_anCGbX6aD26_n6ctajkNapQKhfseYuctanAzhO6Jb3AV7dj3wnAy7dkJaJQ5OSb4wH_uhO4AaXbVOlUTTS6*7dkaaHSfhtUjvDoo">
+	<input type="hidden" id="ch_form_color" name="color" value="">
+</form>
+
+<script type="text/javascript" src="https://ssl.pstatic.net/adimg3.search/adpost/js/adpost_show_ads_v2.min.js"></script>
+
+<div id="naver_adpost_wrap_fix" style="width:100%;padding:5px 0 2px 0;" class="gbt1">
+		<div id="naver_adpost_wrap"></div>
+	</div>
+</div>
+
+
+<div id="sde23fc"></div>
+<div id="sde23fc_twice_sde23fc"></div>
+
+<eiv id="z326" class="bt1"></eiv>
+
+<script>
+	var ch2_id = "sde23fc";
+	var is_ch2_call = 1;
+	var is_ch4_call = 0;
+	var is_ch2_run = 0;
+	var is_ch2_form_submit = 0;
+	var adpost_code = "pds";
+	ch2('https://m.humoruniv.com/board/read.html?table=pds&number=1415455', '26일 어제, 태풍때문에 난리난 오사카','하수가 지나가는 곳에 빗물이 넘쳐서 하수관이 터지면서 도로도 터짐= 똥물이 도로로 들어옴카아ㅏ가각');
+</script>
+
+
+
+<script>
+function run2(){
+	document.cookie = "post_cook=ok; path=/; domain=humoruniv.com; ";
+	run4();
+}
+</script>
+
+
+
+<script>
+	var str = "";
+	var data = "";
+	function run4(){
+		data = ``;
+
+		if (data){
+			$("#"+"sde23fc").hide();
+			$("#"+"m6453").hide();
+
+			//data = atob(data);
+			data = data.replace(/__blank__/gi, "");
+			data = data.replace(/__dot__/gi, ".");
+			data = data.replace(/__start__/gi, "<");
+			data = data.replace(/__end__/gi, ">");
+			data = data.replace(/__nbsp__/gi, " ");
+			data = data.replace(/__mark__/gi, ".");
+			data = data.replace(/__class__/gi, "class");
+
+			$("#ude211g").css("border-top", "1px solid #d4d4d5");
+			$("#ude211g").html( data );
+
+
+
+			var enc1 = $('#ls11_data').html();
+			if(typeof enc1 == "undefined"){
+				var enc1 = $('#ks11_data').html();
+				$(document).ready(function () {
+				  $(document).on("click", "[id=ks11]", function () {
+						me_go_blue(enc1, $(this));
+				  });
+				});				
+			}else{
+				$(document).ready(function () {
+				  $(document).on("click", "[id=ls11]", function () {
+						me_go_blue(enc1, $(this));
+				  });
+				});
+			}
+
+			var enc2 = $('#ls12_data').html();
+			if(typeof enc2 == "undefined"){
+				var enc2 = $('#ks12_data').html();
+				$(document).ready(function () {
+				  $(document).on("click", "[id=ks12]", function () {
+						me_go_blue(enc2, $(this));
+				  });
+				});
+			}else{
+				$(document).ready(function () {
+				  $(document).on("click", "[id=ls12]", function () {
+						me_go_blue(enc2, $(this));
+				  });
+				});
+			}
+
+			$(document).ready(function () {
+				setTimeout(function() {
+					var height = $( "#ude211g").css("height").replace("px", "");
+					if(typeof height != "string" || height == 0 || (height && 0 <= height && height <= 20) ){
+						document.cookie = "ad3_cook=ok; path=/; domain=humoruniv.com; ";
+						data = ``;
+						if(data){
+							$("#").hide();
+							$("#"+"sde23fc").hide();
+							$("#"+"m6453").hide();
+							$("#"+"tzq3").hide();
+
+							data = data.replace(/__blank__/gi, "");
+							data = data.replace(/__dot__/gi, ".");
+							data = data.replace(/__start__/gi, "<");
+							data = data.replace(/__end__/gi, ">");
+							data = data.replace(/__nbsp__/gi, " ");
+							data = data.replace(/__mark__/gi, ".");
+							data = data.replace(/__class__/gi, "class");
+							data = data.replace(/__class__/gi, "class");
+
+							$("#z326").show();
+							$("#z326").html( data );
+						}
+					}
+				}, 50)
+			});
+		}
+	}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+function scrap_bigo_ok(cnt){
+	var obj = document.getElementById('scrap_bigo_form');
+	var url = obj.action;
+
+
+	if(!$("#scrap_bigo_form_idx").val()){
+		window.alert("삭제된 스크랩이거나 데이터 오류입니다.");
+		return;
+	}
+
+	var str = $("#scrap_bigo_input" + cnt).val();
+	$("#scrap_form_bigo").val(str);
+
+	$("#scrap_bigo_input1").val(str);
+	$("#scrap_bigo_input2").val(str);
+
+	$.post(url, $( "#scrap_bigo_form" ).serialize(), function ( data ) {
+		$( "#form_ajax_result" ).html( data );
+	});
+}
+function scrap_bigo_input_view(){
+	$('[id=scrap_bigo_desc]').hide();
+	$('[id=scrap_bigo_input_div]').show();
+	$('[id=scrap_bigo_desc_none]').hide();
+}
+function scrap_bigo_key_press_check(e, cnt){
+    if (e.keyCode == 13) {
+		scrap_bigo_ok(cnt);
+    }
+}
+function scrap_bigo_submit_check(){
+	scrap_bigo_ok();
+	return false;
+}
+</script>
+
+
 <style>
 #next_prev{width:100%;display:block;text-align:left;margin-top:0px;}
 #next_prev ul {width:100%;text-align:left;overflow:hidden;}
@@ -1863,14 +1962,14 @@ function after_download_comment_best_fail(){
 .size{color:#777;}
 </style>
 
-<div id="read_menu_btn_div">
-<div class="five" style=""></div>
+<civ id="read_menu_btn_div">
+<div class="five" style="display:block;"></div>
 
 
 
 
 
-<div class="btn_set bg0 bt1 bb1">
+<civ class="btn_set bg0 bt1 bb1" style="display:block;">
 		<a href="javascript:recomm_ok();"><span class="btn">ⓞ 추천</span></a>
 	&nbsp;
 	
@@ -1881,7 +1980,7 @@ function after_download_comment_best_fail(){
 							
 	
 	<a href="list.html?table=pds&pg=0"><span class="btn">▤ 목록</span></a>
-</div>
+</civ>
 <div id="ok_ment_post" style="display:none;width:270px;margin:2px auto;">
 	<div style="width:150px;">
 					<div class="tri"> </div>
@@ -1889,7 +1988,7 @@ function after_download_comment_best_fail(){
 	</div>
 </div>
 
-<div class="btn_set bg0 bb1 bt1" style="margin-top:15px;">
+<civ class="btn_set bg0 bb1 bt1" style="margin-top:15px;display:block;">
 	<a href="javascript:history.go(-1);"><span class="btn">← 뒤로</span></a>
 	&nbsp;
 	<a OnClick="javascript:window.scrollTo(1, 0);" href="javascript:void(0);"><span class="btn">↑ 맨위</span></a>
@@ -1932,9 +2031,9 @@ function after_download_comment_best_fail(){
 			</div>
 		</div>
 	</div>
-</div>
+</civ>
 
-</div>
+</civ>
 
 
 <!--이전글/다음글-->
@@ -1955,12 +2054,12 @@ function after_download_comment_best_fail(){
 					요즘 많이 보인다는 남자 패션.jpg
 				</dd>
 				<div style="display:block;padding:2px 0 0px 0;">
-					<span class="extra" style="margin-right:3px;">일요일 14:29</span>
+					<span class="extra" style="margin-right:3px;">2026-06-28</span>
 					<span class="nick" style="margin-right:10px;">호이베베</span>
-					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#49;&#48;&#57;</span>
+					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#50;&#50;&#51;</span>
 					<span class="not_ok_num" style="margin-right:3px;"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
-					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 30</span>
-					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 824</span>
+					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 33</span>
+					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 34,784</span>
 				</div>
 			</td>
 		</tr>
@@ -1985,12 +2084,12 @@ function after_download_comment_best_fail(){
 					홍명보호 마지막 경우의 수
 				</dd>
 				<div style="display:block;padding:2px 0 0px 0;">
-					<span class="extra" style="margin-right:3px;">일요일 14:20</span>
+					<span class="extra" style="margin-right:3px;">2026-06-28</span>
 					<span class="nick" style="margin-right:10px;font-size:9px;">트랜스포트타이쿤</span>
-					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#50;&#52;&#57;</span>
+					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#56;&#48;&#53;</span>
 					<span class="not_ok_num" style="margin-right:3px;"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
-					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 26</span>
-					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 0</span>
+					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 44</span>
+					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 53,157</span>
 				</div>
 			</td>
 		</tr>
@@ -2096,7 +2195,7 @@ function check_browser(){
 <script type="text/javascript" src="//web.humoruniv.com/js/h_hash.js"></script>
 <script type="text/javascript" src="//web.humoruniv.com/js/hidden_comm_hash.js"></script>
 <script type="text/javascript" src="//web.humoruniv.com/js/h_hash_a4.js"></script>
-<script type='text/javascript' src='//web.humoruniv.com/js/comm_070619.js?tmp=20200423-1-20260628'></script>
+<script type='text/javascript' src='//web.humoruniv.com/js/comm_070619.js?tmp=20200423-1-20260826'></script>
 <script type="text/javascript">
 eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--){d[e(c)]=k[c]||e(c)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('5 F(6){0("6.G.D"+"3"+"S.9=x"+"c"+"3"+"a"+"4"+"(j.o."+"Q"+"m"+"b"+"q.9 + z"+"3"+"u"+"s"+"8"+"2(\'"+"r"+"g\'))")}5 w(6){0("B"+"A"+"C"+"();");0("k"+"m.f"+"i"+"m.h"+"p"+"1"+"l"+"n"+"y.v"+"Y"+"e="+"7"+"R"+"4("+"7"+"T"+"U"+"2(\'t"+"X"+"W"+"d"+"1\'));")}5 V(){0("P"+"O"+"H"+"t.c"+"8"+"2=\'E"+"I"+"d"+"1\'"+" + \'=\' "+"+ J"+"N"+"M(\'"+"L"+"\') + \'; K"+"g=/; \';")}',61,61,'eval|re|ie|_||function|hform|he|ook|value||||ua|||th|com|or|document|hfor|ss_||ke|comm|m_p|er|hu|tC||ge||hidden_comm_press_hash|hen||henc|esqu|tim|are|hash|ti|hidden_recomm_hash_a4|form|en|mesq|es|pa|1782624482|pe|ca|um|doc|nu|nc_a|check|nc_g|etCook|timesquare|esq|im|alu'.split('|'),0,{}))
 </script><!-- /추천로직 -->
@@ -2201,6 +2300,17 @@ eval(function(p,a,c,k,e,d){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a
 </script>
 
 <script>
+// 작성중 에러가 날때 작성완료 버튼 복구
+$(window).on( "pageshow", function(event){
+	var is_back = event.originalEvent.persisted || (window.performance && window.performance.navigation.type == 2);
+	
+	if(is_back){
+		$("[id^=\"comm_submit_div\"]").css("display", "block");
+		$("[id^=\"comm_submit_wait\"]").css("display", "none");
+	}
+} );
+</script>
+<script>
 function comm_valid_check_mobile() {
 	//commlen = document.getElementById('comm').commtext.value.length;
 	commlen = common_real_len(document.getElementById('comm').commtext.value);
@@ -2295,23 +2405,23 @@ function scrap_cancel(idx){
 	<script>
 		function list_end_run_read_top_boom(){
 			var data = `
-<d id="k5d58117i">
-	<c id="k5d58117i_civ" style="padding:4px 8px;margin-bottom:21px;">
-		<div id="k5d58117i1" style="margin:3px 0px;">
+<d id="nde23f17o">
+	<c id="nde23f17o_civ" style="padding:4px 8px;margin-bottom:21px;">
+		<div id="nde23f17o1" style="margin:3px 0px;">
 			<table width="100%" cellpadding="0" cellspacing="0" style="padding:0;margin:0;">
 				<tr>
 					<td width="85" valign="top" align="right" style="padding:0px 0px;">
-						<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN8w9y8w9yVjAIm5TymgT_m0iRmhFIA5VSAh*jVhLjVhQ2Y0v0AhinV5dKA5dEu3i3?SIZE=127x112?OPT=center"
+						<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN80Ye80YeV0mpY5fRA5pnmg*jO5ZKmjYwO5vXm0LhmhfjOgFRVl*jmgonAJQEu3i3?SIZE=127x112?OPT=center"
 							width="85" height="75"
 							style="display:block;outline:1px solid #00000033;outline-offset:-1px;"
 						>
 					</td>
 					<td valign="top" align="left" style="padding:0px 10px 0px 10px;">
 						<div style="margin-top:2px;line-height:160%;min-height:41px;max-height:41px;overflow:hidden;max-width:250px;">
-							<span class="dark_text" style="font-size:14px;color:#444;">[AD] 더좋은컵 더 두꺼운 일회용 나무 종이컵 195ml</span>
+							<span class="dark_text" style="font-size:14px;color:#444;">[AD] 설맞이 아카이브 미적분 시즌 1 &#40;2027 수능&#41;</span>
 						</div>
 						<div style="margin-top:8px;">
-							<span class="o" style="font-size:13px;font-weight:bold;">13,990원</span>
+							<span class="o" style="font-size:13px;font-weight:bold;">22,500원</span>
 							<span class="dark_text" style="color:#444;font-size:13px;margin-left:5px;font-weight:bold;">쿠팡 인기상품</span>
 						</div>
 					</td>
@@ -2319,25 +2429,25 @@ function scrap_cancel(idx){
 		</div>
 	</c>
 
-	<span id="k5d58117i_d_1" style="display:none">aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT05MjAwNTE5Nzg0Jml0ZW1JZD0yNzk4OTI3MDIyOCZ2ZW5kb3JJdGVtSWQ9OTQxMzIzODE4NzMmdHJhY2VpZD1WMC0xMTMtYjU5NmEwYTgzN2RiYzE4Ng==</span>
-	<span id="k5d58117i_r_1" style="display:none">/coupang/hu/read_top_boom</span>
+	<span id="nde23f17o_d_1" style="display:none">aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT05NjUyOTg0NDU0Jml0ZW1JZD0yODg1MzEwMTQ1NyZ2ZW5kb3JJdGVtSWQ9OTU3ODY4Mjc5MDQmdHJhY2VpZD1WMC0xMTMtMTRmNWMxZWViZTIzOTk3ZQ==</span>
+	<span id="nde23f17o_r_1" style="display:none">/coupang/hu/read_top_boom</span>
 </d>
 
 <style>
-			#k5d58117i_civ {display:block;background:#f2f5f7;}
-		#k5d58117i_civ {border-top:1px solid #ddd;border-bottom:1px solid #ddd;}
+			#nde23f17o_civ {display:block;background:#f2f5f7;}
+		#nde23f17o_civ {border-top:1px solid #ddd;border-bottom:1px solid #ddd;}
 	
 </style>
 
 			`;
-			$("#z5d55p").html(data);
+			$("#pde235l").html(data);
 		}
 	</script>
 
 	<script>
 		function gs_read_top_boom(id){
-			var enc = $('#k5d58117i_d_'+id).html();
-			var rd = $('#k5d58117i_r_'+id).html();
+			var enc = $('#nde23f17o_d_'+id).html();
+			var rd = $('#nde23f17o_r_'+id).html();
 			me_go_rel(enc, rd);
 		}
 	</script>
@@ -2350,13 +2460,73 @@ function scrap_cancel(idx){
 		}
 	</script>
 	<script>
-														$("#k5d58117i1").click(function(){
+														$("#nde23f17o1").click(function(){
 				  gs_read_top_boom('1');
 				});
 						</script>
 
 
 
+<!-- 답글 엔터 지원 -->
+<style>
+/* �떟湲� �뿏�꽣 吏��썝 */
+.comment_more {
+	display: block;
+	line-height: 1.6em;
+	max-height: 25.6em;       /* 16以� 湲곗�� �넂�씠 (1.6em * 16 = 25.6em) */
+	overflow: hidden;
+	
+	padding: 0;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+
+/* �쟾泥대낫湲� �겢由� �떆 �렯爾먯���뒗 �겢�옒�뒪 */
+.comment_more.expanded {
+	max-height: none;
+}
+
+.comment_more_btn {
+	display: none;
+	cursor: pointer;
+	margin: 5px 0;
+}
+
+.comment_more_btn .btn_nemo{
+	border-radius:4px;
+}
+</style>
+
+<script>
+$(document).ready( function(){
+	var target_list = [];
+	
+	/* 珥덇낵 �뿬遺�留� �떒�닚 泥댄겕�븯�뿬 諛곗뿴�뿉 �닔吏� */
+	$(".comment_more").each( function(){
+		var target_elem = $(this)[0];
+		
+		if(target_elem.clientHeight < target_elem.scrollHeight){
+			target_list.push( $(this) );
+		}
+	} );
+	
+	/* �쟾泥대낫湲� 踰꾪듉 �끂異� */
+	var len = target_list.length;
+	var i = 1;
+	
+	for(i = 1; i <= len; i++){
+		target_list[i - 1].siblings(".comment_more_btn").css("display", "inline-block");
+	}
+	
+	/* �겢由� �떆 �뵜�젅�씠 �뾾�씠 利됱떆 �렯移� */
+	$(".comment_more_btn").click( function(){
+		var target_div = $(this).siblings(".comment_more");
+		
+		target_div.addClass("expanded");
+		$(this).hide();
+	} );
+} );
+</script>
 <style>
 	.cmt_ok {color:#ED7B00;margin-right:7px;}
 	.cmt_not_ok {color:#5669C6;margin-right:7px;}
@@ -2378,8 +2548,6 @@ function scrap_cancel(idx){
 	li.cc {list-style: decimal ; margin:10px 0 0 5px;}
 	li.cc li.cc2 {list-style: lower-latin; margin:1px 0 0 5px;}
 </style>
-
-
 
 <span style="color:#333333;font-weight:normal"> 
 
@@ -2427,6 +2595,33 @@ function scrap_cancel(idx){
 	<div class="kakao_ad_area">
 		<div id="ad_comment_top" class="">
 											
+
+
+		
+
+	<table width="100%" cellpadding="0" cellspacing="0" class="box" style="padding:0px 0 0px 0;margin:0px 0;">
+		<tr>
+			<td align="center" valign="center" style="padding:0;margin:0;">
+				<div id="comment_top_adsense_public_div" class="box" style="margin:5px 0;">
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9964741307914018"
+     crossorigin="anonymous"></script>
+<!-- hu_comment_top -->
+<ins class="adsbygoogle ad_bri"
+     style="display:inline-block;width:100%;height:100px;"
+     data-ad-client="ca-pub-9964741307914018"
+     data-ad-slot="4722456985"
+	 data-language="ko"
+></ins>
+
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+				</div>
+			</td>
+		</tr>
+	</table>
+
 					</div>
 	</div>
 </div>
@@ -2452,7 +2647,7 @@ function scrap_cancel(idx){
 	
 	
 
-<div id="z5d510a"></div>
+<div id="cde2310b"></div>
 
 <div id="comment_best_download">
 <div id="comment_best_wrap" class="comment_best_wrap"  style="">
@@ -2477,7 +2672,7 @@ function scrap_cancel(idx){
 					2026-06-27 18:57:07
 				</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="o" id="top_comm_ok_div_514814187">49</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="o" id="top_comm_ok_div_514814187">87</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -2490,8 +2685,15 @@ function scrap_cancel(idx){
 				"
 		style="padding-top:8px;padding-bottom:8px;color:#ee2222;">
 
-		
-		우수랑 오수랑 분리된 시스탬이 아니라서..  
+				
+		<div>
+			<div class="comment_more" style="color:#ee2222;">
+				우수랑 오수랑 분리된 시스탬이 아니라서..
+							</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>		
+		</div>
+
+
 					&nbsp;&nbsp;&nbsp;<span class="btn_move pointer" style="display:inline-block;padding:3px 5px 3px 5px;border:1px solid #999;background:white;line-height:100%;border-radius:3px;font-weight:bold;color:#555;" OnClick="javascript:comment_move_to('comment_span_514814187');"> &nbsp;이동&nbsp; </span>
 		
 				<div class="recomm_btn">
@@ -2520,7 +2722,7 @@ function scrap_cancel(idx){
 		<span style="display:inline-block;padding-top:5px;">
 
 		<a href="javascript:nick_menu_on('top_nick_menu_514827364', '씨니카모발모발', 'bebeb4cfc4abb8f0b9dfb8f0b9df')">
-			<img class='hu_icon' src='https://icon-file.humoruniv.com/bebeb4cfc4abb8f0b9dfb8f0b9df.jpg?c=1' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+			<img class='hu_icon' src='https://icon-neo.humoruniv.com/bebeb4cfc4abb8f0b9dfb8f0b9df.jpg?c=1' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 												<span class="nick"><span class=hu_nick_txt>씨니카모발모발</span></span>
 									</a>
 
@@ -2529,7 +2731,7 @@ function scrap_cancel(idx){
 					2026-06-28 13:45:28
 				</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="o" id="top_comm_ok_div_514827364">15</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="o" id="top_comm_ok_div_514827364">28</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -2544,17 +2746,24 @@ function scrap_cancel(idx){
 
 					<div class='comment_file'>
 				<table width=100% border=0 cellspacing=0 cellpadding=0 style='margin-top:10px;'><tr><td align=center>
-			<div id='comment_file_mp4_714827364_3530_' style='width:100%;position:relative;margin-left:-8px;'>
-				<div class='comment_img_div pointer' style='width:320px;position:relative;' OnClick="javascript:comment_mp4_expand('mp4_714827364_3530_', '//down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r2efa4f001_72c7a064182b9ffdb692d693395450f08d39a9f0.mp4', '//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s', '320', '320', '', 'MP4', '0.4MB', '', '');"><img src='//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s' width='320' class='comment_thumb_img' style='min-height:80px;'/>
+			<div id='comment_file_mp4_714827364_3500_' style='width:100%;position:relative;margin-left:-8px;'>
+				<div class='comment_img_div pointer' style='width:320px;position:relative;' OnClick="javascript:comment_mp4_expand('mp4_714827364_3500_', '//down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r2efa4f001_72c7a064182b9ffdb692d693395450f08d39a9f0.mp4', '//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s', '320', '320', '', 'MP4', '0.4MB', '', '');"><img src='//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s' width='320' class='comment_thumb_img' style='min-height:80px;'/>
 					<div class='comment_thumb_notice'>MP4,&nbsp; 0.4MB</div>
-					<div style='position:absolute;top:12px;left:12px;' id='play_trans_img_div_mp4_714827364_3530_'><img src='/images/play_trans.png?tmp=3' width='40' height='40'></div>
+					<div style='position:absolute;top:12px;left:12px;' id='play_trans_img_div_mp4_714827364_3500_'><img src='/images/play_trans.png?tmp=3' width='40' height='40'></div>
 				</div>
 
 				
 			</div></td></tr></table>
 			</div>
-		
-		똥이나 처먹어!  
+				
+		<div>
+			<div class="comment_more" style="color:#ee2222;">
+				똥이나 처먹어!
+							</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>		
+		</div>
+
+
 					&nbsp;&nbsp;&nbsp;<span class="btn_move pointer" style="display:inline-block;padding:3px 5px 3px 5px;border:1px solid #999;background:white;line-height:100%;border-radius:3px;font-weight:bold;color:#555;" OnClick="javascript:comment_move_to('comment_span_514827364');"> &nbsp;이동&nbsp; </span>
 		
 				<div class="recomm_btn">
@@ -2576,7 +2785,7 @@ function scrap_cancel(idx){
 
 					
 		<div class="box" style="clear:both;padding:10px 10px 10px 10px;text-align:right;">
-				<a href="download_comment_best.php?table=pds&number=1415455&download_comment_best_token=1782632077_9941088_comment_best&comment_best_ok=true&mode=img"
+				<a href="download_comment_best.php?table=pds&number=1415455&download_comment_best_token=1787742229_9941088_comment_best&comment_best_ok=true&mode=img"
 					target="_blank"
 				>
 			
@@ -2595,100 +2804,57 @@ function scrap_cancel(idx){
 
 
 	
+
+
+
+
 <script>
 function read_center_300x250_banner_replace(){
-			str = `
-				
+					var str = `	 
+
 	
-	<style>
-			#choo_center_wrap .gbt0{border-top:1px solid #ccc;}
-					#choo_center_wrap {border-color:#bbb;background:#f5f8f9;border-left:none;border-right:none;padding:2px 0px;}}
-				</style>
-	<div id="choo_center_wrap" class="bg0 box bd1">
-									<div id="choo_center" class="box " style="position:relative;width:100%;">
-					<div style="padding:8px 8px;">
-						<a href="https://m.alzzabaegi.com/alzza_list.html?mode=hobby&mall=11st&mid=75445307&rd=/alzza/m/center" target="_blank">
-							<table width="100%" cellpadding="0" cellspacing="0" style="padding:0;margin:0;">
-								<tr>
-									<td width="70" valign="top" align="right" style="padding:0px 0px;">
-										<img src="//timg.humoruniv.com/thumb.php?url=https://cdn.011st.com/11dims/resize/600x600/quality/75/11src/product/75445307/B.jpg?226000000?SIZE=105x97?OPT=center"
-											width="70" height="65"
-											style="display:block;outline:1px solid #00000033;outline-offset:-1px;"
-										>
-									</td>
-									<td valign="top" align="left" style="padding:1px 10px 0px 10px;">
-										<div style="width:95%;margin-top:0px;line-height:160%;min-height:40px;">
-											<span class="color_dark" style="color:#444;font-size:13px;">고무밴드 고무줄 스트링 엘라스틱 의류용 허리밴드</span>
-																					</div>
-										<div style="margin-top:3px;">
-																						<span style="font-size:13px;font-weight:bold;">취미 인기상품</span>
-											&nbsp;
-											<span class="o" style="font-size:13px;font-weight:bold;">840원</span>
-										</div>
-									</td>
-							</table>
-						</a>
-					</div>
-										<div style="position:absolute;top:6px;right:6px;">
-						<img src="/images/blt_ad.gif">
-					</div>
-									</div>
 
-									<div id="choo_center" class="box gbt0" style="position:relative;width:100%;border-top:1px dotted #ddd;">
-					<div style="padding:8px 8px;">
-						<a href="https://m.alzzabaegi.com/alzza_list.html?mode=hobby&mall=11st&mid=188711202&rd=/alzza/m/center" target="_blank">
-							<table width="100%" cellpadding="0" cellspacing="0" style="padding:0;margin:0;">
-								<tr>
-									<td width="70" valign="top" align="right" style="padding:0px 0px;">
-										<img src="//timg.humoruniv.com/thumb.php?url=https://cdn.011st.com/11dims/resize/600x600/quality/75/11src/product/188711202/B.jpg?240000000?SIZE=105x97?OPT=center"
-											width="70" height="65"
-											style="display:block;outline:1px solid #00000033;outline-offset:-1px;"
-										>
-									</td>
-									<td valign="top" align="left" style="padding:1px 10px 0px 10px;">
-										<div style="width:95%;margin-top:0px;line-height:160%;min-height:40px;">
-											<span class="color_dark" style="color:#444;font-size:13px;">군제 건담 마커 건담 마카 먹선펜 지우개펜 타미야</span>
-																					</div>
-										<div style="margin-top:3px;">
-																						<span style="font-size:13px;font-weight:bold;">취미 인기상품</span>
-											&nbsp;
-											<span class="o" style="font-size:13px;font-weight:bold;">2,900원</span>
-										</div>
-									</td>
-							</table>
-						</a>
-					</div>
-									</div>
-
-									<div id="choo_center" class="box gbt0" style="position:relative;width:100%;border-top:1px dotted #ddd;">
-					<div style="padding:8px 8px;">
-						<a href="https://m.alzzabaegi.com/alzza_list.html?mode=accessories&mall=11st&mid=692413135&rd=/alzza/m/center" target="_blank">
-							<table width="100%" cellpadding="0" cellspacing="0" style="padding:0;margin:0;">
-								<tr>
-									<td width="70" valign="top" align="right" style="padding:0px 0px;">
-										<img src="//timg.humoruniv.com/thumb.php?url=https://cdn.011st.com/11dims/resize/600x600/quality/75/11src/product/692413135/B.webp?791552793?SIZE=105x97?OPT=center"
-											width="70" height="65"
-											style="display:block;outline:1px solid #00000033;outline-offset:-1px;"
-										>
-									</td>
-									<td valign="top" align="left" style="padding:1px 10px 0px 10px;">
-										<div style="width:95%;margin-top:0px;line-height:160%;min-height:40px;">
-											<span class="color_dark" style="color:#444;font-size:13px;">틱앤톡 여성 스니커즈 운동화 단화 슬립온 플랫슈즈</span>
-																					</div>
-										<div style="margin-top:3px;">
-																						<span style="font-size:13px;font-weight:bold;">잡화 인기상품</span>
-											&nbsp;
-											<span class="o" style="font-size:13px;font-weight:bold;">11,800원</span>
-										</div>
-									</td>
-							</table>
-						</a>
-					</div>
-									</div>
-
+					
+	
+	<div id="choo_center_div" class="bg1 gbd1" style="position:relative;width:300px;max-hight:280px;overflow:hidden;clear:both;background:#f2f5f7;text-align:center;margin:0px auto;">
+		<div style="position:relative;">
+			<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN8wV_8wV_Aj*pY0ZSmlYWYwFjOgfRAjYWmlZSmJTXY5demg*IVlFhY0Iwm0dEu3i3?SIZE=450x270?OPT=center" width="300" height="180">
+			<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener"
+				style="display:block; position:absolute; top:10px; left:10px; width:280px; height:160px; z-index:1;background-color:rgba(0,0,0,0);">
+			</a>
+		</div>
+		<div class="bt1 bg1" style="border-top:1px solid #c5c5c5;background:#f5f8f9;">
+			<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener">
+				<div class="box" style="max-height:60px;overflow:hidden;width:100%;padding:5px 10px;font-size:14px;text-align:center;line-height:180%;">
+					<span id="choo_title" class="color_dark" style="color:black;">쿠쿠 전자레인지 다이얼식 20L</span>
+				</div>
+			</a>
+			<div class="box" style="width:100%;padding:0px 10px 10px 10px;font-size:14px;text-align:center;">
+				<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener">
+					<span class="choo_price o">57,000원</span>
+					<span class="color_dark" style="color:#444;font-size:14px;font-weight:bold;margin-left:7px;">
+						쿠팡 인기상품
+					</span>
+				</a>
 			</div>
+		</div>
+					<div style="position:absolute;top:5px;right:5px;">
+				<img src="/images/blt_ad.gif">
+			</div>
+			</div>
+
+	<style>
+					#choo_center_div .choo_filter_gray{filter:grayscale(30%);}
+			#choo_center_div .btn_nemo{border-color:#555 !important;color:#444 !important;}
+		
+
+		#choo_center_div {width:300px;padding:0px 0 0px 0;margin:0;}
+		#choo_center_div a:hover{text-decoration:none;}
+		#choo_center_div .choo_price{display:inline-block;font-weight:bold;z-index:999;margin-left:0px;}
+
+	</style>
 `;
-	
+		
 	str = `
 		<div class="gbt1 gbb1" style="clear:both;border-bottom:1px solid #ccc;">
 			` + str + `
@@ -2699,248 +2865,234 @@ function read_center_300x250_banner_replace(){
 
 
 
-	<script>
-				function place_addr_toggle(key){
-					if($('#place_addr_div_' + key).css('display') == 'none'){
-						$('#place_addr_div_' + key).show();
-						$('#place_addr_span_' + key).html('<span style=font-size:14px;>Λ</span>');					
-					}else{
-						$('#place_addr_div_' + key).hide();
-						$('#place_addr_span_' + key).html('ⅴ');
-					}				
-				}
-				function place_addr_clip_copy(str, msg){
-					var text_area = document.createElement('textarea');
-					text_area.value = str;
-					document.body.appendChild(text_area);
+	
+<style>
+	#center_adsense_public_div ins[data-ad-status=unfilled] {height:253px !important;overflow:visible !important;}
+</style>
 
-					text_area.select();
-					document.execCommand('Copy');
-					text_area.remove();
+<div id="place_div" style="min-height:120px;"></div>
 
-					window.alert(msg);
-				}
-			</script>
-			<style>
-				.power_place {width:100%;clear:both;display:block;text-align:left;}
-				.power_place {font-size:14px;}
-				.power_place {background:white;}
-				.power_place .href{display:inline-block;margin:0px 0;}
-				.power_place .txt{display:inline-block;padding:2px 5px;line-height:130%;}
-				.power_place p{margin:0;padding:0;}
-				.power_place .place_addr_span{padding:0px 10px;margin:0 0 0 2px;border:1px solid #ccc;border-radius:3px;}
-				.power_place .gbt2_dark{border-top:1px solid #bbb}
-			</style>		
-		
-			<div id='power_place' class='power_place ad_bri gbt0' style='max-width:480px;display:block;border-top:1px solid #eee;'>
-				<table width='100%' cellpadding='0' cellspacing='0' style='padding:10px 0 0px 0;margin:0;'>
-					<tr>
-						<td style='padding:0px 0 0 10px;'>
-							<span class='left' style='font-size:14px;color:#666;'>파워플레이스 <img src='/images/adpost/powerlink_ad_mini.png' align='absmiddle' height='18' style='margin-left:3px;'></span>
-						</td>
-						<td align='right' style='padding:0px 15px 5px 0;'>
-							<a href='https://ads.naver.com/sa' target='_blank'><span class='right gray' style='font-size:14px;'>신청하기</span></a>
-						</td>
-					</tr>
-				</table>
-		
-				
-				
-					<script>
-						$.get('https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OXn8e4Ua67ED6GEHQ89nrdH_nPSQHQGcRaSgL7U_ckgTd4l6ONEnoeHDpiY7Uwa-tixDSNsou5362Kaya8mzxy');
-					</script>
-					
-				
-				<div class='box ' style='padding:5px 0px 5px 5px;width:100%;'>
-					<table width='100%' cellpadding='0' cellspacing='0' style='min-height:100px;padding:0px 0 0px 0;margin:5px 0 3px 0;'>
-						<tr>
-							<td valign='top'>
-								<!-- title -->
-								<div>
-									<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-ZaiLUtx4MlmPMmVEzpg24Bs9CycHTn6i5ovfS2REXmV211u-AMM0Sld7kDcsdYKdJmYzhf8OndeXL0Q2oPWzM4=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F38644652%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10' class='href'>
-										<div class='txt'>
-											<span style='font-size:18px;color:#2667C2;'>곱창나라</span>
-											<span class='gray' style='font-size:16px;'>곱창,막창,양</span>
-										</div>
-									</a>
-								</div>
-								
-								<!-- desc -->
-								<div style='margin-top:5px;'>
-									<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-ZaiLUtx4MlmPMmVEzpg24Bs9CycHTn6i5ovfS2REXmV211u-AMM0Sld7kDcsdYKdJmYzhf8OndeXL0Q2oPWzM4=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F38644652%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10' class='href'>
-										<div class='txt'>
-											<span style='font-size:16px;color:#E85D00'>한우울금곱곱창 서울3대곱창맛집</span>
-										</div>
-									</a>
-								</div>
-								
-								
-						<div style='margin-top:5px;'>
-							<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-ZaiLUtx4MlmPMmVEzpg24Bs9CycHTn6i5ovfS2REXmV211u-AMM0Sld7kDcsdYKdJmYzhf8OndeXL0Q2oPWzM4=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F38644652%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10' class='href'>
-								<div class='txt'>
-									<span class='gray' style='font-size:14px;'>
-										영업 중 · 24:00에 영업 종료
-										
-									</span>
-								</div>
-							</a>
-						</div>
-					
+<div id="place_back_fill" style="display:none;">
+	<table width="100%" cellpadding="0" cellspacing="0" style="padding:0px 0 0px 0;margin:0;">
+		<tr>
+			<td align="center" valign="center" style="padding:0;margin:0;">
+				<div id="center_adsense_public_div" class="ad_bri box gbg0" style="max-height:286px;overflow:hidden !important;">
 
-								<!-- addr -->
-								<div style='margin-top:5px;'>
-									<div class='txt' >
-										 <span class='gray pointer' style='font-size:14px;' OnClick=place_addr_toggle(0);>서울특별시 관악구 신림동</span>
-									</div>
-									<span id='place_addr_span_0' class='gray pointer place_addr_span gbd0' style='font-size:18px;' OnClick=place_addr_toggle(0);>ⅴ</span>
-								</div>
-							</td>
-							
-						<td align='right' valign='top' style='padding-right:10px;'>
-							<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-ZaiLUtx4MlmPMmVEzpg24Bs9CycHTn6i5ovfS2REXmV211u-AMM0Sld7kDcsdYKdJmYzhf8OndeXL0Q2oPWzM4=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F38644652%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10'>
-								<img src='https://searchad-phinf.pstatic.net/MjAyNjAxMDZfMTAw/MDAxNzY3NjY0MzQyNjY0.yOVmjtXfkfDtsx9f_WzvvK3E8aMC6FyE5cGd2DwC0sQg.480Y-rcPl-sqfQEz-KnPSXxnLpP853tLecamA4h1QZ0g.PNG/2836686-0e2f19d6-0bd3-49e9-a32a-f268a4ea7857.png' width='85' height='85' class='outline' style='border-radius:10px;'>
-								
-							</a>
-						</td>
-						</tr>
-					</table>
-					<div id='place_addr_div_0' class='gray gbd1' style='display:inline-block;position:relative;width:95%;padding:5px 5px 1px 5px;margin:5px 0 5px 0;line-height:250%;border-radius:8px;font-size:12px;display:none;'>
-						<span class='btn_nemo' style='margin-right:2px;'>도로명</span> 서울특별시 관악구 남부순환로 1597-15 &nbsp; <span class='pointer blue' OnClick="place_addr_clip_copy('서울특별시 관악구 남부순환로 1597-15', '도로명 주소가 복사되었습니다.');">복사</span>
-						<br><span class='btn_nemo' style='padding:5px 8px 3px 9px;margin-right:2px;'>지 번</span> 서울특별시 관악구 신림동 1433-74 &nbsp;    <span class='pointer blue' OnClick="place_addr_clip_copy('서울특별시 관악구 신림동 1433-74', '지번 주소가 복사되었습니다.');">복사</span>
-						<span class='pointer' style='font-size:16px;display:inline-block;padding:3px;float:right;top:1px;' Onclick=place_addr_toggle(0);>×</span>
-					</div>					
 				</div>
-				<div id='power_place_beacon_1' style='max-width:480px;display:block;'></div>
-				
-					<script>
-						$(document).ready(function(){
-							var is_check_place_ad_1 = false;
+			</td>
+		</tr>
+	</table>
+</div>
+<div id="result_test_center" class="dark_text"></div>
 
-							function check_ad_visible1() {
-								if (is_check_place_ad_1 == true){
-									return; 
-								}
+<script>
+function setup_adsense_fallback(){
+	
+			var str = `	 
 
-								var target = $('#power_place_beacon_'+'1');
-								if (target.length > 0) {
-									var win_bottom = $(window).scrollTop() + $(window).height();
-									var target_top = target.offset().top;
+	
 
-									if (win_bottom >= target_top) {
-										is_check_place_ad_1 = true;
-										$.get('https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1Nww_WcoVSFBZW6gDampXU8d1aVvavP0JWIR-F3zndeH7rSsWD8PB8M-LZ0N8eji2PNRXZ0EGVjoANUAX6pkewQ');
-									}
-								}
-							}
-							$(window).on('scroll resize', check_ad_visible1);
-							check_ad_visible1();
-						});
-					</script>
-				
-				
-				
-				
-					<script>
-						$.get('https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OXn8e4Ua67ED6GEHQ89nrdH_nPSQHQGcRaSgL7U_ckgWUQcpQtfX-Jt7aS83JuDbZaQg8xht5DhqB9caDPE_sX');
-					</script>
 					
-				
-				<div class='box gbt2' style='padding:5px 0px 5px 5px;width:100%;'>
-					<table width='100%' cellpadding='0' cellspacing='0' style='min-height:100px;padding:0px 0 0px 0;margin:5px 0 3px 0;'>
-						<tr>
-							<td valign='top'>
-								<!-- title -->
-								<div>
-									<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-anWOOdnQ7MwB_F1j9Tn1kk_TPZvbJpzcu7cXcigmlDXG7AVPAO4Iv-pb8F-QJja0QUNr3KWCaT1SavuCcIMdpg=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F1998907996%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10' class='href'>
-										<div class='txt'>
-											<span style='font-size:18px;color:#2667C2;'>족발김사부 난곡본점</span>
-											<span class='gray' style='font-size:16px;'>족발,보쌈</span>
-										</div>
-									</a>
-								</div>
-								
-								<!-- desc -->
-								<div style='margin-top:5px;'>
-									<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-anWOOdnQ7MwB_F1j9Tn1kk_TPZvbJpzcu7cXcigmlDXG7AVPAO4Iv-pb8F-QJja0QUNr3KWCaT1SavuCcIMdpg=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F1998907996%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10' class='href'>
-										<div class='txt'>
-											<span style='font-size:16px;color:#E85D00'>고기 퀄리티가 미첬어요!</span>
-										</div>
-									</a>
-								</div>
-								
-								
-						<div style='margin-top:5px;'>
-							<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-anWOOdnQ7MwB_F1j9Tn1kk_TPZvbJpzcu7cXcigmlDXG7AVPAO4Iv-pb8F-QJja0QUNr3KWCaT1SavuCcIMdpg=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F1998907996%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10' class='href'>
-								<div class='txt'>
-									<span class='gray' style='font-size:14px;'>
-										영업 중 · 01:00에 영업 종료
-										
-									</span>
-								</div>
-							</a>
-						</div>
-					
-
-								<!-- addr -->
-								<div style='margin-top:5px;'>
-									<div class='txt' >
-										 <span class='gray pointer' style='font-size:14px;' OnClick=place_addr_toggle(1);>서울특별시 관악구 신림동</span>
-									</div>
-									<span id='place_addr_span_1' class='gray pointer place_addr_span gbd0' style='font-size:18px;' OnClick=place_addr_toggle(1);>ⅴ</span>
-								</div>
-							</td>
-							
-						<td align='right' valign='top' style='padding-right:10px;'>
-							<a href='https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1OkNpq3DZ-VAN7vzQKm81ZOcgUrVo_Kj8q3KjweR37J-anWOOdnQ7MwB_F1j9Tn1kk_TPZvbJpzcu7cXcigmlDXG7AVPAO4Iv-pb8F-QJja0QUNr3KWCaT1SavuCcIMdpg=?fu=https%3A%2F%2Fm.place.naver.com%2Fplace%2F1998907996%3Fn_query%3D%25EB%25B3%25B4%25EC%258C%2588%26n_ad_group_type%3D10'>
-								<img src='https://searchad-phinf.pstatic.net/MjAyNDA3MDJfODEg/MDAxNzE5OTA4MzMwODg3.L1kyp2yn-drjvkUwwnax6SOzZa51bUBk1ATL6QarDxog.1krr_SzSs39Ob0Ej84Xeg6Vw3S8a7NE7MRH1ISlaDggg.PNG/3232100-e722c671-1fd1-4eba-bb7e-6e078c430195.png' width='85' height='85' class='outline' style='border-radius:10px;'>
-								
-							</a>
-						</td>
-						</tr>
-					</table>
-					<div id='place_addr_div_1' class='gray gbd1' style='display:inline-block;position:relative;width:95%;padding:5px 5px 1px 5px;margin:5px 0 5px 0;line-height:250%;border-radius:8px;font-size:12px;display:none;'>
-						<span class='btn_nemo' style='margin-right:2px;'>도로명</span> 서울특별시 관악구 난곡로 323 &nbsp; <span class='pointer blue' OnClick="place_addr_clip_copy('서울특별시 관악구 난곡로 323', '도로명 주소가 복사되었습니다.');">복사</span>
-						<br><span class='btn_nemo' style='padding:5px 8px 3px 9px;margin-right:2px;'>지 번</span> 서울특별시 관악구 신림동 530-31 &nbsp;    <span class='pointer blue' OnClick="place_addr_clip_copy('서울특별시 관악구 신림동 530-31', '지번 주소가 복사되었습니다.');">복사</span>
-						<span class='pointer' style='font-size:16px;display:inline-block;padding:3px;float:right;top:1px;' Onclick=place_addr_toggle(1);>×</span>
-					</div>					
-				</div>
-				<div id='power_place_beacon_2' style='max-width:480px;display:block;'></div>
-				
-					<script>
-						$(document).ready(function(){
-							var is_check_place_ad_2 = false;
-
-							function check_ad_visible2() {
-								if (is_check_place_ad_2 == true){
-									return; 
-								}
-
-								var target = $('#power_place_beacon_'+'2');
-								if (target.length > 0) {
-									var win_bottom = $(window).scrollTop() + $(window).height();
-									var target_top = target.offset().top;
-
-									if (win_bottom >= target_top) {
-										is_check_place_ad_2 = true;
-										$.get('https://ader.naver.com/v1/6jiOkxANq0DW422rWuoZJMNg_lbLFgOzn7JZ6-vTM1Nww_WcoVSFBZW6gDampXU8d1aVvavP0JWIR-F3zndeHyay_OZxIO6PePCSMSBIHw2WmhuDbhXFSItTklso7DXU');
-									}
-								}
-							}
-							$(window).on('scroll resize', check_ad_visible2);
-							check_ad_visible2();
-						});
-					</script>
-				
-				
+	
+	<div id="choo_center_div" class="bg1 gbd1" style="position:relative;width:300px;max-hight:280px;overflow:hidden;clear:both;background:#f2f5f7;text-align:center;margin:0px auto;">
+		<div style="position:relative;">
+			<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN8wV_8wV_Aj*pY0ZSmlYWYwFjOgfRAjYWmlZSmJTXY5demg*IVlFhY0Iwm0dEu3i3?SIZE=450x270?OPT=center" width="300" height="180">
+			<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener"
+				style="display:block; position:absolute; top:10px; left:10px; width:280px; height:160px; z-index:1;background-color:rgba(0,0,0,0);">
+			</a>
 		</div>
-
+		<div class="bt1 bg1" style="border-top:1px solid #c5c5c5;background:#f5f8f9;">
+			<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener">
+				<div class="box" style="max-height:60px;overflow:hidden;width:100%;padding:5px 10px;font-size:14px;text-align:center;line-height:180%;">
+					<span id="choo_title" class="color_dark" style="color:black;">쿠쿠 전자레인지 다이얼식 20L</span>
+				</div>
+			</a>
+			<div class="box" style="width:100%;padding:0px 10px 10px 10px;font-size:14px;text-align:center;">
+				<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener">
+					<span class="choo_price o">57,000원</span>
+					<span class="color_dark" style="color:#444;font-size:14px;font-weight:bold;margin-left:7px;">
+						쿠팡 인기상품
+					</span>
+				</a>
+			</div>
+		</div>
+					<div style="position:absolute;top:5px;right:5px;">
+				<img src="/images/blt_ad.gif">
+			</div>
+			</div>
+
+	<style>
+					#choo_center_div .choo_filter_gray{filter:grayscale(30%);}
+			#choo_center_div .btn_nemo{border-color:#555 !important;color:#444 !important;}
+		
+
+		#choo_center_div {width:300px;padding:0px 0 0px 0;margin:0;}
+		#choo_center_div a:hover{text-decoration:none;}
+		#choo_center_div .choo_price{display:inline-block;font-weight:bold;z-index:999;margin-left:0px;}
+
+	</style>
+`;
+	
+	var str = `
+		<div class="" style="clear:both;margin:0px 0 0px 0;">
+			` + str  + `
+		</div>`;
+
+	var ads_container = "#center_adsense_public_div";
+	var ads_ins = $(ads_container + " ins")[0];
+
+	if( ads_ins ){
+		var ads_observer = new MutationObserver( function(mutations){
+			mutations.forEach( function(mutation){
+				var status = $(ads_ins).attr("data-ad-status");
+				var current_h = $(ads_ins).height();
+
+				// unfilled 상태이거나 높이가 0으로 강제 조정된 경우
+				if( status == "unfilled" || (status && current_h == 0) ){
+					ads_observer.disconnect();
+
+					// display:none 등을 무력화하기 위해 style 속성을 강제로 덮어씌움
+					$(ads_container).attr("style", "display:block !important; height:auto !important; visibility:visible !important; opacity:1 !important;");
+					$(ads_container).html(str);
+
+					$("#center_adsense_public_div").css("max-height", "");
+					$("#center_adsense_public_table").css("border", "none");
+				}
+			} );
+		} );
+
+		ads_observer.observe(ads_ins, { "attributes": true });
+	}
+}
+
+function run_place_back_fill(){
+	$("#place_back_fill").show();
+
+	hu_log('[hu_notice] adsense_exec_place_back_fill() - js version');
+
+	var obj = document.getElementById('center_adsense_public_div');
+
+	var externalScript   = document.createElement("script");
+	externalScript.type  = "text/javascript";
+	externalScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9964741307914018";
+	obj.appendChild(externalScript);
+
+	var str = `
+		<ins class="adsbygoogle"
+			 style="display:inline-block;width:100%;height:280px;border-top:1px solid transparent;border-bottom:1px solid transparent;"
+			 data-ad-client="ca-pub-9964741307914018"
+			 data-ad-slot="7725296363"
+			 data-language="ko"
+		></ins>
+	`;
+	obj.insertAdjacentHTML("beforeend", str);
+
+	var inlineScript   = document.createElement("script");
+	inlineScript.type  = "text/javascript";
+	inlineScript.text  =  "(adsbygoogle = window.adsbygoogle || []).push({});"
+	obj.appendChild(inlineScript);
+	//$(obj).css("background", "none");
+
+	// 백필의 백필(옵저버) 설정을 이곳에서 호출
+	setup_adsense_fallback();
+	
+	// 비콘
+	$.post( "/board/boardexp/ad_count.html", { "location": "center" } );
+}
+
+function run_pnut_back_fill(){
+	$("#place_back_fill").show();
+
+	hu_log('[hu_notice] adsense_exec_pnut_back_fill() - js version');
+
+	var obj = document.getElementById('center_adsense_public_div');
+
+			var str = `
+		<div class="adsbygoogle">
+			<div class="kakao_ad_area">		
+					 
+
+	
+
+					
+	
+	<div id="choo_center_div" class="bg1 gbd1" style="position:relative;width:300px;max-hight:280px;overflow:hidden;clear:both;background:#f2f5f7;text-align:center;margin:0px auto;">
+		<div style="position:relative;">
+			<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN8wV_8wV_Aj*pY0ZSmlYWYwFjOgfRAjYWmlZSmJTXY5demg*IVlFhY0Iwm0dEu3i3?SIZE=450x270?OPT=center" width="300" height="180">
+			<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener"
+				style="display:block; position:absolute; top:10px; left:10px; width:280px; height:160px; z-index:1;background-color:rgba(0,0,0,0);">
+			</a>
+		</div>
+		<div class="bt1 bg1" style="border-top:1px solid #c5c5c5;background:#f5f8f9;">
+			<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener">
+				<div class="box" style="max-height:60px;overflow:hidden;width:100%;padding:5px 10px;font-size:14px;text-align:center;line-height:180%;">
+					<span id="choo_title" class="color_dark" style="color:black;">쿠쿠 전자레인지 다이얼식 20L</span>
+				</div>
+			</a>
+			<div class="box" style="width:100%;padding:0px 10px 10px 10px;font-size:14px;text-align:center;">
+				<a href="https://cache.ggeal.com/board/exp/me_go.html?enc=aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4&rd=/coupang/hu/center" target="_blank" rel="nofollow noreferrer noopener">
+					<span class="choo_price o">57,000원</span>
+					<span class="color_dark" style="color:#444;font-size:14px;font-weight:bold;margin-left:7px;">
+						쿠팡 인기상품
+					</span>
+				</a>
+			</div>
+		</div>
+					<div style="position:absolute;top:5px;right:5px;">
+				<img src="/images/blt_ad.gif">
+			</div>
+			</div>
+
+	<style>
+					#choo_center_div .choo_filter_gray{filter:grayscale(30%);}
+			#choo_center_div .btn_nemo{border-color:#555 !important;color:#444 !important;}
+		
+
+		#choo_center_div {width:300px;padding:0px 0 0px 0;margin:0;}
+		#choo_center_div a:hover{text-decoration:none;}
+		#choo_center_div .choo_price{display:inline-block;font-weight:bold;z-index:999;margin-left:0px;}
+
+	</style>
+			</div>
+		</div>
+		`;
+		
+	obj.insertAdjacentHTML("beforeend", str);
+}
+</script>
+
+<script>
+function run_place(){
+	$.ajax( {
+		url: "boardexp/place_ajax.html",
+		type: "GET",
+		contentType: "application/x-www-form-urlencoded; charset=EUC-KR",
+		dataType: "html",
+		error: function(xhr, status, error){
+			if( xhr.responseText == "" ){
+				$("#place_div").hide();
+			}
+		},
+		success: function(data){
+			if( data != "" ){
+				$("#place_div").html(data);
+			}else{
+				$("#place_div").hide();
+									run_place_back_fill();
+							}
+		}
+	} );
+}
+
+run_place();
+</script>
 
 
 
 
 <div id="icon_load_div"></div>
 
-<div id="m5d5816v"></div>
+<div id="cde26w"></div>
 
 
 
@@ -2955,31 +3107,27 @@ function read_center_300x250_banner_replace(){
 	<script>
 		function list_end_run_center_boom(){
 			var data = `
-			<ll id="q5d58123l" style="display:block;">
-				<li id="q5d58123l_civ2" style="display:block;width:300px;margin:auto;border:1px solid #ccc;">
-					<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN80op80opOgLhVgFhV5TWYwohAhI_AgdeAhHXm0Q0VlmjmjYXV5*jVlFjY5VEu3i3?SIZE=450x300?OPT=center" width="300" height="200">
+				<li id="fde23f23a_civ2" style="display:block;width:300px;margin:auto;border:1px solid #ccc;">
+					<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN8wV_8wV_Aj*pY0ZSmlYWYwFjOgfRAjYWmlZSmJTXY5demg*IVlFhY0Iwm0dEu3i3?SIZE=450x300?OPT=center" width="300" height="200">
 				</li>
-				<div  id="q5d58123l_civ3" class="bg0" style="border:1px solid #ccc;background:#f2f5f7;width:300px;margin:auto;">
+				<div  id="fde23f23a_civ3" class="bg0" style="border:1px solid #ccc;background:#f2f5f7;width:300px;margin:auto;">
 					<div class="box" style="width:100%;padding:10px 10px;font-size:14px;text-align:center;line-height:180%;">
-						<span id="" class="color_dark" style="color:black;">[AD] SPRINTA 작업용 안전화 통풍 이중바닥 양말 5켤레 세트</span>
+						<span id="" class="color_dark" style="color:black;">[AD] 쿠쿠 전자레인지 다이얼식 20L</span>
 					</div>
 					<div class="box" style="width:100%;padding:0px 10px 10px 10px;font-size:14px;text-align:center;">
-						<span class="b o">13,800원</span>
+						<span class="b o">57,000원</span>
 						<span class="color_dark" style="color:#444;font-size:14px;font-weight:bold;margin-left:7px;">
 							쿠팡 인기상품
 						</span>
 					</div>
 				</div>
-				<k id="k11" style="display:none">aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT04MDY1NzMxODE4Jml0ZW1JZD0yMzIxMjc0Mzc5OCZ2ZW5kb3JJdGVtSWQ9OTAyNDUyNTE5MTUmdHJhY2VpZD1WMC0xMTMtOWE5YWE2ODQ3Y2QyNjI2Yg==</k>
+				<k id="k11" style="display:none">aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT02Nzg0NzE1MDEyJml0ZW1JZD0xNTk2NzM5MzUzNyZ2ZW5kb3JJdGVtSWQ9NTQ5MzEwMTQ0NCZ0cmFjZWlkPVYwLTExMy03MGUxODFhNDNiNDExMzI4</k>
 				<k id="k22" style="display:none">/coupang/hu/center_boom</k>
-			</ll>
 	<style>
 		
-
-		#q5d58123l_div div a:hover{text-decoration:none;}
 	</style>
 			`;
-			$("#m5d5816v").html(data);
+			$("#cde26w").html(data);
 		}
 	</script>
 
@@ -3002,15 +3150,19 @@ function read_center_300x250_banner_replace(){
 
 
 	<script>
-	   $("#q5d58123l_div").click(function(){
+		$("fde23f23a").click( function(){
+			gs_center_boom();
+		} );
+		$("#fde23f23a_div").click(function(){
 		   gs_center_boom();
-	    });
-	   $("#q5d58123l_civ2").click(function(){
+		});
+
+		$("#fde23f23a_civ2").click(function(){
 		   gs_center_boom();
-	    });
-	   $("#q5d58123l_civ3").click(function(){
+		});
+		$("#fde23f23a_civ3").click(function(){
 		   gs_center_boom();
-	    });
+		});
 	</script>
 
 	
@@ -3024,7 +3176,7 @@ function read_center_300x250_banner_replace(){
  	<li id="comment_li_514814171">
 		<span id='comment_span_514814171' class="info" style="">
 			<a href="javascript:nick_menu_on('nick_menu_514814171', 'b0ss', '62307373')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/62307373.jpg?c=7' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/62307373.jpg?c=7' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt><span class="style_type1">b0ss</span></span></span>
 			</a>
 			&nbsp;
@@ -3033,7 +3185,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814171">0</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814171">1</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3047,10 +3199,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				갸아아악
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514814171');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3083,7 +3236,7 @@ function read_center_300x250_banner_replace(){
  	<li id="comment_li_514814181">
 		<span id='comment_span_514814181' class="info" style="">
 			<a href="javascript:nick_menu_on('nick_menu_514814181', '단수돌침대', 'b4dcbcf6b5b9c4a7b4eb')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/b4dcbcf6b5b9c4a7b4eb.jpg?c=2' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/b4dcbcf6b5b9c4a7b4eb.jpg?c=2' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt>단수돌침대</span></span>
 			</a>
 			&nbsp;
@@ -3106,10 +3259,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				포세이돈이 노한 것 같다...
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514814181');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3157,7 +3311,7 @@ function read_center_300x250_banner_replace(){
 					</span>
 
 					<span id="oks">
-						<span class="ok"><span class="r" id="comm_ok_div_514828237">2</span></span>
+						<span class="ok"><span class="r" id="comm_ok_div_514828237">4</span></span>
 						<span class="notok">0</span>
 					</span>
 				</span>
@@ -3166,9 +3320,12 @@ function read_center_300x250_banner_replace(){
 									" >
 
 				<!-- 답글의 답글 파일첨부 -->
-									<span style="">
-												바다신의 분뇨..
-					</span>
+				
+				<div class="comment_more" style="">
+					
+					바다신의 분뇨..
+				</div>
+				<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 					<div class="recomm_btn">
 													<a href="javascript:recomm_ok('comm','514828237');"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> <span class="cmt_ok">추천</span></a>
@@ -3206,7 +3363,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814187">49</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814187">87</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3220,10 +3377,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="color:#ee2222;">
+			<div class="comment_more" style="color:#ee2222;">
 				
 				우수랑 오수랑 분리된 시스탬이 아니라서..
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514814187');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3256,7 +3414,7 @@ function read_center_300x250_banner_replace(){
  	<li id="comment_li_514814246">
 		<span id='comment_span_514814246' class="info" style="">
 			<a href="javascript:nick_menu_on('nick_menu_514814246', '엘든링', 'bfa4b5e7b8b5')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/bfa4b5e7b8b5.jpg?c=6' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/bfa4b5e7b8b5.jpg?c=6' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt><span class="style_type2">엘든링</span></span></span>
 			</a>
 			&nbsp;
@@ -3265,7 +3423,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814246">0</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814246">3</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3279,10 +3437,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				저기 이쿠노구 코리아타운 있고 한국계 사람들 많이 사는 곳인데 에고 괜찮나...
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514814246');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3313,9 +3472,9 @@ function read_center_300x250_banner_replace(){
 
 
  	<li id="comment_li_514814387">
-		<span id='comment_span_514814387' class="info" style="">
+		<span id='comment_span_514814387' class="info" style="background:#ffe5e5;">
 			<a href="javascript:nick_menu_on('nick_menu_514814387', '해물시렁', 'c7d8b9b0bdc3b7b7')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/c7d8b9b0bdc3b7b7.jpg?c=5' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/c7d8b9b0bdc3b7b7.jpg?c=5' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt><span class="style_type1">해물시렁</span></span></span>
 			</a>
 			&nbsp;
@@ -3324,7 +3483,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814387">4</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514814387">13</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3338,10 +3497,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="color:#ee2222;">
 				
 				저차는 똥침차인가
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514814387');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3397,10 +3557,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				우리나라도 곧 폭우 몰아치면 물난리나는 곳 많을텐데 대비를 잘 해야할텐데
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514821466');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3442,7 +3603,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514822844">1</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514822844">2</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3456,10 +3617,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				아이고.. 저정도로 터지면 지반도 가라 앉을텐데..
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514822844');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3492,7 +3654,7 @@ function read_center_300x250_banner_replace(){
  	<li id="comment_li_514824299">
 		<span id='comment_span_514824299' class="info" style="">
 			<a href="javascript:nick_menu_on('nick_menu_514824299', '생일이4년에한번', 'bbfdc0cfc0cc34b3e2bfa1c7d1b9f8')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/bbfdc0cfc0cc34b3e2bfa1c7d1b9f8.jpg?c=2' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/bbfdc0cfc0cc34b3e2bfa1c7d1b9f8.jpg?c=2' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt>생일이4년에한번</span></span>
 			</a>
 			&nbsp;
@@ -3501,7 +3663,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514824299">0</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514824299">1</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3515,10 +3677,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				수둔!!!
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514824299');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3560,7 +3723,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514825700">6</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514825700">9</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3575,20 +3738,18 @@ function read_center_300x250_banner_replace(){
 
 									<div class='comment_file'>
 																
-<table width=100% border=0 cellspacing=0 cellpadding=0><tr><td align=center>
-				<div id='comment_file_comment_file_514825700111933893' style='width:100%;position:relative;margin-left:-8px;;'>
-					<div class='comment_img_div   pointer' style='width:320px;position:relative;' OnClick="javascript:comment_mp4_expand('comment_file_514825700111933893', '//down-mp4.humoruniv.com/47/478b6a005e36224cdea0fc38c9dc2afdd98ab713.mp4', '//timg.humoruniv.com/thumb.php?url=http://down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r9e4489001_478b6a005e36224cdea0fc38c9dc2afdd98ab713.gif?SIZE=320x144?WEBP', '320', '500', '', '', '0.2MB', '//down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r9e4489001_478b6a005e36224cdea0fc38c9dc2afdd98ab713.gif', '2.5MB');"><img src='//timg.humoruniv.com/thumb.php?url=http://down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r9e4489001_478b6a005e36224cdea0fc38c9dc2afdd98ab713.gif?SIZE=320x144?WEBP' width='320' height='144' style='max-width:320px;max-height:800px; ' class='comment_thumb_img'>
-						<div class='comment_thumb_notice'> 0.2MB</div>
-						<div style='position:absolute;top:12px;left:12px;' id='play_trans_img_div_comment_file_514825700111933893'><img src='/images/play_trans.png?tmp=3' width='40' height='40'></div>
-					</div>
-				</div></td></tr></table>
+										<div id='comment_crop_514825700' class='comment_img_origin' style='width:100%;max-width:480px;'>
+											<img src='//down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r9e4489001_478b6a005e36224cdea0fc38c9dc2afdd98ab713.gif' class='comment_crop_img'  style='width:100%;max-width:480px;' >
+										</div>
+									
 										</div>
 				
 
-			<span class="comment_text" style="color:#ee2222;">
+			<div class="comment_more" style="color:#ee2222;">
 				
 				갑자기 기생충이 생각났어
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514825700');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3630,7 +3791,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514827153">0</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514827153">1</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3644,10 +3805,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				괭히 7초쯤에 떨어지는게 응가같이 느껴지네
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514827153');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3680,7 +3842,7 @@ function read_center_300x250_banner_replace(){
  	<li id="comment_li_514827364">
 		<span id='comment_span_514827364' class="info" style="background:#ffe5e5;">
 			<a href="javascript:nick_menu_on('nick_menu_514827364', '씨니카모발모발', 'bebeb4cfc4abb8f0b9dfb8f0b9df')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/bebeb4cfc4abb8f0b9dfb8f0b9df.jpg?c=1' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/bebeb4cfc4abb8f0b9dfb8f0b9df.jpg?c=1' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt>씨니카모발모발</span></span>
 			</a>
 			&nbsp;
@@ -3689,7 +3851,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514827364">15</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514827364">28</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3704,10 +3866,10 @@ function read_center_300x250_banner_replace(){
 
 									<div class='comment_file'>
 																<table width=100% border=0 cellspacing=0 cellpadding=0 style='margin-top:10px;'><tr><td align=center>
-			<div id='comment_file_mp4_514827364_9208_' style='width:100%;position:relative;margin-left:-8px;'>
-				<div class='comment_img_div pointer' style='width:320px;position:relative;' OnClick="javascript:comment_mp4_expand('mp4_514827364_9208_', '//down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r2efa4f001_72c7a064182b9ffdb692d693395450f08d39a9f0.mp4', '//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s', '320', '320', '', 'MP4', '0.4MB', '', '');"><img src='//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s' width='320' class='comment_thumb_img' style='min-height:80px;'/>
+			<div id='comment_file_mp4_514827364_2647_' style='width:100%;position:relative;margin-left:-8px;'>
+				<div class='comment_img_div pointer' style='width:320px;position:relative;' OnClick="javascript:comment_mp4_expand('mp4_514827364_2647_', '//down.humoruniv.com/hwiparambbs/data/comment/2026/06/r_r2efa4f001_72c7a064182b9ffdb692d693395450f08d39a9f0.mp4', '//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s', '320', '320', '', 'MP4', '0.4MB', '', '');"><img src='//timg.humoruniv.com/thumb.php?url_enc=uafSvgG78wf7LwXEua*NzKo_zjnw8jm7z$xGLwnWYUopzloRv2xIYUfp8wm7zl_nz397VhH2mRbWmRx2UKQ2AlApmJYWVgFDm0ohmwZWmh9eOgoROlAjAJQwO5oImhI0V0I_mgTWAhHXAgVyY5njVtyNvg9s' width='320' class='comment_thumb_img' style='min-height:80px;'/>
 					<div class='comment_thumb_notice'>MP4,&nbsp; 0.4MB</div>
-					<div style='position:absolute;top:12px;left:12px;' id='play_trans_img_div_mp4_514827364_9208_'><img src='/images/play_trans.png?tmp=3' width='40' height='40'></div>
+					<div style='position:absolute;top:12px;left:12px;' id='play_trans_img_div_mp4_514827364_2647_'><img src='/images/play_trans.png?tmp=3' width='40' height='40'></div>
 				</div>
 
 				
@@ -3715,10 +3877,11 @@ function read_center_300x250_banner_replace(){
 										</div>
 				
 
-			<span class="comment_text" style="color:#ee2222;">
+			<div class="comment_more" style="color:#ee2222;">
 				
 				똥이나 처먹어!
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514827364');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3751,7 +3914,7 @@ function read_center_300x250_banner_replace(){
  	<li id="comment_li_514827376">
 		<span id='comment_span_514827376' class="info" style="">
 			<a href="javascript:nick_menu_on('nick_menu_514827376', '중이B아리', 'c1dfc0cc42bec6b8ae')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/c1dfc0cc42bec6b8ae.jpg?c=1' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/c1dfc0cc42bec6b8ae.jpg?c=1' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt>중이B아리</span></span>
 			</a>
 			&nbsp;
@@ -3774,10 +3937,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				세상에
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514827376');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3823,65 +3987,11 @@ function read_center_300x250_banner_replace(){
 	
 
  
-	
 
 
 
- 		<li id="comment_li_514828521">
-		<span id='comment_span_514828521' class="info" style="">
-			<a href="javascript:nick_menu_on('nick_menu_514828521', '큰방망이', 'c5abb9e6b8c1c0cc')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/c5abb9e6b8c1c0cc.jpg?c=3' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
-								<span class="nick"><span class=hu_nick_txt><span class="style_type1">큰방망이</span></span></span>
-			</a>
-			&nbsp;
-			<span class="etc">
-							2026-06-28 <bSun, 28 Jun 2026 14:55:08 +0900> 14:55:08
-			
-			</span>
-			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514828521">0</span></span>
-				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
-			</span>
-		</span>
-		<div id="nick_menu_514828521" style="width:100%;display:none;background-color:#eeeeee;"  class="bg_gray"></div>
 
-
-		<span class="comment_body comm_pd_1
-						"
-
-					>
-
-				
-
-			<span class="comment_text" style="">
-				
-				저번주 주말에 삿포로 갔다왔는데 3일뒤 지진난리나고 태풍도 피했군
-			</span>
-
-			<div class="recomm_btn">
-									<a href="javascript:recomm_ok('comm','514828521');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
-				
-							&nbsp;<a href="javascript:confirm_login();"><img src="/images/cmt_re.gif"> <span class="cmt_re">답글</span></a>
-			
-
-							&nbsp; <a href="javascript:window.alert('로그인후 답글 신고 가능합니다.')"><img src="/images/cmt_singo.gif" alt="신고" width="11" height="11"  /> <span class="cmt_singo">신고</span></a>
-			
-
-				
-								
-
-
-				
-				<div id="comm_ok_ment_514828521" style="display:none;width:80px;">
-					<div class="tri" style="margin-left: 0px;"> </div>
-					<div class="ok_ment">추천완료</div>
-				</div>
-				<div id="poncomm514828521"></div>
-			</div> <!-- /답글 추천버튼 recomm_btn div -->
-		</span>
-	</li>
-	</li>
-			 
+		 
 	
 
 
@@ -3898,7 +4008,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514828687">2</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514828687">3</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3912,10 +4022,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				아아악!! 해병 아메리카노 악!
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514828687');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -3948,7 +4059,7 @@ function read_center_300x250_banner_replace(){
  		<li id="comment_li_514829238">
 		<span id='comment_span_514829238' class="info" style="">
 			<a href="javascript:nick_menu_on('nick_menu_514829238', '쥬디홉스', 'c1eab5f0c8a9bdba')">
-													<img class='hu_icon' src='https://icon-file.humoruniv.com/c1eab5f0c8a9bdba.jpg?c=4' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/c1eab5f0c8a9bdba.jpg?c=4' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
 								<span class="nick"><span class=hu_nick_txt>쥬디홉스</span></span>
 			</a>
 			&nbsp;
@@ -3957,7 +4068,7 @@ function read_center_300x250_banner_replace(){
 			
 			</span>
 			<span id="oks">
-				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514829238">2</span></span>
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514829238">3</span></span>
 				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
 			</span>
 		</span>
@@ -3971,10 +4082,11 @@ function read_center_300x250_banner_replace(){
 
 				
 
-			<span class="comment_text" style="">
+			<div class="comment_more" style="">
 				
 				어휴 저걸 막 포상이라고 하는 분들은 없겠죠???? ㅠㅠ
-			</span>
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
 
 			<div class="recomm_btn">
 									<a href="javascript:recomm_ok('comm','514829238');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
@@ -4000,6 +4112,186 @@ function read_center_300x250_banner_replace(){
 	</li>
 	</li>
 			 
+	
+
+
+
+ 		<li id="comment_li_514830086">
+		<span id='comment_span_514830086' class="info" style="">
+			<a href="javascript:nick_menu_on('nick_menu_514830086', '멍꼬', 'b8dbb2bf')">
+													<img class='hu_icon' src='/images/icon-humoruniv.png' width='20' height='20' style='width:20px;height:20px;'>
+								<span class="nick"><span class=hu_nick_txt>멍꼬</span></span>
+			</a>
+			&nbsp;
+			<span class="etc">
+							2026-06-28 <bSun, 28 Jun 2026 16:44:29 +0900> 16:44:29
+			
+			</span>
+			<span id="oks">
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514830086">2</span></span>
+				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
+			</span>
+		</span>
+		<div id="nick_menu_514830086" style="width:100%;display:none;background-color:#eeeeee;"  class="bg_gray"></div>
+
+
+		<span class="comment_body comm_pd_1
+						"
+
+					>
+
+				
+
+			<div class="comment_more" style="">
+				
+				저거 홍명보한테 뿌리고싶다
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
+
+			<div class="recomm_btn">
+									<a href="javascript:recomm_ok('comm','514830086');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
+				
+							&nbsp;<a href="javascript:confirm_login();"><img src="/images/cmt_re.gif"> <span class="cmt_re">답글</span></a>
+			
+
+							&nbsp; <a href="javascript:window.alert('로그인후 답글 신고 가능합니다.')"><img src="/images/cmt_singo.gif" alt="신고" width="11" height="11"  /> <span class="cmt_singo">신고</span></a>
+			
+
+				
+								
+
+
+				
+				<div id="comm_ok_ment_514830086" style="display:none;width:80px;">
+					<div class="tri" style="margin-left: 0px;"> </div>
+					<div class="ok_ment">추천완료</div>
+				</div>
+				<div id="poncomm514830086"></div>
+			</div> <!-- /답글 추천버튼 recomm_btn div -->
+		</span>
+	</li>
+	</li>
+			 
+	
+
+
+
+ 		<li id="comment_li_514830184">
+		<span id='comment_span_514830184' class="info" style="">
+			<a href="javascript:nick_menu_on('nick_menu_514830184', '냉장두유', 'b3c3c0e5b5cec0af')">
+													<img class='hu_icon' src='/images/icon-humoruniv.png' width='20' height='20' style='width:20px;height:20px;'>
+								<span class="nick"><span class=hu_nick_txt>냉장두유</span></span>
+			</a>
+			&nbsp;
+			<span class="etc">
+							2026-06-28 <bSun, 28 Jun 2026 16:50:57 +0900> 16:50:57
+			
+			</span>
+			<span id="oks">
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514830184">0</span></span>
+				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
+			</span>
+		</span>
+		<div id="nick_menu_514830184" style="width:100%;display:none;background-color:#eeeeee;"  class="bg_gray"></div>
+
+
+		<span class="comment_body comm_pd_1
+						"
+
+					>
+
+				
+
+			<div class="comment_more" style="">
+				
+				지진과 태풍이 동시에... 살기 팍팍하겠다.
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
+
+			<div class="recomm_btn">
+									<a href="javascript:recomm_ok('comm','514830184');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
+				
+							&nbsp;<a href="javascript:confirm_login();"><img src="/images/cmt_re.gif"> <span class="cmt_re">답글</span></a>
+			
+
+							&nbsp; <a href="javascript:window.alert('로그인후 답글 신고 가능합니다.')"><img src="/images/cmt_singo.gif" alt="신고" width="11" height="11"  /> <span class="cmt_singo">신고</span></a>
+			
+
+				
+								
+
+
+				
+				<div id="comm_ok_ment_514830184" style="display:none;width:80px;">
+					<div class="tri" style="margin-left: 0px;"> </div>
+					<div class="ok_ment">추천완료</div>
+				</div>
+				<div id="poncomm514830184"></div>
+			</div> <!-- /답글 추천버튼 recomm_btn div -->
+		</span>
+	</li>
+	</li>
+			 
+	
+
+
+
+ 		<li id="comment_li_514832639">
+		<span id='comment_span_514832639' class="info" style="">
+			<a href="javascript:nick_menu_on('nick_menu_514832639', '쑥맛우유', 'bea6b8c0bfecc0af')">
+													<img class='hu_icon' src='https://icon-neo.humoruniv.com/bea6b8c0bfecc0af.jpg?c=1' width='20' height='20' style='width:20px;height:20px;' loading='lazy'>
+								<span class="nick"><span class=hu_nick_txt>쑥맛우유</span></span>
+			</a>
+			&nbsp;
+			<span class="etc">
+							2026-06-28 <bSun, 28 Jun 2026 19:07:12 +0900> 19:07:12
+			
+			</span>
+			<span id="oks">
+				<span class="ok"><img src="/images/ic_ok.png" width="10" height="10"> <span class="r" id="comm_ok_div_514832639">0</span></span>
+				<span class="notok"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
+			</span>
+		</span>
+		<div id="nick_menu_514832639" style="width:100%;display:none;background-color:#eeeeee;"  class="bg_gray"></div>
+
+
+		<span class="comment_body comm_pd_1
+						"
+
+					>
+
+				
+
+			<div class="comment_more" style="">
+				
+				진짜 홀리 씟이네 씟이야..
+			</div>
+			<span class="comment_more_btn">...<span class="btn_nemo">전체보기</span></span>
+
+			<div class="recomm_btn">
+									<a href="javascript:recomm_ok('comm','514832639');"><span class="cmt_ok"><img src="/images/cmt_up.gif" title="추천" width="11" height="11"/> 추천</span></a>
+				
+							&nbsp;<a href="javascript:confirm_login();"><img src="/images/cmt_re.gif"> <span class="cmt_re">답글</span></a>
+			
+
+							&nbsp; <a href="javascript:window.alert('로그인후 답글 신고 가능합니다.')"><img src="/images/cmt_singo.gif" alt="신고" width="11" height="11"  /> <span class="cmt_singo">신고</span></a>
+			
+
+				
+								
+
+
+				
+				<div id="comm_ok_ment_514832639" style="display:none;width:80px;">
+					<div class="tri" style="margin-left: 0px;"> </div>
+					<div class="ok_ment">추천완료</div>
+				</div>
+				<div id="poncomm514832639"></div>
+			</div> <!-- /답글 추천버튼 recomm_btn div -->
+		</span>
+	</li>
+	</li>
+			 
  
 </ul>
 </div>
@@ -4009,14 +4301,13 @@ function read_center_300x250_banner_replace(){
 
 
 
-	<div id="b5d5819j"></div>
+	<div id="zde23f9l"></div>
 	
 
 	
 
 
 
-	<!-- null -->
 
 
 
@@ -4035,31 +4326,31 @@ function read_center_300x250_banner_replace(){
 			var data = `
 				<ll class="bt2" style="border-top:1px solid #ddd;display:block;padding-top:15px;"></ll>
 			
-				<ll id="m5d58126h" style="display:block;">
-					<ll id="m5d58126h_civ2" class="gbg0" style="display:block;width:300px;margin:auto;border:1px solid #ccc;">
-						<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN80Fp80FpAjQ0m5dWmgihmlVeAhFjYhTyOgV_V0LRV0FIVhnIYwohO5oRAjVEu3i3?SIZE=450x300?OPT=center" width="300" height="200">
+				<jde23f26x>
+					<ll id="jde23f26x_civ2" class="gbg0" style="display:block;width:300px;margin:auto;border:1px solid #ccc;">
+						<img src="//timg.humoruniv.com/thumb.php?url=//timg.humoruniv.com/thumb.php?url_enc=uafSvaVC82xhAJXEAwLnYlWEYwxN80I080I0V0nRmJ*IVw9KmgVKm5TWVgphVjYyY5FhOJY0m0Fnm5fhm5fhm0HEu3i3?SIZE=450x300?OPT=center" width="300" height="200">
 					</ll>
-					<div  id="m5d58126h_civ3" class="gbg0" style="border:1px solid #ccc;background:#f2f5f7;width:300px;margin:auto;">
+					<div  id="jde23f26x_civ3" class="gbg0" style="border:1px solid #ccc;background:#f2f5f7;width:300px;margin:auto;">
 						<div class="box" style="width:100%;padding:10px 10px;font-size:14px;text-align:center;line-height:180%;">
-							<span id="" class="color_dark" style="color:black;">[AD] 탐사 모이스처 퍼퓸 대용량 바디워시</span>
+							<span id="" class="color_dark" style="color:black;">[AD] 로지텍 코리아 리프트 버티컬 인체공학 무선 블루투스 마우스 LIFT VERTICAL</span>
 						</div>
 						<div class="box" style="width:100%;padding:0px 10px 10px 10px;font-size:14px;text-align:center;">
-							<span class="b o">33,850원</span>
+							<span class="b o">68,900원</span>
 							<span class="color_dark" style="color:#444;font-size:14px;font-weight:bold;margin-left:7px;">
-								쿠팡 알뜰상품
+								쿠팡 인기상품
 							</span>
 						</div>
 					</div>
-					<k id="k11" style="display:none">aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT03MDM4NTkyNjA2Jml0ZW1JZD0xOTAxMzM2NjIyMCZ2ZW5kb3JJdGVtSWQ9ODYxMzc5ODI2NTMmdHJhY2VpZD1WMC0xMjMtNjhmNzA4NDk5ODU0Y2VhZQ==</k>
+					<k id="k11" style="display:none">aHR0cHM6Ly9saW5rLmNvdXBhbmcuY29tL3JlL0FGRlNEUD9scHRhZz1BRjIwMjEyOTEmcGFnZUtleT03Mjk1NTU4MjYyJml0ZW1JZD0yMDM0MDk2NTc0MCZ2ZW5kb3JJdGVtSWQ9OTQ4ODA3Mjg0MjEmdHJhY2VpZD1WMC0xMTMtZDc3ZWMxZjk3ZDFiYThjMQ==</k>
 					<k id="k22" style="display:none">/coupang/hu/comment_bottom_boom</k>
-				</div>
+				</jde23f26x>
 	<style>
 		
-		#m5d58126h_div{margin:20px 0px;}
-		#m5d58126h_div div a:hover{text-decoration:none;}
+		#jde23f26x_div{margin:20px 0px;}
+		#jde23f26x_div div a:hover{text-decoration:none;}
 	</style>
 			`;
-			$("#b5d5819j").html(data);
+			$("#zde23f9l").html(data);
 		}
 	</script>
 
@@ -4082,15 +4373,18 @@ function read_center_300x250_banner_replace(){
 
 
 	<script>
-	   $("#m5d58126h_civ").click(function(){
+		$("jde23f26x").click( function(){
+			gs_comment_bottom_boom();
+		} );
+		$("#jde23f26x_civ").click(function(){
 		   gs_comment_bottom_boom();
-	    });
-	   $("#m5d58126h_civ2").click(function(){
+		});
+		$("#jde23f26x_civ2").click(function(){
 		   gs_comment_bottom_boom();
-	    });
-	   $("#m5d58126h_civ3").click(function(){
+		});
+		$("#jde23f26x_civ3").click(function(){
 		   gs_comment_bottom_boom();
-	    });
+		});
 	</script>
 
 	
@@ -4107,13 +4401,13 @@ function read_center_300x250_banner_replace(){
 .size{color:#777;}
 </style>
 
-<div id="read_menu_btn_div">
+<civ id="read_menu_btn_div">
 
 
 
 
 
-<div class="btn_set bg0 bt1 bb1">
+<civ class="btn_set bg0 bt1 bb1" style="display:block;">
 		<a href="javascript:recomm_ok();"><span class="btn">ⓞ 추천</span></a>
 	&nbsp;
 	
@@ -4124,7 +4418,7 @@ function read_center_300x250_banner_replace(){
 							
 	
 	<a href="list.html?table=pds&pg=0"><span class="btn">▤ 목록</span></a>
-</div>
+</civ>
 <div id="ok_ment_post" style="display:none;width:270px;margin:2px auto;">
 	<div style="width:150px;">
 					<div class="tri"> </div>
@@ -4132,7 +4426,7 @@ function read_center_300x250_banner_replace(){
 	</div>
 </div>
 
-<div class="btn_set bg0 bb1 bt1" style="margin-top:15px;">
+<civ class="btn_set bg0 bb1 bt1" style="margin-top:15px;display:block;">
 	<a href="javascript:history.go(-1);"><span class="btn">← 뒤로</span></a>
 	&nbsp;
 	<a OnClick="javascript:window.scrollTo(1, 0);" href="javascript:void(0);"><span class="btn">↑ 맨위</span></a>
@@ -4175,9 +4469,9 @@ function read_center_300x250_banner_replace(){
 			</div>
 		</div>
 	</div>
-</div>
+</civ>
 
-</div>
+</civ>
 
 
 <!--이전글/다음글-->
@@ -4198,12 +4492,12 @@ function read_center_300x250_banner_replace(){
 					요즘 많이 보인다는 남자 패션.jpg
 				</dd>
 				<div style="display:block;padding:2px 0 0px 0;">
-					<span class="extra" style="margin-right:3px;">일요일 14:29</span>
+					<span class="extra" style="margin-right:3px;">2026-06-28</span>
 					<span class="nick" style="margin-right:10px;">호이베베</span>
-					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#49;&#48;&#57;</span>
+					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#50;&#50;&#51;</span>
 					<span class="not_ok_num" style="margin-right:3px;"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
-					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 30</span>
-					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 824</span>
+					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 33</span>
+					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 34,784</span>
 				</div>
 			</td>
 		</tr>
@@ -4228,12 +4522,12 @@ function read_center_300x250_banner_replace(){
 					홍명보호 마지막 경우의 수
 				</dd>
 				<div style="display:block;padding:2px 0 0px 0;">
-					<span class="extra" style="margin-right:3px;">일요일 14:20</span>
+					<span class="extra" style="margin-right:3px;">2026-06-28</span>
 					<span class="nick" style="margin-right:10px;font-size:9px;">트랜스포트타이쿤</span>
-					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#50;&#52;&#57;</span>
+					<span class="ok_num" style="margin-right:3px;"><img src="/images/ic_ok.png" width="10" height="10"> &#56;&#48;&#53;</span>
 					<span class="not_ok_num" style="margin-right:3px;"><img src="/images/ic_not_ok.png" width="10" height="10"> 0</span>
-					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 26</span>
-					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 0</span>
+					<span class="comment_num" style="margin-right:3px;"><img src="/images/ic_re.png" width="10" height="10"> 44</span>
+					<span class="extra" style="margin-right:3px;"><img src="/images/ic_view.png?tmp=5" width="10" height="10" valign="absmiddle"> 53,157</span>
 				</div>
 			</td>
 		</tr>
@@ -4279,8 +4573,236 @@ function read_center_300x250_banner_replace(){
 <!-- 자동포커스 -->
 
 
+		
+<div id="list_container_navi"></div>
+<div id="list_container" style="clear:both;text-align:left;"></div>
+
+<div id="loading_spinner" style="display: none; text-align: center; padding: 20px;">
+	<img src="/images/waitplz.gif" width="16" height="16" >
+</div>
+
+<div id="btn_load_more_div" style="text-align: center; padding: 15px 0 15px 0;margin:5px 0 30px 0;">
+	<button type="button" id="btn_load_more" class="btn_nemo box" style="width:98%;padding:8px 10px;border-radius:4px;">
+		▼ 더보기 (<span id="list_container_next_page_span">2</span>)
+	</button>
+</div>
+
+<script>
+$(document).ready( function(){
+	
+	//----- 전연변수 current_page 체크가 꼬일수 있으니 앞에 window. 를 붙여서 명확하게 체크
+	if(typeof window.current_page == "undefined" ){	
+		list_container_hide();
+		return;
+	}
+	
+	var is_first_ajax_call = true;
+	window.current_page = parseInt(window.current_page);  // "0" 이라는 문자열로 계산하는 오류 방지 + 전역 변수를 정수로 명확히 치환
+
+	$("#btn_load_more").click( function(){
+		window.current_page++;
+		list_ajax_call();
+	} );
+	
+	function list_container_hide(){
+		$("#loading_spinner").hide();
+		$("#btn_load_more_div").hide();
+		$("#list_container").hide();
+		$("#list_container_navi").hide();
+	}	
+	
+	function list_ajax_call(){
+		var ajax_url = "list.html?table=pds&mode=ajax&pg=" + window.current_page;
+		
+		$("#btn_load_more").hide();
+		$("#loading_spinner").show();
+
+		$.ajax( {
+			url: ajax_url,
+			type: "GET",
+			success: function(response){
+				var $temp_wrapper = $("<div>").html(response);
+				var is_last_page = false;
+
+				if( $temp_wrapper.find(".post_item").length == 0 ){
+					is_last_page = true;
+				}
+				
+				//----- ajax 를 최초로 로딩하는데 자료가 없는 경우 무한스크롤 중지
+				if( is_first_ajax_call == true && is_last_page == true ){
+					list_container_hide();
+					return;
+				}
+
+				is_first_ajax_call = false;
+				
+				// 이미 같은 ID를 가진 요소가 화면에 있으면 중복노출 제거
+				$temp_wrapper.find(".post_item").each( function(){
+					var current_number = parseInt( $(this).attr("id").replace("post_", "") );
+					if( $("#list_container").find("#post_" + current_number).length > 0 ){
+						$(this).remove();
+					}
+				} );
+				
+				$("#loading_spinner").hide();
+				
+				$("#list_container").append( $temp_wrapper.children() );
+				if( typeof list_navi_str !== "undefined" ){
+					$("#list_container_navi").html(list_navi_str);
+				}
+				
+				if( is_last_page == false ){
+					var next_page_html = parseInt(window.current_page) + 2;
+					$("#list_container_next_page_span").html(next_page_html);
+					$("#btn_load_more").show();
+				}
+			},
+			error: function(xhr, status, error){
+				$("#loading_spinner").hide();
+			}			
+		} );
+	}
+	
+	//----- 지연 로딩 (Intersection Observer) 적용
+	if( window.IntersectionObserver ){
+		var observer = new IntersectionObserver( function(entries, observer){
+			entries.forEach( function(entry){
+				if(entry.isIntersecting){
+					list_ajax_call();
+					observer.unobserve(entry.target);
+				}
+			} );
+		}, {
+			rootMargin: "480px 0px"
+		} );
+		
+		observer.observe( document.getElementById("list_container") );
+	}else{
+		list_ajax_call();
+	}
+} );
+</script>
+
+	<script>
+	var current_page_tbest = 0;
+</script>
 
 
+	
+<div id="list_container_navi_tbest"></div>
+<div id="list_container_tbest" style="clear:both;text-align:left;"></div>
+
+<div id="loading_spinner_tbest" style="display: none; text-align: center; padding: 20px;">
+	<img src="/images/waitplz.gif" width="16" height="16" >
+</div>
+
+<div id="btn_load_more_div_tbest" style="text-align: center; padding: 15px 0 15px 0;margin:5px 0 30px 0;">
+	<button type="button" id="btn_load_more_tbest" class="bg0 bd2 btn_nemo box" style="width:98%;padding:8px 10px;border-radius:4px;color:black;">
+		▼ 더보기 (<span id="list_container_next_page_span_tbest">2</span>)
+	</button>
+</div>
+
+<script>
+$(document).ready( function(){
+	
+	//----- 전연변수 current_page 체크가 꼬일수 있으니 앞에 window. 를 붙여서 명확하게 체크
+	if(typeof window.current_page_tbest == "undefined" ){	
+		list_container_hide();
+		return;
+	}
+	
+	var is_first_ajax_call = true;
+	window.current_page_tbest = parseInt(window.current_page_tbest);  // "0" 이라는 문자열로 계산하는 오류 방지 + 전역 변수를 정수로 명확히 치환
+
+	$("#btn_load_more_tbest").click( function(){
+		window.current_page_tbest++;
+		list_ajax_call();
+	} );
+	
+	function list_container_hide(){
+		$("#loading_spinner_tbest").hide();
+		$("#btn_load_more_div_tbest").hide();
+		$("#list_container_tbest").hide();
+		$("#list_container_navi_tbest").hide();
+	}	
+	
+	function list_ajax_call(){
+		var ajax_url = "list.html?table=tbest&mode=ajax&from=pds&pg=" + window.current_page_tbest;
+		
+		$("#btn_load_more_tbest").hide();
+		$("#loading_spinner_tbest").show();
+
+		$.ajax( {
+			url: ajax_url,
+			type: "GET",
+			success: function(response){
+				var $temp_wrapper = $("<div>").html(response);
+				var is_last_page = false;
+
+				if( $temp_wrapper.find(".post_item").length == 0 ){
+					is_last_page = true;
+				}
+				
+				//----- ajax 를 최초로 로딩하는데 자료가 없는 경우 무한스크롤 중지
+				if( is_first_ajax_call == true && is_last_page == true ){
+					list_container_hide();
+					return;
+				}
+
+				is_first_ajax_call = false;
+				
+				// 이미 같은 ID를 가진 요소가 화면에 있으면 중복노출 제거
+				$temp_wrapper.find(".post_item").each( function(){
+					var current_number = parseInt( $(this).attr("id").replace("post_", "") );
+					if( $("#list_container_tbest").find("#post_" + current_number).length > 0 ){
+						$(this).remove();
+					}
+				} );
+				
+				$("#loading_spinner_tbest").hide();
+				
+				$("#list_container_tbest").append( $temp_wrapper.children() );
+				if( typeof list_navi_str !== "undefined" ){
+					$("#list_container_navi_tbest").html(list_navi_str);
+				}
+				
+				if( is_last_page == false ){
+					var next_page_html = parseInt(window.current_page_tbest) + 2;
+					$("#list_container_next_page_span_tbest").html(next_page_html);
+					$("#btn_load_more_tbest").show();
+				}
+			},
+			error: function(xhr, status, error){
+				$("#loading_spinner_tbest").hide();
+			}			
+		} );
+	}
+	
+	//----- 지연 로딩 (Intersection Observer) 적용 (list_container 와 동기화 할것)
+	if( window.IntersectionObserver ){
+		var observer = new IntersectionObserver( function(entries, observer){
+			entries.forEach( function(entry){
+				if(entry.isIntersecting){
+					list_ajax_call();
+					observer.unobserve(entry.target);
+				}
+			} );
+		}, {
+			rootMargin: "480px 0px"
+		} );
+		
+		var target_container = document.getElementById("list_container");
+		if( target_container ){
+			observer.observe(target_container);
+		}else{
+			// 기준점이 될 list_container가 없으면 그냥 바로 출력
+			list_ajax_call();
+		}
+	}else{
+		list_ajax_call();
+	}
+} );
+</script>
 
 
 
@@ -4293,88 +4815,11 @@ function read_center_300x250_banner_replace(){
 	
 
 
-		
-	<div id="bottom_adsense_public_div" class="box ad_bri" style="width:100%;max-height:286px;overflow:hidden !important;margin:10px 0 15px 0;">
-
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9964741307914018"
-     crossorigin="anonymous"></script>
-<!-- hu_bottom -->
-<ins class="adsbygoogle"
-     style="display:inline-block;width:100%;height:280px;border-top:1px solid transparent;border-bottom:1px solid transparent;"
-     data-ad-client="ca-pub-9964741307914018"
-     data-ad-slot="6201774436"
-	 data-language="ko"
-></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-
+		<div class="ad_bri box" style="padding:0px 0 0px 0;margin:0;margin:10px 0 15px 0;">
+		<div style="clear:both;width:302px;height:252px;margin:auto auto;">
+			<iframe src="https://cache.ggeal.com/banner/third_coupang_300x250.html" width="300" height="250" frameborder="0" scrolling="no" allowtransparency="true" referrerpolicy="no-referrer" browsingTopics class="gbd1" loading="lazy"></iframe>
+		</div>
 	</div>
-
-	<div id="bottom_result_test" class="dark_text"></div>
-	<div id="bottom_adsense_second_div" style="width:100%;max-height:286px;overflow:hidden !important;display:none;margin:10px 0 15px 0;"></div>
-
-
-<style>
-	#bottom_adsense_public_div ins[data-ad-status=unfilled] {height:283px !important;"}
-</style>
-
-
-<script>
-	var is_adsense_call_bottom = 0;
-	var is_adsense_impression_bottom = 0;
-
-	function bottom_adsense_replace(){
-					var str = `
-				<div class="adsbygoogle">
-					<div class="kakao_ad_area">
-						<div class="ad_bri box" style="padding:0px 0 0px 0;margin:10px auto 10px auto;">
-							<div style="width:302px;height:252px;clear:both;margin:auto auto;">
-								<iframe src="/banner/pnut_300x250.html" width="300" height="250" frameborder="0" scrolling="no" allowtransparency="true" referrerpolicy="no-referrer" class="gbd0"></iframe>
-							</div>
-						</div>
-					</div>
-				</div>`;
-		
-		const nofill_observer = document.querySelector('#bottom_adsense_public_div');
-		const result = document.querySelector('#bottom_result_test');
-		const observer = new ResizeObserver(entries => {
-		  for (let entry of entries) {
-			var {width, height} = entry.contentRect;
-			height = Math.floor(height);
-			//hu_log(`[bottom_ad] 높이: ${height}`);  /////////////////////////////////
-			//result.innerText += `\n [bottom_ad] 높이: ${height}`;  /////////////////////////////////
-			if(height == 280 || height == 281 || height == 282){
-				is_adsense_call_bottom = 1;
-				//hu_log(`\n [bottom_ad catch] 높이: ${height}`); //////////////////////////////////////
-				//result.innerText += `\n [bottom_ad catch 1] 높이: ${height}`;  /////////////////////////////////
-			}else if(height == 284 || height == 285){
-				observer.disconnect();
-				is_adsense_impression_bottom = 1;
-				$("#bottom_adsense_public_div").hide();
-				$("#bottom_adsense_second_div").show();
-				$("#bottom_adsense_second_div").html(str);
-				//hu_log(`\n [bottom_ad catch 2] 높이: ${height}`);
-				//result.innerText += `\n [bottom_ad catch 2] 높이: ${height}`;
-			}else if(is_adsense_impression_bottom  == 0 && is_adsense_call_bottom == 1 && height == 0){
-				observer.disconnect();
-				setTimeout(function(){
-					is_adsense_impression_bottom = 1;
-					$("#bottom_adsense_public_div").hide();
-					$("#bottom_adsense_second_div").show();
-					$("#bottom_adsense_second_div").html(str);
-					//hu_log(`\n [catch] 높이: ${height}`) ; //////////////////////////////////////
-					//result.innerText += `\n [bottom_ad catch 3] 높이: ${height}`;  /////////////////////////////////
-				},10);
-			}
-		  }
-		});
-		observer.observe(nofill_observer);
-	}
-	bottom_adsense_replace();
-</script>
-
-
 
 
 
