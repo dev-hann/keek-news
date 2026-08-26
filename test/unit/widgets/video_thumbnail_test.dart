@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 Widget _wrapped(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -77,6 +78,41 @@ void main() {
       await tester.pump();
 
       expect(() => tester.binding.scheduleFrame(), returnsNormally);
+    });
+
+    testWidgets('placeholder shows play icon by default', (tester) async {
+      await tester.pumpWidget(
+        _wrapped(
+          const SizedBox(
+            width: 200,
+            height: 200,
+            child: VideoThumbnail(videoUrl: 'https://example.com/clip.mp4'),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byIcon(LucideIcons.circlePlay), findsOneWidget);
+    });
+
+    testWidgets('placeholder hides play icon when showIcon is false', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrapped(
+          const SizedBox(
+            width: 200,
+            height: 200,
+            child: VideoThumbnail(
+              videoUrl: 'https://example.com/clip.mp4',
+              showIcon: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byIcon(LucideIcons.circlePlay), findsNothing);
     });
   });
 }

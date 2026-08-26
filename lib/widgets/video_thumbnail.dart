@@ -11,12 +11,17 @@ class VideoThumbnail extends StatefulWidget {
     required this.videoUrl,
     this.fit = BoxFit.cover,
     this.placeholderColor,
+    this.showIcon = true,
     super.key,
   });
 
   final String videoUrl;
   final BoxFit fit;
   final Color? placeholderColor;
+
+  /// Hosts that draw their own play overlay (feed carousel) pass false to
+  /// avoid a doubled play icon over the placeholder.
+  final bool showIcon;
 
   @override
   State<VideoThumbnail> createState() => _VideoThumbnailState();
@@ -80,8 +85,14 @@ class _VideoThumbnailState extends State<VideoThumbnail> {
   Widget build(BuildContext context) {
     final placeholder = ColoredBox(
       color: widget.placeholderColor ?? Colors.black,
-      child: const Center(
-        child: Icon(LucideIcons.circlePlay, color: Colors.white54, size: 40),
+      child: Center(
+        child: widget.showIcon
+            ? const Icon(
+                LucideIcons.circlePlay,
+                color: Colors.white54,
+                size: 40,
+              )
+            : const SizedBox.shrink(),
       ),
     );
 

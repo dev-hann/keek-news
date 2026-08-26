@@ -55,7 +55,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
       date: _extractDate(doc),
-      contentBlocks: scanResult.blocks,
+      contentBlocks: scanResult.blocks.map(_withSynthesizedVideoThumb).toList(),
       imageUrls: scanResult.imageUrls,
       recommendCount: _extractRecommendCount(doc),
       notRecommendCount: _extractNotRecommendCount(doc),
@@ -322,7 +322,9 @@ class HumorunivImpl extends HtmlCommunityRepo {
 
     final mediaBlocks = <ContentBlock>[];
     if (bodyEl != null) {
-      mediaBlocks.addAll(htmlClient.scanContentCompact(bodyEl));
+      mediaBlocks.addAll(
+        htmlClient.scanContentCompact(bodyEl).map(_withSynthesizedVideoThumb),
+      );
     }
 
     var date = DateTime.fromMillisecondsSinceEpoch(0);
@@ -359,6 +361,23 @@ class HumorunivImpl extends HtmlCommunityRepo {
       mediaBlocks: mediaBlocks,
       replies: const [],
     );
+  }
+
+  /// humoruniv exposes a session-free thumbnail proxy for any hosted media
+  /// (same shape as og:image / file-list thumbs), so thumbnail-less videos
+  /// can always get a poster instead of a bare placeholder in the feed.
+  ContentBlock _withSynthesizedVideoThumb(ContentBlock block) {
+    if (block is VideoBlock &&
+        (block.thumbnailUrl == null || block.thumbnailUrl!.isEmpty)) {
+      return VideoBlock(
+        url: block.url,
+        thumbnailUrl: 'https://timg.humoruniv.com/thumb.php?url=${block.url}',
+        width: block.width,
+        height: block.height,
+        isGifConversion: block.isGifConversion,
+      );
+    }
+    return block;
   }
 
   /// Extracts `YYYY-MM-DD [HH:MM:SS]` from humoruniv's noisy `.etc` text.

@@ -52,6 +52,41 @@ class _FixtureHtmlService extends HtmlService
   List<ContentBlock> scanContentCompact(Element container) => const [];
 }
 
+/// Same fixture plumbing as [_FixtureHtmlService] but inherits the real
+/// ContentScanner-backed scan* implementations from [HtmlService].
+class _ScanningHtmlService extends HtmlService
+    with HtmlServiceMultiCandidateMixin {
+  _ScanningHtmlService(this._fixtures);
+  final Map<String, String> _fixtures;
+
+  @override
+  Future<String> get(String path) async {
+    for (final entry in _fixtures.entries) {
+      if (path.contains(entry.key)) return entry.value;
+    }
+    throw Exception('No fixture for: $path');
+  }
+
+  @override
+  int extractNumber(String? text) {
+    if (text == null) return 0;
+    final digits = text.replaceAll(RegExp('[^0-9]'), '');
+    return int.tryParse(digits) ?? 0;
+  }
+
+  @override
+  String textOf(Element? element) => element?.text.trim() ?? '';
+
+  @override
+  String? attrOf(Element? element, String name) => element?.attributes[name];
+
+  @override
+  int statOf(Element? parent, String selector) {
+    if (parent == null) return 0;
+    return extractNumber(textOf(parent.querySelector(selector)));
+  }
+}
+
 String _read(String path) => File('test/fixtures/$path').readAsStringSync();
 
 void main() {
@@ -226,6 +261,64 @@ void main() {
       for (final reply in parent.replies) {
         expect(reply.content, isNot(contains('전체보기')));
         expect(reply.content, isNot(contains('[')));
+      }
+    });
+  });
+
+  group('HumorunivImpl.fetchDetail video thumbnail synthesis', () {
+    // Thumbnail-less VideoBlocks render as a permanent white circlePlay
+    // placeholder in the feed carousel. humoruniv serves session-free
+    // posters via timg.humoruniv.com/thumb.php?url=<media>, so the parser
+    // must synthesize one whenever a video ships without its own poster.
+    test('body VideoBlocks get a synthesized timg poster', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'read.html': _read('pds_1419653.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1419653');
+
+      final videos = detail.contentBlocks.whereType<VideoBlock>().toList();
+      expect(videos, isNotEmpty, reason: 'fixture must contain a video');
+      for (final v in videos) {
+        expect(
+          v.thumbnailUrl,
+          startsWith('https://timg.humoruniv.com/thumb.php?url='),
+          reason: 'video ${v.url} has no synthesized poster',
+        );
+      }
+      expect(
+        videos.any(
+          (v) =>
+              v.thumbnailUrl ==
+              'https://timg.humoruniv.com/thumb.php?url=${v.url}',
+        ),
+        isTrue,
+        reason: 'at least one poster must be synthesized (not pre-existing)',
+      );
+    });
+
+    test('comment VideoBlocks get a synthesized timg poster', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'read.html': _read('pds_1415455.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1415455');
+
+      final commentVideos = <VideoBlock>[
+        for (final c in detail.comments)
+          ...c.mediaBlocks.whereType<VideoBlock>(),
+      ];
+      expect(commentVideos, isNotEmpty, reason: 'fixture has comment mp4s');
+      for (final v in commentVideos) {
+        expect(
+          v.thumbnailUrl,
+          startsWith('https://timg.humoruniv.com/thumb.php?url='),
+          reason: 'comment video ${v.url} has no synthesized poster',
+        );
       }
     });
   });

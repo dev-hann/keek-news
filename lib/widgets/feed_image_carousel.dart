@@ -156,7 +156,11 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
             placeholderColor: Colors.black,
           )
         else
-          VideoThumbnail(videoUrl: video.url, placeholderColor: Colors.black),
+          VideoThumbnail(
+            videoUrl: video.url,
+            placeholderColor: Colors.black,
+            showIcon: false,
+          ),
         Center(
           child: Semantics(
             label: '재생',
