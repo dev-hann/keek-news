@@ -32,6 +32,16 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
 
   VideoBlock get videoBlock;
 
+  /// Whether this state must dispose the controller on dispose(). The inline
+  /// player keeps its controller alive while the shared fullscreen route is
+  /// open; the fullscreen player never disposes an adopted controller.
+  bool get disposesController => true;
+
+  /// Whether this state may attach the [VideoSurface]. While the shared
+  /// fullscreen route is open the inline player falls back to a thumbnail so
+  /// the controller texture is attached to only one [VideoPlayer] widget.
+  bool get rendersVideoSurface => true;
+
   bool get isPlaying =>
       isInitialized && controller != null && controller!.value.isPlaying;
 
@@ -56,7 +66,7 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
-  void initController({Duration? initialPosition}) {
+  void initController() {
     final c = VideoPlayerController.networkUrl(Uri.parse(videoBlock.url));
     controller = c
       ..addListener(_onValueChange)
@@ -66,9 +76,6 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
             setState(() => isInitialized = true);
             controller!.setLooping(true);
             controller!.setVolume(isMuted ? 0 : 1);
-            if (initialPosition != null && initialPosition > Duration.zero) {
-              controller!.seekTo(initialPosition);
-            }
             onAfterInit();
             startHideTimer();
           })
@@ -76,6 +83,17 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
             if (!mounted || controller != c) return;
             setState(() => hasError = true);
           });
+  }
+
+  /// Adopts a controller created and owned by another player instance (inline
+  /// → fullscreen handoff). No initialize() wait: position, buffering and the
+  /// already-downloaded media carry over, so playback never restarts.
+  void adoptController(VideoPlayerController c, {required bool muted}) {
+    controller = c..addListener(_onValueChange);
+    isInitialized = c.value.isInitialized;
+    isMuted = muted;
+    showPlayButton = !c.value.isPlaying;
+    if (isPlaying) startHideTimer();
   }
 
   /// Disposes the current controller and re-initializes from scratch. Used by
@@ -148,7 +166,9 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
   void dispose() {
     hideTimer?.cancel();
     controller?.removeListener(_onValueChange);
-    controller?.dispose();
+    if (disposesController) {
+      controller?.dispose();
+    }
     super.dispose();
   }
 
@@ -190,7 +210,7 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
           children: [
             if (hasError)
               VideoErrorView(onRetry: retryInit)
-            else if (isInitialized)
+            else if (isInitialized && rendersVideoSurface)
               VideoSurface(controller: controller!)
             else if (videoBlock.thumbnailUrl != null)
               RetryableNetworkImage(
@@ -396,8 +416,16 @@ class InlineVideoPlayer extends StatefulWidget {
 
 class _InlineVideoPlayerState extends State<InlineVideoPlayer>
     with _VideoPlayerControllerMixin<InlineVideoPlayer> {
+  bool _fullscreenOpen = false;
+
   @override
   VideoBlock get videoBlock => widget.block;
+
+  @override
+  bool get disposesController => !_fullscreenOpen;
+
+  @override
+  bool get rendersVideoSurface => !_fullscreenOpen;
 
   @override
   void initState() {
@@ -446,23 +474,43 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
 
   void _onVisibilityChanged(VisibilityInfo info) {
     final id = widget.videoId;
-    if (id == null) return;
+    if (id == null || _fullscreenOpen) return;
     if (info.visibleFraction < _kPauseThreshold) {
       pauseIfPlaying();
     }
   }
 
-  void _enterFullscreen() {
-    if (!mounted || controller == null) return;
-    Navigator.push<void>(
+  Future<void> _enterFullscreen() async {
+    final c = controller;
+    if (!mounted || c == null || _fullscreenOpen) return;
+    final share = isInitialized && !hasError;
+    if (share) {
+      setState(() => _fullscreenOpen = true);
+    }
+    await Navigator.push<void>(
       context,
       MaterialPageRoute<void>(
         builder: (_) => _FullscreenVideoPlayer(
           block: widget.block,
-          initialPosition: controller!.value.position,
+          sharedController: share ? c : null,
+          initialMuted: isMuted,
         ),
       ),
     );
+    if (!mounted) {
+      // Inline player was disposed under the fullscreen route (feed page
+      // popped): nobody is left to own the controller.
+      if (share) await c.dispose();
+      return;
+    }
+    if (!share) return;
+    setState(() {
+      _fullscreenOpen = false;
+      isMuted = c.value.volume == 0;
+      showPlayButton = !c.value.isPlaying;
+      showControls = true;
+    });
+    if (isPlaying) startHideTimer();
   }
 
   @override
@@ -511,10 +559,17 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
 class _FullscreenVideoPlayer extends StatefulWidget {
   const _FullscreenVideoPlayer({
     required this.block,
-    required this.initialPosition,
+    required this.initialMuted,
+    this.sharedController,
   });
   final VideoBlock block;
-  final Duration initialPosition;
+
+  /// When set, playback continues on this controller instead of creating a
+  /// new one — position, mute and buffered media carry over from the inline
+  /// player. Null means the fullscreen player owns a fresh controller (used
+  /// when inline playback never initialized, e.g. the error-retry path).
+  final VideoPlayerController? sharedController;
+  final bool initialMuted;
 
   @override
   State<_FullscreenVideoPlayer> createState() => _FullscreenVideoPlayerState();
@@ -526,9 +581,18 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
   VideoBlock get videoBlock => widget.block;
 
   @override
+  bool get disposesController => widget.sharedController == null;
+
+  @override
   void initState() {
     super.initState();
-    initController(initialPosition: widget.initialPosition);
+    final shared = widget.sharedController;
+    if (shared != null) {
+      adoptController(shared, muted: widget.initialMuted);
+    } else {
+      isMuted = widget.initialMuted;
+      initController();
+    }
   }
 
   @override

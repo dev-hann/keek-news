@@ -155,5 +155,32 @@ void main() {
         expect(find.byType(VideoBufferingOverlay), findsOneWidget);
       },
     );
+
+    testWidgets('tapping fullscreen opens the fullscreen player', (
+      tester,
+    ) async {
+      const block = VideoBlock(url: 'https://example.com/video.mp4');
+      await tester.pumpWidget(_wrapped(const InlineVideoPlayer(block: block)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(LucideIcons.maximize));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('닫기'), findsOneWidget);
+    });
+
+    testWidgets('closing the fullscreen player returns to the inline player '
+        'without touching its state', (tester) async {
+      const block = VideoBlock(url: 'https://example.com/video.mp4');
+      await tester.pumpWidget(_wrapped(const InlineVideoPlayer(block: block)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(LucideIcons.maximize));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('닫기'));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('닫기'), findsNothing);
+      expect(find.byIcon(LucideIcons.maximize), findsOneWidget);
+      // The inline player's own controller was not disposed by the
+      // fullscreen round trip: its error view is still rendered.
+      expect(find.byType(VideoErrorView), findsOneWidget);
+    });
   });
 }
