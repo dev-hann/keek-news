@@ -89,6 +89,30 @@ class _ScanningHtmlService extends HtmlService
 
 String _read(String path) => File('test/fixtures/$path').readAsStringSync();
 
+const _humorunivListHtml = '''
+<html><body>
+<div class="post_item"><a class="post_link" data-number="1422846"
+ href="read.html?table=pds&amp;number=1422846">
+<span class="link_hover">title</span></a></div>
+<div id="pgnum">
+<a class="def" href="list.html?table=pds&amp;pg=0">1</a>
+<a class="def" href="list.html?table=pds&amp;pg=1">2</a>
+<a class="def" href="list.html?table=pds&amp;pg=2">3</a>
+</div>
+</body></html>
+''';
+
+class _RecordingHtmlService extends _FixtureHtmlService {
+  _RecordingHtmlService() : super({'list.html': _humorunivListHtml});
+  final requests = <String>[];
+
+  @override
+  Future<String> get(String path) async {
+    requests.add(path);
+    return super.get(path);
+  }
+}
+
 void main() {
   group('HumorunivImpl.fetchDetail comment dates', () {
     test('regular comments do not fall back to epoch (1970)', () async {
@@ -383,5 +407,34 @@ void main() {
         );
       },
     );
+  });
+
+  group('HumorunivImpl.fetchLatest pagination (pg is 0-based)', () {
+    // The live pager maps [1] -> pg=0, so a tokenless fetch must hit pg=0
+    // (the real first page); starting at pg=1 silently skipped the newest
+    // posts. The token chain must also stop at the last pager page instead
+    // of requesting one empty page beyond it.
+    test('tokenless fetch requests pg=0, not pg=1', () async {
+      final htmlService = _RecordingHtmlService();
+      final repo = HumorunivImpl(htmlClient: htmlService);
+
+      final result = await repo.fetchLatest();
+
+      expect(htmlService.requests.single, contains('pg=0'));
+      expect(result.items, hasLength(1));
+    });
+
+    test('token chain advances then stops at the last page', () async {
+      final repo = HumorunivImpl(htmlClient: _RecordingHtmlService());
+
+      final first = await repo.fetchLatest();
+      expect(first.pageToken, '1');
+
+      final second = await repo.fetchLatest(pageToken: '1');
+      expect(second.pageToken, '2');
+
+      final last = await repo.fetchLatest(pageToken: '2');
+      expect(last.pageToken, isNull);
+    });
   });
 }

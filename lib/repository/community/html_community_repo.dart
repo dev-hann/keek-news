@@ -18,6 +18,10 @@ abstract class HtmlCommunityRepo implements CommunityRepo {
 
   int get listPageSize;
 
+  /// Page token [fetchLatest] uses when called without one. Boards are
+  /// 1-based except humoruniv, whose `pg` is 0-based.
+  String get firstPageToken => '1';
+
   /// Per-community config for [buildBlocks]. Defaults to a plain config for
   /// [communityId]; override only when a community needs special handling
   /// (ppomppu, todayhumor).
@@ -77,7 +81,7 @@ abstract class HtmlCommunityRepo implements CommunityRepo {
 
   @override
   Future<CommunityListResult> fetchLatest({String? pageToken}) async {
-    final page = pageToken ?? '1';
+    final page = pageToken ?? firstPageToken;
     final html = await htmlClient.get(listPath(page));
     final doc = html_parser.parse(html);
     final items = doc

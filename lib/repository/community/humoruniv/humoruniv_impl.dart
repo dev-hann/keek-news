@@ -15,9 +15,13 @@ class HumorunivImpl extends HtmlCommunityRepo {
   @override
   CommunityId get communityId => CommunityId.humoruniv;
 
+  /// m.humoruniv.com `pg` is 0-based: the site pager maps [1] -> pg=0.
+  @override
+  String get firstPageToken => '0';
+
   @override
   String listPath(String page) =>
-      '/board/list.html?table=pds&pg=${int.tryParse(page) ?? 1}';
+      '/board/list.html?table=pds&pg=${int.tryParse(page) ?? 0}';
 
   @override
   String listRowSelector() => 'div.post_item a.post_link';
@@ -31,9 +35,9 @@ class HumorunivImpl extends HtmlCommunityRepo {
     String currentPage,
     List<FeedItem> items,
   ) {
-    final page = int.tryParse(currentPage) ?? 1;
+    final page = int.tryParse(currentPage) ?? 0;
     final totalPage = _extractTotalPage(doc);
-    return page < totalPage ? '${page + 1}' : null;
+    return page < totalPage - 1 ? '${page + 1}' : null;
   }
 
   @override
