@@ -20,47 +20,45 @@ import 'package:keek_news/repository/community/ruliweb/ruliweb_impl.dart';
 import 'package:keek_news/repository/community/todayhumor/todayhumor_impl.dart';
 import 'package:keek_news/repository/feed/feed_impl.dart';
 import 'package:keek_news/repository/feed/feed_repo.dart';
+import 'package:keek_news/repository/media_save/media_save_impl.dart';
+import 'package:keek_news/repository/media_save/media_save_repo.dart';
 import 'package:keek_news/repository/update/update_impl.dart';
 import 'package:keek_news/repository/update/update_repo.dart';
 import 'package:keek_news/service/apk_download_service.dart';
 import 'package:keek_news/service/apk_installer_service.dart';
+import 'package:keek_news/service/community_headers.dart';
 import 'package:keek_news/service/default_image_cache_service.dart';
 import 'package:keek_news/service/dio_apk_download_service.dart';
 import 'package:keek_news/service/dio_github_remote_service.dart';
 import 'package:keek_news/service/dio_html_service.dart';
+import 'package:keek_news/service/dio_media_download_service.dart';
 import 'package:keek_news/service/dio_retry_interceptor.dart';
+import 'package:keek_news/service/gal_gallery_save_service.dart';
+import 'package:keek_news/service/gallery_save_service.dart';
 import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/service/image_cache_service.dart';
 import 'package:keek_news/service/local_storage_service.dart';
+import 'package:keek_news/service/media_download_service.dart';
+import 'package:keek_news/service/media_share_service.dart';
 import 'package:keek_news/service/method_channel_apk_installer_service.dart';
 import 'package:keek_news/service/prefs_local_storage_service.dart';
+import 'package:keek_news/service/share_plus_media_share_service.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/cache_use_case.dart';
+import 'package:keek_news/use_case/copy_media_url_use_case.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
+import 'package:keek_news/use_case/save_media_use_case.dart';
+import 'package:keek_news/use_case/share_media_use_case.dart';
 import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _mobileUA =
-    'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/138.0.0.0 Mobile Safari/537.36';
+const _mobileUA = mobileUserAgent;
 
-const _desktopUA =
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-    '(KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36';
+const _desktopUA = desktopUserAgent;
 
-const _browserHeaders = <String, String>{
-  'Accept':
-      'text/html,application/xhtml+xml,application/xml;q=0.9,'
-      'image/avif,image/webp,*/*;q=0.8',
-  'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-  'Sec-Fetch-Dest': 'document',
-  'Sec-Fetch-Mode': 'navigate',
-  'Sec-Fetch-Site': 'same-origin',
-  'Sec-Fetch-User': '?1',
-  'Upgrade-Insecure-Requests': '1',
-};
+const _browserHeaders = browserHeaders;
 
 Dio _dio({
   required String baseUrl,
@@ -270,4 +268,26 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<CacheUseCase>(
     () => CacheUseCase(sl<ImageCacheRepo>()),
   );
+
+  sl.registerLazySingleton<MediaDownloadService>(DioMediaDownloadService.new);
+  sl.registerLazySingleton<GallerySaveService>(
+    () => const GalGallerySaveService(),
+  );
+  sl.registerLazySingleton<MediaShareService>(
+    () => const SharePlusMediaShareService(),
+  );
+  sl.registerLazySingleton<MediaSaveRepo>(
+    () => MediaSaveImpl(
+      downloadService: sl<MediaDownloadService>(),
+      galleryService: sl<GallerySaveService>(),
+      shareService: sl<MediaShareService>(),
+    ),
+  );
+  sl.registerLazySingleton<SaveMediaUseCase>(
+    () => SaveMediaUseCase(sl<MediaSaveRepo>()),
+  );
+  sl.registerLazySingleton<ShareMediaUseCase>(
+    () => ShareMediaUseCase(sl<MediaSaveRepo>()),
+  );
+  sl.registerLazySingleton<CopyMediaUrlUseCase>(CopyMediaUrlUseCase.new);
 }

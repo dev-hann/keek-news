@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
@@ -10,12 +11,17 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../helpers/media_action_fakes.dart';
+import '../../helpers/shad_harness.dart';
+
 Widget _wrapped(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
+
+  tearDown(GetIt.I.reset);
 
   group('InlineVideoPlayer', () {
     testWidgets('should show play icon for non-GIF VideoBlock', (tester) async {
@@ -181,6 +187,25 @@ void main() {
       // The inline player's own controller was not disposed by the
       // fullscreen round trip: its error view is still rendered.
       expect(find.byType(VideoErrorView), findsOneWidget);
+    });
+
+    testWidgets('long-press opens the media action sheet for the video', (
+      tester,
+    ) async {
+      final repo = StubMediaSaveRepo();
+      registerMediaActionFakes(repo);
+      const block = VideoBlock(url: 'https://example.com/video.mp4');
+      await tester.pumpWidget(
+        shadHarness(const InlineVideoPlayer(block: block)),
+      );
+      await tester.pump();
+
+      await tester.longPress(find.byType(InlineVideoPlayer));
+      await tester.pumpAndSettle();
+
+      expect(find.text('갤러리에 저장'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.download), findsOneWidget);
+      expect(find.text('공유'), findsOneWidget);
     });
   });
 }

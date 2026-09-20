@@ -2,7 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/community/community_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/copy_media_url_use_case.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
+import 'package:keek_news/use_case/save_media_use_case.dart';
+import 'package:keek_news/use_case/share_media_use_case.dart';
 import 'package:keek_news/use_case/update_use_case.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,6 +46,13 @@ void main() {
       expect(di.sl<FeedUseCase>(), isNotNull);
       expect(di.sl<FeedUseCase>(), isNotNull);
       expect(di.sl<UpdateUseCase>(), isNotNull);
+    });
+
+    test('should register media action use cases', () async {
+      await di.configureDependencies();
+      expect(di.sl.isRegistered<SaveMediaUseCase>(), isTrue);
+      expect(di.sl.isRegistered<ShareMediaUseCase>(), isTrue);
+      expect(di.sl.isRegistered<CopyMediaUrlUseCase>(), isTrue);
     });
 
     test('UpdateUseCase should read version from PackageInfo', () async {

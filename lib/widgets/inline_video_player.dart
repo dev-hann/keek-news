@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/model/media_target.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/service/video_playback_controller.dart';
+import 'package:keek_news/widgets/media_action_sheet.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_buffering_overlay.dart';
 import 'package:keek_news/widgets/video_error_view.dart';
@@ -527,6 +529,10 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer>
 
     final player = GestureDetector(
       onTap: isInitialized ? handleVideoTap : null,
+      onLongPress: () => showMediaActionSheet(
+        context,
+        target: MediaTarget.video(widget.block),
+      ),
       child: buildMediaStack(
         overlay: isGif
             ? _buildGifOverlay()
@@ -605,6 +611,10 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer>
       body: Center(
         child: GestureDetector(
           onTap: isInitialized ? handleVideoTap : null,
+          onLongPress: () => showMediaActionSheet(
+            context,
+            target: MediaTarget.video(widget.block),
+          ),
           child: buildMediaStack(
             overlay: buildControlsStack(
               position: position,

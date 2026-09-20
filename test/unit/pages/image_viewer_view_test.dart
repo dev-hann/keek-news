@@ -2,13 +2,77 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../helpers/media_action_fakes.dart';
 import '../../helpers/shad_harness.dart';
 
 void main() {
+  tearDown(GetIt.I.reset);
+
   group('ImageViewerView', () {
+    testWidgets(
+      'long-press opens the media action sheet for the current image',
+      (tester) async {
+        final repo = StubMediaSaveRepo();
+        registerMediaActionFakes(repo);
+        await tester.pumpWidget(
+          shadApp(
+            home: ImageViewerView(
+              imageUrls: const ['https://example.com/a.jpg'],
+              imageBuilder: (_) => const SizedBox.shrink(),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        await tester.longPress(find.byType(PageView));
+        await tester.pumpAndSettle();
+
+        expect(find.text('갤러리에 저장'), findsOneWidget);
+        expect(find.text('공유'), findsOneWidget);
+        expect(find.text('URL 복사'), findsOneWidget);
+      },
+    );
+
+    testWidgets('long-press on a paged gallery targets the visible image', (
+      tester,
+    ) async {
+      final repo = StubMediaSaveRepo();
+      registerMediaActionFakes(repo);
+      await tester.pumpWidget(
+        shadAppWithMessenger(
+          home: ImageViewerView(
+            imageUrls: const [
+              'https://example.com/a.jpg',
+              'https://example.com/b.jpg',
+            ],
+            imageBuilder: (_) => const SizedBox.shrink(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tapAt(const Offset(700, 300));
+      await tester.pumpAndSettle();
+      await tester.longPress(find.byType(PageView));
+      await tester.pumpAndSettle();
+
+      expect(find.text('갤러리에 저장'), findsOneWidget);
+
+      // Share records the target URL and closes the sheet without a
+      // snackbar timer, keeping pumpAndSettle deterministic.
+      await tester.tap(find.text('공유'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('갤러리에 저장'), findsNothing);
+      expect(repo.sharedTargets.map((t) => t.url), [
+        'https://example.com/b.jpg',
+      ]);
+    });
+
     testWidgets('renders close button for a single image', (tester) async {
       await tester.pumpWidget(
         shadApp(

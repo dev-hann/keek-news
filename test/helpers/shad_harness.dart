@@ -17,6 +17,21 @@ Widget shadApp({Widget? home, GlobalKey<NavigatorState>? navigatorKey}) {
   );
 }
 
+/// Like [shadApp], but injects a [ScaffoldMessenger] above the navigator
+/// (same wiring as KeekNewsApp's builder). Required when a test shows
+/// snackbars from routes pushed on the navigator — e.g. modal bottom sheets
+/// — because ScaffoldMessenger.of only looks up the tree.
+Widget shadAppWithMessenger({Widget? home}) {
+  return ShadApp(
+    title: 'test',
+    themeMode: ThemeMode.dark,
+    darkTheme: AppShadTheme.dark(),
+    builder: (context, child) =>
+        ScaffoldMessenger(child: child ?? const SizedBox.shrink()),
+    home: home ?? const Scaffold(),
+  );
+}
+
 /// Wraps [body] in a [ShadApp] providing [AppShadTheme.dark()] and a
 /// [Scaffold] for widget tests that just need a body.
 Widget shadHarness(Widget body) {

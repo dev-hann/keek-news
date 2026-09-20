@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/model/media_target.dart';
 import 'package:keek_news/pages/comment_video_viewer_view.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/utils/time_ago.dart';
+import 'package:keek_news/widgets/media_action_sheet.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -127,7 +129,12 @@ class _MediaRow extends StatelessWidget {
         imageIndex++;
         children.add(
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => _openImageViewer(context, imageUrls, idx),
+            onLongPress: () => showMediaActionSheet(
+              context,
+              target: MediaTarget.image(block.url),
+            ),
             child: _MediaBox(
               child: RetryableNetworkImage(
                 imageUrl: block.url,
@@ -141,7 +148,10 @@ class _MediaRow extends StatelessWidget {
       } else if (block is VideoBlock) {
         children.add(
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => _openVideoViewer(context, block),
+            onLongPress: () =>
+                showMediaActionSheet(context, target: MediaTarget.video(block)),
             child: _MediaBox(
               child: Stack(
                 fit: StackFit.expand,

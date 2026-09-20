@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/widgets/comment_tile.dart';
@@ -8,6 +9,7 @@ import 'package:keek_news/widgets/video_thumbnail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../helpers/media_action_fakes.dart';
 import '../../helpers/shad_harness.dart';
 
 Comment _comment({
@@ -36,6 +38,8 @@ void main() {
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
+
+  tearDown(GetIt.I.reset);
 
   group('CommentTile', () {
     testWidgets('renders author and content', (tester) async {
@@ -125,6 +129,57 @@ void main() {
       expect(find.text('대댓글 내용'), findsOneWidget);
       // Two CommentTiles: parent + reply.
       expect(find.byType(CommentTile), findsNWidgets(2));
+    });
+
+    testWidgets('long-press on a comment image opens the media action sheet', (
+      tester,
+    ) async {
+      final repo = StubMediaSaveRepo();
+      registerMediaActionFakes(repo);
+      await tester.pumpWidget(
+        _wrap(
+          SingleChildScrollView(
+            child: CommentTile(
+              comment: _comment(
+                mediaBlocks: const [
+                  ImageBlock(url: 'https://example.com/c.jpg'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.longPress(find.byType(RetryableNetworkImage));
+      await tester.pumpAndSettle();
+
+      expect(find.text('갤러리에 저장'), findsOneWidget);
+    });
+
+    testWidgets('long-press on a comment video opens the media action sheet', (
+      tester,
+    ) async {
+      final repo = StubMediaSaveRepo();
+      registerMediaActionFakes(repo);
+      await tester.pumpWidget(
+        _wrap(
+          SingleChildScrollView(
+            child: CommentTile(
+              comment: _comment(
+                mediaBlocks: const [
+                  VideoBlock(url: 'https://example.com/cv.mp4'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.longPress(find.byType(VideoThumbnail));
+      await tester.pumpAndSettle();
+
+      expect(find.text('갤러리에 저장'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.download), findsOneWidget);
     });
   });
 }

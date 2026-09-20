@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:keek_news/model/media_target.dart';
 import 'package:keek_news/utils/image_aspect_resolver.dart';
 import 'package:keek_news/utils/long_image.dart';
+import 'package:keek_news/widgets/media_action_sheet.dart';
 import 'package:keek_news/widgets/media_count_badge.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -147,6 +149,10 @@ class _ImageViewerViewState extends State<ImageViewerView> {
     // still reach the PageView/ScrollView; only clean taps page.
     final body = GestureDetector(
       onTapUp: _onTapUp,
+      onLongPress: () => showMediaActionSheet(
+        context,
+        target: MediaTarget.image(widget.imageUrls[_currentIndex]),
+      ),
       behavior: HitTestBehavior.opaque,
       child: pageView,
     );

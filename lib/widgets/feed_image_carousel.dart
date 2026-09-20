@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/model/media_target.dart';
 import 'package:keek_news/model/video_id.dart';
 import 'package:keek_news/service/video_playback_controller.dart';
 import 'package:keek_news/utils/image_aspect_resolver.dart';
 import 'package:keek_news/widgets/inline_video_player.dart';
+import 'package:keek_news/widgets/media_action_sheet.dart';
 import 'package:keek_news/widgets/media_count_badge.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
@@ -128,6 +130,10 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: widget.onImageTap == null ? null : () => widget.onImageTap!(index),
+      onLongPress: () => showMediaActionSheet(
+        context,
+        target: MediaTarget.image(widget.imageUrls[index]),
+      ),
       child: RetryableNetworkImage(
         imageUrl: widget.imageUrls[index],
         width: double.infinity,
@@ -146,44 +152,48 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
       );
     }
     final video = widget.videoBlocks[index];
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (video.thumbnailUrl != null)
-          RetryableNetworkImage(
-            imageUrl: video.thumbnailUrl!,
-            fit: BoxFit.cover,
-            placeholderColor: Colors.black,
-          )
-        else
-          VideoThumbnail(
-            videoUrl: video.url,
-            placeholderColor: Colors.black,
-            showIcon: false,
-          ),
-        Center(
-          child: Semantics(
-            label: '재생',
-            button: true,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => setState(() => _expandedVideoIndex = index),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Colors.black54,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  LucideIcons.play,
-                  color: Colors.white,
-                  size: 40,
+    return GestureDetector(
+      onLongPress: () =>
+          showMediaActionSheet(context, target: MediaTarget.video(video)),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (video.thumbnailUrl != null)
+            RetryableNetworkImage(
+              imageUrl: video.thumbnailUrl!,
+              fit: BoxFit.cover,
+              placeholderColor: Colors.black,
+            )
+          else
+            VideoThumbnail(
+              videoUrl: video.url,
+              placeholderColor: Colors.black,
+              showIcon: false,
+            ),
+          Center(
+            child: Semantics(
+              label: '재생',
+              button: true,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => setState(() => _expandedVideoIndex = index),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    LucideIcons.play,
+                    color: Colors.white,
+                    size: 40,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
