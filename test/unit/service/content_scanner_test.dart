@@ -86,6 +86,45 @@ void main() {
     });
   });
 
+  group('ContentScanner autolink anchors (href == text)', () {
+    // humoruniv comment images are autolink `<a href=url>url</a>` markup —
+    // no `<img>` at all. The anchor must still yield an image block.
+    test('scanContentCompact turns image autolinks into image blocks', () {
+      const url =
+          'https://down.humoruniv.com/hwiparambbs/data/comment/'
+          '2017/02/worldcup_15253_1487330699.96832.png';
+      const html =
+          '''
+<div class="comment_body"><div class="comment_more">
+<span class="autolink"><a href="$url" title="$url" >$url</a>
+</span></div></div>
+''';
+      final doc = html_parser.parse(html);
+      final blocks = ContentScanner.scanContentCompact(doc.body!);
+
+      final images = blocks.whereType<ImageBlock>().toList();
+      expect(images, hasLength(1));
+      expect(images.first.url, url);
+    });
+
+    test('scanContent emits image block for self-text image link', () {
+      const url = 'https://example.com/photo.jpg';
+      final doc = html_parser.parse('<div><a href="$url">$url</a></div>');
+      final result = ContentScanner.scanContent(doc.body!);
+
+      expect(_firstImage(result.blocks)?.url, url);
+    });
+
+    test('non-media self-text link stays a plain link', () {
+      const url = 'https://example.com/page';
+      final doc = html_parser.parse('<div><a href="$url">$url</a></div>');
+      final result = ContentScanner.scanContent(doc.body!);
+
+      expect(result.blocks.whereType<ImageBlock>(), isEmpty);
+      expect(result.blocks.whereType<HtmlBlock>(), isNotEmpty);
+    });
+  });
+
   group('ContentScanner session-token thumbs (url_enc)', () {
     // humoruniv `thumb.php?url_enc=…` URLs embed a per-session token that
     // expires after the page view; they must never become ImageBlocks

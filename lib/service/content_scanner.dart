@@ -335,10 +335,10 @@ abstract final class ContentScanner {
       }
       if (href.startsWith('http')) {
         final text = el.text.trim();
-        if (text.isNotEmpty && href != text) {
-          entries.add(_UrlEntry(url: href, text: text));
-        } else if (text.isEmpty) {
+        if (text.isEmpty || href == text) {
           entries.add(_UrlEntry(url: href));
+        } else {
+          entries.add(_UrlEntry(url: href, text: text));
         }
       }
       return entries;

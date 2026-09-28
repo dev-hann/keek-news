@@ -294,8 +294,16 @@ class HumorunivImpl extends HtmlCommunityRepo {
 
   Comment _parseComment(dom.Element item, {required bool isBest}) {
     final author = htmlClient.textOf(item.querySelector('.hu_nick_txt'));
-    var content = '';
+
+    final mediaBlocks = <ContentBlock>[];
     final bodyEl = item.querySelector('.comment_body');
+    if (bodyEl != null) {
+      mediaBlocks.addAll(
+        htmlClient.scanContentCompact(bodyEl).map(_withSynthesizedVideoThumb),
+      );
+    }
+
+    var content = '';
     if (bodyEl != null) {
       // 2026-08 redesign: humoruniv dropped `.comment_text` and wraps
       // bodies in `.comment_more`; the sibling `.comment_more_btn`
@@ -305,30 +313,16 @@ class HumorunivImpl extends HtmlCommunityRepo {
       final textEl =
           bodyEl.querySelector('.comment_text') ??
           bodyEl.querySelector('.comment_more');
-      if (textEl != null) {
-        final clone = textEl.clone(true);
-        clone
-            .querySelectorAll('.comment_num, .comment_more_btn')
-            .forEach((el) => el.remove());
-        content = clone.text.trim();
-      } else {
-        final clone = bodyEl.clone(true);
-        clone
-            .querySelectorAll(
-              '.recomm_btn, .btn_move, .comment_num, .comment_thumb_notice, '
-              '.comment_img_div, .comment_crop_wrap, .comment_crop_href, '
-              '.comment_crop_href_mp4, .comment_file, .comment_more_btn',
-            )
-            .forEach((el) => el.remove());
-        content = clone.text.trim();
-      }
-    }
-
-    final mediaBlocks = <ContentBlock>[];
-    if (bodyEl != null) {
-      mediaBlocks.addAll(
-        htmlClient.scanContentCompact(bodyEl).map(_withSynthesizedVideoThumb),
-      );
+      final clone = (textEl ?? bodyEl).clone(true);
+      clone
+          .querySelectorAll(
+            '.recomm_btn, .btn_move, .comment_num, .comment_thumb_notice, '
+            '.comment_img_div, .comment_crop_wrap, .comment_crop_href, '
+            '.comment_crop_href_mp4, .comment_file, .comment_more_btn',
+          )
+          .forEach((el) => el.remove());
+      _removeMediaUrlAnchors(clone, mediaBlocks);
+      content = clone.text.trim();
     }
 
     var date = DateTime.fromMillisecondsSinceEpoch(0);
@@ -365,6 +359,29 @@ class HumorunivImpl extends HtmlCommunityRepo {
       mediaBlocks: mediaBlocks,
       replies: const [],
     );
+  }
+
+  /// Comment images arrive as autolink `<a href=url>url</a>` where the URL
+  /// doubles as the anchor text. Once the URL becomes a media block, the
+  /// raw-URL anchor is a duplicate and must not leak into content text.
+  /// Labeled links (text != href) are user-written and stay.
+  void _removeMediaUrlAnchors(dom.Element root, List<ContentBlock> blocks) {
+    final candidates = <String?>{
+      for (final b in blocks)
+        switch (b) {
+          ImageBlock(:final url) => url,
+          VideoBlock(:final url) => url,
+          _ => null,
+        },
+    };
+    final mediaUrls = candidates.whereType<String>().toSet();
+    if (mediaUrls.isEmpty) return;
+    for (final a in root.querySelectorAll('a')) {
+      final href = a.attributes['href'] ?? '';
+      if (a.text.trim() == href && mediaUrls.contains(href)) {
+        a.remove();
+      }
+    }
   }
 
   /// humoruniv exposes a session-free thumbnail proxy for any hosted media

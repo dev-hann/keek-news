@@ -437,4 +437,40 @@ void main() {
       expect(last.pageToken, isNull);
     });
   });
+
+  group('HumorunivImpl.fetchDetail comment autolink images (1426857)', () {
+    // Comment images are autolink `<a href=url>url</a>` markup without any
+    // `<img>` tag; they must surface as media blocks and the raw URL text
+    // must not leak into comment content.
+    test('comment autolink images become ImageBlocks', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'number=1426857': _read('pds_1426857.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1426857');
+      final comment = detail.comments.firstWhere((c) => c.id == 516655017);
+
+      final images = comment.mediaBlocks.whereType<ImageBlock>().toList();
+      expect(images, hasLength(3));
+      expect(images.every((i) => i.url.contains('down.humoruniv.com')), isTrue);
+      expect(images[0].url, contains('worldcup_15253'));
+      expect(images[1].url, contains('r_rec7e5a001'));
+      expect(images[2].url, contains('worldcup_15438'));
+    });
+
+    test('comment content strips raw image URL text', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'number=1426857': _read('pds_1426857.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1426857');
+      final comment = detail.comments.firstWhere((c) => c.id == 516655017);
+
+      expect(comment.content, isNot(contains('down.humoruniv.com')));
+    });
+  });
 }
