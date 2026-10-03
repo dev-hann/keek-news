@@ -409,6 +409,55 @@ void main() {
     );
   });
 
+  group('HumorunivImpl.fetchDetail comment gif→mp4 expand divs (1427341)', () {
+    // Cookie'd requests (the app persists a cookie jar) re-ship comment
+    // GIFs as comment_mp4_expand divs pointing at down-mp4.humoruniv.com
+    // conversions. Those must stay in the comment's mediaBlocks and never
+    // leak into the post-body carousel as a second VideoBlock page.
+    test('body carousel is exactly one video, no comment mp4 leak', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'read.html': _read('pds_1427341.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1427341');
+
+      expect(detail.imageUrls, isEmpty);
+
+      final videos = detail.contentBlocks.whereType<VideoBlock>().toList();
+      expect(videos, hasLength(1));
+      expect(
+        videos.single.url,
+        contains('a_wd7807a001_ffd59b4fa4ff837a57e1222283636727d4fad02b.mp4'),
+      );
+      expect(
+        videos.single.thumbnailUrl,
+        'https://timg.humoruniv.com/thumb.php?url=${videos.single.url}',
+      );
+    });
+
+    test('comment gif→mp4 stays in comment mediaBlocks', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'read.html': _read('pds_1427341.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1427341');
+
+      final comment = detail.comments.firstWhere((c) => c.id == 516726485);
+      final commentVideos = comment.mediaBlocks
+          .whereType<VideoBlock>()
+          .toList();
+      expect(commentVideos, hasLength(1));
+      expect(
+        commentVideos.single.url,
+        contains('down-mp4.humoruniv.com/f4/f4213bc915806d0a'),
+      );
+    });
+  });
+
   group('HumorunivImpl.fetchLatest pagination (pg is 0-based)', () {
     // The live pager maps [1] -> pg=0, so a tokenless fetch must hit pg=0
     // (the real first page); starting at pg=1 silently skipped the newest

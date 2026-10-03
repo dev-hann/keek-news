@@ -172,4 +172,85 @@ void main() {
       expect(images.first.url, contains('b.webp'));
     });
   });
+
+  group('ContentScanner doc-wide fallback excludes comment scopes', () {
+    // With session cookies humoruniv re-ships comment GIFs as
+    // comment_mp4_expand divs inside `li[id^="comment_li_"]`. The doc-wide
+    // fallback loops exist for post-body media OUTSIDE the content element
+    // (attach lists), so anything inside a comment item must be skipped —
+    // otherwise a comment's 1s gif→mp4 becomes a bogus second carousel
+    // page on the post card.
+    test('comment_mp4_expand inside comment li is skipped', () {
+      const html = '''
+        <html><body>
+        <div class="body_editor"><p>본문</p></div>
+        <ul>
+          <li id="comment_li_516726485">
+            <span class="comment_body">
+              <div class="comment_img_div"
+                onclick="comment_mp4_expand('cf_1',
+                  '//down-mp4.humoruniv.com/f4/abc123.mp4',
+                  '//timg.humoruniv.com/thumb.php?url=x.gif', '320', '800',
+                  '', '', '63KB', '//x.gif', '1.2MB');">
+              </div>
+            </span>
+          </li>
+        </ul>
+        </body></html>
+      ''';
+      final doc = html_parser.parse(html);
+      final contentEl = doc.querySelector('.body_editor')!;
+
+      final result = ContentScanner.scanContentFull(doc, contentEl);
+
+      final videos = result.blocks.whereType<VideoBlock>().toList();
+      expect(videos, isEmpty);
+    });
+
+    test('download.php link inside best comment is skipped', () {
+      const html = '''
+        <html><body>
+        <div class="body_editor"><p>본문</p></div>
+        <div id="comment_best_wrap">
+          <div class="best_li">
+            <a href="download.php?url=https://down.humoruniv.com/data/c.png">
+              <img src="https://timg.humoruniv.com/thumb.php?url=c.png"/>
+            </a>
+          </div>
+        </div>
+        </body></html>
+      ''';
+      final doc = html_parser.parse(html);
+      final contentEl = doc.querySelector('.body_editor')!;
+
+      final result = ContentScanner.scanContentFull(doc, contentEl);
+
+      expect(result.blocks.whereType<ImageBlock>(), isEmpty);
+      expect(result.imageUrls, isEmpty);
+    });
+
+    test('attach-list media outside comments still collected', () {
+      const html = '''
+        <html><body>
+        <div class="body_editor"><p>본문</p></div>
+        <div id="list_download">
+          <div class="comment_img_div"
+            onclick="comment_mp4_expand('mp4_0_1',
+              '//down.humoruniv.com/hwiparambbs/data/pds/body.mp4',
+              '//timg.humoruniv.com/thumb.php?url=body.mp4', '348', '348',
+              '', 'MP4', '', '', '');">
+          </div>
+        </div>
+        </body></html>
+      ''';
+      final doc = html_parser.parse(html);
+      final contentEl = doc.querySelector('.body_editor')!;
+
+      final result = ContentScanner.scanContentFull(doc, contentEl);
+
+      final videos = result.blocks.whereType<VideoBlock>().toList();
+      expect(videos, hasLength(1));
+      expect(videos.single.url, contains('body.mp4'));
+    });
+  });
 }

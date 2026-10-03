@@ -24,11 +24,18 @@ abstract final class ContentScanner {
 
     _walkNodes(contentEl.nodes, blocks, seenKeys, imageUrls);
 
+    final commentScopes = [
+      ...doc.querySelectorAll('#comment_best_wrap'),
+      ...doc.querySelectorAll('li[id^="comment_li_"]'),
+    ];
+
     final allDownloadLinks = doc.querySelectorAll(
       'a[href*="download.php?url="]',
     );
     for (final link in allDownloadLinks) {
-      if (contentEl.contains(link)) continue;
+      if (contentEl.contains(link) || _withinAny(commentScopes, link)) {
+        continue;
+      }
 
       final href = link.attributes['href'] ?? '';
       final match = _downloadPhpUrlPattern.firstMatch(href);
@@ -60,7 +67,7 @@ abstract final class ContentScanner {
 
     final mp4Divs = doc.querySelectorAll('[onclick*="comment_mp4_expand"]');
     for (final div in mp4Divs) {
-      if (contentEl.contains(div)) continue;
+      if (contentEl.contains(div) || _withinAny(commentScopes, div)) continue;
       final onclick = div.attributes['onclick'] ?? '';
       final m = _commentMp4ExpandPattern.firstMatch(onclick);
       if (m != null) {
@@ -131,6 +138,21 @@ abstract final class ContentScanner {
   static final RegExp _commentMp4ExpandPattern = RegExp(
     r"comment_mp4_expand\('[^']*',\s*'([^']+)'",
   );
+
+  /// Cookie-gated humoruniv markup re-ships comment GIFs as
+  /// `comment_mp4_expand` divs inside comment items. Those belong to the
+  /// comment's own mediaBlocks, not the post-body carousel the doc-wide
+  /// fallback loops feed — so both loops skip anything inside a comment
+  /// scope. package:html `contains` is shallow (direct children only), so
+  /// this walks the ancestor chain instead.
+  static bool _withinAny(List<dom.Element> scopes, dom.Element el) {
+    for (dom.Node? node = el.parent; node != null; node = node.parent) {
+      for (final scope in scopes) {
+        if (identical(node, scope)) return true;
+      }
+    }
+    return false;
+  }
 
   /// humoruniv session-token thumbs (`thumb.php?url_enc=…`) expire with the
   /// page session; keeping them yields broken image slots and dead video
