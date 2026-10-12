@@ -522,4 +522,94 @@ void main() {
       expect(comment.content, isNot(contains('down.humoruniv.com')));
     });
   });
+
+  group('HumorunivImpl data/pds attachment storage migration (1428508)', () {
+    // 2026-10: new `hwiparambbs/data/pds/a_*` uploads 404 on
+    // down.humoruniv.com; the canonical file now lives on the webp CDN at
+    // `down-webp.humoruniv.com/<hash[0:2]>/<hash>.webp` (also the img src
+    // the page itself ships). The dead original survives only in
+    // `img_file_url` and thumb.php params, so every URL of that shape —
+    // feed thumbnails, body blocks, imageUrls — must be rewritten.
+    const deadOriginal =
+        'https://down.humoruniv.com/hwiparambbs/data/pds/'
+        'a_wb96707001_62616c6a5e766c82782b378487c0d217219306f1.png';
+    const webpCdn =
+        'https://down-webp.humoruniv.com/'
+        '62/62616c6a5e766c82782b378487c0d217219306f1.webp';
+
+    test('body attachment urls are rewritten to the webp CDN', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'read.html': _read('pds_1428508.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1428508');
+
+      expect(detail.imageUrls, contains(webpCdn));
+      expect(detail.imageUrls, isNot(contains(deadOriginal)));
+
+      final images = detail.contentBlocks.whereType<ImageBlock>().toList();
+      expect(images, isNotEmpty, reason: 'fixture must contain an image');
+      for (final img in images) {
+        expect(
+          img.url,
+          isNot(contains('down.humoruniv.com/hwiparambbs/data/pds/')),
+          reason: 'dead attachment url leaked: ${img.url}',
+        );
+      }
+      expect(
+        images.any((i) => i.url == webpCdn),
+        isTrue,
+        reason: 'img_file_url must map to the webp CDN file',
+      );
+    });
+
+    test('data/pds list thumb unwraps to the webp CDN', () async {
+      const listHtml =
+          '''
+<html><body>
+<div class="post_item"><a class="post_link" data-number="1428508"
+ href="read.html?table=pds&amp;number=1428508">
+<table><tr>
+<td><img class="img" src="https://timg.humoruniv.com/thumb.php?url=$deadOriginal?SIZE=120x90"></td>
+<td><span class="link_hover">title</span></td>
+</tr></table></a></div>
+<div id="pgnum"><a class="def" href="list.html?table=pds&amp;pg=0">1</a></div>
+</body></html>
+''';
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({'list.html': listHtml}),
+      );
+
+      final result = await repo.fetchLatest();
+
+      expect(result.items.single.thumbnailUrl, webpCdn);
+    });
+
+    test('editor upload thumbs keep the original host', () async {
+      const editorOriginal =
+          'https://down.humoruniv.com/hwiparambbs/data/editor/pdswait/'
+          'e_sb269e5003_aaf59e6fe748ba115415bfb75e6ce3ad28a2a169.jpg';
+      const listHtml =
+          '''
+<html><body>
+<div class="post_item"><a class="post_link" data-number="1428508"
+ href="read.html?table=pds&amp;number=1428508">
+<table><tr>
+<td><img class="img" src="https://timg.humoruniv.com/thumb.php?url=$editorOriginal?SIZE=120x90"></td>
+<td><span class="link_hover">title</span></td>
+</tr></table></a></div>
+<div id="pgnum"><a class="def" href="list.html?table=pds&amp;pg=0">1</a></div>
+</body></html>
+''';
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({'list.html': listHtml}),
+      );
+
+      final result = await repo.fetchLatest();
+
+      expect(result.items.single.thumbnailUrl, editorOriginal);
+    });
+  });
 }

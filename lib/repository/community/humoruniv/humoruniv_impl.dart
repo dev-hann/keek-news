@@ -59,8 +59,11 @@ class HumorunivImpl extends HtmlCommunityRepo {
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
       date: _extractDate(doc),
-      contentBlocks: scanResult.blocks.map(_withSynthesizedVideoThumb).toList(),
-      imageUrls: scanResult.imageUrls,
+      contentBlocks: scanResult.blocks
+          .map(_rewriteAttachmentBlock)
+          .map(_withSynthesizedVideoThumb)
+          .toList(),
+      imageUrls: scanResult.imageUrls.map(_rewriteAttachmentUrl).toList(),
       recommendCount: _extractRecommendCount(doc),
       notRecommendCount: _extractNotRecommendCount(doc),
       viewCount: _extractViewCount(doc),
@@ -119,6 +122,53 @@ class HumorunivImpl extends HtmlCommunityRepo {
     return _fullSizeFromThumb(normalized);
   }
 
+  /// 2026-10: humoruniv stopped serving board attachment originals
+  /// (`hwiparambbs/data/pds/a_<id>_<hash>.<ext>`) from down.humoruniv.com —
+  /// new uploads 404 there while the site itself now ships
+  /// `down-webp.humoruniv.com/<hash[0:2]>/<hash>.webp` as the img src
+  /// (the old path survives only in `img_file_url` and thumb.php params).
+  /// The webp CDN serves old and new uploads alike, so every URL of that
+  /// shape is rewritten to it. Editor uploads (`data/editor/pdswait/e_*`)
+  /// still resolve in place and pass through untouched.
+  static final RegExp _legacyAttachmentPattern = RegExp(
+    r'^https?://down\.humoruniv\.com/hwiparambbs/data/pds/'
+    r'a_[0-9a-z]+_([0-9a-f]{40})\.(?:png|jpe?g|gif|webp|bmp)$',
+    caseSensitive: false,
+  );
+
+  static String _rewriteAttachmentUrl(String url) {
+    final match = _legacyAttachmentPattern.firstMatch(url);
+    if (match == null) return url;
+    final hash = match.group(1)!;
+    return 'https://down-webp.humoruniv.com/'
+        '${hash.substring(0, 2)}/$hash.webp';
+  }
+
+  static ContentBlock _rewriteAttachmentBlock(ContentBlock block) {
+    switch (block) {
+      case ImageBlock(:final url, :final thumbnailUrl):
+        return ImageBlock(
+          url: _rewriteAttachmentUrl(url),
+          thumbnailUrl: thumbnailUrl == null
+              ? null
+              : _rewriteAttachmentUrl(thumbnailUrl),
+        );
+      case VideoBlock():
+        final video = block;
+        return VideoBlock(
+          url: video.url,
+          thumbnailUrl: video.thumbnailUrl == null
+              ? null
+              : _rewriteAttachmentUrl(video.thumbnailUrl!),
+          width: video.width,
+          height: video.height,
+          isGifConversion: video.isGifConversion,
+        );
+      case _:
+        return block;
+    }
+  }
+
   String _fullSizeFromThumb(String url) {
     final match = RegExp(r'thumb\.php\?url=([^&]+)').firstMatch(url);
     if (match == null) return url;
@@ -131,7 +181,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
       if (outerSizeIdx != -1) thumbUrl = thumbUrl.substring(0, outerSizeIdx);
       return thumbUrl;
     }
-    return original;
+    return _rewriteAttachmentUrl(original);
   }
 
   String _buildPostUrl(String href) {
@@ -299,7 +349,10 @@ class HumorunivImpl extends HtmlCommunityRepo {
     final bodyEl = item.querySelector('.comment_body');
     if (bodyEl != null) {
       mediaBlocks.addAll(
-        htmlClient.scanContentCompact(bodyEl).map(_withSynthesizedVideoThumb),
+        htmlClient
+            .scanContentCompact(bodyEl)
+            .map(_rewriteAttachmentBlock)
+            .map(_withSynthesizedVideoThumb),
       );
     }
 
