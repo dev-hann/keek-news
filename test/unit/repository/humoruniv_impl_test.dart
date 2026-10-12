@@ -612,4 +612,61 @@ void main() {
       expect(result.items.single.thumbnailUrl, editorOriginal);
     });
   });
+
+  group('HumorunivImpl native webp uploads stay in place (1428549)', () {
+    // Native webp (and mp4) attachments exist only on the original
+    // down.humoruniv.com host — the webp CDN 404s for them — so the
+    // png/jpg propagation rewrite must never touch them.
+    const webpOriginal =
+        'https://down.humoruniv.com/hwiparambbs/data/pds/'
+        'a_w776d7a001_11eda84ef82bd1667e3dd6ff3b503ba8b038ae76.webp';
+
+    test('body native webp url is not rewritten to the CDN', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'read.html': _read('pds_1428549.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1428549');
+
+      final images = detail.contentBlocks.whereType<ImageBlock>().toList();
+      expect(images, isNotEmpty, reason: 'fixture must contain an image');
+      for (final img in images) {
+        expect(
+          img.url,
+          isNot(startsWith('https://down-webp.humoruniv.com/')),
+          reason: 'native upload wrongly rewritten: ${img.url}',
+        );
+      }
+      expect(
+        images.any((i) => i.url == webpOriginal),
+        isTrue,
+        reason: 'webp original must survive as-is',
+      );
+      expect(detail.imageUrls, contains(webpOriginal));
+    });
+
+    test('native webp list thumb keeps the original host', () async {
+      const listHtml =
+          '''
+<html><body>
+<div class="post_item"><a class="post_link" data-number="1428549"
+ href="read.html?table=pds&amp;number=1428549">
+<table><tr>
+<td><img class="img" src="https://timg.humoruniv.com/thumb.php?url=$webpOriginal?SIZE=120x90"></td>
+<td><span class="link_hover">title</span></td>
+</tr></table></a></div>
+<div id="pgnum"><a class="def" href="list.html?table=pds&amp;pg=0">1</a></div>
+</body></html>
+''';
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({'list.html': listHtml}),
+      );
+
+      final result = await repo.fetchLatest();
+
+      expect(result.items.single.thumbnailUrl, webpOriginal);
+    });
+  });
 }

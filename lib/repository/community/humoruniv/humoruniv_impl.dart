@@ -122,17 +122,21 @@ class HumorunivImpl extends HtmlCommunityRepo {
     return _fullSizeFromThumb(normalized);
   }
 
-  /// 2026-10: humoruniv stopped serving board attachment originals
-  /// (`hwiparambbs/data/pds/a_<id>_<hash>.<ext>`) from down.humoruniv.com —
-  /// new uploads 404 there while the site itself now ships
-  /// `down-webp.humoruniv.com/<hash[0:2]>/<hash>.webp` as the img src
-  /// (the old path survives only in `img_file_url` and thumb.php params).
-  /// The webp CDN serves old and new uploads alike, so every URL of that
-  /// shape is rewritten to it. Editor uploads (`data/editor/pdswait/e_*`)
-  /// still resolve in place and pass through untouched.
+  /// humoruniv publishes non-webp board attachments
+  /// (`hwiparambbs/data/pds/a_<id>_<hash>.{png,jpg}`) to the webp CDN
+  /// (`down-webp.humoruniv.com/<hash[0:2]>/<hash>.webp`) immediately, but
+  /// the original on down.humoruniv.com only appears after a propagation
+  /// delay — fresh posts 404 there for a while (verified 2026-10: six
+  /// list attachments were 404 at fetch time and 200 an hour later).
+  /// Rewriting png/jpg to the CDN covers that window and stays correct
+  /// afterwards (both copies live).
+  /// Native webp and mp4 uploads exist ONLY on the original host — the
+  /// CDN 404s for them — so they must never be rewritten. Editor uploads
+  /// (`data/editor/pdswait/e_*`) and comment files (`data/comment/*`)
+  /// also resolve in place and pass through untouched.
   static final RegExp _legacyAttachmentPattern = RegExp(
     r'^https?://down\.humoruniv\.com/hwiparambbs/data/pds/'
-    r'a_[0-9a-z]+_([0-9a-f]{40})\.(?:png|jpe?g|gif|webp|bmp)$',
+    r'a_[0-9a-z]+_([0-9a-f]{40})\.(?:png|jpe?g)$',
     caseSensitive: false,
   );
 
