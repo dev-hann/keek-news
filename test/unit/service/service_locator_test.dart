@@ -3,6 +3,7 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/blocked_image/blocked_image_impl.dart';
 import 'package:keek_news/repository/blocked_image/blocked_image_repo.dart';
 import 'package:keek_news/repository/community/community_repo.dart';
+import 'package:keek_news/service/image_hash_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/use_case/copy_media_url_use_case.dart';
@@ -62,6 +63,11 @@ void main() {
       await di.configureDependencies();
       expect(di.sl<BlockedImageRepo>(), isA<BlockedImageImpl>());
       expect(di.sl<BlockImageUseCase>(), isNotNull);
+    });
+
+    test('should register the image hash service', () async {
+      await di.configureDependencies();
+      expect(di.sl<ImageHashService>(), isNotNull);
     });
 
     test('UpdateUseCase should read version from PackageInfo', () async {

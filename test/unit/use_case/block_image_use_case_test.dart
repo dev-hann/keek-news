@@ -5,10 +5,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/blocked_image.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/repository/blocked_image/blocked_image_repo.dart';
+import 'package:keek_news/service/image_hash_service.dart';
 import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockBlockedImageRepo extends Mock implements BlockedImageRepo {}
+
+class FakeImageHashService implements ImageHashService {
+  const FakeImageHashService(this.hash);
+
+  final String? hash;
+
+  @override
+  Future<String?> hashFor(String url) async => hash;
+}
 
 void main() {
   late MockBlockedImageRepo repo;
@@ -80,6 +90,43 @@ void main() {
 
       expect(fired, 1);
       await subscription.cancel();
+    });
+  });
+
+  group('BlockImageUseCase fingerprints', () {
+    test('add should capture the fingerprint when hashing succeeds', () async {
+      when(() => repo.add(any())).thenAnswer((_) async {});
+      final useCaseWithHash = BlockImageUseCase(
+        repo,
+        hashService: const FakeImageHashService('abcdef0123456789'),
+      );
+
+      await useCaseWithHash.add('https://x/a.jpg');
+
+      final captured =
+          verify(() => repo.add(captureAny())).captured.single as BlockedImage;
+      expect(captured.hash, 'abcdef0123456789');
+    });
+
+    test('add should store a URL-only entry when hashing fails', () async {
+      when(() => repo.add(any())).thenAnswer((_) async {});
+      final useCaseNoHash = BlockImageUseCase(
+        repo,
+        hashService: const FakeImageHashService(null),
+      );
+
+      await useCaseNoHash.add('https://x/a.jpg');
+
+      final captured =
+          verify(() => repo.add(captureAny())).captured.single as BlockedImage;
+      expect(captured.hash, isNull);
+    });
+
+    test('isHashBlocked should delegate to the repo', () async {
+      when(() => repo.isHashBlocked(any())).thenReturn(true);
+
+      expect(useCase.isHashBlocked('0123456789abcdef'), isTrue);
+      verify(() => repo.isHashBlocked('0123456789abcdef')).called(1);
     });
   });
 }

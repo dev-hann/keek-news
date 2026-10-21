@@ -39,6 +39,7 @@ import 'package:keek_news/service/gal_gallery_save_service.dart';
 import 'package:keek_news/service/gallery_save_service.dart';
 import 'package:keek_news/service/github_remote_service.dart';
 import 'package:keek_news/service/image_cache_service.dart';
+import 'package:keek_news/service/image_hash_service.dart';
 import 'package:keek_news/service/local_storage_service.dart';
 import 'package:keek_news/service/media_download_service.dart';
 import 'package:keek_news/service/media_share_service.dart';
@@ -271,8 +272,12 @@ Future<void> configureDependencies() async {
   sl.registerLazySingleton<BlockedImageRepo>(
     () => BlockedImageImpl(sl<LocalStorageService>()),
   );
+  sl.registerLazySingleton<ImageHashService>(FlutterImageHashService.new);
   sl.registerLazySingleton<BlockImageUseCase>(
-    () => BlockImageUseCase(sl<BlockedImageRepo>()),
+    () => BlockImageUseCase(
+      sl<BlockedImageRepo>(),
+      hashService: sl<ImageHashService>(),
+    ),
   );
   sl.registerLazySingleton<CacheUseCase>(
     () => CacheUseCase(sl<ImageCacheRepo>()),

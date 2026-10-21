@@ -1,6 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:keek_news/service/image_hash_service.dart';
 import 'package:keek_news/service/retry_controller.dart';
+import 'package:keek_news/service/service_locator.dart';
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 class RetryableNetworkImage extends StatefulWidget {
@@ -16,6 +20,7 @@ class RetryableNetworkImage extends StatefulWidget {
     this.foregroundColor,
     this.borderRadius,
     this.controller,
+    this.disableBlockFilter = false,
     super.key,
   });
 
@@ -31,6 +36,10 @@ class RetryableNetworkImage extends StatefulWidget {
   final BorderRadius? borderRadius;
   final RetryController? controller;
 
+  /// Skips the blocked-image fingerprint check. The blocklist management
+  /// screen sets this so users can still see what they are unblocking.
+  final bool disableBlockFilter;
+
   @override
   State<RetryableNetworkImage> createState() => _RetryableNetworkImageState();
 }
@@ -39,6 +48,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
   RetryController? _ownedController;
   RetryController? _controller;
   int _lastSeenAttempt = 0;
+  bool _hashBlocked = false;
 
   RetryController get _effectiveController {
     if (widget.controller != null) return widget.controller!;
@@ -55,6 +65,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
     _controller = _effectiveController;
     _lastSeenAttempt = _controller!.attempt;
     _controller!.addListener(_onControllerChanged);
+    _checkBlocklist();
   }
 
   @override
@@ -70,6 +81,28 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
     if (oldWidget.imageUrl != widget.imageUrl) {
       _controller!.resetForUrl(widget.imageUrl, currentUrl: oldWidget.imageUrl);
       _lastSeenAttempt = _controller!.attempt;
+      _hashBlocked = false;
+      _checkBlocklist();
+    } else if (oldWidget.disableBlockFilter != widget.disableBlockFilter) {
+      _hashBlocked = false;
+      _checkBlocklist();
+    }
+  }
+
+  /// Fingerprint check against the blocklist. The image swaps to a blocked
+  /// placeholder when its dHash matches a blocked picture posted under a
+  /// different URL. Services are DI-optional in widget tests; degrade quietly.
+  Future<void> _checkBlocklist() async {
+    if (widget.disableBlockFilter) return;
+    if (!sl.isRegistered<ImageHashService>() ||
+        !sl.isRegistered<BlockImageUseCase>()) {
+      return;
+    }
+    final url = widget.imageUrl;
+    final hash = await sl<ImageHashService>().hashFor(url);
+    if (!mounted || hash == null || url != widget.imageUrl) return;
+    if (sl<BlockImageUseCase>().isHashBlocked(hash)) {
+      setState(() => _hashBlocked = true);
     }
   }
 
@@ -109,7 +142,13 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
         widget.foregroundColor ?? theme.colorScheme.mutedForeground;
 
     final Widget content;
-    if (_controller!.isExhausted) {
+    if (_hashBlocked) {
+      content = _BlockedView(
+        background: background,
+        foreground: foreground,
+        showCaption: widget.height == null || widget.height! >= 44,
+      );
+    } else if (_controller!.isExhausted) {
       content = _RetryErrorView(
         icon: widget.errorIcon,
         foreground: foreground,
@@ -135,6 +174,49 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
       return ClipRRect(borderRadius: widget.borderRadius!, child: content);
     }
     return content;
+  }
+}
+
+class _BlockedView extends StatelessWidget {
+  const _BlockedView({
+    required this.background,
+    required this.foreground,
+    required this.showCaption,
+  });
+
+  final Color background;
+  final Color foreground;
+  final bool showCaption;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = ShadTheme.of(context);
+    return Semantics(
+      button: true,
+      label: '차단된 이미지, 탭하여 차단 해제',
+      child: InkWell(
+        onTap: () => context.push('/blocked-images'),
+        child: ColoredBox(
+          color: background,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(LucideIcons.imageOff, color: foreground),
+                if (showCaption) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    '차단된 이미지',
+                    style: theme.textTheme.small.copyWith(color: foreground),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

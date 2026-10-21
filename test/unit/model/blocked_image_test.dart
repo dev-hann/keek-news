@@ -7,12 +7,23 @@ void main() {
       final image = BlockedImage(
         url: 'https://example.com/a.jpg',
         blockedAt: DateTime.fromMillisecondsSinceEpoch(1722324000000),
+        hash: '0123456789abcdef',
       );
 
       final decoded = BlockedImage.fromJson(image.toJson());
 
       expect(decoded.url, image.url);
       expect(decoded.blockedAt, image.blockedAt);
+      expect(decoded.hash, '0123456789abcdef');
+    });
+
+    test('should decode legacy entries without a hash', () {
+      final decoded = BlockedImage.fromJson(const <String, dynamic>{
+        'url': 'https://example.com/a.jpg',
+        'blockedAtMillis': 1722324000000,
+      });
+
+      expect(decoded.hash, isNull);
     });
 
     test('should use url in equality', () {

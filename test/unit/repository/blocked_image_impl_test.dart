@@ -125,6 +125,94 @@ void main() {
     });
   });
 
+  group('BlockedImageImpl hash matching', () {
+    test('should persist and reload the hash field', () async {
+      when(() => storage.getString(_storageKey)).thenReturn(
+        encodeAll([
+          BlockedImage(
+            url: 'https://x/a.jpg',
+            blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+            hash: '0123456789abcdef',
+          ),
+        ]),
+      );
+
+      final result = await repo.getAll();
+
+      expect(result.single.hash, '0123456789abcdef');
+    });
+
+    test('isHashBlocked matches within the Hamming threshold', () async {
+      when(() => storage.getString(_storageKey)).thenReturn(
+        encodeAll([
+          BlockedImage(
+            url: 'https://x/a.jpg',
+            blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+            hash: '0000000000000000',
+          ),
+        ]),
+      );
+
+      // 0x3f is 6 bits away — inside the threshold.
+      expect(repo.isHashBlocked('3f'), isTrue);
+      // 0xff is 8 bits away — outside.
+      expect(repo.isHashBlocked('ff'), isFalse);
+    });
+
+    test('isHashBlocked reads storage lazily without a prior getAll', () async {
+      when(() => storage.getString(_storageKey)).thenReturn(
+        encodeAll([
+          BlockedImage(
+            url: 'https://x/a.jpg',
+            blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+            hash: '0000000000000000',
+          ),
+        ]),
+      );
+
+      expect(repo.isHashBlocked('0000000000000000'), isTrue);
+    });
+
+    test('isHashBlocked skips entries without a hash', () async {
+      when(() => storage.getString(_storageKey)).thenReturn(
+        encodeAll([
+          BlockedImage(
+            url: 'https://x/a.jpg',
+            blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+          ),
+        ]),
+      );
+
+      expect(repo.isHashBlocked('0000000000000000'), isFalse);
+    });
+
+    test('add stores the hash captured at block time', () async {
+      when(() => storage.getString(_storageKey)).thenReturn(null);
+      when(
+        () => storage.setString(_storageKey, any()),
+      ).thenAnswer((_) async {});
+
+      await repo.add(
+        BlockedImage(
+          url: 'https://x/a.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+          hash: 'abcdef0123456789',
+        ),
+      );
+
+      final captured =
+          verify(
+                () => storage.setString(_storageKey, captureAny()),
+              ).captured.single
+              as String;
+      final persisted = (jsonDecode(captured) as List)
+          .cast<Map<String, dynamic>>()
+          .map(BlockedImage.fromJson)
+          .toList();
+      expect(persisted.single.hash, 'abcdef0123456789');
+    });
+  });
+
   group('BlockedImageImpl remove', () {
     test('should remove matching url and persist', () async {
       when(() => storage.getString(_storageKey)).thenReturn(

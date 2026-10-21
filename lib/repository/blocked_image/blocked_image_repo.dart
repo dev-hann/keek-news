@@ -10,4 +10,8 @@ abstract class BlockedImageRepo {
   Future<void> remove(String url);
 
   Stream<void> get changes;
+
+  /// Whether [hash] fingerprint-matches any blocked image (small Hamming
+  /// distance). Sync so render-time checks never await.
+  bool isHashBlocked(String hash);
 }

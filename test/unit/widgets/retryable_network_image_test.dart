@@ -1,11 +1,25 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:keek_news/model/blocked_image.dart';
+import 'package:keek_news/service/image_hash_service.dart';
 import 'package:keek_news/service/retry_controller.dart';
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../helpers/media_action_fakes.dart';
 import '../../helpers/shad_harness.dart';
+
+class FakeImageHashService implements ImageHashService {
+  const FakeImageHashService(this.hash);
+
+  final String hash;
+
+  @override
+  Future<String?> hashFor(String url) async => hash;
+}
 
 void main() {
   group('RetryableNetworkImage', () {
@@ -276,6 +290,95 @@ void main() {
         // This test guards against the owned controller being constructed
         // with default args — if so, retryDelay=500ms would still pass here.
         expect(cachedImageKey(), contains('#0'));
+      });
+    });
+
+    group('blocked-image placeholder', () {
+      tearDown(GetIt.I.reset);
+
+      Future<void> pumpImage(
+        WidgetTester tester, {
+        bool disableBlockFilter = false,
+      }) async {
+        final blockedRepo = StubBlockedImageRepo();
+        await blockedRepo.add(
+          BlockedImage(
+            url: 'https://example.com/original.jpg',
+            blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+            hash: '0000000000000000',
+          ),
+        );
+        final sl = GetIt.I;
+        sl.registerLazySingleton<ImageHashService>(
+          () => const FakeImageHashService('3f'),
+        );
+        sl.registerLazySingleton<BlockImageUseCase>(
+          () => BlockImageUseCase(blockedRepo),
+        );
+        await tester.pumpWidget(
+          shadHarness(
+            RetryableNetworkImage(
+              imageUrl: 'https://example.com/repost.webp',
+              disableBlockFilter: disableBlockFilter,
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+      }
+
+      testWidgets('fingerprint match swaps in the blocked placeholder', (
+        tester,
+      ) async {
+        await pumpImage(tester);
+
+        expect(find.byIcon(LucideIcons.imageOff), findsOneWidget);
+        expect(find.text('차단된 이미지'), findsOneWidget);
+        expect(find.byType(CachedNetworkImage), findsNothing);
+        expect(
+          find.byWidgetPredicate(
+            (w) => w is Semantics && w.properties.label == '차단된 이미지, 탭하여 차단 해제',
+          ),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('disableBlockFilter keeps the real image', (tester) async {
+        await pumpImage(tester, disableBlockFilter: true);
+
+        expect(find.text('차단된 이미지'), findsNothing);
+        expect(find.byType(CachedNetworkImage), findsOneWidget);
+      });
+
+      testWidgets('hides the caption for small boxes', (tester) async {
+        final blockedRepo = StubBlockedImageRepo();
+        await blockedRepo.add(
+          BlockedImage(
+            url: 'https://example.com/original.jpg',
+            blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+            hash: '0000000000000000',
+          ),
+        );
+        final sl = GetIt.I;
+        sl.registerLazySingleton<ImageHashService>(
+          () => const FakeImageHashService('3f'),
+        );
+        sl.registerLazySingleton<BlockImageUseCase>(
+          () => BlockImageUseCase(blockedRepo),
+        );
+        await tester.pumpWidget(
+          shadHarness(
+            const RetryableNetworkImage(
+              imageUrl: 'https://example.com/repost.webp',
+              height: 40,
+            ),
+          ),
+        );
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byIcon(LucideIcons.imageOff), findsOneWidget);
+        expect(find.text('차단된 이미지'), findsNothing);
       });
     });
   });

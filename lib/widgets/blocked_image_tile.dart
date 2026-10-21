@@ -30,6 +30,7 @@ class BlockedImageTile extends StatelessWidget {
               fit: BoxFit.cover,
               width: 64,
               height: 64,
+              disableBlockFilter: true,
             ),
           ),
           const SizedBox(width: 12),

@@ -8,6 +8,7 @@ import 'package:keek_news/model/media_save_failure.dart';
 import 'package:keek_news/model/media_target.dart';
 import 'package:keek_news/repository/blocked_image/blocked_image_repo.dart';
 import 'package:keek_news/repository/media_save/media_save_repo.dart';
+import 'package:keek_news/service/image_hash_service.dart';
 import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/use_case/copy_media_url_use_case.dart';
 import 'package:keek_news/use_case/save_media_use_case.dart';
@@ -57,6 +58,8 @@ class StubMediaSaveRepo implements MediaSaveRepo {
 /// In-memory blocklist double: tracks blocked URLs (newest first) and
 /// broadcasts [BlockedImageRepo.changes] after each mutation.
 class StubBlockedImageRepo implements BlockedImageRepo {
+  static const _matchDistance = 6;
+
   final List<BlockedImage> _images = [];
   final StreamController<void> _changes = StreamController<void>.broadcast();
 
@@ -84,6 +87,18 @@ class StubBlockedImageRepo implements BlockedImageRepo {
     removedUrls.add(url);
     _images.removeWhere((b) => b.url == url);
     _changes.add(null);
+  }
+
+  @override
+  bool isHashBlocked(String hash) {
+    for (final image in _images) {
+      final blocked = image.hash;
+      if (blocked == null) continue;
+      if (FlutterImageHashService.distance(hash, blocked) <= _matchDistance) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
