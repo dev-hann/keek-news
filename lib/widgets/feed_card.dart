@@ -8,6 +8,7 @@ import 'package:keek_news/widgets/action_button.dart';
 import 'package:keek_news/widgets/avatar.dart';
 import 'package:keek_news/widgets/count_badge.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
+import 'package:keek_news/widgets/link_text.dart';
 import 'package:keek_news/widgets/skeleton_box.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
@@ -42,12 +43,32 @@ class FeedCard extends StatelessWidget {
   String? get _bodyText {
     final d = detail;
     if (d == null) return null;
-    final texts = d.contentBlocks
-        .whereType<TextBlock>()
-        .map((b) => b.text.trim())
-        .where((t) => t.isNotEmpty)
-        .toList();
+    final texts = <String>[];
+    for (final block in d.contentBlocks) {
+      String? text;
+      if (block is TextBlock) {
+        text = block.text.trim();
+      } else if (block is HtmlBlock) {
+        // Labels and bare-URL anchors inside rich blocks must stay visible;
+        // the raw markup never reaches the UI.
+        text = _htmlBlockText(block.html);
+      }
+      if (text != null && text.isNotEmpty) texts.add(text);
+    }
     return texts.isEmpty ? null : texts.join('\n');
+  }
+
+  static String _htmlBlockText(String html) {
+    const entities = {'&amp;': '&', '&quot;': '"', '&lt;': '<', '&gt;': '>'};
+    var text = html;
+    for (final entry in entities.entries) {
+      text = text.replaceAll(entry.key, entry.value);
+    }
+    return text
+        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+        .replaceAll(RegExp('<[^>]+>'), ' ')
+        .replaceAll(RegExp(r'[ \t]+'), ' ')
+        .trim();
   }
 
   @override
@@ -261,7 +282,7 @@ class _ExpandableTextState extends State<_ExpandableText> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            LinkText(
               widget.text,
               style: style,
               maxLines: _expanded ? null : widget.maxLines,

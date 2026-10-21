@@ -9,11 +9,19 @@ import 'package:keek_news/theme/shad_theme.dart';
 import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/feed_card.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
+import 'package:keek_news/widgets/link_text.dart';
 import 'package:keek_news/widgets/skeleton_box.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../helpers/shad_harness.dart';
+
+Iterable<TextSpan> _allSpans(TextSpan span) sync* {
+  yield span;
+  for (final child in span.children ?? const <InlineSpan>[]) {
+    if (child is TextSpan) yield* _allSpans(child);
+  }
+}
 
 void main() {
   setUp(() {
@@ -401,6 +409,74 @@ void main() {
         expect(find.text('더보기'), findsOneWidget);
       },
     );
+
+    testWidgets('HtmlBlock link labels stay visible in body text', (
+      tester,
+    ) async {
+      final detail = detailWith(
+        blocks: const [
+          TextBlock('참고하세요'),
+          HtmlBlock(
+            '<a href="https://example.com/ref" target="_blank">여기 클릭</a>',
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
+          ),
+        ),
+      );
+
+      expect(find.byType(LinkText), findsOneWidget);
+      final rich = tester.widget<RichText>(
+        find.descendant(
+          of: find.byType(LinkText),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(
+        rich.text.toPlainText(),
+        contains('여기 클릭'),
+        reason: 'labeled link text must not vanish from the card body',
+      );
+      expect(
+        rich.text.toPlainText(),
+        isNot(contains('<a')),
+        reason: 'raw markup must never reach the UI',
+      );
+    });
+
+    testWidgets('bare URL in body text gets a tap recognizer', (tester) async {
+      final detail = detailWith(
+        blocks: const [TextBlock('출처 https://example.com/src')],
+      );
+      await tester.pumpWidget(
+        shadHarness(
+          SingleChildScrollView(
+            child: FeedCard(post: post, detail: detail),
+          ),
+        ),
+      );
+
+      final rich = tester.widget<RichText>(
+        find.descendant(
+          of: find.byType(LinkText),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(
+        _allSpans(rich.text as TextSpan).any(
+          (s) =>
+              s.text != null &&
+              s.text!.contains('example.com') &&
+              s.recognizer != null,
+        ),
+        isTrue,
+        reason: 'bare URL must be tappable',
+      );
+    });
   });
 
   group('FeedCard action buttons', () {

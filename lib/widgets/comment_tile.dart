@@ -5,6 +5,7 @@ import 'package:keek_news/model/media_target.dart';
 import 'package:keek_news/pages/comment_video_viewer_view.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/utils/time_ago.dart';
+import 'package:keek_news/widgets/link_text.dart';
 import 'package:keek_news/widgets/media_action_sheet.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
@@ -28,7 +29,7 @@ class CommentTile extends StatelessWidget {
           _Header(comment: comment, theme: theme, mTheme: mTheme),
           if (comment.content.isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text(
+            LinkText(
               comment.content,
               style: mTheme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.foreground,

@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:keek_news/model/comment.dart';
 import 'package:keek_news/model/content_block.dart';
 import 'package:keek_news/widgets/comment_tile.dart';
+import 'package:keek_news/widgets/link_text.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -33,6 +34,13 @@ Comment _comment({
 }
 
 Widget _wrap(Widget child) => shadHarness(child);
+
+Iterable<TextSpan> _allSpans(TextSpan span) sync* {
+  yield span;
+  for (final child in span.children ?? const <InlineSpan>[]) {
+    if (child is TextSpan) yield* _allSpans(child);
+  }
+}
 
 void main() {
   setUp(() {
@@ -129,6 +137,30 @@ void main() {
       expect(find.text('대댓글 내용'), findsOneWidget);
       // Two CommentTiles: parent + reply.
       expect(find.byType(CommentTile), findsNWidgets(2));
+    });
+
+    testWidgets('content with a url renders as LinkText', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          SingleChildScrollView(
+            child: CommentTile(
+              comment: _comment(content: '출처 www.example.com/src 입니다'),
+            ),
+          ),
+        ),
+      );
+
+      final rich = tester.widget<RichText>(
+        find.descendant(
+          of: find.byType(LinkText),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(
+        _allSpans(rich.text as TextSpan).any((s) => s.recognizer != null),
+        isTrue,
+        reason: 'url must carry a tap recognizer',
+      );
     });
 
     testWidgets('long-press on a comment image opens the media action sheet', (
