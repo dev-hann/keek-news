@@ -1,13 +1,53 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:keek_news/model/blocked_image.dart';
 import 'package:keek_news/pages/image_viewer_view.dart';
+import 'package:keek_news/provider/blocked_images_provider.dart';
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../helpers/media_action_fakes.dart';
 import '../../helpers/shad_harness.dart';
+
+/// [ImageViewerView] is a [ConsumerStatefulWidget]: every pump needs a
+/// [ProviderScope] with a stubbed blocked-image use case (empty blocklist).
+Widget _scopedShadApp({
+  Widget? home,
+  GlobalKey<NavigatorState>? navigatorKey,
+  StubBlockedImageRepo? blockedRepo,
+}) {
+  final container = ProviderContainer(
+    overrides: [
+      blockImageUseCaseProvider.overrideWithValue(
+        BlockImageUseCase(blockedRepo ?? StubBlockedImageRepo()),
+      ),
+    ],
+  );
+  addTearDown(container.dispose);
+  return UncontrolledProviderScope(
+    container: container,
+    child: shadApp(home: home, navigatorKey: navigatorKey),
+  );
+}
+
+Widget _scopedShadAppWithMessenger({Widget? home}) {
+  final container = ProviderContainer(
+    overrides: [
+      blockImageUseCaseProvider.overrideWithValue(
+        BlockImageUseCase(StubBlockedImageRepo()),
+      ),
+    ],
+  );
+  addTearDown(container.dispose);
+  return UncontrolledProviderScope(
+    container: container,
+    child: shadAppWithMessenger(home: home),
+  );
+}
 
 void main() {
   tearDown(GetIt.I.reset);
@@ -19,7 +59,7 @@ void main() {
         final repo = StubMediaSaveRepo();
         registerMediaActionFakes(repo);
         await tester.pumpWidget(
-          shadApp(
+          _scopedShadApp(
             home: ImageViewerView(
               imageUrls: const ['https://example.com/a.jpg'],
               imageBuilder: (_) => const SizedBox.shrink(),
@@ -43,7 +83,7 @@ void main() {
       final repo = StubMediaSaveRepo();
       registerMediaActionFakes(repo);
       await tester.pumpWidget(
-        shadAppWithMessenger(
+        _scopedShadAppWithMessenger(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/a.jpg',
@@ -75,7 +115,7 @@ void main() {
 
     testWidgets('renders close button for a single image', (tester) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: const ImageViewerView(imageUrls: ['https://example.com/a.jpg']),
         ),
       );
@@ -85,7 +125,7 @@ void main() {
 
     testWidgets('renders page indicator for multiple images', (tester) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: const ImageViewerView(
             imageUrls: [
               'https://example.com/a.jpg',
@@ -100,7 +140,7 @@ void main() {
 
     testWidgets('renders a PageView for paging between images', (tester) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: const ImageViewerView(imageUrls: ['https://example.com/a.jpg']),
         ),
       );
@@ -111,7 +151,7 @@ void main() {
 
     testWidgets('renders InteractiveViewer for a normal image', (tester) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: const ImageViewerView(
             imageUrls: ['https://example.com/a.jpg'],
             knownAspects: {'https://example.com/a.jpg': 2.0},
@@ -131,7 +171,7 @@ void main() {
         // 800x600 viewport, extendBodyBehindAppBar → body height 600; a
         // 2000-tall long image has maxScrollExtent = 1400 without reserve.
         await tester.pumpWidget(
-          shadApp(
+          _scopedShadApp(
             home: ImageViewerView(
               imageUrls: const ['https://example.com/long.jpg'],
               knownAspects: const {'https://example.com/long.jpg': 0.5},
@@ -161,7 +201,7 @@ void main() {
     testWidgets('renders vertical SingleChildScrollView for a long image '
         'instead of InteractiveViewer', (tester) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: const ImageViewerView(
             imageUrls: ['https://example.com/a.jpg'],
             knownAspects: {'https://example.com/a.jpg': 0.5},
@@ -188,7 +228,7 @@ void main() {
     testWidgets('close button pops the screen', (tester) async {
       final navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           navigatorKey: navigatorKey,
           home: const Scaffold(body: Text('root')),
         ),
@@ -218,7 +258,7 @@ void main() {
     ) async {
       final navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           navigatorKey: navigatorKey,
           home: const Scaffold(body: Text('root')),
         ),
@@ -246,7 +286,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/a.jpg',
@@ -274,7 +314,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/a.jpg',
@@ -303,7 +343,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/a.jpg',
@@ -325,7 +365,7 @@ void main() {
       'horizontal swipe advances pages when starting on a long image',
       (tester) async {
         await tester.pumpWidget(
-          shadApp(
+          _scopedShadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/long.jpg',
@@ -358,7 +398,7 @@ void main() {
       'horizontal swipe advances pages when the next page is a long image',
       (tester) async {
         await tester.pumpWidget(
-          shadApp(
+          _scopedShadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/normal.jpg',
@@ -390,7 +430,7 @@ void main() {
     testWidgets('REPRO: horizontal swipe on a genuinely tall long-image page '
         'advances to the next page', (tester) async {
       await tester.pumpWidget(
-        shadApp(
+        _scopedShadApp(
           home: ImageViewerView(
             imageUrls: const [
               'https://example.com/long.jpg',
@@ -432,7 +472,7 @@ void main() {
       '(dismiss must not steal it)',
       (tester) async {
         await tester.pumpWidget(
-          shadApp(
+          _scopedShadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/normal.jpg',
@@ -473,7 +513,7 @@ void main() {
       'REPRO: slightly-diagonal swipe from a long image still pages back',
       (tester) async {
         await tester.pumpWidget(
-          shadApp(
+          _scopedShadApp(
             home: ImageViewerView(
               imageUrls: const [
                 'https://example.com/normal.jpg',
@@ -505,5 +545,108 @@ void main() {
         );
       },
     );
+
+    testWidgets('pre-blocked image is removed from the paged list', (
+      tester,
+    ) async {
+      final repo = StubBlockedImageRepo();
+      await repo.add(
+        BlockedImage(
+          url: 'https://example.com/a.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
+      await tester.pumpWidget(
+        _scopedShadApp(
+          blockedRepo: repo,
+          home: const ImageViewerView(
+            imageUrls: [
+              'https://example.com/a.jpg',
+              'https://example.com/b.jpg',
+            ],
+            imageBuilder: Text.new,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('https://example.com/a.jpg'),
+        findsNothing,
+        reason: 'blocked image must not render a page',
+      );
+      expect(find.text('https://example.com/b.jpg'), findsOneWidget);
+    });
+
+    testWidgets('viewer pops itself when every image is blocked', (
+      tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      final repo = StubBlockedImageRepo();
+      await repo.add(
+        BlockedImage(
+          url: 'https://example.com/a.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
+      await tester.pumpWidget(
+        _scopedShadApp(
+          blockedRepo: repo,
+          navigatorKey: navigatorKey,
+          home: const Scaffold(body: Text('root')),
+        ),
+      );
+      unawaited(
+        navigatorKey.currentState!.push(
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                const ImageViewerView(imageUrls: ['https://example.com/a.jpg']),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('root'),
+        findsOneWidget,
+        reason: 'empty viewer must auto-pop back to the caller',
+      );
+    });
+
+    testWidgets('blocking the open image removes its page live', (
+      tester,
+    ) async {
+      final repo = StubBlockedImageRepo();
+      await tester.pumpWidget(
+        _scopedShadApp(
+          blockedRepo: repo,
+          home: const ImageViewerView(
+            imageUrls: [
+              'https://example.com/a.jpg',
+              'https://example.com/b.jpg',
+            ],
+            imageBuilder: Text.new,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('https://example.com/a.jpg'), findsOneWidget);
+      expect(find.text('1/2'), findsOneWidget);
+
+      await repo.add(
+        BlockedImage(
+          url: 'https://example.com/a.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('https://example.com/a.jpg'),
+        findsNothing,
+        reason: 'the blocked page must disappear live',
+      );
+      expect(find.text('https://example.com/b.jpg'), findsOneWidget);
+    });
   });
 }

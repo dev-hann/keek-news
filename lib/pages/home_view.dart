@@ -5,11 +5,13 @@ import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/feed_item.dart';
 import 'package:keek_news/provider/app_version_provider.dart';
+import 'package:keek_news/provider/blocked_images_provider.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/provider/feed_video_playback_provider.dart';
 import 'package:keek_news/provider/merged_feed_provider.dart';
 import 'package:keek_news/provider/settings_provider.dart';
 import 'package:keek_news/service/video_playback_controller.dart';
+import 'package:keek_news/utils/blocked_image_filter.dart';
 import 'package:keek_news/widgets/community_tab_bar.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
 import 'package:keek_news/widgets/error_state_view.dart';
@@ -139,6 +141,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final details = ref.watch(mergedDetailProvider);
     final videoController = ref.watch(videoPlaybackControllerProvider);
     final appVersion = ref.watch(appVersionProvider).valueOrNull;
+    final blockedUrls = {
+      for (final image in ref.watch(blockedImagesProvider)) image.url,
+    };
     final enabled = ref.watch(settingsProvider);
     final visibleCommunities = communities
         .where((c) => enabled.contains(c.id))
@@ -206,6 +211,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
               details,
               videoController,
               appVersion,
+              blockedUrls,
             ),
           ],
         ),
@@ -225,6 +231,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     MergedDetailMap details,
     VideoPlaybackController videoController,
     String? appVersion,
+    Set<String> blockedUrls,
   ) {
     if (state.isLoading) {
       return [_sliverSkeleton()];
@@ -267,7 +274,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           return RepaintBoundary(
             child: FeedDetailCard(
               post: item,
-              detail: av?.value,
+              detail: filterBlockedPostDetail(av?.value, blockedUrls),
               detailLoading: av?.isLoading ?? false,
               isBookmarked: bookmarks.any(
                 (b) => b.community == item.community && b.id == item.id,

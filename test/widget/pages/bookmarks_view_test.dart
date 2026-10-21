@@ -6,9 +6,11 @@ import 'package:keek_news/model/bookmark.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/post_detail.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
+import 'package:keek_news/provider/blocked_images_provider.dart';
 import 'package:keek_news/provider/bookmark_provider.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
@@ -16,6 +18,7 @@ import 'package:keek_news/widgets/feed_card.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
+import '../../helpers/media_action_fakes.dart';
 import '../../helpers/package_info_helper.dart';
 import '../../helpers/post_detail_helper.dart';
 import '../../helpers/shad_harness.dart';
@@ -100,6 +103,9 @@ void main() {
       overrides: [
         bookmarkProvider.overrideWith(
           (ref) => BookmarkNotifier(BookmarkUseCase(repo)),
+        ),
+        blockImageUseCaseProvider.overrideWithValue(
+          BlockImageUseCase(StubBlockedImageRepo()),
         ),
       ],
     );

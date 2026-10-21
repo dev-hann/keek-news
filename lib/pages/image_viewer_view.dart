@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:keek_news/model/blocked_image.dart';
 import 'package:keek_news/model/media_target.dart';
+import 'package:keek_news/provider/blocked_images_provider.dart';
 import 'package:keek_news/utils/image_aspect_resolver.dart';
 import 'package:keek_news/utils/long_image.dart';
 import 'package:keek_news/widgets/media_action_sheet.dart';
@@ -16,7 +18,12 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 /// Deliberately avoids `photo_view` and swipe-down-to-dismiss: a vertical drag
 /// recognizer competed with horizontal paging on real touches. Dismiss via the
 /// close button or system back gesture.
-class ImageViewerView extends StatefulWidget {
+///
+/// Blocked images are removed from the paged list; callers may pass an
+/// already-filtered list (feed carousel) or a raw snapshot (comment sheet) —
+/// either way the viewer re-filters against the live blocklist. When every
+/// page ends up blocked the viewer pops itself.
+class ImageViewerView extends ConsumerStatefulWidget {
   const ImageViewerView({
     required this.imageUrls,
     this.initialIndex = 0,
@@ -43,10 +50,10 @@ class ImageViewerView extends StatefulWidget {
   final Widget Function(String url)? imageBuilder;
 
   @override
-  State<ImageViewerView> createState() => _ImageViewerViewState();
+  ConsumerState<ImageViewerView> createState() => _ImageViewerViewState();
 }
 
-class _ImageViewerViewState extends State<ImageViewerView> {
+class _ImageViewerViewState extends ConsumerState<ImageViewerView> {
   final TransformationController _transformController =
       TransformationController();
   PageController? _pageController;
@@ -54,18 +61,26 @@ class _ImageViewerViewState extends State<ImageViewerView> {
   int _currentIndex = 0;
   bool _isZoomed = false;
   final Map<String, double> _aspects = {};
+  List<String> _urls = const [];
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: widget.initialIndex);
+    _urls = _filterUrls(_blockedUrls(ref.read(blockedImagesProvider)));
+    final initial = _urls.isEmpty
+        ? 0
+        : widget.initialIndex.clamp(0, _urls.length - 1);
+    _currentIndex = initial;
+    _pageController = PageController(initialPage: initial);
     _transformController.addListener(_onTransformChanged);
     if (widget.knownAspects != null) {
       _aspects.addAll(widget.knownAspects!);
     }
-    for (final url in widget.imageUrls) {
+    for (final url in _urls) {
       _resolveAspect(url);
+    }
+    if (_urls.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _popIfEmpty());
     }
   }
 
@@ -75,6 +90,46 @@ class _ImageViewerViewState extends State<ImageViewerView> {
     _transformController.dispose();
     _pageController?.dispose();
     super.dispose();
+  }
+
+  Set<String> _blockedUrls(List<BlockedImage> images) => {
+    for (final image in images) image.url,
+  };
+
+  List<String> _filterUrls(Set<String> blocked) => blocked.isEmpty
+      ? widget.imageUrls
+      : widget.imageUrls.where((u) => !blocked.contains(u)).toList();
+
+  void _onBlockedChanged(Set<String> blocked) {
+    final urls = _filterUrls(blocked);
+    if (urls.length == _urls.length) {
+      // Length equality on the same source list implies the same survivors;
+      // avoids controller churn on unrelated blocklist writes.
+      return;
+    }
+    setState(() {
+      _urls = urls;
+      if (urls.isEmpty) {
+        _currentIndex = 0;
+      } else if (_currentIndex >= urls.length) {
+        _currentIndex = urls.length - 1;
+      }
+    });
+    if (urls.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _popIfEmpty());
+    } else {
+      final target = _currentIndex;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final controller = _pageController;
+        if (!mounted || controller == null || !controller.hasClients) return;
+        controller.jumpToPage(target);
+      });
+    }
+  }
+
+  void _popIfEmpty() {
+    if (!mounted) return;
+    Navigator.of(context).maybePop();
   }
 
   void _onTransformChanged() {
@@ -96,10 +151,10 @@ class _ImageViewerViewState extends State<ImageViewerView> {
   }
 
   bool _isLongImage(int index) {
-    if (index < 0 || index >= widget.imageUrls.length) return false;
+    if (index < 0 || index >= _urls.length) return false;
     final size = MediaQuery.sizeOf(context);
     final viewportAspect = size.width / size.height;
-    final imageAspect = _aspects[widget.imageUrls[index]];
+    final imageAspect = _aspects[_urls[index]];
     if (imageAspect == null) return false;
     return LongImage.fitWidthScale(
           imageAspect: imageAspect,
@@ -122,7 +177,7 @@ class _ImageViewerViewState extends State<ImageViewerView> {
   }
 
   void _goToPage(int index) {
-    if (index < 0 || index >= widget.imageUrls.length) return;
+    if (index < 0 || index >= _urls.length) return;
     _pageController!.animateToPage(
       index,
       duration: const Duration(milliseconds: 250),
@@ -132,11 +187,14 @@ class _ImageViewerViewState extends State<ImageViewerView> {
 
   @override
   Widget build(BuildContext context) {
-    final multiple = widget.imageUrls.length > 1;
+    ref.listen<List<BlockedImage>>(blockedImagesProvider, (previous, next) {
+      if (previous != next) _onBlockedChanged(_blockedUrls(next));
+    });
+    final multiple = _urls.length > 1;
 
     final pageView = PageView.builder(
       controller: _pageController,
-      itemCount: widget.imageUrls.length,
+      itemCount: _urls.length,
       onPageChanged: (index) => setState(() {
         _currentIndex = index;
         _transformController.value = Matrix4.identity();
@@ -151,7 +209,7 @@ class _ImageViewerViewState extends State<ImageViewerView> {
       onTapUp: _onTapUp,
       onLongPress: () => showMediaActionSheet(
         context,
-        target: MediaTarget.image(widget.imageUrls[_currentIndex]),
+        target: MediaTarget.image(_urls[_currentIndex]),
       ),
       behavior: HitTestBehavior.opaque,
       child: pageView,
@@ -179,7 +237,7 @@ class _ImageViewerViewState extends State<ImageViewerView> {
                 right: 0,
                 child: Center(
                   child: MediaCountBadge(
-                    text: '${_currentIndex + 1}/${widget.imageUrls.length}',
+                    text: '${_currentIndex + 1}/${_urls.length}',
                     style: Theme.of(context).textTheme.labelLarge,
                     borderRadius: const BorderRadius.all(Radius.circular(16)),
                     padding: const EdgeInsets.symmetric(
@@ -196,7 +254,7 @@ class _ImageViewerViewState extends State<ImageViewerView> {
   }
 
   Widget _buildPage(int index) {
-    final url = widget.imageUrls[index];
+    final url = _urls[index];
     if (_isLongImage(index)) {
       // Reserve space below the image equal to the floating page indicator's
       // footprint (offset + indicator height) so the user can scroll the

@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/community.dart';
+import 'package:keek_news/repository/blocked_image/blocked_image_impl.dart';
+import 'package:keek_news/repository/blocked_image/blocked_image_repo.dart';
 import 'package:keek_news/repository/community/community_repo.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/use_case/copy_media_url_use_case.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
 import 'package:keek_news/use_case/save_media_use_case.dart';
@@ -53,6 +56,12 @@ void main() {
       expect(di.sl.isRegistered<SaveMediaUseCase>(), isTrue);
       expect(di.sl.isRegistered<ShareMediaUseCase>(), isTrue);
       expect(di.sl.isRegistered<CopyMediaUrlUseCase>(), isTrue);
+    });
+
+    test('should register blocked image repo and use case', () async {
+      await di.configureDependencies();
+      expect(di.sl<BlockedImageRepo>(), isA<BlockedImageImpl>());
+      expect(di.sl<BlockImageUseCase>(), isNotNull);
     });
 
     test('UpdateUseCase should read version from PackageInfo', () async {

@@ -57,6 +57,25 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
   }
 
   @override
+  void didUpdateWidget(covariant FeedImageCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The media list can shrink mid-session (blocked images are filtered at
+    // the view layer). Keep the visible page index inside the new bounds.
+    final total = _totalCount;
+    if (total > 0 && _page >= total) {
+      final target = total - 1;
+      _page = target;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _controller.hasClients) {
+          _controller.jumpToPage(target);
+        }
+      });
+    } else if (total == 0) {
+      _page = 0;
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();

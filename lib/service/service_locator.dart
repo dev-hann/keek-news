@@ -5,6 +5,8 @@ import 'package:get_it/get_it.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/repository/apk_install/apk_install_impl.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
+import 'package:keek_news/repository/blocked_image/blocked_image_impl.dart';
+import 'package:keek_news/repository/blocked_image/blocked_image_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_impl.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
 import 'package:keek_news/repository/cache/image_cache_impl.dart';
@@ -43,6 +45,7 @@ import 'package:keek_news/service/media_share_service.dart';
 import 'package:keek_news/service/method_channel_apk_installer_service.dart';
 import 'package:keek_news/service/prefs_local_storage_service.dart';
 import 'package:keek_news/service/share_plus_media_share_service.dart';
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/cache_use_case.dart';
 import 'package:keek_news/use_case/copy_media_url_use_case.dart';
@@ -264,6 +267,12 @@ Future<void> configureDependencies() async {
 
   sl.registerLazySingleton<BookmarkUseCase>(
     () => BookmarkUseCase(sl<BookmarkRepo>()),
+  );
+  sl.registerLazySingleton<BlockedImageRepo>(
+    () => BlockedImageImpl(sl<LocalStorageService>()),
+  );
+  sl.registerLazySingleton<BlockImageUseCase>(
+    () => BlockImageUseCase(sl<BlockedImageRepo>()),
   );
   sl.registerLazySingleton<CacheUseCase>(
     () => CacheUseCase(sl<ImageCacheRepo>()),

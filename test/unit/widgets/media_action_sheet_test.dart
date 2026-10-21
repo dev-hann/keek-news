@@ -23,6 +23,8 @@ Future<void> _pumpSheet(
   _SaveHandler? onSave,
   _SaveHandler? onShare,
   Future<void> Function()? onCopyUrl,
+  Future<bool> Function(String url)? onBlockImage,
+  Future<void> Function(String url)? onUnblockImage,
 }) async {
   onCancelCalled = false;
   await tester.pumpWidget(
@@ -38,6 +40,8 @@ Future<void> _pumpSheet(
                   onSave: onSave ?? (_) async => const Right(unit),
                   onShare: onShare ?? (_) async => const Right(unit),
                   onCopyUrl: onCopyUrl ?? () async {},
+                  onBlockImage: onBlockImage,
+                  onUnblockImage: onUnblockImage,
                   onCancelDownload: () => onCancelCalled = true,
                 ),
               ),
@@ -293,6 +297,86 @@ void main() {
         const Left(MediaSaveFailure(MediaSaveFailureType.canceled)),
       );
       await tester.pumpAndSettle();
+    });
+  });
+
+  group('MediaActionSheet block row', () {
+    testWidgets('shows the block row for an image target', (tester) async {
+      await _pumpSheet(
+        tester,
+        target: MediaTarget.image('https://x/a.jpg'),
+        onBlockImage: (_) async => true,
+      );
+
+      expect(find.text('이미지 차단'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.imageOff), findsOneWidget);
+    });
+
+    testWidgets('hides the block row for a video target', (tester) async {
+      await _pumpSheet(
+        tester,
+        target: MediaTarget.video(const VideoBlock(url: 'https://x/v.mp4')),
+        onBlockImage: (_) async => true,
+      );
+
+      expect(find.text('이미지 차단'), findsNothing);
+    });
+
+    testWidgets('hides the block row when no block callback is wired', (
+      tester,
+    ) async {
+      await _pumpSheet(tester, target: MediaTarget.image('https://x/a.jpg'));
+
+      expect(find.text('이미지 차단'), findsNothing);
+    });
+
+    testWidgets('successful block closes the sheet and offers undo', (
+      tester,
+    ) async {
+      final blockedUrls = <String>[];
+      final unblockedUrls = <String>[];
+      await _pumpSheet(
+        tester,
+        target: MediaTarget.image('https://x/a.jpg'),
+        onBlockImage: (url) async {
+          blockedUrls.add(url);
+          return true;
+        },
+        onUnblockImage: (url) async => unblockedUrls.add(url),
+      );
+
+      await tester.tap(find.text('이미지 차단'));
+      await tester.pump(const Duration(milliseconds: 400));
+      // Finish the sheet's exit animation while the 4s snackbar is still up.
+      await tester.pump(const Duration(milliseconds: 700));
+
+      expect(blockedUrls, ['https://x/a.jpg']);
+      expect(find.text('이미지를 차단했어요'), findsOneWidget);
+      expect(find.text('이미지 차단'), findsNothing);
+
+      await tester.tap(find.text('취소'));
+      await tester.pump();
+
+      expect(unblockedUrls, ['https://x/a.jpg']);
+
+      // Expires the snackbar timer.
+      await _pumpSnackbarCycle(tester);
+    });
+
+    testWidgets('failed block keeps the sheet open with an error snackbar', (
+      tester,
+    ) async {
+      await _pumpSheet(
+        tester,
+        target: MediaTarget.image('https://x/a.jpg'),
+        onBlockImage: (_) async => false,
+      );
+
+      await tester.tap(find.text('이미지 차단'));
+      await _pumpSnackbarCycle(tester);
+
+      expect(find.text('차단하지 못했어요'), findsOneWidget);
+      expect(find.text('이미지 차단'), findsOneWidget);
     });
   });
 }

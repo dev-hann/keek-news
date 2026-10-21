@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keek_news/model/community.dart';
 import 'package:keek_news/provider/app_version_provider.dart';
+import 'package:keek_news/provider/blocked_images_provider.dart';
 import 'package:keek_news/provider/cache_management_provider.dart';
 import 'package:keek_news/provider/settings_provider.dart';
 import 'package:keek_news/provider/update_provider.dart';
@@ -93,6 +94,12 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   title: '이미지 캐시',
                   subtitle: '캐시 용량 ${_formatBytes(cacheState.sizeBytes)}',
                   onTap: () => _confirmClearCache(context),
+                ),
+                SettingsTile(
+                  leading: const Icon(LucideIcons.imageOff),
+                  title: '차단된 이미지',
+                  subtitle: '${ref.watch(blockedImagesProvider).length}개',
+                  onTap: () => context.push('/blocked-images'),
                 ),
               ],
             ),

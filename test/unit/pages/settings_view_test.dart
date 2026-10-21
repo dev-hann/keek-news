@@ -9,6 +9,7 @@ import 'package:keek_news/model/community.dart';
 import 'package:keek_news/model/failures.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/pages/settings_view.dart';
+import 'package:keek_news/provider/blocked_images_provider.dart';
 import 'package:keek_news/provider/shared_preferences_provider.dart';
 import 'package:keek_news/repository/apk_install/apk_install_repo.dart';
 import 'package:keek_news/repository/bookmark/bookmark_repo.dart';
@@ -23,6 +24,7 @@ import 'package:keek_news/service/local_storage_service.dart';
 import 'package:keek_news/service/prefs_local_storage_service.dart';
 import 'package:keek_news/service/service_locator.dart' as di;
 import 'package:keek_news/theme/shad_theme.dart';
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/use_case/bookmark_use_case.dart';
 import 'package:keek_news/use_case/cache_use_case.dart';
 import 'package:keek_news/use_case/feed_use_case.dart';
@@ -33,6 +35,8 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+import '../../helpers/media_action_fakes.dart';
 
 class MockUpdateRepository extends Mock implements UpdateRepo {}
 
@@ -162,7 +166,12 @@ void main() {
   tearDown(di.sl.reset);
 
   Widget buildApp() => ProviderScope(
-    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(prefs),
+      blockImageUseCaseProvider.overrideWithValue(
+        BlockImageUseCase(StubBlockedImageRepo()),
+      ),
+    ],
     child: ShadApp(
       title: 'test',
       themeMode: ThemeMode.dark,
@@ -188,6 +197,27 @@ void main() {
       expect(find.text('저장함', skipOffstage: false), findsOneWidget);
       expect(find.text('미디어 & 데이터', skipOffstage: false), findsOneWidget);
       expect(find.text('정보', skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('should display blocked images tile with count', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      when(() => mockRepository.getLatestRelease()).thenAnswer(
+        (_) async =>
+            const AppRelease(version: '1.0.0', htmlUrl: 'https://example.com'),
+      );
+
+      await tester.pumpWidget(buildApp());
+      await tester.pump();
+
+      expect(find.text('차단된 이미지'), findsOneWidget);
+      expect(find.text('0개'), findsOneWidget);
+      expect(find.byIcon(LucideIcons.imageOff), findsOneWidget);
     });
 
     testWidgets('should display AppBar with 설정 title', (tester) async {
@@ -334,7 +364,12 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            blockImageUseCaseProvider.overrideWithValue(
+              BlockImageUseCase(StubBlockedImageRepo()),
+            ),
+          ],
           child: ShadApp.router(
             title: 'test',
             themeMode: ThemeMode.dark,

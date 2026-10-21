@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keek_news/pages/blocked_images_view.dart';
 import 'package:keek_news/pages/bookmarks_view.dart';
 import 'package:keek_news/pages/home_view.dart';
 import 'package:keek_news/pages/settings_view.dart';
@@ -16,6 +17,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsView(),
+    ),
+    GoRoute(
+      path: '/blocked-images',
+      builder: (context, state) => const BlockedImagesView(),
     ),
   ],
 );

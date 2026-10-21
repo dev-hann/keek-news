@@ -4,6 +4,7 @@ import 'package:keek_news/model/download_progress.dart';
 import 'package:keek_news/model/media_save_failure.dart';
 import 'package:keek_news/model/media_target.dart';
 import 'package:keek_news/service/service_locator.dart';
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/use_case/copy_media_url_use_case.dart';
 import 'package:keek_news/use_case/save_media_use_case.dart';
 import 'package:keek_news/use_case/share_media_use_case.dart';
@@ -16,7 +17,8 @@ typedef MediaActionCallback =
       void Function(DownloadProgress progress)? onProgress,
     );
 
-/// Presents the long-press action sheet (저장 / 공유 / URL 복사) for [target].
+/// Presents the long-press action sheet (저장 / 공유 / URL 복사 / 이미지 차단)
+/// for [target].
 ///
 /// Use cases default to the DI container; tests may inject fakes.
 Future<void> showMediaActionSheet(
@@ -25,10 +27,12 @@ Future<void> showMediaActionSheet(
   SaveMediaUseCase? saveUseCase,
   ShareMediaUseCase? shareUseCase,
   CopyMediaUrlUseCase? copyUseCase,
+  BlockImageUseCase? blockUseCase,
 }) {
   final save = saveUseCase ?? sl<SaveMediaUseCase>();
   final share = shareUseCase ?? sl<ShareMediaUseCase>();
   final copy = copyUseCase ?? const CopyMediaUrlUseCase();
+  final block = blockUseCase ?? sl<BlockImageUseCase>();
   return showModalBottomSheet<void>(
     context: context,
     // Sheet chrome stays Material-side: ShadSheet relies on ShadApp root
@@ -40,6 +44,10 @@ Future<void> showMediaActionSheet(
       onSave: (onProgress) => save(target, onProgress: onProgress),
       onShare: (onProgress) => share(target, onProgress: onProgress),
       onCopyUrl: () => copy(target),
+      onBlockImage: (url) async => (await block.add(url)).isRight(),
+      onUnblockImage: (url) async {
+        await block.remove(url);
+      },
       onCancelDownload: () {
         save.cancel(target);
         share.cancel(target);
@@ -57,6 +65,8 @@ class MediaActionSheet extends StatefulWidget {
     required this.onShare,
     required this.onCopyUrl,
     required this.onCancelDownload,
+    this.onBlockImage,
+    this.onUnblockImage,
     super.key,
   });
 
@@ -64,6 +74,13 @@ class MediaActionSheet extends StatefulWidget {
   final MediaActionCallback onSave;
   final MediaActionCallback onShare;
   final Future<void> Function() onCopyUrl;
+
+  /// Blocks an image URL; returns whether the blocklist was updated. When
+  /// null (or the target is not an image) the block row is hidden.
+  final Future<bool> Function(String url)? onBlockImage;
+
+  /// Undoes a block from the snackbar action.
+  final Future<void> Function(String url)? onUnblockImage;
 
   /// Cancels any in-flight download. Called when the sheet is dismissed
   /// mid-download (v1 keeps downloads alive only while the sheet is open) and
@@ -166,6 +183,30 @@ class _MediaActionSheetState extends State<MediaActionSheet> {
     _closeSheet();
   }
 
+  Future<void> _runBlock() async {
+    final url = widget.target.url;
+    final unblock = widget.onUnblockImage;
+    final blocked = await widget.onBlockImage?.call(url) ?? false;
+    if (!mounted) return;
+    if (!blocked) {
+      _showSnackbar('차단하지 못했어요');
+      return;
+    }
+    // The snackbar outlives this sheet (app-level ScaffoldMessenger); capture
+    // the callbacks locally so the action never touches a disposed widget.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('이미지를 차단했어요'),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: '취소',
+          onPressed: () => unblock?.call(url),
+        ),
+      ),
+    );
+    _closeSheet();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = ShadTheme.of(context);
@@ -177,12 +218,19 @@ class _MediaActionSheetState extends State<MediaActionSheet> {
       _buildShareRow(theme),
       Divider(height: 1, color: theme.colorScheme.border),
       _buildCopyRow(theme),
+      if (_canBlock) ...[
+        Divider(height: 1, color: theme.colorScheme.border),
+        _buildBlockRow(theme),
+      ],
     ];
     return SafeArea(
       top: false,
       child: Column(mainAxisSize: MainAxisSize.min, children: rows),
     );
   }
+
+  bool get _canBlock =>
+      widget.target.kind == MediaKind.image && widget.onBlockImage != null;
 
   Widget _buildSaveRow(ShadThemeData theme) {
     final isVideo = widget.target.kind == MediaKind.video;
@@ -239,6 +287,16 @@ class _MediaActionSheetState extends State<MediaActionSheet> {
       label: 'URL 복사',
       semanticsLabel: 'URL 복사',
       onTap: _runCopy,
+    );
+  }
+
+  Widget _buildBlockRow(ShadThemeData theme) {
+    return _ActionRow(
+      icon: LucideIcons.imageOff,
+      label: '이미지 차단',
+      semanticsLabel: '이미지 차단',
+      onTap: _runBlock,
+      foreground: theme.colorScheme.destructive,
     );
   }
 

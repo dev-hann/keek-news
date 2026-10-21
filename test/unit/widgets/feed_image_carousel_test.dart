@@ -149,5 +149,51 @@ void main() {
       expect(find.text('갤러리에 저장'), findsOneWidget);
       expect(find.byIcon(LucideIcons.download), findsOneWidget);
     });
+
+    testWidgets('clamps the visible page when the media list shrinks', (
+      tester,
+    ) async {
+      Widget harness(FeedImageCarousel carousel) => shadHarness(carousel);
+      await tester.pumpWidget(
+        harness(
+          const FeedImageCarousel(
+            imageUrls: [
+              'https://example.com/a.jpg',
+              'https://example.com/b.jpg',
+              'https://example.com/c.jpg',
+            ],
+            postId: 1,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.fling(find.byType(PageView), const Offset(-400, 0), 2000);
+      await tester.pumpAndSettle();
+      await tester.fling(find.byType(PageView), const Offset(-400, 0), 2000);
+      await tester.pumpAndSettle();
+      expect(find.text('3/3'), findsOneWidget);
+
+      // Simulates a blocked image being filtered out of the loaded detail.
+      await tester.pumpWidget(
+        harness(
+          const FeedImageCarousel(
+            imageUrls: [
+              'https://example.com/a.jpg',
+              'https://example.com/b.jpg',
+            ],
+            postId: 1,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('2/2'),
+        findsOneWidget,
+        reason: 'page index must clamp to the last remaining page',
+      );
+    });
   });
 }
