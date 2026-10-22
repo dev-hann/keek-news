@@ -669,4 +669,53 @@ void main() {
       expect(result.items.single.thumbnailUrl, webpOriginal);
     });
   });
+
+  group('HumorunivImpl.fetchDetail hidden attachment toolbox', () {
+    test('strips ZIP/filename/origin noise from the body', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'number=1429732': _read('pds_1429732.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1429732');
+
+      final texts = detail.contentBlocks
+          .whereType<TextBlock>()
+          .map((b) => b.text)
+          .toList();
+      expect(texts, isEmpty, reason: 'body has no real prose; found: $texts');
+
+      final images = detail.contentBlocks.whereType<ImageBlock>().toList();
+      expect(
+        images.length,
+        3,
+        reason:
+            'only the three body images may remain; download-list thumbs and '
+            'duplicates must be gone (${images.map((i) => i.url)})',
+      );
+      for (final img in images) {
+        expect(img.url, contains('data/editor/pdswait/'));
+      }
+    });
+
+    test('body images survive with editor URLs', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _ScanningHtmlService({
+          'number=1429732': _read('pds_1429732.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1429732');
+
+      expect(
+        detail.imageUrls,
+        contains(
+          'https://down.humoruniv.com/hwiparambbs/data/editor/pdswait/'
+          'e_e2b4c0b001_fe197ae4ad97377492114f6fd788c49ab35344bd.png',
+        ),
+        reason: 'img_file_url override must stay the canonical URL',
+      );
+    });
+  });
 }

@@ -45,9 +45,27 @@ class HumorunivImpl extends HtmlCommunityRepo {
     final html = await htmlClient.get('/board/read.html?table=pds&number=$id');
     final doc = html_parser.parse(html);
 
+    // read.html ships hidden UI after the body: `#download_all_span`
+    // ("ZIP 파일 다운로드") and the `#btn_nemo_expand_all` "원본" chip.
+    // Neither ever carries media, so they are dropped doc-wide. This also
+    // blinds the doc-wide download.php fallback to nothing — their hrefs are
+    // download_all.php, never matched.
+    doc
+        .querySelectorAll('#download_all_span, #btn_nemo_expand_all')
+        .forEach((el) => el.remove());
+
     final contentEl = _findContentContainer(doc);
     final ContentScanResult scanResult;
     if (contentEl != null) {
+      // `#list_download_div` (per-file rows "001.png"… plus the 베스트 댓글
+      // 스크린샷 block) leaks its filename text when the malformed page nests
+      // it inside the body container. Inside, its download.php links are
+      // duplicates of inline body images anyway. Outside — the only place
+      // native webp/mp4 uploads expose their media — it must survive so the
+      // doc-wide fallback can still collect it (1428549).
+      contentEl
+          .querySelectorAll('#list_download_div')
+          .forEach((el) => el.remove());
       scanResult = htmlClient.scanContentFull(doc, contentEl);
     } else {
       scanResult = const ContentScanResult(blocks: [], imageUrls: []);
