@@ -215,6 +215,9 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
             else if (isInitialized && rendersVideoSurface)
               VideoSurface(controller: controller!)
             else if (videoBlock.thumbnailUrl != null)
+              // Same rationale as the carousel video poster: synthesized
+              // posters share one fingerprint, so they must skip the
+              // blocked-image hash check.
               RetryableNetworkImage(
                 imageUrl: videoBlock.thumbnailUrl!,
                 fit: BoxFit.cover,
@@ -222,6 +225,7 @@ mixin _VideoPlayerControllerMixin<T extends StatefulWidget> on State<T> {
                 height: double.infinity,
                 placeholderColor: _mediaSurface,
                 foregroundColor: _scrimForeground,
+                disableBlockFilter: true,
               )
             else
               _buildLoadingPlaceholder(),

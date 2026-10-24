@@ -37,7 +37,9 @@ class RetryableNetworkImage extends StatefulWidget {
   final RetryController? controller;
 
   /// Skips the blocked-image fingerprint check. The blocklist management
-  /// screen sets this so users can still see what they are unblocking.
+  /// screen sets this so users can still see what they are unblocking;
+  /// video posters set it because video media is outside the image-block
+  /// scope and community-synthesized posters share one fingerprint.
   final bool disableBlockFilter;
 
   @override

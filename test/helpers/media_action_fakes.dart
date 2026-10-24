@@ -55,6 +55,17 @@ class StubMediaSaveRepo implements MediaSaveRepo {
   }
 }
 
+/// Returns a fixed fingerprint for every URL, so widget tests can prime
+/// the blocklist to match (or not match) without real network bytes.
+class FakeImageHashService implements ImageHashService {
+  const FakeImageHashService(this.hash);
+
+  final String hash;
+
+  @override
+  Future<String?> hashFor(String url) async => hash;
+}
+
 /// In-memory blocklist double: tracks blocked URLs (newest first) and
 /// broadcasts [BlockedImageRepo.changes] after each mutation.
 class StubBlockedImageRepo implements BlockedImageRepo {

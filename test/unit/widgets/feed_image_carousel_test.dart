@@ -1,7 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:keek_news/model/blocked_image.dart';
 import 'package:keek_news/model/content_block.dart';
+import 'package:keek_news/service/image_hash_service.dart';
+import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/widgets/feed_image_carousel.dart';
 import 'package:keek_news/widgets/video_thumbnail.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -148,6 +152,47 @@ void main() {
 
       expect(find.text('갤러리에 저장'), findsOneWidget);
       expect(find.byIcon(LucideIcons.download), findsOneWidget);
+    });
+
+    testWidgets('video poster skips the blocked-image fingerprint check', (
+      tester,
+    ) async {
+      // Regression: every synthesized video poster shares one fingerprint,
+      // so a single hash-colliding blocklist entry must not hide the poster.
+      final blockedRepo = StubBlockedImageRepo();
+      await blockedRepo.add(
+        BlockedImage(
+          url: 'https://example.com/blocked.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+          hash: 'ffffffffffffffff',
+        ),
+      );
+      final sl = GetIt.I;
+      sl.registerLazySingleton<ImageHashService>(
+        () => const FakeImageHashService('fffffffffff3ffff'),
+      );
+      sl.registerLazySingleton<BlockImageUseCase>(
+        () => BlockImageUseCase(blockedRepo),
+      );
+      const block = VideoBlock(
+        url: 'https://example.com/v.mp4',
+        thumbnailUrl:
+            'https://timg.humoruniv.com/thumb.php?url=https%3A%2F%2Fexample.com%2Fv.mp4',
+      );
+      await tester.pumpWidget(
+        shadHarness(
+          const FeedImageCarousel(
+            imageUrls: [],
+            videoBlocks: [block],
+            postId: 3,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('차단된 이미지'), findsNothing);
+      expect(find.byType(CachedNetworkImage), findsOneWidget);
     });
 
     testWidgets('clamps the visible page when the media list shrinks', (

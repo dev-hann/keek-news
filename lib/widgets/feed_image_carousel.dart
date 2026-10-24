@@ -178,10 +178,14 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
         fit: StackFit.expand,
         children: [
           if (video.thumbnailUrl != null)
+            // Video media is outside the image-block scope, and synthesized
+            // posters (humoruniv thumb.php) share one fingerprint across all
+            // videos — a single matching blocklist entry would hide them all.
             RetryableNetworkImage(
               imageUrl: video.thumbnailUrl!,
               fit: BoxFit.cover,
               placeholderColor: Colors.black,
+              disableBlockFilter: true,
             )
           else
             VideoThumbnail(
