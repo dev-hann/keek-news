@@ -305,12 +305,12 @@ void main() {
           BlockedImage(
             url: 'https://example.com/original.jpg',
             blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
-            hash: '0000000000000000',
+            hash: '7e7e7e7e7e7e7e7e',
           ),
         );
         final sl = GetIt.I;
         sl.registerLazySingleton<ImageHashService>(
-          () => const FakeImageHashService('3f'),
+          () => const FakeImageHashService('7e7e7e7e7e7e7e7a'),
         );
         sl.registerLazySingleton<BlockImageUseCase>(
           () => BlockImageUseCase(blockedRepo),
@@ -356,12 +356,12 @@ void main() {
           BlockedImage(
             url: 'https://example.com/original.jpg',
             blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
-            hash: '0000000000000000',
+            hash: '7e7e7e7e7e7e7e7e',
           ),
         );
         final sl = GetIt.I;
         sl.registerLazySingleton<ImageHashService>(
-          () => const FakeImageHashService('3f'),
+          () => const FakeImageHashService('7e7e7e7e7e7e7e7a'),
         );
         sl.registerLazySingleton<BlockImageUseCase>(
           () => BlockImageUseCase(blockedRepo),

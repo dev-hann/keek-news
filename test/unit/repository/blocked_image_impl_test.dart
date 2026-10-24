@@ -148,15 +148,32 @@ void main() {
           BlockedImage(
             url: 'https://x/a.jpg',
             blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
-            hash: '0000000000000000',
+            hash: '7e7e7e7e7e7e7e7e',
           ),
         ]),
       );
 
-      // 0x3f is 6 bits away — inside the threshold.
-      expect(repo.isHashBlocked('3f'), isTrue);
-      // 0xff is 8 bits away — outside.
-      expect(repo.isHashBlocked('ff'), isFalse);
+      // …7a is 1 bit away — inside the threshold.
+      expect(repo.isHashBlocked('7e7e7e7e7e7e7e7a'), isTrue);
+      // …81 is 8 bits away — outside.
+      expect(repo.isHashBlocked('7e7e7e7e7e7e7e81'), isFalse);
+    });
+
+    test('isHashBlocked never matches degenerate fingerprints', () async {
+      when(() => storage.getString(_storageKey)).thenReturn(
+        encodeAll([
+          BlockedImage(
+            url: 'https://x/a.jpg',
+            blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+            hash: '000000000000003f',
+          ),
+        ]),
+      );
+
+      // Sparse (near-flat picture) hashes collide too easily to trust, even
+      // against themselves.
+      expect(repo.isHashBlocked('000000000000003f'), isFalse);
+      expect(repo.isHashBlocked('00000000000000ff'), isFalse);
     });
 
     test('isHashBlocked reads storage lazily without a prior getAll', () async {
@@ -165,12 +182,12 @@ void main() {
           BlockedImage(
             url: 'https://x/a.jpg',
             blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
-            hash: '0000000000000000',
+            hash: '7e7e7e7e7e7e7e7e',
           ),
         ]),
       );
 
-      expect(repo.isHashBlocked('0000000000000000'), isTrue);
+      expect(repo.isHashBlocked('7e7e7e7e7e7e7e7e'), isTrue);
     });
 
     test('isHashBlocked skips entries without a hash', () async {
@@ -183,7 +200,7 @@ void main() {
         ]),
       );
 
-      expect(repo.isHashBlocked('0000000000000000'), isFalse);
+      expect(repo.isHashBlocked('7e7e7e7e7e7e7e7e'), isFalse);
     });
 
     test('add stores the hash captured at block time', () async {

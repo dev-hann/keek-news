@@ -14,9 +14,6 @@ class BlockedImageImpl implements BlockedImageRepo {
 
   static const _storageKey = 'blocked_images';
 
-  /// Fingerprints within this Hamming distance count as the same picture.
-  static const _matchDistance = 6;
-
   /// Parsed blocklist cache so render-time hash checks stay synchronous.
   List<BlockedImage>? _cache;
 
@@ -45,7 +42,7 @@ class BlockedImageImpl implements BlockedImageRepo {
     for (final image in _ensureCache()) {
       final blocked = image.hash;
       if (blocked == null) continue;
-      if (FlutterImageHashService.distance(hash, blocked) <= _matchDistance) {
+      if (FlutterImageHashService.matches(hash, blocked)) {
         return true;
       }
     }

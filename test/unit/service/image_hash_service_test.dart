@@ -56,6 +56,42 @@ void main() {
     });
   });
 
+  group('FlutterImageHashService.popCount', () {
+    test('counts set bits', () {
+      expect(FlutterImageHashService.popCount('0000000000000000'), 0);
+      expect(FlutterImageHashService.popCount('7e7e7e7e7e7e7e7e'), 48);
+      expect(FlutterImageHashService.popCount('7e7e7e7e7e7e7e7a'), 47);
+    });
+
+    test('returns 0 for unparseable input', () {
+      expect(FlutterImageHashService.popCount('zzz'), 0);
+    });
+  });
+
+  group('FlutterImageHashService.matches', () {
+    test('dense fingerprints within the threshold match', () {
+      expect(
+        FlutterImageHashService.matches('7e7e7e7e7e7e7e7e', '7e7e7e7e7e7e7e7a'),
+        isTrue,
+      );
+    });
+
+    test('dense fingerprints beyond the threshold differ', () {
+      expect(
+        FlutterImageHashService.matches('7e7e7e7e7e7e7e7e', '7e7e7e7e7e7e7e81'),
+        isFalse,
+      );
+    });
+
+    test('near-flat fingerprints never match, even identically', () {
+      expect(
+        FlutterImageHashService.matches('000000000000003f', '000000000000003f'),
+        isFalse,
+        reason: 'sparse hashes collide too easily for cross-URL matching',
+      );
+    });
+  });
+
   group('FlutterImageHashService.dHashFromBytes', () {
     test('is stable across rescales of the same picture', () async {
       final small = await _gradientPng(36, 32);

@@ -41,6 +41,36 @@ class FlutterImageHashService implements ImageHashService {
     return count;
   }
 
+  /// Fingerprints within this Hamming distance count as the same picture.
+  static const matchDistance = 6;
+
+  /// Hashes with fewer set bits describe nearly featureless pictures whose
+  /// gradients are dominated by letterboxing or compression noise; they
+  /// collide too easily for cross-URL matching, so [matches] rejects them.
+  static const minReliableBits = 8;
+
+  /// Whether two fingerprints describe the same picture: dense hashes within
+  /// [matchDistance] bits. Unparseable or too-flat fingerprints never match.
+  static bool matches(String a, String b) {
+    if (popCount(a) < minReliableBits || popCount(b) < minReliableBits) {
+      return false;
+    }
+    return distance(a, b) <= matchDistance;
+  }
+
+  /// Number of set bits in a hex fingerprint; 0 when unparseable.
+  static int popCount(String hex) {
+    final value = int.tryParse(hex, radix: 16);
+    if (value == null) return 0;
+    var v = value;
+    var count = 0;
+    while (v != 0) {
+      v &= v - 1;
+      count++;
+    }
+    return count;
+  }
+
   /// Decodes [bytes] to 9×8 grayscale and packs the horizontal gradient into
   /// a 64-bit dHash. Returns null for undecodable input.
   @visibleForTesting

@@ -69,8 +69,6 @@ class FakeImageHashService implements ImageHashService {
 /// In-memory blocklist double: tracks blocked URLs (newest first) and
 /// broadcasts [BlockedImageRepo.changes] after each mutation.
 class StubBlockedImageRepo implements BlockedImageRepo {
-  static const _matchDistance = 6;
-
   final List<BlockedImage> _images = [];
   final StreamController<void> _changes = StreamController<void>.broadcast();
 
@@ -105,7 +103,7 @@ class StubBlockedImageRepo implements BlockedImageRepo {
     for (final image in _images) {
       final blocked = image.hash;
       if (blocked == null) continue;
-      if (FlutterImageHashService.distance(hash, blocked) <= _matchDistance) {
+      if (FlutterImageHashService.matches(hash, blocked)) {
         return true;
       }
     }
