@@ -31,6 +31,29 @@ void main() {
       expect(find.bySemanticsLabel('차단 해제'), findsOneWidget);
     });
 
+    testWidgets('calls onOpen when the thumbnail is tapped', (tester) async {
+      var opened = false;
+      await tester.pumpWidget(
+        shadHarness(
+          Scaffold(
+            body: BlockedImageTile(
+              image: BlockedImage(
+                url: 'https://example.com/a.jpg',
+                blockedAt: DateTime.now(),
+              ),
+              onOpen: () => opened = true,
+              onUnblock: () {},
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.bySemanticsLabel('전체화면으로 보기'));
+      await tester.pump();
+
+      expect(opened, isTrue);
+    });
+
     testWidgets('calls onUnblock when the action is tapped', (tester) async {
       var unblocked = false;
       await tester.pumpWidget(

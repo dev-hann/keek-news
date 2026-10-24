@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -610,6 +611,55 @@ void main() {
         find.text('root'),
         findsOneWidget,
         reason: 'empty viewer must auto-pop back to the caller',
+      );
+    });
+
+    testWidgets('showBlocked keeps the blocked page and renders it', (
+      tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      final repo = StubBlockedImageRepo();
+      await repo.add(
+        BlockedImage(
+          url: 'https://example.com/a.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
+      await tester.pumpWidget(
+        _scopedShadApp(
+          blockedRepo: repo,
+          navigatorKey: navigatorKey,
+          home: const Scaffold(body: Text('root')),
+        ),
+      );
+      unawaited(
+        navigatorKey.currentState!.push(
+          MaterialPageRoute<void>(
+            builder: (_) => const ImageViewerView(
+              imageUrls: ['https://example.com/a.jpg'],
+              showBlocked: true,
+            ),
+          ),
+        ),
+      );
+      // Bounded pumps: a full pumpAndSettle would drive the image's retry
+      // cycle to exhaustion and swap CachedNetworkImage for the error view.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump();
+
+      expect(
+        find.text('root'),
+        findsNothing,
+        reason: 'management preview must not auto-pop for blocked entries',
+      );
+      expect(find.byIcon(LucideIcons.x), findsOneWidget);
+      expect(find.text('차단된 이미지'), findsNothing);
+      expect(
+        find.byType(CachedNetworkImage),
+        findsOneWidget,
+        reason: 'preview must show the real image, not the block placeholder',
       );
     });
 

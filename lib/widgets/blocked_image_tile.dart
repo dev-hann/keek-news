@@ -4,16 +4,21 @@ import 'package:keek_news/utils/time_ago.dart';
 import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-/// One blocked-image row in the management list: thumbnail, blocked-at time,
-/// and an unblock action.
+/// One blocked-image row in the management list: thumbnail (tap to preview
+/// fullscreen), blocked-at time, and an unblock action.
 class BlockedImageTile extends StatelessWidget {
   const BlockedImageTile({
     required this.image,
     required this.onUnblock,
+    this.onOpen,
     super.key,
   });
 
   final BlockedImage image;
+
+  /// Opens the fullscreen preview of the blocked image.
+  final VoidCallback? onOpen;
+
   final VoidCallback onUnblock;
 
   @override
@@ -23,14 +28,22 @@ class BlockedImageTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            child: RetryableNetworkImage(
-              imageUrl: image.url,
-              fit: BoxFit.cover,
-              width: 64,
-              height: 64,
-              disableBlockFilter: true,
+          Semantics(
+            button: true,
+            label: '전체화면으로 보기',
+            child: InkWell(
+              onTap: onOpen,
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                child: RetryableNetworkImage(
+                  imageUrl: image.url,
+                  fit: BoxFit.cover,
+                  width: 64,
+                  height: 64,
+                  disableBlockFilter: true,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),

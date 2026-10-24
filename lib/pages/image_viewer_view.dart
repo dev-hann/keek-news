@@ -22,13 +22,15 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 /// Blocked images are removed from the paged list; callers may pass an
 /// already-filtered list (feed carousel) or a raw snapshot (comment sheet) —
 /// either way the viewer re-filters against the live blocklist. When every
-/// page ends up blocked the viewer pops itself.
+/// page ends up blocked the viewer pops itself. [ImageViewerView.showBlocked]
+/// inverts this for the blocklist management screen.
 class ImageViewerView extends ConsumerStatefulWidget {
   const ImageViewerView({
     required this.imageUrls,
     this.initialIndex = 0,
     this.knownAspects,
     this.imageBuilder,
+    this.showBlocked = false,
     super.key,
   });
 
@@ -49,6 +51,11 @@ class ImageViewerView extends ConsumerStatefulWidget {
   /// tall placeholder to exercise long-image scrolling).
   final Widget Function(String url)? imageBuilder;
 
+  /// Blocklist management mode: render the URLs as-is — no blocked-URL
+  /// filtering, no auto-pop, no fingerprint placeholder — so users can
+  /// inspect what they blocked in fullscreen.
+  final bool showBlocked;
+
   @override
   ConsumerState<ImageViewerView> createState() => _ImageViewerViewState();
 }
@@ -66,7 +73,9 @@ class _ImageViewerViewState extends ConsumerState<ImageViewerView> {
   @override
   void initState() {
     super.initState();
-    _urls = _filterUrls(_blockedUrls(ref.read(blockedImagesProvider)));
+    _urls = widget.showBlocked
+        ? widget.imageUrls
+        : _filterUrls(_blockedUrls(ref.read(blockedImagesProvider)));
     final initial = _urls.isEmpty
         ? 0
         : widget.initialIndex.clamp(0, _urls.length - 1);
@@ -101,6 +110,9 @@ class _ImageViewerViewState extends ConsumerState<ImageViewerView> {
       : widget.imageUrls.where((u) => !blocked.contains(u)).toList();
 
   void _onBlockedChanged(Set<String> blocked) {
+    // Management mode shows a static snapshot; blocklist writes must not
+    // repage or pop the preview.
+    if (widget.showBlocked) return;
     final urls = _filterUrls(blocked);
     if (urls.length == _urls.length) {
       // Length equality on the same source list implies the same survivors;
@@ -290,6 +302,7 @@ class _ImageViewerViewState extends ConsumerState<ImageViewerView> {
           imageUrl: url,
           placeholderColor: Colors.black,
           foregroundColor: Colors.white,
+          disableBlockFilter: widget.showBlocked,
         );
   }
 }

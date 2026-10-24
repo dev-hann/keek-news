@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/provider/blocked_images_provider.dart';
 import 'package:keek_news/widgets/blocked_image_tile.dart';
 import 'package:keek_news/widgets/empty_state_view.dart';
@@ -29,9 +30,19 @@ class BlockedImagesView extends ConsumerWidget {
                 itemCount: images.length,
                 itemBuilder: (context, index) => BlockedImageTile(
                   image: images[index],
+                  onOpen: () => _openViewer(context, images[index].url),
                   onUnblock: () => _unblock(context, ref, images[index].url),
                 ),
               ),
+      ),
+    );
+  }
+
+  void _openViewer(BuildContext context, String url) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => ImageViewerView(imageUrls: [url], showBlocked: true),
+        fullscreenDialog: true,
       ),
     );
   }

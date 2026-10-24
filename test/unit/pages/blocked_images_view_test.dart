@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keek_news/model/blocked_image.dart';
 import 'package:keek_news/pages/blocked_images_view.dart';
+import 'package:keek_news/pages/image_viewer_view.dart';
 import 'package:keek_news/provider/blocked_images_provider.dart';
 import 'package:keek_news/use_case/block_image_use_case.dart';
 import 'package:keek_news/widgets/blocked_image_tile.dart';
+import 'package:keek_news/widgets/retryable_network_image.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../helpers/media_action_fakes.dart';
@@ -78,6 +80,23 @@ void main() {
         findsOneWidget,
         reason: 'newest block renders first',
       );
+    });
+
+    testWidgets('tapping a thumbnail opens the fullscreen preview', (
+      tester,
+    ) async {
+      final repo = StubBlockedImageRepo();
+      await seedBlock(repo, 'https://example.com/a.jpg');
+      await pumpScreen(tester, makeContainer(repo));
+
+      await tester.tap(find.byType(RetryableNetworkImage));
+      await tester.pumpAndSettle();
+
+      final viewer = tester.widget<ImageViewerView>(
+        find.byType(ImageViewerView),
+      );
+      expect(viewer.showBlocked, isTrue);
+      expect(viewer.imageUrls, ['https://example.com/a.jpg']);
     });
 
     testWidgets('unblock removes the row and shows a snackbar', (tester) async {
