@@ -299,6 +299,7 @@ void main() {
       Future<void> pumpImage(
         WidgetTester tester, {
         bool disableBlockFilter = false,
+        VoidCallback? onBlocked,
       }) async {
         final blockedRepo = StubBlockedImageRepo();
         await blockedRepo.add(
@@ -320,6 +321,7 @@ void main() {
             RetryableNetworkImage(
               imageUrl: 'https://example.com/repost.webp',
               disableBlockFilter: disableBlockFilter,
+              onBlocked: onBlocked,
             ),
           ),
         );
@@ -348,6 +350,17 @@ void main() {
 
         expect(find.text('차단된 이미지'), findsNothing);
         expect(find.byType(CachedNetworkImage), findsOneWidget);
+      });
+
+      testWidgets('fires onBlocked on a fingerprint match, and only once', (
+        tester,
+      ) async {
+        var calls = 0;
+        await pumpImage(tester, onBlocked: () => calls++);
+
+        expect(calls, 1);
+        await tester.pump();
+        expect(calls, 1, reason: 'URL이 바뀌지 않는 한 재발화하지 않음');
       });
 
       testWidgets('hides the caption for small boxes', (tester) async {

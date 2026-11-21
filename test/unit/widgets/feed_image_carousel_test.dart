@@ -14,6 +14,17 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../helpers/media_action_fakes.dart';
 import '../../helpers/shad_harness.dart';
 
+/// URL별로 다른 핑거프린트를 돌려주는 더블 — 한 게시글 안에서 일부 이미지만
+/// 차단되는 시나리오를 만들 때 사용.
+class _PerUrlFakeImageHashService implements ImageHashService {
+  const _PerUrlFakeImageHashService(this.hashes);
+
+  final Map<String, String> hashes;
+
+  @override
+  Future<String?> hashFor(String url) async => hashes[url];
+}
+
 void main() {
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
@@ -193,6 +204,134 @@ void main() {
 
       expect(find.text('차단된 이미지'), findsNothing);
       expect(find.byType(CachedNetworkImage), findsOneWidget);
+    });
+
+    testWidgets('drops fingerprint-blocked pages and collapses when no '
+        'media remains', (tester) async {
+      final blockedRepo = StubBlockedImageRepo();
+      await blockedRepo.add(
+        BlockedImage(
+          url: 'https://example.com/blocked.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+          hash: '7e7e7e7e7e7e7e7e',
+        ),
+      );
+      final sl = GetIt.I;
+      sl.registerLazySingleton<ImageHashService>(
+        () => const FakeImageHashService('7e7e7e7e7e7e7e7a'),
+      );
+      sl.registerLazySingleton<BlockImageUseCase>(
+        () => BlockImageUseCase(blockedRepo),
+      );
+      await tester.pumpWidget(
+        shadHarness(
+          const FeedImageCarousel(
+            imageUrls: ['https://example.com/repost.webp'],
+            postId: 4,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.text('차단된 이미지'), findsNothing);
+      expect(find.byType(PageView), findsNothing);
+      expect(
+        tester.getSize(find.byType(FeedImageCarousel)),
+        Size.zero,
+        reason: '모든 이미지가 핑거프린트 차단되면 미디어 영역은 붕괴해야 함',
+      );
+    });
+
+    testWidgets('keeps the original onImageTap index after dropping a '
+        'blocked page', (tester) async {
+      var tapped = -1;
+      final blockedRepo = StubBlockedImageRepo();
+      await blockedRepo.add(
+        BlockedImage(
+          url: 'https://example.com/blocked.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+          hash: '7e7e7e7e7e7e7e7e',
+        ),
+      );
+      final sl = GetIt.I;
+      sl.registerLazySingleton<ImageHashService>(
+        () => const _PerUrlFakeImageHashService({
+          'https://example.com/a.jpg': '7e7e7e7e7e7e7e7a',
+          'https://example.com/b.jpg': '8181818181818181',
+        }),
+      );
+      sl.registerLazySingleton<BlockImageUseCase>(
+        () => BlockImageUseCase(blockedRepo),
+      );
+      await tester.pumpWidget(
+        shadHarness(
+          FeedImageCarousel(
+            imageUrls: const [
+              'https://example.com/a.jpg',
+              'https://example.com/b.jpg',
+            ],
+            postId: 5,
+            onImageTap: (i) => tapped = i,
+          ),
+        ),
+      );
+      expect(find.text('1/2'), findsOneWidget);
+
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.text('1/2'),
+        findsNothing,
+        reason: '차단 페이지 제거 후 단일 페이지가 되면 배지는 사라짐',
+      );
+      expect(find.text('차단된 이미지'), findsNothing);
+      await tester.tap(find.byType(PageView));
+      await tester.pump();
+      expect(tapped, 1, reason: '뷰어 initialIndex는 원본 목록 기준이므로 원본 인덱스 전달');
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('keeps video pages when every image is fingerprint-blocked', (
+      tester,
+    ) async {
+      final blockedRepo = StubBlockedImageRepo();
+      await blockedRepo.add(
+        BlockedImage(
+          url: 'https://example.com/blocked.jpg',
+          blockedAt: DateTime.fromMillisecondsSinceEpoch(0),
+          hash: '7e7e7e7e7e7e7e7e',
+        ),
+      );
+      final sl = GetIt.I;
+      sl.registerLazySingleton<ImageHashService>(
+        () => const FakeImageHashService('7e7e7e7e7e7e7e7a'),
+      );
+      sl.registerLazySingleton<BlockImageUseCase>(
+        () => BlockImageUseCase(blockedRepo),
+      );
+      await tester.pumpWidget(
+        shadHarness(
+          const FeedImageCarousel(
+            imageUrls: ['https://example.com/repost.webp'],
+            videoBlocks: [VideoBlock(url: 'https://example.com/v.mp4')],
+            postId: 6,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.byType(VideoThumbnail),
+        findsOneWidget,
+        reason: '이미지만 차단되어도 영상 페이지는 유지되어야 함',
+      );
+      expect(
+        tester.getSize(find.byType(FeedImageCarousel)).height,
+        greaterThan(0),
+      );
     });
 
     testWidgets('clamps the visible page when the media list shrinks', (

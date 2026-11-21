@@ -21,6 +21,7 @@ class RetryableNetworkImage extends StatefulWidget {
     this.borderRadius,
     this.controller,
     this.disableBlockFilter = false,
+    this.onBlocked,
     super.key,
   });
 
@@ -41,6 +42,11 @@ class RetryableNetworkImage extends StatefulWidget {
   /// video posters set it because video media is outside the image-block
   /// scope and community-synthesized posters share one fingerprint.
   final bool disableBlockFilter;
+
+  /// Fired when the fingerprint check matches the blocklist. The feed
+  /// carousel uses this to drop the page entirely; without it the widget
+  /// falls back to the blocked placeholder.
+  final VoidCallback? onBlocked;
 
   @override
   State<RetryableNetworkImage> createState() => _RetryableNetworkImageState();
@@ -105,6 +111,7 @@ class _RetryableNetworkImageState extends State<RetryableNetworkImage> {
     if (!mounted || hash == null || url != widget.imageUrl) return;
     if (sl<BlockImageUseCase>().isHashBlocked(hash)) {
       setState(() => _hashBlocked = true);
+      widget.onBlocked?.call();
     }
   }
 

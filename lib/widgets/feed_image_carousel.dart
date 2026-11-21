@@ -34,16 +34,27 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
   static final _AspectCache _aspectCache = _AspectCache(maxEntries: 200);
 
   final PageController _controller = PageController();
+  final Set<String> _hashBlockedUrls = <String>{};
   int _page = 0;
   int? _expandedVideoIndex;
 
-  int get _totalCount => widget.imageUrls.length + widget.videoBlocks.length;
+  /// Visible image pages as (original index, url) pairs. Fingerprint-blocked
+  /// URLs drop out at render time; the original index keeps onImageTap
+  /// aligned with the unfiltered list the image viewer pages through.
+  List<(int, String)> get _visibleImagePages => [
+    for (var i = 0; i < widget.imageUrls.length; i++)
+      if (!_hashBlockedUrls.contains(widget.imageUrls[i]))
+        (i, widget.imageUrls[i]),
+  ];
+
+  int get _totalCount => _visibleImagePages.length + widget.videoBlocks.length;
 
   String? get _currentMediaUrl {
-    if (_page < widget.imageUrls.length) {
-      return widget.imageUrls[_page];
+    final images = _visibleImagePages;
+    if (_page < images.length) {
+      return images[_page].$2;
     }
-    final vi = _page - widget.imageUrls.length;
+    final vi = _page - images.length;
     if (vi < widget.videoBlocks.length) {
       return widget.videoBlocks[vi].thumbnailUrl;
     }
@@ -60,7 +71,16 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
   void didUpdateWidget(covariant FeedImageCarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
     // The media list can shrink mid-session (blocked images are filtered at
-    // the view layer). Keep the visible page index inside the new bounds.
+    // the view layer or dropped after a fingerprint match). Keep the visible
+    // page index inside the new bounds.
+    _clampVisiblePage();
+  }
+
+  /// Keeps [_page] inside the current media bounds after the visible list
+  /// shrinks, then re-syncs the PageController post-frame. Mutating [_page]
+  /// outside setState is safe: callers run during (or just before) a
+  /// scheduled rebuild that reads it.
+  void _clampVisiblePage() {
     final total = _totalCount;
     if (total > 0 && _page >= total) {
       final target = total - 1;
@@ -73,6 +93,12 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
     } else if (total == 0) {
       _page = 0;
     }
+  }
+
+  void _onImageHashBlocked(String url) {
+    if (!mounted) return;
+    setState(() => _hashBlockedUrls.add(url));
+    _clampVisiblePage();
   }
 
   @override
@@ -103,7 +129,13 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final total = _totalCount;
+    final visibleImages = _visibleImagePages;
+    final total = visibleImages.length + widget.videoBlocks.length;
+    if (total == 0) {
+      // Every image was fingerprint-blocked and no videos remain — collapse
+      // instead of reserving a media slot (min height would be 120px).
+      return const SizedBox.shrink();
+    }
     final multiple = total > 1;
     final screenW = MediaQuery.sizeOf(context).width;
     final url = _currentMediaUrl;
@@ -125,10 +157,10 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
               itemCount: total,
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder: (context, index) {
-                if (index < widget.imageUrls.length) {
-                  return _buildImagePage(index);
+                if (index < visibleImages.length) {
+                  return _buildImagePage(visibleImages[index]);
                 }
-                return _buildVideoPage(index - widget.imageUrls.length);
+                return _buildVideoPage(index - visibleImages.length);
               },
             ),
           ),
@@ -145,18 +177,18 @@ class _FeedImageCarouselState extends State<FeedImageCarousel> {
     );
   }
 
-  Widget _buildImagePage(int index) {
+  Widget _buildImagePage((int, String) page) {
+    final (index, url) = page;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: widget.onImageTap == null ? null : () => widget.onImageTap!(index),
-      onLongPress: () => showMediaActionSheet(
-        context,
-        target: MediaTarget.image(widget.imageUrls[index]),
-      ),
+      onLongPress: () =>
+          showMediaActionSheet(context, target: MediaTarget.image(url)),
       child: RetryableNetworkImage(
-        imageUrl: widget.imageUrls[index],
+        imageUrl: url,
         width: double.infinity,
         fit: BoxFit.contain,
+        onBlocked: () => _onImageHashBlocked(url),
       ),
     );
   }
