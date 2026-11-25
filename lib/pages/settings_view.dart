@@ -12,7 +12,7 @@ import 'package:keek_news/widgets/settings_tile.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _repoUrl = 'https://github.com/dev-hann/happy-news';
+const _repoUrl = 'https://github.com/dev-hann/keek-news';
 
 class SettingsView extends ConsumerStatefulWidget {
   const SettingsView({super.key});

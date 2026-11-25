@@ -16,7 +16,9 @@ class DioGitHubRemoteService implements GitHubRemoteService {
   @override
   Future<String> fetchLatestRelease() async {
     final response = await _dio.get<String>(
-      '/repos/dev-hann/humoruniv/releases/latest',
+      // Canonical repo name: GitHub's rename redirects (humoruniv,
+      // happy-news) only last until those names are reused.
+      '/repos/dev-hann/keek-news/releases/latest',
       options: Options(responseType: ResponseType.plain),
     );
 

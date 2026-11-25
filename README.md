@@ -54,7 +54,7 @@ Service → Repository → UseCase → Provider 4계층으로 의존성 방향�
 
 ## 다운로드
 
-최신 릴리스 APK는 [GitHub Releases](https://github.com/dev-hann/happy-news/releases)에서
+최신 릴리스 APK는 [GitHub Releases](https://github.com/dev-hann/keek-news/releases)에서
 받을 수 있습니다. 앱 내 설정 화면에서도 자동으로 업데이트를 확인합니다.
 
 ## 시작하기
