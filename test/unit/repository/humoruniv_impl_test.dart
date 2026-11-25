@@ -89,6 +89,20 @@ class _ScanningHtmlService extends HtmlService
 
 String _read(String path) => File('test/fixtures/$path').readAsStringSync();
 
+/// Every committed humoruniv detail fixture. Server markup drifts between
+/// captures, so parser invariants are asserted across all of them.
+const _detailFixtures = [
+  'pds_1415455.html',
+  'pds_1419653.html',
+  'pds_1419769.html',
+  'pds_1422694.html',
+  'pds_1426857.html',
+  'pds_1427341.html',
+  'pds_1428508.html',
+  'pds_1428549.html',
+  'pds_1429732.html',
+];
+
 const _humorunivListHtml = '''
 <html><body>
 <div class="post_item"><a class="post_link" data-number="1422846"
@@ -114,6 +128,32 @@ class _RecordingHtmlService extends _FixtureHtmlService {
 }
 
 void main() {
+  group('HumorunivImpl.fetchDetail post title', () {
+    test('reads the title from the subject header', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1415455.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1415455');
+
+      expect(detail.title, '26일 어제, 태풍때문에 난리난 오사카');
+    });
+
+    test('falls back to <title> when the page has no subject header', () async {
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': _read('pds_1429732.html'),
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1429732');
+
+      expect(detail.title, '던전의 시체 운반꾼 아가씨 만화.manhwa');
+    });
+  });
+
   group('HumorunivImpl.fetchDetail comment dates', () {
     test('regular comments do not fall back to epoch (1970)', () async {
       final repo = HumorunivImpl(
@@ -162,6 +202,88 @@ void main() {
       expect(best.isBest, isTrue);
       expect(best.date, DateTime(2026, 6, 27, 18, 57, 7));
     });
+
+    test(
+      'long-nick best comment keeps author and year-anchored date',
+      () async {
+        // humoruniv renders long nicks as a bare `.nick` with no inner
+        // `.hu_nick_txt` and drops the year from the best-comment date
+        // ("09-20 20:08:45").
+        final repo = HumorunivImpl(
+          htmlClient: _FixtureHtmlService({
+            'read.html': _read('pds_1428549.html'),
+          }),
+        );
+
+        final detail = await repo.fetchDetail('1428549');
+
+        final best = detail.comments.firstWhere((c) => c.isBest);
+        expect(best.author, '그래너라면가능하다');
+        expect(best.date, DateTime(2026, 9, 20, 20, 8, 45));
+      },
+    );
+
+    test('year-less comment date anchors to the post year', () async {
+      // A comment can never predate its post, so a `MM-DD HH:MM:SS` date that
+      // would is rolled into the next year.
+      final repo = HumorunivImpl(
+        htmlClient: _FixtureHtmlService({
+          'read.html': '''
+<html><body>
+<p id="read_profile_desc"><span class="etc">작성 2026-12-30 10:00:00</span></p>
+<div id="comment_best_wrap">
+  <li class="best_li">
+    <span class="nick">같은해에단긴닉네임</span>
+    <span class="etc">12-31 09:00:00</span>
+    <span class="comment_body">같은 해</span>
+  </li>
+  <li class="best_li">
+    <span class="nick">다음해에단긴닉네임</span>
+    <span class="etc">01-02 11:30:00</span>
+    <span class="comment_body">다음 해</span>
+  </li>
+</div>
+</body></html>
+''',
+        }),
+      );
+
+      final detail = await repo.fetchDetail('1');
+
+      expect(detail.comments.map((c) => c.date), [
+        DateTime(2026, 12, 31, 9),
+        DateTime(2027, 1, 2, 11, 30),
+      ]);
+    });
+
+    test(
+      'every comment on every detail fixture has an author and a date',
+      () async {
+        for (final fixture in _detailFixtures) {
+          final repo = HumorunivImpl(
+            htmlClient: _FixtureHtmlService({'read.html': _read(fixture)}),
+          );
+
+          final detail = await repo.fetchDetail('0');
+
+          final comments = [
+            for (final c in detail.comments) ...[c, ...c.replies],
+          ];
+          for (final c in comments) {
+            expect(
+              c.author,
+              isNotEmpty,
+              reason: '$fixture comment ${c.id}: no author',
+            );
+            expect(
+              c.date.year,
+              greaterThan(2000),
+              reason: '$fixture comment ${c.id} by "${c.author}": ${c.date}',
+            );
+          }
+        }
+      },
+    );
   });
 
   group('HumorunivImpl.fetchDetail comment_more redesign (2026-08)', () {

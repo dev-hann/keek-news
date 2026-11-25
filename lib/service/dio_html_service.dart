@@ -10,8 +10,13 @@ import 'package:keek_news/service/html_service.dart';
 typedef CharsetDecode =
     Future<String> Function(String encoding, Uint8List bytes);
 
-Future<String> _defaultCharsetDecode(String encoding, Uint8List bytes) =>
-    CharsetConverter.decode(encoding, bytes);
+/// UTF-8 is native to `dart:convert`, so only legacy Korean charsets pay the
+/// charset_converter platform-channel round trip. Malformed bytes degrade to
+/// U+FFFD instead of failing the whole page.
+Future<String> _defaultCharsetDecode(String encoding, Uint8List bytes) {
+  if (encoding != 'utf-8') return CharsetConverter.decode(encoding, bytes);
+  return Future.value(utf8.decode(bytes, allowMalformed: true));
+}
 
 const _diagnosticHeaderAllowlist = <String>{
   'server',

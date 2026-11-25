@@ -4,7 +4,7 @@
 
 Unofficial native mobile app for [humoruniv.com](https://m.humoruniv.com), a Korean humor community since 1998.
 
-- No backend server. The app fetches HTML from `m.humoruniv.com`, decodes EUC-KR, parses the DOM, and presents structured data.
+- No backend server. The app fetches HTML from `m.humoruniv.com`, decodes UTF-8 (the site served EUC-KR until 2026-10), parses the DOM, and presents structured data.
 - Clean Architecture: Presentation / Domain / Data layers with strict dependency direction.
 - TDD-first development. All features require unit, widget, integration, and E2E tests.
 

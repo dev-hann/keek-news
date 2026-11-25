@@ -112,7 +112,10 @@ Future<void> configureDependencies() async {
       },
       cookieJar: await _newPersistedCookieJar('humoruniv'),
     ),
-    encoding: 'euc-kr',
+    // humoruniv moved from EUC-KR to UTF-8 in 2026-10; every list and detail
+    // page now ships <meta charset=utf-8>, and the previous 'euc-kr' setting
+    // garbled every Korean character.
+    encoding: 'utf-8',
   );
   final todayhumorHtml = DioHtmlService(
     dio: _dio(

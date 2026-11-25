@@ -13,10 +13,16 @@ DioHtmlService _newClient({Dio? dio}) => DioHtmlService(
 );
 
 class _Canned {
-  const _Canned({this.statusCode = 200, this.body = '', this.headers});
+  const _Canned({
+    this.statusCode = 200,
+    this.body = '',
+    this.headers,
+    this.rawBytes,
+  });
   final int statusCode;
   final String body;
   final Map<String, String>? headers;
+  final List<int>? rawBytes;
 }
 
 class _QueuedAdapter implements HttpClientAdapter {
@@ -31,7 +37,7 @@ class _QueuedAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     final r = _responses[_i++];
-    final bytes = utf8.encode(r.body);
+    final bytes = r.rawBytes ?? utf8.encode(r.body);
     return ResponseBody(
       Stream.value(Uint8List.fromList(bytes)),
       r.statusCode,
@@ -54,9 +60,35 @@ Dio _dioWith(List<_Canned> responses) => Dio(
   ),
 )..httpClientAdapter = _QueuedAdapter(responses);
 
-Future<String> _identityDecode(_, Uint8List bytes) async => utf8.decode(bytes);
-
 void main() {
+  group('DioHtmlService charset decode', () {
+    test('decodes UTF-8 pages without the platform channel', () async {
+      final client = DioHtmlService(
+        dio: _dioWith([const _Canned(body: '<title>웃긴자료</title>')]),
+        encoding: 'utf-8',
+      );
+
+      expect(
+        await client.get('/board/list.html?table=pds&pg=0'),
+        '<title>웃긴자료</title>',
+      );
+    });
+
+    test(
+      'replaces malformed UTF-8 bytes instead of failing the page',
+      () async {
+        final client = DioHtmlService(
+          dio: _dioWith([
+            const _Canned(rawBytes: [0xEA, 0xB0, 0x80, 0xFF, 0x41]),
+          ]),
+          encoding: 'utf-8',
+        );
+
+        expect(await client.get('/x'), '가\uFFFDA');
+      },
+    );
+  });
+
   group('DioHtmlService', () {
     test('should throw NetworkFailure when dio fails with bad URL', () {
       final client = _newClient(
@@ -170,7 +202,6 @@ void main() {
           ),
         ]),
         encoding: 'utf-8',
-        decode: _identityDecode,
       );
 
       ServerFailure? caught;
@@ -194,7 +225,6 @@ void main() {
       final client = DioHtmlService(
         dio: _dioWith([const _Canned(statusCode: 404)]),
         encoding: 'utf-8',
-        decode: _identityDecode,
       );
 
       ServerFailure? caught;

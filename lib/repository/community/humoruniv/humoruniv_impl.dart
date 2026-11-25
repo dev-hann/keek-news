@@ -71,12 +71,14 @@ class HumorunivImpl extends HtmlCommunityRepo {
       scanResult = const ContentScanResult(blocks: [], imageUrls: []);
     }
 
+    final postDate = _extractDate(doc);
+
     return LoadedPostDetail(
       id: int.tryParse(id) ?? 0,
       community: CommunityId.humoruniv,
       title: _extractTitle(doc),
       author: _extractAuthor(doc),
-      date: _extractDate(doc),
+      date: postDate,
       contentBlocks: scanResult.blocks
           .map(_rewriteAttachmentBlock)
           .map(_withSynthesizedVideoThumb)
@@ -86,7 +88,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
       notRecommendCount: _extractNotRecommendCount(doc),
       viewCount: _extractViewCount(doc),
       commentCount: _extractCommentCount(doc),
-      comments: _extractComments(doc),
+      comments: _extractComments(doc, postDate),
     );
   }
 
@@ -234,13 +236,14 @@ class HumorunivImpl extends HtmlCommunityRepo {
   }
 
   String _extractTitle(dom.Document doc) {
-    return htmlClient.textOfAny(doc.body, const [
-      'title',
-      'h1.read_title',
-      '.read_title',
-      '#read_title',
-      '.view_title',
+    // The subject header carries the displayed title. Pages from the
+    // header-less `#read_view_wrap` template (fixture 1429732) only expose it
+    // through <head><title>, which sits outside `doc.body`.
+    final subject = htmlClient.textOfAny(doc.body, const [
+      '#read_subject_div h2 a',
     ]);
+    if (subject.isNotEmpty) return subject;
+    return htmlClient.textOf(doc.querySelector('title'));
   }
 
   String _extractAuthor(dom.Document doc) {
@@ -320,11 +323,11 @@ class HumorunivImpl extends HtmlCommunityRepo {
     return htmlClient.extractBracketedInt(hit.text);
   }
 
-  List<Comment> _extractComments(dom.Document doc) {
+  List<Comment> _extractComments(dom.Document doc, DateTime postDate) {
     final comments = <Comment>[];
 
     for (final item in doc.querySelectorAll('#comment_best_wrap .best_li')) {
-      comments.add(_parseComment(item, isBest: true));
+      comments.add(_parseComment(item, isBest: true, postDate: postDate));
     }
 
     // humoruniv closes each parent <li> twice before its reply <li>s, so
@@ -342,7 +345,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
         }
         continue;
       }
-      comments.add(_parseComment(item, isBest: false));
+      comments.add(_parseComment(item, isBest: false, postDate: postDate));
     }
 
     for (final entry in replyElsByParent.entries) {
@@ -356,7 +359,8 @@ class HumorunivImpl extends HtmlCommunityRepo {
         isBest: parent.isBest,
         mediaBlocks: parent.mediaBlocks,
         replies: [
-          for (final el in entry.value) _parseComment(el, isBest: false),
+          for (final el in entry.value)
+            _parseComment(el, isBest: false, postDate: postDate),
         ],
       );
     }
@@ -364,8 +368,14 @@ class HumorunivImpl extends HtmlCommunityRepo {
     return comments;
   }
 
-  Comment _parseComment(dom.Element item, {required bool isBest}) {
-    final author = htmlClient.textOf(item.querySelector('.hu_nick_txt'));
+  Comment _parseComment(
+    dom.Element item, {
+    required bool isBest,
+    required DateTime postDate,
+  }) {
+    // Best comments of long-nick users render a bare `.nick` with no inner
+    // `.hu_nick_txt` wrapper.
+    final author = htmlClient.textOfAny(item, const ['.hu_nick_txt', '.nick']);
 
     final mediaBlocks = <ContentBlock>[];
     final bodyEl = item.querySelector('.comment_body');
@@ -403,7 +413,7 @@ class HumorunivImpl extends HtmlCommunityRepo {
     var date = DateTime.fromMillisecondsSinceEpoch(0);
     for (final el in item.querySelectorAll('.etc')) {
       final text = el.text.trim();
-      final parsed = _parseCommentDate(text);
+      final parsed = _parseCommentDate(text, postDate);
       if (parsed != null) {
         date = parsed;
         break;
@@ -476,13 +486,34 @@ class HumorunivImpl extends HtmlCommunityRepo {
     return block;
   }
 
+  static final RegExp _commentDatePattern = RegExp(
+    r'(?:(\d{4})-)?(\d{1,2})-(\d{1,2})(?:[^\d]*?(\d{1,2}):(\d{2}):(\d{2}))?',
+  );
+
   /// Extracts `YYYY-MM-DD [HH:MM:SS]` from humoruniv's noisy `.etc` text.
-  DateTime? _parseCommentDate(String text) {
-    return parseDatePattern(
-      text,
-      RegExp(
-        r'(\d{4})-(\d{1,2})-(\d{1,2})(?:[^\d]*?(\d{1,2}):(\d{2}):(\d{2}))?',
-      ),
+  /// Long-nick best comments drop the year (`MM-DD HH:MM:SS`); such a date is
+  /// anchored to [postDate]'s year, rolling forward once when that would put
+  /// the comment before the post was written.
+  DateTime? _parseCommentDate(String text, DateTime postDate) {
+    final m = _commentDatePattern.firstMatch(text);
+    if (m == null) return null;
+    final year = int.tryParse(m.group(1) ?? '');
+    final month = int.parse(m.group(2)!);
+    final day = int.parse(m.group(3)!);
+    final hour = int.tryParse(m.group(4) ?? '') ?? 0;
+    final minute = int.tryParse(m.group(5) ?? '') ?? 0;
+    final second = int.tryParse(m.group(6) ?? '') ?? 0;
+    if (year != null) return DateTime(year, month, day, hour, minute, second);
+    final inPostYear = DateTime(
+      postDate.year,
+      month,
+      day,
+      hour,
+      minute,
+      second,
     );
+    return inPostYear.isBefore(postDate)
+        ? DateTime(postDate.year + 1, month, day, hour, minute, second)
+        : inPostYear;
   }
 }
