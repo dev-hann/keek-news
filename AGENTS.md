@@ -41,7 +41,7 @@ flutter analyze
 flutter test
 ```
 
-All must pass. `flutter analyze` runs with **all severities fatal** — any info, warning, or error fails the commit. `flutter test` must show **zero skipped** (the `~N` count must be 0) — unit/widget/integration tests are never skipped. The only opt-in category is smoke (`test/smoke/`, via `make smoke`). Or use: `make check`
+All must pass. `flutter analyze` runs with **all severities fatal** — any info, warning, or error fails the commit. `flutter test` must show **zero skipped outside smoke** — every test in the `~N` count must be a gated test under `test/smoke/`; unit/widget/integration tests are never skipped. The only opt-in category is smoke (`test/smoke/`, gated by `SMOKE=1`, run via `make smoke`). Or use: `make check`
 
 ## Commands
 
@@ -51,7 +51,6 @@ All must pass. `flutter analyze` runs with **all severities fatal** — any info
 | `make analyze` | lint check only |
 | `make test` | all tests |
 | `make coverage` | tests with coverage report |
-| `make e2e` | E2E tests (needs device) |
 | `make smoke` | Smoke tests — real network (needs internet) |
 | `make fix` | dart format + auto-fix lint |
 | `make clean` | clean and re-fetch dependencies |

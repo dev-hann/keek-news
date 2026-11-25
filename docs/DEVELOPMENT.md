@@ -24,8 +24,8 @@ flutter run
 ## Test
 
 ```bash
-flutter test                    # All tests in test/
-flutter test integration_test/  # E2E (needs device/emulator)
+flutter test                    # All tests in test/ (smoke tests skipped)
+make smoke                      # Smoke tests against live servers (needs internet)
 ```
 
 For detailed test commands and coverage, see [TESTING_POLICY.md](TESTING_POLICY.md).

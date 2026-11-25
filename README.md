@@ -81,7 +81,6 @@ flutter run
 | `make analyze` | 정적 분석만 |
 | `make test` | 전체 테스트 |
 | `make coverage` | 커버리지 리포트와 함께 테스트 |
-| `make e2e` | E2E 테스트 (기기 필요) |
 | `make smoke` | 스모크 테스트 — 실제 네트워크 (인터넷 필요) |
 | `make fix` | dart format + 린트 자동 수정 |
 | `make clean` | 클린 및 의존성 재설치 |

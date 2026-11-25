@@ -10,16 +10,15 @@ Run `make check` before committing — the husky pre-commit hook enforces `dart 
 
 ### No-Skip Rule (enforced)
 
-**Unit, widget, and integration tests must never be skipped and must all pass.** `flutter test` output must show `~0` (zero skipped). Do not use `skip:` or `@Skip` in:
+**Unit, widget, and integration tests must never be skipped and must all pass.** `flutter test` output must show no skipped test outside `test/smoke/` — the `~N` count may only come from gated smoke tests. Do not use `skip:` or `@Skip` in:
 
 - `test/unit/`
 - `test/widget/`
 - `test/integration/`
-- `integration_test/`
 
 If a test is broken or flaky, **fix it** — do not skip it. A skipped test is a red flag equivalent to a failing test during code review.
 
-The **only** opt-in category is **smoke tests** (`test/smoke/`), gated by `SMOKE=1` and run via `make smoke`. Smoke is exempt because it hits live network endpoints and is intentionally not part of the default suite.
+The **only** opt-in category is **smoke tests** (`test/smoke/`), gated by `SMOKE=1` and run via `make smoke`. Smoke is exempt because it hits live network endpoints. The default `flutter test` run still discovers them and reports them as skipped, so its `~N` count equals the number of gated smoke tests — anything skipped outside `test/smoke/` breaks this rule.
 
 ## TDD Cycle (recommended for logic)
 
@@ -116,13 +115,13 @@ Test complete screens in isolation using `WidgetTester`. Use `ProviderScope` ove
 
 Wire multiple real layers together with only the external boundary mocked (real parsers + mock HtmlClient returning fixture HTML).
 
-### 4. E2E Tests (`integration_test/`)
+### 4. E2E Tests (`integration_test/`) — not currently present
 
-Full app tests on a device/emulator. Use Provider overrides to inject deterministic fake data — no real network calls.
+No E2E tests are checked in: the legacy `integration_test/` suite was removed in 2026-07 and there is no `make e2e` target. When E2E coverage is (re)introduced, it belongs here — full app tests on a device/emulator, using Provider overrides to inject deterministic fake data (no real network calls) — together with a Makefile target and a row in the Commands table.
 
 ### 5. Smoke Tests (`test/smoke/`)
 
-Real network tests verifying parsers against live servers. The **only** test category permitted to use `skip:` — gated by `SMOKE=1` env var so the default `flutter test` suite reports `~0` skipped. Run: `SMOKE=1 flutter test test/smoke/` or `make smoke`. All other test levels are bound by the No-Skip Rule.
+Real network tests verifying parsers against live servers. The **only** test category permitted to use `skip:` — gated by `SMOKE=1`, so a default `flutter test` run reports them as skipped (see the No-Skip Rule). Run: `SMOKE=1 flutter test test/smoke/` or `make smoke`. All other test levels are bound by the No-Skip Rule.
 
 ## Fixture Management
 
@@ -182,5 +181,4 @@ Parsers MUST never throw — always return a valid result.
 | `flutter test test/unit/` | Only unit tests |
 | `flutter test test/widget/` | Only widget tests |
 | `flutter test test/integration/` | Only integration tests |
-| `flutter test integration_test/` | E2E (requires device) |
 | `flutter analyze` | Static analysis (0 errors required) |
