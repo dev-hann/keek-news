@@ -52,7 +52,7 @@ All must pass. `flutter analyze` runs with **all severities fatal** — any info
 | `make test` | all tests |
 | `make coverage` | tests with coverage report |
 | `make e2e` | E2E tests (needs device) |
-| `make smoke` | Smoke tests — real network (needs device + internet) |
+| `make smoke` | Smoke tests — real network (needs internet) |
 | `make fix` | dart format + auto-fix lint |
 | `make clean` | clean and re-fetch dependencies |
 

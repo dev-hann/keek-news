@@ -19,7 +19,7 @@ e2e:
 	flutter test integration_test/app_e2e_test.dart
 
 smoke:
-	flutter test integration_test/app_smoke_test.dart
+	SMOKE=1 flutter test test/smoke/
 
 format:
 	dart format .

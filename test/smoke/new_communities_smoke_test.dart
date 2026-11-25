@@ -8,6 +8,8 @@ import 'package:keek_news/repository/community/natepann/natepann_impl.dart';
 import 'package:keek_news/repository/community/ruliweb/ruliweb_impl.dart';
 import 'package:keek_news/service/dio_html_service.dart';
 
+import 'helpers.dart';
+
 const _userAgent =
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
     '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
@@ -37,7 +39,7 @@ DioHtmlService _service(String baseUrl, String encoding) {
 }
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  ensureLiveNetwork();
   final skip = Platform.environment['SMOKE'] != '1';
 
   // fmkorea is currently hidden from the UI and feed (see
