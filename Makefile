@@ -1,9 +1,12 @@
-.PHONY: check analyze test coverage smoke fix format clean
+.PHONY: check check-web analyze test coverage smoke fix format clean
 
-check:
+check: check-web
 	dart format --set-exit-if-changed .
 	flutter analyze
 	flutter test
+
+check-web:
+	npm run check --prefix web
 
 analyze:
 	flutter analyze

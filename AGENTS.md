@@ -19,6 +19,16 @@ Current scope: **웃긴자료 (pds) board only.** Active communities: dogdrip, p
 - `lib/theme/shad_theme.dart` — `AppShadTheme.dark()` (ShadThemeData with orange color scheme)
 - `lib/main.dart` — entry, boots DI
 - `test/helpers/shad_harness.dart` — `shadHarness(body)` / `shadApp({home, navigatorKey})` widget test helpers
+- `web/` — the web app the Android shell shows (React + Vite + TypeScript); `web/src/service/` is the port of `lib/service/`, tests mirror `web/src/` under `web/test/`
+- `shell/` — the gyo WebView shell; `lib/` is a symlink to `../web`. See `shell/README.md`
+
+## Web App (migration in progress)
+
+The Flutter app is being moved to a web app shown in a gyo WebView shell. Until that is done both live here: `web/` is the web app, `shell/` the Android project that shows it.
+
+- The four layers carry over under `web/src/`: `service/` → `repository/` → `use_case/` → `provider/`, with `model/`, `pages/` and `widgets/`.
+- Tests mirror `web/src/` under `web/test/` (Vitest). The HTML fixtures in `test/fixtures/` are reused by the parser ports.
+- Community pages are fetched through the native relay (`@gyo-framework/http`), never by the WebView: CORS, the WebView's own user agent and its Referer get in the way. `web/src/service/service_locator.ts` holds each site's headers, charset and cookie jar and stays in step with `lib/service/service_locator.dart` as long as the Flutter app exists.
 
 ## Design System
 
@@ -36,6 +46,7 @@ This project uses `shadcn_ui` (^0.56.0) as its design system. See [docs/DESIGN.m
 Pre-commit hook (husky) enforces:
 
 ```bash
+npm run check --prefix web   # web/: lint, format check, typecheck, test, build
 dart format --set-exit-if-changed .
 flutter analyze
 flutter test
@@ -47,7 +58,8 @@ All must pass. `flutter analyze` runs with **all severities fatal** — any info
 
 | Command | Description |
 |---------|-------------|
-| `make check` | format check + analyze + test (run before commit) |
+| `make check` | format check + analyze + test + web checks (run before commit) |
+| `make check-web` | web app only: lint + format check + typecheck + test + build |
 | `make analyze` | lint check only |
 | `make test` | all tests |
 | `make coverage` | tests with coverage report |

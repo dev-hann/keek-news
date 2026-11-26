@@ -1,0 +1,27 @@
+{
+  "name": "keek-news",
+  "version": "0.1.0",
+  "displayName": "킥뉴스 (웹)",
+  "profiles": {
+    "development": {
+      "serverUrl": "http://localhost:3000"
+    }
+  },
+  "platforms": {
+    "android": {
+      "enabled": true,
+      "packageName": "com.keek_news.app.webdev"
+    },
+    "ios": {
+      "enabled": false,
+      "bundleId": "com.keek-news.webdev"
+    }
+  },
+  "webview": {
+    "allowFileAccess": false,
+    "allowUniversalAccessFromFileURLs": false
+  },
+  "script": {
+    "start": "npm run dev"
+  }
+}
