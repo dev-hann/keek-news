@@ -9,17 +9,16 @@
   "platforms": {
     "android": {
       "enabled": true,
-      "packageName": "com.example.gyoshell"
+      "packageName": "com.example.gyo_shell"
     },
     "ios": {
       "enabled": false,
-      "bundleId": "com.example.gyoshell"
+      "bundleId": "com.example.gyo-shell"
     }
   },
   "webview": {
     "allowFileAccess": false,
-    "allowUniversalAccessFromFileURLs": false,
-    "userAgent": "gyo-webview/1.0"
+    "allowUniversalAccessFromFileURLs": false
   },
   "script": {
     "start": "npm start"

@@ -61,8 +61,8 @@ const FALLBACK_MEDIA = {
 const FALLBACK_VIDEO = 'https://i2.ruliweb.com/ori/26/11/26/1a214b20fd8513930.mp4';
 
 // --- gyo bridge protocol (same shape as @gyo-framework/bridge) -------------
-// The shell injects `window.gyo.__bridge.postMessage` once the page has
-// loaded; the web side owns `window.gyoBridge`.
+// The shell exposes `window.androidBridge` before any page script runs. The
+// web side owns `window.gyoBridge`, which the shell calls back.
 const pending = new Map();
 window.gyoBridge = {
   resolve(callbackId, data) {
@@ -82,15 +82,7 @@ window.gyoBridge = {
   publish() {},
 };
 
-const hasNativeBridge = () => Boolean(window.gyo && window.gyo.__bridge);
-
-async function waitForNativeBridge(timeoutMs) {
-  const deadline = performance.now() + timeoutMs;
-  while (!hasNativeBridge() && performance.now() < deadline) {
-    await new Promise((done) => setTimeout(done, 50));
-  }
-  return hasNativeBridge();
-}
+const hasNativeBridge = () => Boolean(window.androidBridge);
 
 /** GET `url` with `headers` through the native relay (or the dev relay). */
 function relay(url, headers = {}) {
@@ -111,12 +103,14 @@ function relay(url, headers = {}) {
           reject(error);
         },
       });
-      window.gyo.__bridge.postMessage({
-        bridgeName: 'http',
-        methodName: 'request',
-        data: { url, headers },
-        callbackId,
-      });
+      window.androidBridge.postMessage(
+        JSON.stringify({
+          bridgeName: 'http',
+          methodName: 'request',
+          data: { url, headers },
+          callbackId,
+        }),
+      );
     });
   }
   const query = new URLSearchParams({ url, headers: btoa(JSON.stringify(headers)) });
@@ -444,7 +438,7 @@ function setupVideo() {
   const s = section(
     'E',
     '동영상 재생·전체화면',
-    '직접 눌러서 확인합니다. 셸에 전체화면 콜백이 없어 전체화면은 실패할 것으로 예상합니다.',
+    '인라인 재생과 전체화면은 셸의 WebChromeClient 구현에 달려 있습니다. 직접 눌러서 확인합니다.',
   );
   const video = h('video', { controls: '', playsinline: '', preload: 'metadata', src: FALLBACK_VIDEO });
   video.addEventListener('loadedmetadata', () =>
@@ -481,7 +475,7 @@ function renderSummary() {
 }
 
 async function main() {
-  const native = await waitForNativeBridge(2500);
+  const native = hasNativeBridge();
   document.querySelector('#env').textContent =
     `${native ? '네이티브 브리지' : '네이티브 브리지 없음 (데스크톱: 개발용 릴레이 사용)'} · `
     + `UA에 "wv" ${navigator.userAgent.includes('; wv') ? '있음' : '없음'} · ${navigator.userAgent}`;

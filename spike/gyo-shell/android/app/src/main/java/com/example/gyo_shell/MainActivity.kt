@@ -1,25 +1,30 @@
-package com.example.gyoshell
+package com.example.gyo_shell
 
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 import gyo.plugins.bridge.AndroidBridgeInterface
 import gyo.plugins.bridge.BridgeRegistry
 import gyo.plugins.http.HttpBridge
-import com.example.gyoshell.BuildConfig
+import com.example.gyo_shell.BuildConfig
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private lateinit var gyoConfig: GyoConfig
+    private var fullscreenView: View? = null
+    private var fullscreenCallback: WebChromeClient.CustomViewCallback? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,10 +46,14 @@ class MainActivity : AppCompatActivity() {
             javaScriptEnabled = true
             domStorageEnabled = true
             databaseEnabled = true
-            allowFileAccess = false
+            allowFileAccess = gyoConfig.allowFileAccess
             allowContentAccess = true
-            allowUniversalAccessFromFileURLs = false
+            allowUniversalAccessFromFileURLs = gyoConfig.allowUniversalAccessFromFileURLs
             mediaPlaybackRequiresUserGesture = false
+
+            // Empty unless gyo.config.json sets webview.userAgent. The WebView's own
+            // user agent is what makes sites treat the shell as a browser.
+            gyoConfig.userAgent?.let { userAgentString = it }
             
             // Enable debugging only in debug builds
             if (BuildConfig.DEBUG) {
@@ -107,7 +116,41 @@ class MainActivity : AppCompatActivity() {
                 
                 return true
             }
+
+            // Full-screen video (`video.requestFullscreen()`). Without these
+            // two the WebView answers "Fullscreen is not supported".
+            override fun onShowCustomView(view: View, callback: CustomViewCallback) {
+                if (fullscreenView != null) {
+                    callback.onCustomViewHidden()
+                    return
+                }
+                fullscreenView = view
+                fullscreenCallback = callback
+                // The WebView must stay alive behind the video; hiding it
+                // would tear the player down.
+                webView.visibility = View.INVISIBLE
+                addContentView(
+                    view,
+                    FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                )
+            }
+
+            override fun onHideCustomView() {
+                hideFullscreen()
+            }
         }
+    }
+
+    private fun hideFullscreen() {
+        val view = fullscreenView
+        fullscreenView = null
+        (view?.parent as? ViewGroup)?.removeView(view)
+        fullscreenCallback?.onCustomViewHidden()
+        fullscreenCallback = null
+        webView.visibility = View.VISIBLE
     }
 
     private fun loadApp() {
@@ -165,7 +208,20 @@ class MainActivity : AppCompatActivity() {
             }
             
             Log.i("MainActivity", "Loaded config - serverUrl: $serverUrl")
-            return GyoConfig(serverUrl = serverUrl, allowedHost = allowedHost)
+            val webview = jsonObject.optJSONObject("webview")
+            val userAgent = webview
+                ?.optString("userAgent")
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+
+            return GyoConfig(
+                serverUrl = serverUrl,
+                allowedHost = allowedHost,
+                userAgent = userAgent,
+                allowFileAccess = webview?.optBoolean("allowFileAccess", false) ?: false,
+                allowUniversalAccessFromFileURLs =
+                    webview?.optBoolean("allowUniversalAccessFromFileURLs", false) ?: false
+            )
         } catch (e: Exception) {
             Log.e("MainActivity", "Failed to load gyo-config.json from assets: ${e.message}")
             throw IllegalStateException("gyo-config.json must be present with valid serverUrl. Did you run 'gyo build' or 'gyo run'?", e)
@@ -173,15 +229,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
+        when {
+            fullscreenView != null -> hideFullscreen()
+            webView.canGoBack() -> webView.goBack()
+            else -> super.onBackPressed()
         }
     }
     
     data class GyoConfig(
         val serverUrl: String,
-        val allowedHost: String
+        val allowedHost: String,
+        val userAgent: String? = null,
+        val allowFileAccess: Boolean = false,
+        val allowUniversalAccessFromFileURLs: Boolean = false
     )
 }
