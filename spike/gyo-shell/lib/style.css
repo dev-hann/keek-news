@@ -1,0 +1,70 @@
+:root {
+  color-scheme: dark;
+  --bg: #121212;
+  --fg: #ededed;
+  --muted: #9a9a9a;
+  --card: #1d1d1f;
+  --pass: #3ddc84;
+  --fail: #ff5c5c;
+  --info: #8ab4f8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.5 system-ui, sans-serif;
+}
+
+h1 { font-size: 22px; margin: 0 0 8px; }
+h2 { font-size: 16px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+
+.env, .why { color: var(--muted); margin: 0 0 8px; font-size: 13px; word-break: break-all; }
+
+.summary { padding-left: 20px; margin: 8px 0 16px; }
+.summary li { margin: 2px 0; }
+
+.check {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 12px 0;
+}
+
+.chip {
+  display: inline-block;
+  min-width: 44px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  background: #444;
+}
+.chip.pass { background: var(--pass); color: #00320f; }
+.chip.fail { background: var(--fail); color: #3d0000; }
+.chip.info { background: #333c55; color: #dbe6ff; }
+
+.line { margin: 4px 0; font-size: 13px; word-break: break-all; }
+.line.ok { color: var(--pass); }
+.line.bad { color: var(--fail); }
+.line.muted { color: var(--muted); }
+
+.thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.thumb {
+  width: 120px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.thumb img { width: 120px; height: 90px; object-fit: cover; border-radius: 6px; background: #000; display: block; }
+.thumb.broken img { visibility: hidden; }
+.thumb.broken { outline: 1px solid var(--fail); border-radius: 6px; }
+
+video, iframe { width: 100%; max-width: 360px; border-radius: 8px; background: #000; display: block; margin: 8px 0; }
+iframe { height: 200px; }
+
+.rerun { padding: 10px 16px; border-radius: 8px; border: 0; background: #2f6fed; color: #fff; font-size: 15px; }
+.check button { padding: 8px 12px; margin-right: 8px; border-radius: 8px; border: 1px solid #555; background: #2a2a2d; color: var(--fg); font-size: 14px; }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug builds only: `gyo run` serves the web app over plain http on the
+  developer machine's LAN address, which the release network security config
+  does not permit (it only allows localhost / 10.0.2.2, i.e. the emulator).
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

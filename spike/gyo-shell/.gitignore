@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+.DS_Store
+*.log
+.env
+.env.local
+.gradle/
+*.iml
+.idea/
+local.properties
+android/build/
+android/.gradle/
+.gyo/cache/
+# lib/ has no dependencies; `gyo run` recreates the lockfile on every start.
+lib/package-lock.json

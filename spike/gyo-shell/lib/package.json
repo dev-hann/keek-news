@@ -1,0 +1,9 @@
+{
+  "name": "gyo-shell-web",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Spike test page for the gyo WebView shell. No dependencies on purpose.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

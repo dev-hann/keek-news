@@ -1,0 +1,27 @@
+{
+  "name": "gyo-shell",
+  "version": "1.0.0",
+  "profiles": {
+    "development": {
+      "serverUrl": "http://localhost:3000"
+    }
+  },
+  "platforms": {
+    "android": {
+      "enabled": true,
+      "packageName": "com.example.gyoshell"
+    },
+    "ios": {
+      "enabled": false,
+      "bundleId": "com.example.gyoshell"
+    }
+  },
+  "webview": {
+    "allowFileAccess": false,
+    "allowUniversalAccessFromFileURLs": false,
+    "userAgent": "gyo-webview/1.0"
+  },
+  "script": {
+    "start": "npm start"
+  }
+}
