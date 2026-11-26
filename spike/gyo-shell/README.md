@@ -24,8 +24,8 @@ WebView는 CORS 때문에 다른 사이트를 직접 받을 수 없으므로, HT
 
 ## 구성
 
-- `lib/` — 의존성 없는 정적 페이지(`index.html`, `app.js`)와 Node 내장 모듈만 쓰는
-  서버(`server.js`).
+- `lib/` — 의존성 없는 정적 페이지(`index.html`, `app.js`)와 대조용 문서
+  (`control.html`), Node 내장 모듈만 쓰는 서버(`server.js`).
 - `android/` — gyo 템플릿 + 릴레이 핸들러 `HttpBridge` + 디버그 전용 cleartext 설정.
 - `HttpBridge` — `http.request({ url, headers })` → OkHttp GET →
   `{ status, contentType, bodyBase64, elapsedMs }`. 바이트를 그대로 돌려주어 웹이
@@ -57,6 +57,23 @@ SPIKE_DEV_RELAY=1 node server.js     # http://localhost:3000
 켜지 마세요. 헤드리스 Chromium의 기본 UA(`HeadlessChrome`)는 커뮤니티 CDN에 봇으로
 차단되니, 실제 기기의 UA를 덮어써서 열어야 합니다.
 
+### 에뮬레이터 (이 머신)
+
+USB 디버깅 폰 대신 에뮬레이터로 돌릴 수 있습니다. 결과는 CDP로 읽습니다. 이
+에뮬레이터(ATD 이미지, `-no-window`)는 `adb screencap`이 검은 화면만 돌려주므로
+화면 캡처는 되지 않습니다.
+
+```bash
+SDK=$HOME/development/android-sdk
+$SDK/emulator/emulator -avd gyo-spike -no-window -no-audio -no-boot-anim \
+  -gpu swiftshader_indirect -no-snapshot -memory 2048 &
+adb wait-for-device   # 부팅까지 기다리기
+cd spike/gyo-shell && mise exec node@24 -- node ~/Documents/gyo/cli/dist/index.js run &
+sock=$(adb shell cat /proc/net/unix | tr -d '\r' | grep -o 'webview_devtools_remote_[0-9]*')
+adb forward tcp:9222 "localabstract:$sock"
+curl -s localhost:9222/json   # 페이지 타깃의 webSocketDebuggerUrl로 CDP 접속
+```
+
 ## 스파이크 중 발견한 gyo 문제
 
 1. **실기기에서 `gyo run`이 페이지를 못 엽니다.** 템플릿의
@@ -70,18 +87,41 @@ SPIKE_DEV_RELAY=1 node server.js     # http://localhost:3000
    `allowFileAccess`는 셸 코드가 읽지 않습니다.
 4. **브리지 런타임이 페이지 로드 뒤에 주입됩니다.** 페이지 스크립트는
    `window.gyo`가 생길 때까지 기다려야 합니다(`app.js`의 `waitForNativeBridge`).
+5. **전체화면이 안 됩니다.** `MainActivity`에 `onShowCustomView`가 없어서
+   `requestFullscreen()`이 "Fullscreen is not supported"로 거절됩니다.
+6. **`gyo run`이 실행될 때마다 작업 트리를 더럽힙니다.** 감지한 LAN URL을 추적 중인
+   `gyo.config.json`에 쓰고, `android/app/src/main/assets/gyo-config.json`을 만듭니다.
+   둘 다 이 머신 전용 값이라 여기서는 되돌리거나 무시합니다.
+7. **`gyo run`이 남기는 것들.** 종료해도 개발 서버와 `adb logcat`이 남습니다. 포트가
+   아직 점유된 채 다시 실행하면 "Local server running"까지 출력한 뒤 서버만
+   `EADDRINUSE`로 죽고, 앱은 그대로 설치되어 "Webpage not available"이 뜹니다.
 
 ## 결과
 
+### Android WebView (에뮬레이터)
+
+2026-11-26. `gyo run`으로 네이티브 브리지를 거쳐 실행했습니다. Android 14 (API 34),
+WebView Chromium 113입니다. 폰이 아니라 에뮬레이터이고, 이 에뮬레이터는 `screencap`이
+검은 화면만 돌려주어 실제 화면이 그려지는지는 확인하지 못했습니다. 결과는 CDP로
+페이지에서 직접 읽었습니다.
+
+- **A PASS** — 이미지 9/9, 6개 사이트가 WebView에서 직접 로드되었습니다.
+  대조: 같은 이미지를 공개 주소 Referer로 요청하면 403, Referer 없이는 200.
+  사설 IP Referer(`http://192.168.x.x`)는 CDN이 허용합니다.
+- **B PASS** — 6개 사이트 모두 200 (네이티브 요청 58~659 ms). 대조: WebView의 UA로
+  루리웹·네이트판n을 요청하면 302.
+- **C PASS** — 뽐뿌 한글 997자, 깨진 문자 0, 제목 30개. 웃대 게시글 20건.
+- **D PASS** — 웃대 상세 146KB: 사이트 응답 113~132 ms, 릴레이 오버헤드 13~38 ms,
+  최대 프레임 간격 17 ms.
+- **E** — 인라인 재생은 동작합니다(`play()` 성공). 전체화면은
+  "Fullscreen is not supported"로 실패합니다. 셸에 전체화면 콜백이 없습니다.
+
 ### 데스크톱 (헤드리스 Chromium, WebView UA, 개발용 릴레이)
 
-2026-11-26. 네이티브 브리지가 아니므로 참고용입니다.
+같은 날. 네이티브 브리지가 아니므로 참고용입니다. A·B·C·D 모두 PASS.
+D는 사이트 응답 1799 ms, 릴레이 오버헤드 3 ms.
 
-- A PASS — 이미지 9/9, 6개 사이트.
-- B PASS — 6개 사이트 모두 200. 대조: 루리웹·네이트판n은 WebView UA로 302.
-- C PASS — 뽐뿌 한글 986자, 깨진 문자 0, 제목 30개. 웃대 게시글 20건.
-- D PASS — 사이트 응답 1799 ms, 릴레이 오버헤드 3 ms, 최대 프레임 간격 17 ms.
+### 폰에서 남은 확인
 
-### Android WebView
-
-(기기 실행 뒤 채움)
+- 화면이 실제로 그려지는지. 에뮬레이터에서는 캡처가 되지 않았습니다.
+- E의 재생·전체화면 버튼을 손으로 눌러서.

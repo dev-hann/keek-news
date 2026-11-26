@@ -300,17 +300,34 @@ async function checkMedia(pages) {
   const ok = total >= 5 && sitesLoaded >= 4;
   s.pass(ok, ok ? 'PASS' : 'FAIL');
 
-  // Control: the same image from a document that does send a Referer.
+  // Control: the same image from a document that does send a Referer. It has
+  // to be a real document — a srcdoc iframe inherits this page's policy.
   const controlUrl = FALLBACK_MEDIA.bobaedream[0];
-  const frame = h('iframe', {
-    title: 'referer control',
-    srcdoc: `<body style="margin:0;background:#333"><img src="${controlUrl}" alt=""></body>`,
+  const frame = h('iframe', { title: 'referer control', src: `/control.html?src=${encodeURIComponent(controlUrl)}` });
+  window.addEventListener('message', (event) => {
+    if (event.origin !== location.origin || event.data?.source !== 'referer-control') return;
+    const blocked = event.data.result === 'blocked';
+    s.info(
+      `대조 결과: ${blocked ? '차단됨' : '로드됨'} — Referer "${event.data.referer}"를 보냄 `
+        + `(이 주소의 Referer 기준, 실제 호스팅 주소에서는 다를 수 있음)`,
+      'muted',
+    );
   });
   s.body.append(h('p', { class: 'line muted', text: '대조 · Referer를 보내는 문서에서 같은 이미지 (차단되어야 정상):' }), frame);
-  frame.addEventListener('load', () => {
-    const blocked = frame.contentDocument?.querySelector('img')?.naturalWidth === 0;
-    s.info(`대조 결과: ${blocked ? '차단됨 (Referer 없이는 로드됨 → Referer 검사 확인)' : '로드됨 (이 CDN은 로컬 주소 Referer는 검사하지 않음 — 기기의 LAN 주소에서 다시 확인)'}`, 'muted');
-  });
+
+  // The control document sits on a private LAN address, which CDNs tend to
+  // allow. The hosted app will send a public origin, so ask for the same
+  // image with one to see the rule the app will actually meet.
+  const withHeaders = async (label, headers) => {
+    try {
+      const response = await relay(controlUrl, headers);
+      s.info(`대조 · 릴레이로 같은 이미지, ${label}: ${response.status}`, 'muted');
+    } catch (error) {
+      s.info(`대조 · 릴레이로 같은 이미지, ${label}: 실패 — ${error.message}`, 'muted');
+    }
+  };
+  await withHeaders('공개 주소 Referer', { 'User-Agent': navigator.userAgent, Referer: 'https://keek-news.github.io/' });
+  await withHeaders('Referer 없음', { 'User-Agent': navigator.userAgent });
 }
 
 function utf8(response) {

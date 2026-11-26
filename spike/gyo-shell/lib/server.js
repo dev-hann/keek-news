@@ -43,6 +43,11 @@ function serveStatic(req, res) {
 
 const server = http.createServer(async (req, res) => {
   const { pathname, searchParams } = new URL(req.url, 'http://localhost');
+  if (pathname === '/__echo') {
+    // Lets control.html show which Referer a document with a default policy sends.
+    res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(req.headers));
+    return;
+  }
   if (pathname === '/__relay') {
     if (!DEV_RELAY) {
       res.writeHead(404).end('dev relay disabled');
