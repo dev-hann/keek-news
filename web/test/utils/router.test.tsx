@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import { waitFor } from '@testing-library/react';
 import {
   homePath,
   navigate,
@@ -65,10 +66,10 @@ describe('router', () => {
     await act(() => root.render(<Path />));
     await act(() => navigate(settingsPath));
 
-    // jsdom leaves the history entry a tick later.
+    // jsdom leaves the history entry a tick later, and under load more than one tick.
     await act(async () => {
       window.history.back();
-      await new Promise((resolve) => setTimeout(resolve, 0));
+      await waitFor(() => expect(host.textContent).toBe(homePath));
     });
 
     expect(host.textContent).toBe(homePath);
