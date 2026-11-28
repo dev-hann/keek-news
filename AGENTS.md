@@ -17,9 +17,9 @@ Current scope: **웃긴자료 (pds) board only.** The app is the web app (`web/`
 
 - `web/src/service/service_locator.ts` — where the dependencies are assembled (`communityRepos()`, `feedUseCase()`, …), and each site's headers, charset and cookie jar
 - `web/src/model/community.ts` — the registry: `registeredCommunityIds`, `communities`
-- `web/src/provider/state_notifier.tsx` — `StateNotifier` and `useNotifierState`, the base of every provider
+- `web/src/provider/state_notifier.ts` — `StateNotifier` and `useNotifierState`, the base of every provider
 - `web/src/utils/router.ts`, `web/src/app.tsx` — the paths, the navigation, and the page shown for a path
-- `web/src/index.css` — the tokens of the theme, and the only place with a raw colour value
+- `web/src/index.css` — the tokens of the theme
 - `web/wrangler.jsonc` — how the web app is deployed (`web/README.md`, 배포)
 - `web/test/helpers/fixtures.ts` — reads the page samples in `web/test/fixtures/`
 - `shell/` — the gyo WebView shell; its `lib/` is a symlink to `../web`; `shell/gyo.config.json` holds its profiles, package name, version and icon. See `shell/README.md`
@@ -85,7 +85,7 @@ skill({ name: "feature-consensus" })
 - Provider imports or provider hooks inside `web/src/widgets/` or in a page's private components (provider access is confined to `pages/*_view.tsx`)
 - Additional page-level components, besides the page itself, in a `*_view.tsx` file (extract to `web/src/widgets/`)
 - Non-`on*` callback names on widget props
-- Raw colour values outside `web/src/index.css`
+- Raw colour values outside `web/src/index.css` for anything new (the community's `brandColor` and the tiers of `CountBadge` are what is there, not the example)
 - Writing anything per community outside the three registry places
 - Pushing a `v*` tag: it publishes the Release that every user of the app is offered. The user decides a release.
 - Putting a secret or a private address in the repository: the release keys and the Cloudflare token are GitHub secrets, and this machine's Tailscale address stays out
