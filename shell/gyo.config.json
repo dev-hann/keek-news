@@ -4,7 +4,7 @@
   "displayName": "킥뉴스 (웹)",
   "profiles": {
     "development": {
-      "serverUrl": "http://localhost:3000"
+      "serverUrl": "http://100.71.158.16:3000"
     }
   },
   "platforms": {

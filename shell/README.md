@@ -18,6 +18,10 @@ mise exec node@24 -- node ~/Documents/gyo/cli/dist/index.js run
 
 빌드에는 Node 24, JDK 17, SDK platform 36이 필요하다. `gyo doctor`로 확인할 수 있다.
 
+`development` 프로필의 `serverUrl`은 이 PC의 Tailscale 주소(`100.71.158.16`)다. 폰이 어느
+네트워크에 있어도 개발 서버에 닿게 하기 위해서라서, 폰도 Tailscale에 연결돼 있어야 한다. 같은
+와이파이에서만 쓴다면 `http://localhost:3000`으로 두면 gyo가 PC의 LAN 주소를 찾아 쓴다.
+
 ## 플러그인
 
 gyo 플러그인은 npm에서 받는다(`web/package.json`의 `@gyo-community/http`). 플러그인의
