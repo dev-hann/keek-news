@@ -21,7 +21,7 @@ Rationale:
 - The pds board is the highest-traffic, highest-value board on the site.
 - Most other boards share the same HTML template, so adding them later requires minimal new parser code.
 
-The web app starts with 웃대 alone. The Flutter app also serves 오늘의유머, 개드립, 뽐뿌, 보배드림, 루리웹 and 네이트판. Each joins the web app by registering its repository: the feed, the settings switches and the tabs already take every registered community.
+The web app serves 웃대 alone. The Flutter app also serves 오늘의유머, 개드립, 뽐뿌, 보배드림, 루리웹 and 네이트판: they are not planned for the web app (§9, W-09). The feed, the settings switches and the tabs take every registered community, so one would join by registering its repository.
 
 ## 2. Target Users (Personas)
 
@@ -325,18 +325,22 @@ The web app is built in slices. Each one is usable on its own and leaves no cont
 | ID | Slice | Status |
 |----|-------|--------|
 | W-00 | Web app skeleton, native relay (`@gyo-community/http`), Android shell | Done |
-| W-01 | Home: feed of 웃대 with inline cards (text and images), body fetched per post, paging, refresh by pull and from the way up, loading / error / empty states | Built. Checked on an emulator; not yet looked at on a phone |
-| W-02 | Settings: community switches, version, source link | Built. Checked on an emulator |
+| W-01 | Home: feed of 웃대 with inline cards (text and images), body fetched per post, paging, refresh by pull and from the way up, loading / error / empty states | Built. Checked on an emulator and on a phone |
+| W-02 | Settings: community switches, version, source link | Built. Checked on an emulator and on a phone |
 | W-03 | Image viewer: fullscreen, swipe, pinch-zoom, for the images of a post's card and for the pictures of a comment (opened from the comments sheet) | Built |
 | W-04 | Comments sheet: reading only, opened from a post card's preview | Built |
 | W-05 | Image carousel, inline video (one at a time) and the media menu (save to the gallery, share, copy the address, block an image), for the media of a post's card; a comment's video opens full screen (`CommentVideoViewer`), and a long-press on a comment's picture or video opens the menu | Built |
 | W-06 | Bookmarks (저장함) and blocked images. Sliced out of it: the image cache, which is not part of the web app; read posts, which stay with F-06; and moving what the Flutter app saved, which is W-08 | Built |
 | W-07 | Cached content and the "Last updated" banner when offline | Deferred |
 | W-08 | Moving the bookmarks and settings saved by the Flutter app | Deferred |
-| W-09 | The other communities, through the repository registry | Later |
+| W-09 | The other communities, through the repository registry | Dropped: the web app serves 웃대 alone |
 | W-10 | Release: the web app under the released app's package and signing key | Last |
 
-Not planned for the web app: the first-launch NSFW warning (F-11), iOS, and the image cache.
+Checked how: W-01 to W-06 were exercised on an emulator's WebView (Android 14) and on a phone (Galaxy Z Flip6, Android 16, WebView 157). On both the page was read and driven through the WebView's debug protocol, on the phone its touches as well; saving to the gallery and the share chooser went through the native plugin on both. No check has yet shown a finger on the glass (how a pinch, a fling or a long-press feel), a screen reader, or Android 9 and earlier.
+
+Not planned for the web app: the first-launch NSFW warning (F-11), iOS, the image cache, and the other communities (W-09).
+
+W-09 was started and set aside on 2026-11-28. Six parsers had been ported with their tests and checked against the real Dart code, and the feed named a community whose list failed; the user then decided that the web app serves 웃대 alone, and that the other communities are designed and built anew if they are ever wanted, not resumed. What that design is to know: the Flutter feed keeps the newest 20 × communities posts of a page and puts the posts without a date first, so with every community on the communities whose posts carry a date are cut — checked live on that day, 오늘의유머 kept 7 of 30 posts and 개드립 6 of 23, and the tab of a community shows only what is kept. The Flutter app behaves the same way.
 
 ### Flutter app (reference until the move is complete)
 
