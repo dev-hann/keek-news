@@ -47,7 +47,11 @@ jobs:
           java-version: "17"
       - name: Android SDK
         # What the shell is built against (shell/android/app/build.gradle): platform 36.
-        run: yes | sdkmanager "platforms;android-36" "build-tools;36.0.0" > /dev/null
+        # sdkmanager is not on the PATH of the runner, and its questions are answered in advance.
+        run: |
+          sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          "$sdkmanager" --list_installed | grep -q "platforms;android-36" || \\
+            printf 'y\ny\ny\ny\ny\ny\ny\ny\n' | "$sdkmanager" "platforms;android-36" > /dev/null
       - name: The tag names the version of the app
         if: github.ref_type == 'tag'
         env:
