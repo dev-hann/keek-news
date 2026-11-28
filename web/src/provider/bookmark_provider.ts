@@ -1,8 +1,7 @@
 import { type Bookmark } from '../model/bookmark';
 import type { CommunityId } from '../model/community';
-import { BookmarkImpl } from '../repository/bookmark/bookmark_impl';
-import { BrowserLocalStorageService } from '../service/browser_local_storage_service';
-import { BookmarkUseCase } from '../use_case/bookmark_use_case';
+import { bookmarkUseCase } from '../service/service_locator';
+import type { BookmarkUseCase } from '../use_case/bookmark_use_case';
 import { StateNotifier, useNotifierState } from './state_notifier';
 
 /** The posts the user saved, most recently saved first. */
@@ -51,9 +50,7 @@ let bookmarks: BookmarkNotifier | undefined;
 
 /** The one bookmark notifier of the app, made the first time a screen asks for it. */
 export function bookmarkNotifier(): BookmarkNotifier {
-  bookmarks ??= new BookmarkNotifier(
-    new BookmarkUseCase(new BookmarkImpl(new BrowserLocalStorageService()))
-  );
+  bookmarks ??= new BookmarkNotifier(bookmarkUseCase());
   return bookmarks;
 }
 

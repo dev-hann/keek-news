@@ -4,9 +4,11 @@ import {
   type CommunityId,
   type RegisteredCommunityId,
 } from '../model/community';
+import { BookmarkImpl } from '../repository/bookmark/bookmark_impl';
 import { HumorunivImpl } from '../repository/community/humoruniv/humoruniv_impl';
 import type { CommunityRepo } from '../repository/community/community_repo';
 import { FeedImpl } from '../repository/feed/feed_impl';
+import { BookmarkUseCase } from '../use_case/bookmark_use_case';
 import { FeedUseCase } from '../use_case/feed_use_case';
 import { browserHeaders, desktopUserAgent, mobileUserAgent } from './community_headers';
 import { BrowserLocalStorageService } from './browser_local_storage_service';
@@ -121,4 +123,12 @@ export function feedUseCase(): FeedUseCase {
     new FeedImpl(new BrowserLocalStorageService(), registeredCommunityIds)
   );
   return feed;
+}
+
+let bookmarks: BookmarkUseCase | undefined;
+
+/** The one bookmark use case of the app, made the first time a screen asks for it. */
+export function bookmarkUseCase(): BookmarkUseCase {
+  bookmarks ??= new BookmarkUseCase(new BookmarkImpl(new BrowserLocalStorageService()));
+  return bookmarks;
 }

@@ -5,9 +5,8 @@ import {
   bookmarkFromJson,
   bookmarkKey,
   bookmarkToJson,
-  feedItemFromBookmark,
 } from '../../src/model/bookmark';
-import type { FeedItem } from '../../src/model/feed_item';
+import { feedItemFromBookmark, type FeedItem } from '../../src/model/feed_item';
 
 describe('Bookmark', () => {
   it('should create with required fields and savedAt', () => {

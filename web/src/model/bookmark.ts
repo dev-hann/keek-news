@@ -56,22 +56,6 @@ export function bookmarkFromFeedItem(item: FeedItem, savedAt: Date): Bookmark {
   };
 }
 
-/** The feed item a bookmark lists as, for the card that shows it. */
-export function feedItemFromBookmark(bookmark: Bookmark): FeedItem {
-  return {
-    community: bookmark.community,
-    id: bookmark.id,
-    title: bookmark.title,
-    url: bookmark.url,
-    ...(bookmark.author == null ? {} : { author: bookmark.author }),
-    ...(bookmark.publishedAt == null ? {} : { publishedAt: bookmark.publishedAt }),
-    recommendCount: bookmark.recommendCount,
-    commentCount: bookmark.commentCount,
-    viewCount: bookmark.viewCount,
-    ...(bookmark.thumbnailUrl == null ? {} : { thumbnailUrl: bookmark.thumbnailUrl }),
-  };
-}
-
 const isCommunityId = (value: unknown): value is CommunityId =>
   typeof value === 'string' && (communityIds as readonly string[]).includes(value);
 
