@@ -12,18 +12,18 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = 'com.keek_news.app.webdev'
+    namespace = 'com.keek_news.app'
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.keek_news.app.webdev"
+        applicationId = "com.keek_news.app"
         minSdk = 24
         targetSdk = 36
 
         // versionCode and versionName follow gyo.config.json; `gyo build` and
         // `gyo run` rewrite these two lines.
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 40000
+        versionName = "4.0.0"
     }
 
     signingConfigs {

@@ -19,8 +19,8 @@ Current scope: **웃긴자료 (pds) board only.** Active communities: dogdrip, p
 - `lib/theme/shad_theme.dart` — `AppShadTheme.dark()` (ShadThemeData with orange color scheme)
 - `lib/main.dart` — entry, boots DI
 - `test/helpers/shad_harness.dart` — `shadHarness(body)` / `shadApp({home, navigatorKey})` widget test helpers
-- `web/` — the web app the Android shell shows (React + Vite + TypeScript); `web/src/service/` is the port of `lib/service/`, tests mirror `web/src/` under `web/test/`
-- `shell/` — the gyo WebView shell; `lib/` is a symlink to `../web`. See `shell/README.md`
+- `web/` — the web app the Android shell shows (React + Vite + TypeScript); `web/src/service/` is the port of `lib/service/`, tests mirror `web/src/` under `web/test/`; `web/wrangler.jsonc` is how it is deployed (`web/README.md`, 배포)
+- `shell/` — the gyo WebView shell; `lib/` is a symlink to `../web`. See `shell/README.md
 
 ## Web App (migration in progress)
 

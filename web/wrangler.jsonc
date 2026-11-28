@@ -1,0 +1,11 @@
+{
+  // Where the web app is served from: a Cloudflare Worker that holds the built
+  // files and nothing else. Pages are asked for only by the app's shell, which
+  // fetches the communities itself, so no code runs here.
+  "name": "keek-news",
+  "compatibility_date": "2026-11-28",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+  },
+}

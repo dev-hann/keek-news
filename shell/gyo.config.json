@@ -1,23 +1,28 @@
 {
   "name": "keek-news",
-  "version": "0.1.0",
-  "displayName": "킥뉴스 (웹)",
+  "version": "4.0.0",
+  "displayName": "킥뉴스",
   "profiles": {
     "development": {
-      "serverUrl": "http://100.71.158.16:3000"
+      "serverUrl": "http://localhost:3000"
+    },
+    "dev-server": {
+      "serverUrl": "http://localhost:3000"
     },
     "standalone": {
-      "serverUrl": "http://100.71.158.16:3000"
+      "serverUrl": "https://keek-news.notion-blog-proxy.workers.dev"
     }
   },
   "platforms": {
     "android": {
       "enabled": true,
-      "packageName": "com.keek_news.app.webdev"
+      "packageName": "com.keek_news.app",
+      "versionCode": 40000,
+      "icon": "icon/launcher.png"
     },
     "ios": {
       "enabled": false,
-      "bundleId": "com.keek-news.webdev"
+      "bundleId": "com.keek-news.app"
     }
   },
   "webview": {

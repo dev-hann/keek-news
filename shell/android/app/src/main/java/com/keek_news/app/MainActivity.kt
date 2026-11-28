@@ -1,4 +1,4 @@
-package com.keek_news.app.webdev
+package com.keek_news.app
 
 import android.content.Context
 import android.annotation.SuppressLint
@@ -39,7 +39,6 @@ import gyo.plugins.bridge.BridgeRegistry
 import gyo.plugins.bridge.MainFrameCheckedInterface
 import gyo.plugins.bridge.PermissionBridge
 import gyo.plugins.bridge.PluginRegistry
-import com.keek_news.app.webdev.BuildConfig
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView

@@ -338,6 +338,8 @@ The web app is built in slices. Each one is usable on its own and leaves no cont
 
 Checked how: W-01 to W-06 were exercised on an emulator's WebView (Android 14) and on a phone (Galaxy Z Flip6, Android 16, WebView 157). On both the page was read and driven through the WebView's debug protocol, on the phone its touches as well; saving to the gallery and the share chooser went through the native plugin on both. No check has yet shown a finger on the glass (how a pinch, a fling or a long-press feel), a screen reader, or Android 9 and earlier.
 
+Where it is served: the web app is a static site, held by a Cloudflare Worker that runs no code (`web/wrangler.jsonc`), at `https://keek-news.notion-blog-proxy.workers.dev`; the `standalone` profile of the shell opens it.
+
 Not planned for the web app: the first-launch NSFW warning (F-11), iOS, the image cache, and the other communities (W-09).
 
 W-09 was started and set aside on 2026-11-28. Six parsers had been ported with their tests and checked against the real Dart code, and the feed named a community whose list failed; the user then decided that the web app serves 웃대 alone, and that the other communities are designed and built anew if they are ever wanted, not resumed. What that design is to know: the Flutter feed keeps the newest 20 × communities posts of a page and puts the posts without a date first, so with every community on the communities whose posts carry a date are cut — checked live on that day, 오늘의유머 kept 7 of 30 posts and 개드립 6 of 23, and the tab of a community shows only what is kept. The Flutter app behaves the same way.
