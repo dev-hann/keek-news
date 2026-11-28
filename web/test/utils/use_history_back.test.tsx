@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { StrictMode, useState } from 'react';
+import { Fragment, StrictMode, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useHistoryBack } from '../../src/utils/use_history_back';
 
@@ -75,6 +75,30 @@ function ViewerAndSheet({
           onSheetClose?.();
         }}
       />
+    </>
+  );
+}
+
+/** Three overlays that can be opened one over another: a sheet, a viewer over it, a menu over that. */
+function Stack({ closes }: { closes: Record<string, () => void> }) {
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  return (
+    <>
+      {['sheet', 'viewer', 'menu'].map((name) => (
+        <Fragment key={name}>
+          <button onClick={() => setOpen((shown) => ({ ...shown, [name]: true }))}>
+            open the {name}
+          </button>
+          <Overlay
+            name={name}
+            open={open[name] === true}
+            onClose={() => {
+              setOpen((shown) => ({ ...shown, [name]: false }));
+              closes[name]();
+            }}
+          />
+        </Fragment>
+      ))}
     </>
   );
 }
@@ -410,6 +434,36 @@ describe('useHistoryBack', () => {
     expect(sheetClose).toHaveBeenCalledTimes(1);
     expect(window.history.state).toEqual(HOME);
     expect(window.location.pathname).toBe('/');
+  });
+
+  it('three overlays, one over another: each Back closes the top one alone, the others are told nothing', async () => {
+    // Seen on the emulator's WebView: a comments sheet, a viewer opened from a comment, and the menu
+    // opened in the viewer. One Back closed the menu and the sheet together.
+    const closes = { sheet: vi.fn(), viewer: vi.fn(), menu: vi.fn() };
+    render(<Stack closes={closes} />);
+    fireEvent.click(screen.getByRole('button', { name: 'open the sheet' }));
+    const sheetEntry = overlayIdOf(window.history.state);
+    fireEvent.click(screen.getByRole('button', { name: 'open the viewer' }));
+    const viewerEntry = overlayIdOf(window.history.state);
+    fireEvent.click(screen.getByRole('button', { name: 'open the menu' }));
+
+    act(() => window.history.back());
+    await until(() => closes.menu.mock.calls.length > 0);
+    expect(closes.menu).toHaveBeenCalledTimes(1);
+    expect(closes.viewer).not.toHaveBeenCalled();
+    expect(closes.sheet).not.toHaveBeenCalled();
+    expect(overlayIdOf(window.history.state)).toBe(viewerEntry);
+
+    act(() => window.history.back());
+    await until(() => closes.viewer.mock.calls.length > 0);
+    expect(closes.viewer).toHaveBeenCalledTimes(1);
+    expect(closes.sheet).not.toHaveBeenCalled();
+    expect(overlayIdOf(window.history.state)).toBe(sheetEntry);
+
+    act(() => window.history.back());
+    await until(() => closes.sheet.mock.calls.length > 0);
+    expect(closes.sheet).toHaveBeenCalledTimes(1);
+    expect(window.history.state).toEqual(HOME);
   });
 
   it('the lower overlay is not closed by a popstate onto its own entry', () => {

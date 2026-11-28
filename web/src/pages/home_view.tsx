@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Button } from '../components/ui/button';
 import { registeredCommunities, type CommunityId } from '../model/community';
 import { feedItemKey } from '../model/feed_item';
+import { commentVideoId } from '../model/video_id';
 import { useBlockedImages } from '../provider/blocked_images_provider';
 import { useBookmarks } from '../provider/bookmark_provider';
 import { useCommentsSheet } from '../provider/comments_sheet';
@@ -19,6 +20,7 @@ import { useSettings } from '../provider/settings_provider';
 import { filterBlockedPostDetail } from '../utils/blocked_image_filter';
 import { CommentsSheet } from '../widgets/comments_sheet';
 import { AppBar } from '../widgets/app_bar';
+import { CommentVideoViewer } from '../widgets/comment_video_viewer';
 import { ImageViewer } from '../widgets/image_viewer';
 import { MediaActionSheet } from '../widgets/media_action_sheet';
 import { CommunityTabBar } from '../widgets/community_tab_bar';
@@ -205,7 +207,17 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
       />
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-3 pt-3 pb-16">{content}</main>
       <ScrollToTopButton visible={showScrollTop} onClick={onScrollToTopTap} />
-      <CommentsSheet comments={sheet.comments} open={sheet.isOpen} onClose={sheet.close} />
+      <CommentsSheet
+        comments={sheet.comments}
+        open={sheet.isOpen}
+        onClose={sheet.close}
+        onOpenImage={media.openImage}
+        onOpenVideo={(video) => {
+          if (sheet.key !== null) media.openVideo(commentVideoId(sheet.key), video);
+        }}
+        onMore={media.openMore}
+      />
+      <CommentVideoViewer {...media.commentVideo} />
       <ImageViewer {...media.viewer} />
       <MediaActionSheet {...media.menu} />
     </div>

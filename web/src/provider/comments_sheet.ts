@@ -21,5 +21,12 @@ export function useCommentsSheet(details: MergedDetailMap, blockedUrls: Set<stri
   const open = useCallback((key: FeedItemKey) => setCommentsOf(key), []);
   const close = useCallback(() => setCommentsOf(null), []);
 
-  return { open, close, comments, isOpen: commentsOf !== null };
+  return {
+    open,
+    close,
+    comments,
+    isOpen: commentsOf !== null,
+    /** The post whose comments are open; null while none is. */
+    key: commentsOf,
+  };
 }

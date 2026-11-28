@@ -3,6 +3,8 @@ import { act, cleanup, fireEvent, render, screen, within } from '@testing-librar
 import { StrictMode, useEffect, useRef, useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Comment } from '../../src/model/comment';
+import type { VideoBlock } from '../../src/model/content_block';
+import type { MediaTarget } from '../../src/model/media_target';
 import { usePathname } from '../../src/utils/router';
 import { CommentsSheet } from '../../src/widgets/comments_sheet';
 
@@ -39,16 +41,59 @@ const thread = (): Comment[] => [
 
 let pageMounts = 0;
 
+const finger = { pointerId: 7, isPrimary: true, button: 0, clientX: 100, clientY: 100 };
+
+const CLIP: VideoBlock = {
+  type: 'video',
+  url: 'https://e.com/v.mp4',
+  thumbnailUrl: 'https://e.com/v.jpg',
+};
+/** A video without a poster: a button only where a player can open it. */
+const BARE: VideoBlock = { type: 'video', url: 'https://e.com/w.mp4' };
+
+/** A comment with a picture and a video, whose reply has a picture and a video without a poster, whose reply has a picture. */
+const withMedia = (): Comment[] => [
+  comment(1, {
+    content: '첫 댓글',
+    mediaBlocks: [{ type: 'image', url: 'https://e.com/a.jpg' }, CLIP],
+    replies: [
+      comment(11, {
+        author: '철수',
+        content: '답글',
+        mediaBlocks: [{ type: 'image', url: 'https://e.com/b.jpg' }, BARE],
+        replies: [
+          comment(111, {
+            author: '영희',
+            content: '답글의 답글',
+            mediaBlocks: [{ type: 'image', url: 'https://e.com/c.jpg' }],
+          }),
+        ],
+      }),
+    ],
+  }),
+];
+
 interface PageProps {
   comments?: Comment[];
   /** Whether the page tells the sheet where the focus goes back. */
   focusBack?: boolean;
   /** Told each time the sheet asks to be closed. */
   onClosed?: () => void;
+  /** What opens the media of a comment, where the page has it. */
+  onOpenImage?: (images: string[], index: number) => void;
+  onOpenVideo?: (video: VideoBlock) => void;
+  onMore?: (target: MediaTarget) => void;
 }
 
 /** A page as the app shows one: its sheet opens from a button, and it mounts again when the app comes back to it. */
-function Page({ comments = thread(), focusBack = true, onClosed }: PageProps) {
+function Page({
+  comments = thread(),
+  focusBack = true,
+  onClosed,
+  onOpenImage,
+  onOpenVideo,
+  onMore,
+}: PageProps) {
   const [open, setOpen] = useState(false);
   const opener = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -68,6 +113,9 @@ function Page({ comments = thread(), focusBack = true, onClosed }: PageProps) {
           onClosed?.();
         }}
         returnFocusTo={focusBack ? opener : undefined}
+        onOpenImage={onOpenImage}
+        onOpenVideo={onOpenVideo}
+        onMore={onMore}
       />
     </>
   );
@@ -136,6 +184,7 @@ describe('CommentsSheet', () => {
   });
 
   afterEach(async () => {
+    vi.useRealTimers();
     // Nothing of this test may traverse the history in the next one.
     cleanup();
     await settle();
@@ -412,6 +461,69 @@ describe('CommentsSheet', () => {
     window.removeEventListener('touchmove', onTouchMove);
     fireEvent.keyDown(document, { key: 'Escape' });
     await until(() => onClosed.mock.calls.length > 0);
+  });
+
+  it('hands what opens the media to every comment it lists, replies included, and to a reply of a reply', async () => {
+    const onOpenImage = vi.fn<(images: string[], index: number) => void>();
+    const onOpenVideo = vi.fn<(video: VideoBlock) => void>();
+    const onMore = vi.fn<(target: MediaTarget) => void>();
+    render(
+      <App
+        comments={withMedia()}
+        onOpenImage={onOpenImage}
+        onOpenVideo={onOpenVideo}
+        onMore={onMore}
+      />
+    );
+    open();
+    const dialog = sheet();
+    const media = (name: string) => within(dialog).getByRole('button', { name });
+
+    fireEvent.click(media('길동이의 댓글 이미지 1'));
+    fireEvent.click(media('길동이의 댓글 동영상'));
+    fireEvent.click(media('철수의 댓글 이미지 1'));
+    // A video without a poster is a button here too: there is a player to open.
+    fireEvent.click(media('철수의 댓글 동영상'));
+    fireEvent.click(media('영희의 댓글 이미지 1'));
+
+    expect(onOpenImage.mock.calls).toEqual([
+      [['https://e.com/a.jpg'], 0],
+      [['https://e.com/b.jpg'], 0],
+      [['https://e.com/c.jpg'], 0],
+    ]);
+    expect(onOpenVideo.mock.calls).toEqual([[CLIP], [BARE]]);
+
+    vi.useFakeTimers();
+    fireEvent.pointerDown(media('길동이의 댓글 동영상'), finger);
+    act(() => vi.advanceTimersByTime(500));
+    vi.useRealTimers();
+
+    expect(onMore).toHaveBeenCalledTimes(1);
+    expect(onMore).toHaveBeenCalledWith({ url: 'https://e.com/v.mp4', kind: 'video' });
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await until(() => window.history.state?.overlay !== true);
+  });
+
+  it('leaves the media of a comment as plain pictures where the page has nothing to open with them', () => {
+    render(<App comments={withMedia()} />);
+    open();
+    const dialog = sheet();
+
+    // The close button is the only control.
+    expect(within(dialog).getAllByRole('button')).toHaveLength(1);
+    expect(
+      within(dialog)
+        .getAllByRole('img')
+        .map((picture) => picture.getAttribute('alt'))
+    ).toEqual([
+      '길동이의 댓글 이미지',
+      '길동이의 댓글 동영상',
+      '철수의 댓글 이미지',
+      '영희의 댓글 이미지',
+    ]);
+    // Nothing of a video without a poster is shown without a player to open.
+    expect(dialog.querySelector('[class*="play" i]')).toBeNull();
   });
 
   it('mounted open under StrictMode, where the effect runs twice, puts one entry on the history', async () => {

@@ -1,6 +1,7 @@
 import { Bookmark } from 'lucide-react';
 import { useEffect } from 'react';
 import { feedItemFromBookmark, feedItemKey } from '../model/feed_item';
+import { commentVideoId } from '../model/video_id';
 import { useBlockedImages } from '../provider/blocked_images_provider';
 import { useBookmarks } from '../provider/bookmark_provider';
 import { useCommentsSheet } from '../provider/comments_sheet';
@@ -9,6 +10,7 @@ import { useMediaOverlays } from '../provider/media_actions';
 import { copyPostError, copyPostLink, toggleBookmark } from '../provider/post_actions';
 import { filterBlockedPostDetail } from '../utils/blocked_image_filter';
 import { AppBar } from '../widgets/app_bar';
+import { CommentVideoViewer } from '../widgets/comment_video_viewer';
 import { CommentsSheet } from '../widgets/comments_sheet';
 import { EmptyStateView } from '../widgets/empty_state_view';
 import { FeedDetailCard } from '../widgets/feed_detail_card';
@@ -77,7 +79,17 @@ export function BookmarksView({ onBack }: BookmarksViewProps) {
           })
         )}
       </main>
-      <CommentsSheet comments={sheet.comments} open={sheet.isOpen} onClose={sheet.close} />
+      <CommentsSheet
+        comments={sheet.comments}
+        open={sheet.isOpen}
+        onClose={sheet.close}
+        onOpenImage={media.openImage}
+        onOpenVideo={(video) => {
+          if (sheet.key !== null) media.openVideo(commentVideoId(sheet.key), video);
+        }}
+        onMore={media.openMore}
+      />
+      <CommentVideoViewer {...media.commentVideo} />
       <ImageViewer {...media.viewer} />
       <MediaActionSheet {...media.menu} />
     </div>

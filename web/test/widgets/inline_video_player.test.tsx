@@ -240,6 +240,20 @@ describe('InlineVideoPlayer', () => {
     expect(stageOf(container).style.aspectRatio).toBe('16 / 9');
   });
 
+  it('fills what holds it, holding no shape of its own, where it is told to: for a viewer that is the screen', () => {
+    const { container, rerender } = render(
+      <InlineVideoPlayer id={CLIP} video={clip({ width: 720, height: 1280 })} fill />
+    );
+    // Whatever the block knows of the video's shape: the stage is as large as what holds it.
+    expect(stageOf(container).style.aspectRatio).toBe('');
+    expect(classes(stageOf(container))).toEqual(expect.arrayContaining(['size-full']));
+
+    // A card's player again: the shape it reserved.
+    rerender(<InlineVideoPlayer id={CLIP} video={clip({ width: 720, height: 1280 })} />);
+    expect(stageOf(container).style.aspectRatio).toBe('720 / 1280');
+    expect(classes(stageOf(container))).not.toContain('size-full');
+  });
+
   it('keeps the shape it reserved once the video plays, of whatever shape the video is', () => {
     // A card does not move when a video starts: the video is letterboxed inside the stage.
     const { container } = render(<InlineVideoPlayer id={CLIP} video={clip()} />);
@@ -787,12 +801,15 @@ describe('InlineVideoPlayer', () => {
     playingAt(video);
 
     const centre = container.querySelector('.size-16');
-    expect(centre?.tagName).toBe('BUTTON');
+    if (centre === null) throw new Error('The stage has no centre button.');
+    expect(centre.tagName).toBe('BUTTON');
     expect(classes(centre)).toContain('z-10');
 
     const bar = container.querySelector('.bg-linear-to-b');
+    if (bar === null) throw new Error('The stage has no bar.');
     expect(classes(bar)).not.toContain('flex-col');
-    const scrub = bar?.querySelector('input[type="range"]')?.parentElement;
+    const scrub = bar.querySelector('input[type="range"]')?.parentElement;
+    if (!scrub) throw new Error('The bar has no scrub.');
     expect(classes(scrub)).toEqual(expect.arrayContaining(['absolute', 'bottom-12', 'h-11']));
   });
 });

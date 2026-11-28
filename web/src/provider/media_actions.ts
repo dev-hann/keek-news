@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import type { VideoBlock } from '../model/content_block';
 import type { MediaSaveResult } from '../model/media_save_failure';
 import type { MediaTarget } from '../model/media_target';
+import type { VideoId } from '../model/video_id';
 import { saveMediaUseCase, shareMediaUseCase } from '../service/service_locator';
 import { copyText } from '../utils/clipboard';
 import { blockedImagesNotifier } from './blocked_images_provider';
@@ -64,11 +66,22 @@ export function useMediaOverlays(blockedUrls: Set<string>) {
   const [viewer, setViewer] = useState<{ images: string[]; index: number } | null>(null);
   /** What the media menu acts on; null while it is closed. */
   const [target, setTarget] = useState<MediaTarget | null>(null);
+  /** The video of a comment shown full screen, and the id its player answers to. */
+  const [video, setVideo] = useState<{ id: VideoId; block: VideoBlock } | null>(null);
 
   return {
     /** Opens the viewer on the image at `index` of the post's images. */
     openImage: (images: string[], index: number) => setViewer({ images, index }),
+    /** Opens a video of a comment full screen, playing at once. */
+    openVideo: (id: VideoId, block: VideoBlock) => setVideo({ id, block }),
     openMore: setTarget,
+    commentVideo: {
+      id: video?.id ?? null,
+      video: video?.block ?? null,
+      open: video !== null,
+      onClose: () => setVideo(null),
+      onMore: setTarget,
+    },
     viewer: {
       // Blocked images leave the viewer while it is open; once none is left, the viewer asks to close.
       images: viewer === null ? [] : viewer.images.filter((url) => !blockedUrls.has(url)),

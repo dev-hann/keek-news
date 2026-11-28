@@ -537,4 +537,79 @@ describe('HomeView', () => {
       expect(within(sheet).getByRole('button', { name: 'URL 복사' })).toBeTruthy();
     });
   });
+
+  describe('the media of a comment', () => {
+    beforeAll(() => {
+      Object.defineProperty(Element.prototype, 'scrollTo', {
+        configurable: true,
+        value: vi.fn(),
+      });
+      // jsdom plays nothing: the player asks the element, and reads a promise back.
+      HTMLMediaElement.prototype.play = vi.fn(() => Promise.resolve());
+      HTMLMediaElement.prototype.pause = vi.fn();
+    });
+    afterAll(() => {
+      delete (Element.prototype as Partial<Element>).scrollTo;
+    });
+
+    const commented = (): LoadedPostDetail => ({
+      ...body('1'),
+      comments: [
+        comment(1, {
+          mediaBlocks: [
+            { type: 'image', url: 'https://e.com/c1.jpg' },
+            { type: 'image', url: 'https://e.com/c2.jpg' },
+            { type: 'video', url: 'https://e.com/c.mp4', thumbnailUrl: 'https://e.com/c.jpg' },
+          ],
+        }),
+      ],
+    });
+    const dialog = (name: string) =>
+      document.querySelector(`[role="dialog"][aria-label="${name}"]`);
+    const openSheet = async () => {
+      fireEvent.click(await screen.findByRole('button', { name: /댓글 1개 모두 보기/ }));
+      return (await waitFor(() => dialog('댓글 1개'))) as HTMLElement;
+    };
+
+    it("opens a comment's pictures in the viewer, on the one that was tapped", async () => {
+      fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+      fake.getPostDetail.mockResolvedValue(commented());
+      render(<HomeView onOpenSettings={() => undefined} />);
+      const sheet = await openSheet();
+
+      fireEvent.click(within(sheet).getByRole('button', { name: '댓글러의 댓글 이미지 2' }));
+
+      const viewer = (await waitFor(() => dialog('이미지 보기'))) as HTMLElement;
+      expect(within(viewer).getByRole('status', { name: '이미지 2 / 2' })).toBeTruthy();
+      // Two overlays, two entries: Back takes the viewer first and the sheet stays.
+      await act(async () => {
+        window.history.back();
+        await waitFor(() => expect(dialog('이미지 보기')).toBeNull());
+      });
+      expect(dialog('댓글 1개')).toBeTruthy();
+    });
+
+    it("opens a comment's video full screen, playing at once, and Back closes it before the sheet", async () => {
+      fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+      fake.getPostDetail.mockResolvedValue(commented());
+      render(<HomeView onOpenSettings={() => undefined} />);
+      const sheet = await openSheet();
+
+      fireEvent.click(within(sheet).getByRole('button', { name: '댓글러의 댓글 동영상' }));
+
+      const viewer = (await waitFor(() => dialog('동영상 보기'))) as HTMLElement;
+      expect(within(viewer).getByRole('button', { name: '닫기' })).toBeTruthy();
+      await waitFor(() => expect(HTMLMediaElement.prototype.play).toHaveBeenCalled());
+      // The modules are loaded again for each test: read the notifier the screen uses.
+      const { feedVideoPlaybackNotifier } =
+        await import('../../src/provider/feed_video_playback_provider');
+      expect(feedVideoPlaybackNotifier().getState()).toBe('humoruniv:1#-1');
+
+      await act(async () => {
+        window.history.back();
+        await waitFor(() => expect(dialog('동영상 보기')).toBeNull());
+      });
+      expect(dialog('댓글 1개')).toBeTruthy();
+    });
+  });
 });

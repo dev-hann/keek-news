@@ -1,30 +1,16 @@
 import { ImageOff, MoreHorizontal } from 'lucide-react';
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
-  type RefObject,
-  type UIEvent as ReactUIEvent,
-} from 'react';
+import { useEffect, useMemo, useRef, useState, type UIEvent as ReactUIEvent } from 'react';
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
 import type { VideoBlock } from '../model/content_block';
 import type { FeedItemKey } from '../model/feed_item';
 import { imageTarget, videoTarget, type MediaTarget } from '../model/media_target';
 import { videoId } from '../model/video_id';
+import { useLongPress } from '../utils/use_long_press';
 import { InlineVideoPlayer } from './inline_video_player';
 
-/** How long a pointer has to be held on the media to be a long press, and how far it may travel meanwhile. */
-const LONG_PRESS_MS = 500;
 /** How long a pager must have stopped scrolling for the area to take its page's height. */
 const SETTLE_AFTER = 250;
-const LONG_PRESS_SLOP = 10;
-
-/** A long press does not start on a slider: a thumb held still before a drag is not a press on the media. */
-const NO_LONG_PRESS = 'input, [role="slider"]';
 
 /** One page of the pager. A `poster` is a video from outside the community, of which only its poster can be shown. */
 type Page =
@@ -60,21 +46,6 @@ function pagesOf(images: string[], videos: VideoBlock[]): Page[] {
   ];
 }
 
-/** A pointer that went down on the media and may still become a long press. */
-interface Hold {
-  pointerId: number;
-  x: number;
-  y: number;
-  timer: ReturnType<typeof setTimeout>;
-}
-
-/** Ends the press being watched, before it counts as long. */
-function endHold(hold: RefObject<Hold | null>): void {
-  if (hold.current === null) return;
-  clearTimeout(hold.current.timer);
-  hold.current = null;
-}
-
 interface FeedImageCarouselProps {
   /** The post the media belong to: it names each of its videos. */
   postKey: FeedItemKey;
@@ -108,12 +79,8 @@ export function FeedImageCarousel({
   const count = pages.length;
   const showing = count > 0;
 
-  const area = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const pageElements = useRef<(Element | null)[]>([]);
-  const hold = useRef<Hold | null>(null);
-  /** The pointer whose long press opened the sheet: letting it go is not also a tap. */
-  const heldPointer = useRef<number | null>(null);
   const [page, setPage] = useState(0);
   /**
    * The page the pager has come to rest on. The area takes the height of
@@ -156,70 +123,15 @@ export function FeedImageCarousel({
     return () => observer.disconnect();
   }, [pages]);
 
-  useEffect(() => {
-    const element = area.current;
-    if (element === null) return;
-    // React's own touch listeners are passive: only native ones keep a finger that pressed long from starting a swipe,
-    // and its letting go from being a click. Chromium clicks where the finger lifts, which is the scrim of the sheet
-    // the press opened: that click would close the sheet at once.
-    const onTouchMove = (event: TouchEvent) => {
-      if (heldPointer.current !== null) event.preventDefault();
-    };
-    const onTouchEnd = (event: TouchEvent) => {
-      if (heldPointer.current !== null) event.preventDefault();
-    };
-    element.addEventListener('touchmove', onTouchMove, { passive: false });
-    element.addEventListener('touchend', onTouchEnd, { passive: false });
-    return () => {
-      element.removeEventListener('touchmove', onTouchMove);
-      element.removeEventListener('touchend', onTouchEnd);
-      endHold(hold);
-    };
-  }, [showing]);
-
-  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!event.isPrimary || event.button !== 0) return;
-    // A new press: nothing is held over from the one before.
-    endHold(hold);
-    heldPointer.current = null;
-    if (onMore === undefined || (event.target as Element).closest(NO_LONG_PRESS) !== null) return;
-    const pressed = pages[shown];
-    if (pressed === undefined) return;
-    const pointerId = event.pointerId;
-    hold.current = {
-      pointerId,
-      x: event.clientX,
-      y: event.clientY,
-      timer: setTimeout(() => {
-        hold.current = null;
-        heldPointer.current = pointerId;
-        onMore(targetOf(pressed));
-      }, LONG_PRESS_MS),
-    };
-  };
-
-  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const pressing = hold.current;
-    if (pressing === null || pressing.pointerId !== event.pointerId) return;
-    if (Math.hypot(event.clientX - pressing.x, event.clientY - pressing.y) <= LONG_PRESS_SLOP)
-      return;
-    endHold(hold);
-  };
-
-  const onPointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (hold.current?.pointerId === event.pointerId) endHold(hold);
-  };
-
-  const onClickCapture = (event: ReactMouseEvent<HTMLDivElement>) => {
-    const pressed = heldPointer.current;
-    if (pressed === null) return;
-    // Another pointer, or the keyboard, which has none: not how this press ended.
-    if ((event.nativeEvent as PointerEvent).pointerId !== pressed) return;
-    // Letting go of a long press is not also a tap: the sheet is open, nothing under the pointer may run.
-    heldPointer.current = null;
-    event.preventDefault();
-    event.stopPropagation();
-  };
+  // A long press is for the page shown, wherever on the media it began.
+  const press = useLongPress<HTMLDivElement>(
+    onMore === undefined
+      ? undefined
+      : () => {
+          const pressed = pages[shown];
+          if (pressed !== undefined) onMore(targetOf(pressed));
+        }
+  );
 
   const onScroll = (event: ReactUIEvent<HTMLDivElement>) => {
     const element = event.currentTarget;
@@ -240,13 +152,8 @@ export function FeedImageCarousel({
 
   return (
     <div
-      ref={area}
+      {...press}
       className="relative select-none [-webkit-touch-callout:none]"
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerEnd}
-      onPointerCancel={onPointerEnd}
-      onClickCapture={onClickCapture}
       // The WebView's own menu for a long press on an image or a video: the sheet of the app is what opens.
       onContextMenu={(event) => event.preventDefault()}
     >

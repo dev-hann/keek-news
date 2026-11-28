@@ -59,6 +59,8 @@ interface InlineVideoPlayerProps {
   video: VideoBlock;
   /** Plays at once, without the 재생 step: for a viewer that was opened for this video. */
   autoStart?: boolean;
+  /** The stage is as large as what holds it, not a shape of its own: for a viewer that is the screen. */
+  fill?: boolean;
 }
 
 /**
@@ -71,7 +73,7 @@ export function InlineVideoPlayer(props: InlineVideoPlayerProps) {
   return <VideoStage key={`${props.id} ${props.video.url}`} {...props} />;
 }
 
-function VideoStage({ id, video, autoStart = false }: InlineVideoPlayerProps) {
+function VideoStage({ id, video, autoStart = false, fill = false }: InlineVideoPlayerProps) {
   const active = useActiveVideo() === id;
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -246,8 +248,11 @@ function VideoStage({ id, video, autoStart = false }: InlineVideoPlayerProps) {
     <div
       ref={rootRef}
       onClick={onStageTap}
-      style={{ aspectRatio: shape }}
-      className="relative overflow-hidden bg-black select-none [&:fullscreen]:fixed [&:fullscreen]:inset-0"
+      style={fill ? undefined : { aspectRatio: shape }}
+      className={cn(
+        'relative overflow-hidden bg-black select-none [&:fullscreen]:fixed [&:fullscreen]:inset-0',
+        fill && 'size-full'
+      )}
     >
       {video.thumbnailUrl !== undefined && (
         <Poster src={video.thumbnailUrl} covered={playback.hasFrame} />

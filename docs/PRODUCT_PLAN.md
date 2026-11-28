@@ -92,7 +92,7 @@ Single-screen IA (Phase 1 — single-board scope; see `.opencode/plans/2026-06-2
 - Each card renders content **inline**: author header → full-bleed media → counts row, ending with the `링크 복사` and `저장` / `저장 취소` buttons → caption (title + expandable body) → comment preview → timestamp.
 - Media: one pager per post (`FeedImageCarousel`) — its images first, then its videos, a page each. A video without a poster still gets a page. An outside embed (YouTube, youtu.be, Vimeo: the `external` kind) has no player and shows its poster only; it gets no page without one. The position `N / M` shows when there is more than one page. Blocked images are left out of the pager, and leave it as soon as they are blocked.
 - **No detail screen.** All reading happens in the feed: a comment preview tap opens the comments sheet over it, and a tap on a picture opens the image viewer over it. Neither is a route, and the viewer opens at once: there is no transition of the picture growing out of its card.
-- **No control that does nothing.** The comment preview is tappable if, and only if, the post's body lists a comment; a tap opens the comments sheet. The media of a card is tappable: a tap on a picture opens the viewer, a video starts on `재생`, and the `⋯` button or a long-press opens the media menu (`MediaActionSheet`) to save to the gallery, share, copy the address or block the image. The media of a comment in the sheet is still a plain thumbnail: the viewer, the players and the menu are built for a post's card, and the comment level is a later slice.
+- **No control that does nothing.** The comment preview is tappable if, and only if, the post's body lists a comment; a tap opens the comments sheet. The media of a card is tappable: a tap on a picture opens the viewer, a video starts on `재생`, and the `⋯` button or a long-press opens the media menu (`MediaActionSheet`) to save to the gallery, share, copy the address or block the image. The media of a comment in the sheet is tappable the same way: a picture opens the viewer on that comment's pictures, a video opens the full-screen video viewer (`CommentVideoViewer`), and a long-press opens the media menu.
 - Read posts shown in muted color (Phase: F-06).
 - Cached data shown when offline, with a "Last updated X minutes ago" banner (Phase: F-08).
 - Refresh by pulling down at the top of the page, or with the floating 맨 위로 button, which goes to the top and loads the first page again. Both keep what is shown until the new page has arrived.
@@ -143,7 +143,7 @@ App
 
 The Flutter app also shows an `NsfwWarningDialog` over HomeScreen at first launch. The web app does not.
 
-In the web app the pages are `HomeView`, `SettingsView`, `BookmarksView` and `BlockedImagesView` (`web/src/pages/`); the overlays are the widgets `ImageViewer`, `MediaActionSheet` and `CommentsSheet` (`web/src/widgets/`).
+In the web app the pages are `HomeView`, `SettingsView`, `BookmarksView` and `BlockedImagesView` (`web/src/pages/`); the overlays are the widgets `ImageViewer`, `CommentVideoViewer`, `MediaActionSheet` and `CommentsSheet` (`web/src/widgets/`).
 
 > **No `PostDetailScreen`.** Phase 1 is an inline feed — all reading happens in the feed card itself. A dedicated detail screen returns only if Phase 2 (comment write / recommend) needs a focused surface.
 > **Phase 3**: a BoardTab returns (BoardListScreen → BoardDetailScreen) when multi-board support lands, at which point a bottom tab bar may be reintroduced.
@@ -154,7 +154,7 @@ Navigation rules:
 - Image tap (in a card of the feed) → ImageViewerScreen, an overlay over `/`. It is not a route: opening it pushes one entry of the WebView's history, at the page's own address.
 - `⋯` button or long-press (on the media of a card, or on a picture in the viewer) → `MediaActionSheet`, an overlay over the page, with one history entry of its own.
 - Comment-preview tap (in a card of the feed, or of 저장함) → `CommentsSheet`, a bottom sheet over the page. It is not a route: opening it pushes one entry of the WebView's history, at the page's own address.
-- Back (system back gesture or button) → the frontmost overlay closes first, and only Back with no overlay open goes to the previous page of the WebView's history. With the media menu over the viewer open, Back closes the menu, then the viewer, and only then leaves the page; with the comments sheet open, Back closes the sheet first.
+- Back (system back gesture or button) → the frontmost overlay closes first, and only Back with no overlay open goes to the previous page of the WebView's history. With the media menu over the viewer open, Back closes the menu, then the viewer, and only then leaves the page; with the comments sheet open, Back closes the sheet first; with all three open (a comment's picture tapped in the sheet, then `⋯` in the viewer), Back closes the menu, then the viewer, then the sheet, and leaves the page only after that.
 
 ## 6. Screen Requirements
 
@@ -199,7 +199,7 @@ In the web app the viewer is the widget `ImageViewer`: an overlay over `/`, not 
 - Unsaving: the card's `저장 취소` button. The post leaves the list; when that failed, `저장을 취소하지 못했어요` says so and the post stays.
 - The comment preview opens the comments sheet here as well, an overlay over `/bookmarks`.
 - Empty: `저장한 게시물이 없어요`, with the hint `좋아하는 글을 북마크해 보세요`.
-- Not here: the image viewer and the media menu. A picture in a card of 저장함 is not a button, and there is no `⋯`: both are wired on `/` only.
+- Here too: the image viewer, the video viewer and the media menu open from a card of 저장함 and from its comments sheet, as on `/`.
 
 ### BlockedImagesScreen (차단된 이미지) — Phase: web (W-06)
 
@@ -278,7 +278,7 @@ Home → AppBar gear → Settings → Tap "Login" → LoginScreen (WebView)
 - Comments sheet: slides in from the bottom over the feed (`250ms`, `ease-out`; no motion under reduced motion) and is removed at once when closed, with no exit animation. It is an overlay, not a route: opening it pushes one entry of the history, at the page's own address. System Back, 닫기, the scrim and Esc all leave it through that one entry, so Back closes the sheet first and only the next Back leaves the page. On close the page is where it was scrolled, and the focus goes back to the preview that opened the sheet.
 - Media menu: a sheet made of the same `BottomSheet` as the comments sheet — every sheet of the web app is, and shadcn's sheet and drawer are not used. It slides in and is removed the same way, and holds one history entry of its own. Opened over the image viewer, it is the frontmost overlay: Back closes it first, and the viewer under it stays.
 - Image viewer: an overlay over everything, not a route, with one history entry of its own, like the sheets. It appears at once, with no transition of the picture growing out of its card. Closed by Back, 닫기 or Esc; the page keeps its scroll and the focus goes back to the picture that opened it.
-- Overlays over overlays: each one pushes its own entry, so Back closes the frontmost first — the menu, then the viewer — and leaves the page only when none is open.
+- Overlays over overlays: each one pushes its own entry, so Back closes the frontmost first — the menu, then the viewer, then the sheet it was opened from — and leaves the page only when none is open. An overlay stays open when Back lands on the entry of one opened after it, so three can be open at once.
 - Full screen of a video: asked of the player's own element, where its controls stay. The Android shell's own Back leaves full screen before the page hears of it, so the player adds no history entry for it.
 
 ### Gestures
@@ -288,7 +288,7 @@ Home → AppBar gear → Settings → Tap "Login" → LoginScreen (WebView)
 - Expand/collapse: post body text (`더보기`/`접기`).
 - Comments sheet: no drag handle — it cannot be dragged or swiped away. It closes by Back, 닫기, the scrim or Esc. Its list scrolls on its own while the page behind is locked, and a tap or a touch inside it does not reach the page.
 - Pager of a card: a swipe is one page, however fast the fling; the pager takes the height of the page it lands on.
-- Comment media: a picture, or the poster of a video, as a plain thumbnail. No tap, no long-press, no play icon: the viewer, the video players and the media menu are in the web app for the media of a post's card, and the comment level is a later slice.
+- Comment media: a picture is a button that opens the image viewer on that comment's pictures; a video, shown by its poster with a play icon, is a button that opens the full-screen video viewer (`CommentVideoViewer`), which plays at once, muted, and goes full screen through its player; a long-press on either opens the media menu. Where a page opens nothing with them, a thumbnail is a plain picture with no icon.
 - Media menu: reached by the `⋯` button — by a tap, or by the keyboard, since it is a button — and by a long-press, a finger held half a second without moving, on the media of a card or on a picture in the viewer. Letting go of the long-press is not also a tap.
 - Image viewer: a swipe is one image. A pinch zooms, up to 4×; a zoomed picture is panned by a drag; a double-tap puts it back to 1× and never pages. A tap does nothing: a tap on the left or right third of the viewer does not page — the swipe, the `이전` / `다음` buttons and the keys `←` / `→` do. A strip of a picture is scrolled up and down.
 - Video: `재생` starts it. A tap on the stage shows or hides the controls and never plays or pauses. The progress bar scrubs, and a touch on it does not reach the page.
@@ -327,9 +327,9 @@ The web app is built in slices. Each one is usable on its own and leaves no cont
 | W-00 | Web app skeleton, native relay (`@gyo-community/http`), Android shell | Done |
 | W-01 | Home: feed of 웃대 with inline cards (text and images), body fetched per post, paging, refresh by pull and from the way up, loading / error / empty states | Built. Checked on an emulator; not yet looked at on a phone |
 | W-02 | Settings: community switches, version, source link | Built. Checked on an emulator |
-| W-03 | Image viewer: fullscreen, swipe, pinch-zoom, for the images of a post's card. The pictures of a comment, plain thumbnails in W-04, become tappable in a later slice | Built |
+| W-03 | Image viewer: fullscreen, swipe, pinch-zoom, for the images of a post's card and for the pictures of a comment (opened from the comments sheet) | Built |
 | W-04 | Comments sheet: reading only, opened from a post card's preview | Built |
-| W-05 | Image carousel, inline video (one at a time) and the media menu (save to the gallery, share, copy the address, block an image), for the media of a post's card. The videos of a comment, shown by their poster in W-04, become tappable in a later slice | Built |
+| W-05 | Image carousel, inline video (one at a time) and the media menu (save to the gallery, share, copy the address, block an image), for the media of a post's card; a comment's video opens full screen (`CommentVideoViewer`), and a long-press on a comment's picture or video opens the menu | Built |
 | W-06 | Bookmarks (저장함) and blocked images. Sliced out of it: the image cache, which is not part of the web app; read posts, which stay with F-06; and moving what the Flutter app saved, which is W-08 | Built |
 | W-07 | Cached content and the "Last updated" banner when offline | Deferred |
 | W-08 | Moving the bookmarks and settings saved by the Flutter app | Deferred |

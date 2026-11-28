@@ -68,8 +68,10 @@ if (typeof window !== 'undefined') {
  * `history.back()`, and `onClose` runs once the entry is gone, whoever took
  * it off.
  *
- * Overlays can sit one over another: an overlay closes when Back lands on
- * any entry but its own, and stays when an overlay above it closes. The
+ * Overlays can sit one over another. Ids grow with the order of opening, so
+ * an overlay can tell where Back landed: on the page's entry, or on that of
+ * an overlay opened before it, its own entry is gone and it closes; on its
+ * own entry, or on that of an overlay opened after it, it stays. The
  * entry keeps the address of the page, so a router that picks the page by
  * path is not moved.
  */
@@ -89,9 +91,11 @@ export function useHistoryBack(open: boolean, onClose: () => void): () => void {
     showing.current = true;
 
     const onPopState = (event: PopStateEvent) => {
-      // On our own entry: an overlay above us left.
-      if (overlayId(event.state) === id) return;
-      // On the entry of the page, or of an overlay under us: ours is gone.
+      // On our own entry, or on that of an overlay opened after us (it is above us, and is the one leaving):
+      // ours is still in the history.
+      const landed = overlayId(event.state);
+      if (landed !== null && landed >= id) return;
+      // On the entry of the page, or of an overlay opened before us: ours is gone.
       hasEntry.current = false;
       close.current();
     };
