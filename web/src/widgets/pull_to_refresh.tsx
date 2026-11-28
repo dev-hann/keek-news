@@ -28,7 +28,11 @@ export function PullToRefresh({ onRefresh, top }: PullToRefreshProps) {
     const onTouchStart = (event: TouchEvent) => {
       const state = pull.current;
       state.active = false;
-      state.startY = !busy.current && window.scrollY <= 0 ? event.touches[0].clientY : -1;
+      // A touch that starts in a dialog, a sheet over the page, is the dialog's: never a pull on the page.
+      const inDialog =
+        event.target instanceof Element && event.target.closest('[role="dialog"]') !== null;
+      state.startY =
+        !inDialog && !busy.current && window.scrollY <= 0 ? event.touches[0].clientY : -1;
     };
 
     const onTouchMove = (event: TouchEvent) => {

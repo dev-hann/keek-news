@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import {
   afterEach,
   beforeEach,
@@ -60,6 +60,25 @@ describe('PullToRefresh', () => {
     scrollY.mockReturnValue(4);
 
     drag(100, 400);
+    await act(() => fireEvent(window, new Event('touchend')));
+
+    expect(onRefresh).not.toHaveBeenCalled();
+  });
+
+  it('leaves a touch that starts inside a dialog to the dialog, even at the top of the page', async () => {
+    const { container } = render(
+      <div>
+        <PullToRefresh onRefresh={onRefresh} top={56} />
+        <div role="dialog" aria-label="댓글 3개">
+          <button type="button">a row of the sheet</button>
+        </div>
+      </div>
+    );
+    const row = screen.getByRole('button', { name: 'a row of the sheet' });
+    expect(row.closest('[role="dialog"]')).toBe(container.querySelector('[role="dialog"]'));
+
+    fireEvent(row, touch('touchstart', 100));
+    fireEvent(row, touch('touchmove', 400));
     await act(() => fireEvent(window, new Event('touchend')));
 
     expect(onRefresh).not.toHaveBeenCalled();
