@@ -1,5 +1,8 @@
 import { Http, base64ToBytes, decodeText, type HttpRequest } from '@gyo-community/http';
 import { useEffect, useState } from 'react';
+import { cn } from 'cn';
+import { Button } from '../components/ui/button';
+import { AppBar } from '../widgets/app_bar';
 import type { CommunityId } from '../model/community';
 import { Failure, NetworkFailure, ServerFailure } from '../model/failures';
 import { HtmlClient } from '../service/html_client';
@@ -213,7 +216,18 @@ async function runChecks(onResult: (result: CheckResult) => void): Promise<void>
   }
 }
 
-export function RelayCheckView() {
+const VERDICT_COLOR: Record<Verdict, string> = {
+  PASS: 'text-primary',
+  FAIL: 'text-destructive',
+  PENDING: 'text-muted-foreground',
+};
+
+interface RelayCheckViewProps {
+  onBack: () => void;
+}
+
+/** Runs the checks of the native relay on a device and shows what came of them. */
+export function RelayCheckView({ onBack }: RelayCheckViewProps) {
   const [results, setResults] = useState<CheckResult[]>([]);
   const [running, setRunning] = useState(true);
   const [run, setRun] = useState(0);
@@ -235,33 +249,43 @@ export function RelayCheckView() {
   const pending = results.length - passed - failed;
 
   return (
-    <main>
-      <h1>릴레이 검사</h1>
-      <p>
-        PASS {passed} · FAIL {failed} · PENDING {pending}
-        {running ? ' · running…' : ''}
-      </p>
-      {running || (
-        <button
-          onClick={() => {
-            setResults([]);
-            setRun(run + 1);
-          }}
-        >
-          다시 실행
-        </button>
-      )}
-      <ol>
-        {results.map((result) => (
-          <li key={result.name} className={`check ${result.verdict.toLowerCase()}`}>
-            <div>
-              <span className="verdict">{result.verdict}</span> {result.name}
-              <span className="ms">{result.ms} ms</span>
-            </div>
-            <div className="detail">{result.detail}</div>
-          </li>
-        ))}
-      </ol>
-    </main>
+    <div className="min-h-dvh bg-background">
+      <AppBar title="릴레이 검사" onBack={onBack} />
+      <main className="mx-auto w-full max-w-2xl px-4 pb-16">
+        <p role="status" className="py-3 text-muted-foreground">
+          PASS {passed} · FAIL {failed} · PENDING {pending}
+          {running ? ' · running…' : ''}
+        </p>
+        {running || (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11"
+            onClick={() => {
+              setResults([]);
+              setRun(run + 1);
+            }}
+          >
+            다시 실행
+          </Button>
+        )}
+        <ol className="mt-4 border-t border-border">
+          {results.map((result) => (
+            <li key={result.name} className="border-b border-border py-2">
+              <div className="flex items-baseline gap-3">
+                <span className={cn('w-16 shrink-0 font-semibold', VERDICT_COLOR[result.verdict])}>
+                  {result.verdict}
+                </span>
+                <span className="min-w-0 flex-1 font-medium">{result.name}</span>
+                <span className="shrink-0 text-sm text-muted-foreground">{result.ms} ms</span>
+              </div>
+              <p className="pt-0.5 pl-19 text-sm break-words text-muted-foreground">
+                {result.detail}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </main>
+    </div>
   );
 }

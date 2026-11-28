@@ -1,6 +1,15 @@
 import { Http } from '@gyo-community/http';
-import type { CommunityId } from '../model/community';
+import {
+  registeredCommunityIds,
+  type CommunityId,
+  type RegisteredCommunityId,
+} from '../model/community';
+import { HumorunivImpl } from '../repository/community/humoruniv/humoruniv_impl';
+import type { CommunityRepo } from '../repository/community/community_repo';
+import { FeedImpl } from '../repository/feed/feed_impl';
+import { FeedUseCase } from '../use_case/feed_use_case';
 import { browserHeaders, desktopUserAgent, mobileUserAgent } from './community_headers';
+import { BrowserLocalStorageService } from './browser_local_storage_service';
 import { HtmlClient, type HtmlClientOptions } from './html_client';
 
 function pageClient(
@@ -88,4 +97,28 @@ function http(): Http {
 /** Reads the pages of a community. */
 export function htmlClient(id: CommunityId): HtmlClient {
   return new HtmlClient(http(), htmlClientOptions[id]);
+}
+
+let repos: Record<RegisteredCommunityId, CommunityRepo> | undefined;
+
+/**
+ * Every community the app serves, by id. A community joins the app here and
+ * in `registeredCommunityIds` of model/community.ts; the compiler wants both.
+ * Made the first time a use case asks for it: a repository holds the relay,
+ * which exists only in the WebView.
+ */
+export function communityRepos(): Record<RegisteredCommunityId, CommunityRepo> {
+  repos ??= { humoruniv: new HumorunivImpl(htmlClient('humoruniv')) };
+  return repos;
+}
+
+let feed: FeedUseCase | undefined;
+
+/** The one feed use case of the app, made the first time a provider asks for it. */
+export function feedUseCase(): FeedUseCase {
+  feed ??= new FeedUseCase(
+    communityRepos(),
+    new FeedImpl(new BrowserLocalStorageService(), registeredCommunityIds)
+  );
+  return feed;
 }

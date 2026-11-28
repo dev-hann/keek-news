@@ -24,9 +24,16 @@ export default defineConfig(
     },
   },
   {
-    files: ['vite.config.ts', 'dev/**/*.ts', 'test/**/*.ts'],
+    files: ['vite.config.ts', 'dev/**/*.ts', 'test/**/*.ts', 'test/**/*.tsx'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    // Added with the shadcn CLI as they are: a variant next to its component is how they are written.
+    files: ['src/components/ui/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   }
 );

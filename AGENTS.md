@@ -26,9 +26,19 @@ Current scope: **웃긴자료 (pds) board only.** Active communities: dogdrip, p
 
 The Flutter app is being moved to a web app shown in a gyo WebView shell. Until that is done both live here: `web/` is the web app, `shell/` the Android project that shows it.
 
-- The four layers carry over under `web/src/`: `service/` → `repository/` → `use_case/` → `provider/`, with `model/`, `pages/` and `widgets/`.
-- Tests mirror `web/src/` under `web/test/` (Vitest). The HTML fixtures in `test/fixtures/` are reused by the parser ports.
+- The four layers carry over under `web/src/`: `service/` → `repository/` → `use_case/` → `provider/`, with `model/`, `utils/`, `pages/` and `widgets/`. Files are named as in Dart (`*_repo.ts`, `*_impl.ts`, `*_use_case.ts`, `*_provider.ts`, `*_view.tsx`); a widget's file is its description.
+- Tests mirror `web/src/` under `web/test/` (`*.test.ts`, Vitest). Port a Dart test with its code. The HTML fixtures in `test/fixtures/` are shared; `test/helpers/fixtures.ts` reads them. A test that needs the DOM starts with `// @vitest-environment jsdom`.
 - Community pages are fetched through the native relay (`@gyo-community/http`), never by the WebView: CORS, the WebView's own user agent and its Referer get in the way. `web/src/service/service_locator.ts` holds each site's headers, charset and cookie jar and stays in step with `lib/service/service_locator.dart` as long as the Flutter app exists.
+- **One community first: 웃대 (humoruniv).** The feed, the settings switches and the tabs take every registered community, so one joins in three places that the compiler keeps in step: `registeredCommunityIds` and `communities` in `web/src/model/community.ts`, and its repository in `communityRepos()` of `web/src/service/service_locator.ts`. Write nothing per community anywhere else.
+- A provider is a notifier class on `StateNotifier` (`web/src/provider/`), tested without React, and a hook next to it that binds the notifier to a screen. Only a `*_view.tsx` page reads providers; a widget receives data and `on*` callbacks.
+
+## Web Design System
+
+The web app uses shadcn/ui for React with Tailwind (`web/src/components/ui/`, added with the shadcn CLI) and `lucide-react` icons. The rules of [docs/DESIGN.md](docs/DESIGN.md) carry over:
+
+- Dark only, orange primary, semantic tokens only (`primary`, `foreground`, `mutedForeground`, `muted`, `border`, `destructive`) — no raw color values outside the theme.
+- 8pt grid (multiples of 4), screen padding 16, touch targets 44px, thumbnails 48/72/120.
+- Color is never the only signal of a state; every interactive element has an accessible name.
 
 ## Design System
 
