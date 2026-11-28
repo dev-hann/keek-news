@@ -1,0 +1,99 @@
+name: Build shell
+
+# The Android shell is rebuilt only when it or one of its gyo plugins changes: a change to the
+# web app alone reaches every installed app from where it is served.
+#
+#   a push to master under shell/ or the plugins  ->  the signed APK, kept as an artifact
+#   a v* tag                                     ->  the Release of that tag, with the APK
+#
+# Only a tag releases. Installed apps check releases/latest, so a Release is offered to every
+# user: it is published on purpose, never by a push to master.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - shell/**
+      - web/package.json
+      - web/package-lock.json
+      - .github/workflows/build-shell.yml
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-shell
+  cancel-in-progress: false
+
+env:
+  APK: shell/android/app/build/outputs/apk/release/app-release.apk
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Android SDK
+        # What the shell is built against (shell/android/app/build.gradle): platform 36.
+        run: yes | sdkmanager "platforms;android-36" "build-tools;36.0.0" > /dev/null
+      - name: The tag names the version of the app
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="v$(node -p "require('./shell/gyo.config.json').version")"
+          if [ "$TAG" != "$version" ]; then
+            echo "::error::The tag is $TAG, but shell/gyo.config.json says $version. Raise the version there, or move the tag."
+            exit 1
+          fi
+      - name: The gyo plugins the shell is built with
+        run: npm ci
+        working-directory: web
+      - name: Build the signed APK
+        # The key is the one the app has always been released with; it lives in the secrets only.
+        working-directory: shell
+        env:
+          GYO_ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/keystore.jks
+          GYO_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          GYO_ANDROID_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          GYO_ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GYO_ANDROID_KEYSTORE_PATH"
+          npx --yes @gyo-framework/cli@0.3.0 build android -p standalone -r
+      - name: Keep the APK
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: keek-news-${{ github.ref_name }}
+          path: ${{ env.APK }}
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: keek-news-${{ github.ref_name }}
+          path: apk
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          mv apk/app-release.apk "apk/keek-news-$TAG.apk"
+          gh release create "$TAG" "apk/keek-news-$TAG.apk" --title "$TAG" --generate-notes
