@@ -75,6 +75,8 @@ skill({ name: "feature-consensus" })
 
 ## Prohibited Actions
 
+A few places in the code step over these rules; [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) names them. They are exceptions to know, not examples to follow.
+
 - "what" comments that restate what the code already expresses (allowed: concise "why" comments for non-obvious behavior, design intent, or regression rationale; public APIs keep a `/** */` doc comment)
 - Committing code with failing tests, or with lint or type errors
 - Skipping `make check` before committing

@@ -6,8 +6,8 @@ name: Build shell
 #   a push to master under shell/ or the plugins  ->  the signed APK, kept as an artifact
 #   a v* tag                                     ->  the Release of that tag, with the APK
 #
-# Only a tag releases. Installed apps check releases/latest, so a Release is offered to every
-# user: it is published on purpose, never by a push to master.
+# Only a tag releases. The Flutter app (up to 3.14.3) checks releases/latest and offers the newest
+# Release to everyone who has it, so a Release is published on purpose, never by a push to master.
 
 on:
   push:

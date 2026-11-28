@@ -1,24 +1,20 @@
 # Testing Policy
 
-Write tests for all new logic. See [AGENTS.md](../AGENTS.md) for workflow rules.
+Write tests for all new logic. Tests are Vitest and live under `web/test/`. See [AGENTS.md](../AGENTS.md) for workflow rules.
 
 ## Core Rule
 
-Every implementation step should be followed by `flutter test`. Write a test, see it fail, implement, see it pass, refactor. For trivial data classes (entities, failures) writing the test alongside the code is acceptable.
+Every implementation step is followed by the tests of what it touched: `npx vitest run <file>` from `web/` for one file, `npm run test --prefix web` for all of them. Write a test, see it fail, implement, see it pass, refactor. For a type or a constant, the test written beside the code is enough.
 
-Run `make check` before committing — the husky pre-commit hook enforces `dart format` + `flutter analyze` + `flutter test` with zero errors.
+`make check` runs lint, format check, typecheck, tests and the build. Both hooks run it, the pre-commit and the pre-push hook, so no commit and no push goes through with a failing test.
 
 ### No-Skip Rule (enforced)
 
-**Unit, widget, and integration tests must never be skipped and must all pass.** `flutter test` output must show no skipped test outside `test/smoke/` — the `~N` count may only come from gated smoke tests. Do not use `skip:` or `@Skip` in:
-
-- `test/unit/`
-- `test/widget/`
-- `test/integration/`
+**Every test passes, and none is skipped.** `it.skip`, `describe.skip`, `it.todo` and `test.only` are used nowhere under `web/test/`. The end of `npm run test --prefix web` says that every test passed.
 
 If a test is broken or flaky, **fix it** — do not skip it. A skipped test is a red flag equivalent to a failing test during code review.
 
-The **only** opt-in category is **smoke tests** (`test/smoke/`), gated by `SMOKE=1` and run via `make smoke`. Smoke is exempt because it hits live network endpoints. The default `flutter test` run still discovers them and reports them as skipped, so its `~N` count equals the number of gated smoke tests — anything skipped outside `test/smoke/` breaks this rule.
+There is no gated category and no smoke folder. No test reaches the network: what a page fetch answers is a page sample or a fake. The native relay is the one part no test stands in for; it is checked by hand on a device with `/relay-check` (see Real-Network Checks).
 
 ## TDD Cycle (recommended for logic)
 
@@ -26,159 +22,207 @@ The **only** opt-in category is **smoke tests** (`test/smoke/`), gated by `SMOKE
 2. **GREEN** — Write the minimum implementation to pass. Run it. Confirm it passes.
 3. **REFACTOR** — Clean up. Run tests again. All still pass.
 
-Parser methods, state management, and business rules benefit most from strict per-case RED→GREEN. Data classes and interfaces do not require RED verification.
+Parser functions, notifiers, and business rules benefit most from strict per-case RED→GREEN. Types, constants and interfaces do not require RED verification.
 
 ## Testing Priority
 
 | Priority | Layer | Reason |
 |----------|-------|--------|
-| 1 | **UseCase** | Business logic focused, purely functional |
-| 2 | **Repository** | Service composition logic |
-| 3 | **Model** | Serialization, value equality (Equatable) |
-| 4 | **Parser** | HTML → DTO, many edge cases |
-| 5 | **Provider** | State management wiring |
-| 6 | **Widget / Screen** | UI rendering, interaction |
+| 1 | **UseCase** | Business logic: fake repositories in, a `Result` out |
+| 2 | **Repository** | The community's pages read from the page samples; stored data read and written |
+| 3 | **Service** | Parsing helpers and classifiers: pure functions, many edge cases |
+| 4 | **Provider** | The state machine of a screen, driven without React |
+| 5 | **Model** | Keys, the JSON readers and writers |
+| 6 | **Widget / Screen** | What is rendered, what a tap does |
 
 ## Test Directory Structure
 
-Mirror the `lib/` structure:
+Tests mirror `web/src/` under `web/test/`:
 
 ```
-test/
-├── fixtures/<community>/   HTML samples
-├── helpers/                shared test helpers
-├── unit/
-│   ├── const/              theme token tests
-│   ├── model/              entity, DTO, failure tests
-│   ├── pages/              view logic tests
-│   ├── provider/           Riverpod provider tests
-│   ├── repository/         *_impl_test.dart
-│   ├── service/            datasource, adapter, network tests
-│   │   └── parser/         HTML parser tests
-│   ├── use_case/           *_use_case_test.dart
-│   ├── utils/              pure helper tests
-│   ├── widgets/            reusable widget tests
-│   └── app_test.dart       app/router tests
-├── widget/
-│   ├── pages/              *_view_test.dart
-│   └── widgets/
-├── integration/
-└── smoke/
+web/test/
+├── fixtures/              page samples, read with readFixture
+├── helpers/               fixtures.ts
+├── setup.ts               what Vitest runs before every test file
+├── integration/           several real layers together
+├── model/                 model tests
+├── provider/              *_provider.test.ts, *_actions.test.ts
+├── repository/            <feature>/<feature>_impl.test.ts, community/humoruniv/humoruniv_impl.test.ts
+├── service/               html_client.test.ts, content_scanner.test.ts, service_locator.test.ts, …
+├── use_case/              *_use_case.test.ts
+├── utils/                 helper tests, hooks included (router.test.tsx)
+└── widgets/               widget tests, and the tests of the pages and of app.tsx (home_view.test.tsx, app.test.tsx)
 ```
+
+- `src/pages/` has no folder of its own: a page's test is in `test/widgets/`, beside the tests of the widgets it is made of. `src/components/` and `src/lib/` have no tests.
+- Vitest finds `test/**/*.test.ts` and `test/**/*.test.tsx` (`vite.config.ts`), and loads `test/setup.ts` in every test file; it unmounts what a test rendered after each test (`cleanup()`).
+- A test file runs in Node. A file that parses markup, touches the browser's storage or renders starts with `// @vitest-environment jsdom`.
 
 ## Test Levels
 
-### 1. Unit Tests (`test/unit/`)
+### 1. Unit Tests (`test/model/`, `test/service/`, `test/repository/`, `test/use_case/`, `test/utils/`)
 
-Isolated tests with dependencies mocked via `mocktail`.
+Isolated tests with every dependency a plain object of `vi.fn()`s.
 
-| Target | What to test | Mock |
-|--------|-------------|------|
-| Entity / DTO | Equatable value equality, `toEntity()` | None |
-| Parser | HTML string → DTO | None (pure function) |
-| UseCase | Business logic, Either result | Repository |
-| Datasource / Adapter | Correct parser called, error handling | HtmlClient |
-| Repository impl | Mapping | Datasource |
-| Provider | State management, async flow | Repository via DI |
-| Widget | Rendering, interaction | Provider overrides |
+| Target | What to test | Double |
+|--------|-------------|--------|
+| Model | Keys, `fromJson` / `toJson` | None |
+| Parser (a community's `*_impl.ts`) | Page sample → model | A client with only `get` |
+| Service (`html_client.ts`, `content_scanner.ts`, …) | Function → value; a retry schedule with `vi.useFakeTimers()` | A fake relay: `{ request: vi.fn() }` |
+| Repository impl | Stored data read and written | A fake `LocalStorageService` |
+| UseCase | Business logic, the `Result` | An object of `vi.fn()`s that `satisfies XxxRepo` |
 
 Parser test pattern:
-```dart
-test('should return list of feed items when html contains valid rows', () {
-  final html = File('test/fixtures/dogdrip/list.html').readAsStringSync();
-  final result = DogdripListParser.parse(html);
-  expect(result, isNotEmpty);
-  expect(result.first.title, isNotEmpty);
-});
+
+```ts
+// @vitest-environment jsdom
+const repo = new HumorunivImpl(fixtureClient({ 'read.html': read('pds_1415455.html') }));
+
+const detail = await repo.fetchDetail('1415455');
+
+expect(detail.title).toBe('26일 어제, 태풍때문에 난리난 오사카');
 ```
 
-Widget test pattern:
-```dart
-testWidgets('should display feed titles when data loads', (tester) async {
-  when(() => mockRepo.getMergedFeed())
-      .thenAnswer((_) async => Right(feed));
+Use case test pattern:
 
-  await tester.pumpWidget(
-    const ProviderScope(child: MaterialApp(home: HomeView())),
-  );
-  await tester.pumpAndSettle();
+```ts
+function repo(communityId: CommunityId) {
+  return {
+    communityId,
+    fetchLatest: vi.fn<(options?: { pageToken?: string | null }) => Promise<CommunityListResult>>(),
+    fetchDetail: vi.fn<(id: string) => Promise<LoadedPostDetail>>(),
+  } satisfies CommunityRepo;
+}
 
-  expect(find.text('First Post'), findsOneWidget);
-});
+humoruniv.fetchLatest.mockRejectedValue(new ServerFailure('humoruniv down'));
+dogdrip.fetchLatest.mockResolvedValue(list([item('dogdrip', '1')]));
+
+const result = await useCase.getMergedFeed();
+
+expect(result.ok && result.value.failedSources.has('humoruniv')).toBe(true);
 ```
 
-### 2. Widget Tests (`test/widget/`)
+### 2. Provider Tests (`test/provider/`)
 
-Test complete screens in isolation using `WidgetTester`. Use `ProviderScope` overrides or DI mock injection.
+Drive the notifier class as a page does, with no React: call its methods, read `getState()`, and subscribe a listener to see that it is told. The use case is an object of `vi.fn()`s. The functions of an actions file are called after their modules were replaced (see Widget Tests).
 
-### 3. Integration Tests (`test/integration/`)
+```ts
+const getMergedFeed = vi.fn().mockResolvedValue({ ok: true, value: page });
+const notifier = new MergedFeedNotifier({ getMergedFeed } as unknown as FeedUseCase);
 
-Wire multiple real layers together with only the external boundary mocked (real parsers + mock HtmlClient returning fixture HTML).
+await notifier.fetch();
 
-### 4. E2E Tests (`integration_test/`) — not currently present
+expect(notifier.getState().items.map((entry) => entry.id)).toEqual(['1']);
+```
 
-No E2E tests are checked in: the legacy `integration_test/` suite was removed in 2026-07 and there is no `make e2e` target. When E2E coverage is (re)introduced, it belongs here — full app tests on a device/emulator, using Provider overrides to inject deterministic fake data (no real network calls) — together with a Makefile target and a row in the Commands table.
+### 3. Widget Tests (`test/widgets/`)
 
-### 5. Smoke Tests (`test/smoke/`)
+Render with Testing Library (`@testing-library/react`) in jsdom. Find by role and name, fire an event, and assert on the DOM and on the callbacks. A widget is given its data and its callbacks as props.
 
-Real network tests verifying parsers against live servers. The **only** test category permitted to use `skip:` — gated by `SMOKE=1`, so a default `flutter test` run reports them as skipped (see the No-Skip Rule). Run: `SMOKE=1 flutter test test/smoke/` or `make smoke`. All other test levels are bound by the No-Skip Rule.
+```tsx
+// @vitest-environment jsdom
+const onCopyLink = vi.fn();
+
+render(<FeedCard post={post()} onCopyLink={onCopyLink} />);
+fireEvent.click(screen.getByRole('button', { name: '링크 복사' }));
+
+expect(onCopyLink).toHaveBeenCalledTimes(1);
+```
+
+- A widget is rendered bare: nothing provides a theme, as there is none to provide. Styling is Tailwind classes on the elements, which jsdom does not compute, so a test asserts structure, text, roles, names and attributes — never colour or layout.
+- What jsdom does not have — `Image`, `ResizeObserver`, `IntersectionObserver`, sizes, media elements — is replaced in the test with `vi.stubGlobal` or `vi.spyOn`, and put back in `afterEach` with `vi.unstubAllGlobals()` or `vi.restoreAllMocks()`.
+- A hook is tested through a small component that uses it, rendered the same way; `renderHook` is not used.
+- A page (`pages/*_view.tsx`) and `app.tsx` read providers, so their tests replace the modules they read: `vi.resetModules()` first, then `vi.doMock(…)` for each module, then `await import(…)` of the page.
+
+```ts
+vi.resetModules();
+vi.doMock('../../src/service/service_locator', () => ({ feedUseCase: () => fake }));
+vi.doMock('../../src/provider/bookmark_provider', () => ({
+  bookmarkNotifier: () => ({ isBookmarked: () => false, toggle: async () => false }),
+  useBookmarks: () => [],
+}));
+const { HomeView } = await import('../../src/pages/home_view');
+```
+
+A state the test changes while the page is shown is a small class on `StateNotifier` that the test owns; the replaced hook reads it with `useNotifierState`.
+
+### 4. Integration Tests (`test/integration/`)
+
+Several real layers wired the way the app wires them, with only the outside replaced. `bookmark_integration.test.ts` runs `BookmarkNotifier → BookmarkUseCase → BookmarkImpl → BrowserLocalStorageService` over jsdom's `window.localStorage`, without the locator: `new BookmarkNotifier(new BookmarkUseCase(repository))`.
+
+### 5. End-to-End Tests — none
+
+No test drives the app on a device or in a browser. The shell's Gradle project has one Kotlin test (`gyo-bridge`); `make check` does not run it.
+
+### 6. Real-Network Checks — by hand
+
+No test fetches a live page. A change to what reaches the relay — `html_client.ts`, the request settings of `service_locator.ts`, a gyo plugin — is checked on a device with `/relay-check` ([DEVELOPMENT.md](DEVELOPMENT.md)). A change to a parser is verified against a fresh page by saving that page as a page sample and running the parser's tests.
 
 ## Fixture Management
 
-- Store HTML samples in `test/fixtures/<community>/`.
-- Naming: `{page_type}[_{variant}].html`
-- Each parser MUST have at least one corresponding fixture.
-- Commit fixtures to the repository.
+- Page samples are in `web/test/fixtures/`, read with `readFixture(name)` from `web/test/helpers/fixtures.ts`, and committed.
+- A sample is the page as the site sent it — markup, encoding, line endings, odd characters. It is never reformatted, re-indented, trimmed or re-encoded; `web/.prettierignore` keeps Prettier off the folder.
+- Naming: `<board>_<post number>.html` (`pds_1415455.html`). The board is the site's `table` name, and the number is the id the site's link carries.
+- A parser is written against a sample, and its tests read it by name. A test for a new shape of page gets a new sample; an existing one is not edited.
+- The samples are post pages of 웃대. The list parser has no sample: its tests use a few rows of markup written in the test file.
+- The samples were captured while the app was Flutter (until 2026-11-28; its last version is the tag `v3.14.3`). A comment in a test that says "as Dart did" explains an assertion kept from that app's tests.
+- A test that needs a response body the way the relay gives it encodes it itself: `Buffer.from(text, 'utf8').toString('base64')`.
 
 ## Mock Conventions
 
-Use `mocktail`.
+There is no mocking library: Vitest's `vi`, and plain objects.
 
-```dart
-class MockMergedFeedRepo extends Mock implements MergedFeedRepo {}
+```ts
+// A dependency is an object of vi.fn()s, typed by what they stand for
+const relay = () => ({ request: vi.fn<(request: HttpRequest) => Promise<HttpResponse>>() });
+getAll = vi.fn<BookmarkUseCase['getAll']>();
 
-// setUp
-registerFallbackValue(CommunityId.dogdrip);
-
-// test
-when(() => mockRepo.getMergedFeed())
-    .thenAnswer((_) async => Right([testFeedItem]));
+// …answered per call, or per test
+humoruniv.fetchLatest.mockResolvedValue(list([item('humoruniv', '1')]));
+useCase = { getMergedFeed: vi.fn(), getPostDetail: vi.fn(), ...overrides } as unknown as FeedUseCase;
 ```
 
-- One mock class per test file or shared in `test/helpers/`.
-- Use `registerFallbackValue` for any `any()` matcher.
-- Provider tests inject mocks via `di.sl` (GetIt) with `setUp`/`tearDown` registration.
+- A small interface is met with `satisfies`; a partial fake of a big one is cast (`as unknown as FeedUseCase`).
+- A module is replaced with `vi.doMock`, never with the hoisted `vi.mock`, which the tests do not use: `vi.resetModules()` in the test (or its `beforeEach`), `vi.doMock(path, factory)` for each module, then the dynamic `await import(…)` of the code under test. The reset makes the module run again, so the singletons the providers and the locator keep start empty for every test.
+- The modules replaced in the tests are `service_locator` (a fake use case), the providers a test steers (a hook that answers a fixed value), `sonner`, `utils/clipboard` and, in a few tests, `model/community` (to serve a second community) or a widget that plays a video. The parsers and the rest of `model/` and `utils/` run for real.
+- `vi.clearAllMocks()` forgets the calls between tests; `vi.restoreAllMocks()` and `vi.unstubAllGlobals()` in `afterEach` undo spies and stubs.
+- Time is `vi.useFakeTimers()` with `vi.advanceTimersByTimeAsync(ms)`, and `vi.useRealTimers()` after.
 
 ## Parser Resilience Testing
 
-Every parser MUST be tested against:
+A parser is tested against what its page can be:
 
 | Case | Expected behavior |
 |------|-------------------|
-| Valid HTML | Returns correctly populated DTOs |
-| Empty string | Returns empty list or default DTO. No crash. |
-| Missing required elements | Returns empty/default. No crash. |
-| Malformed structure | Returns partial results or default. No crash. |
+| A page sample | The values the page has: title, author, date, counts, comments, media |
+| Markup of one shape is missing | The next selector answers (`textOfAny`), or the default: `''`, `0`, the epoch |
+| A row without a number | `parseListRow` answers `null`, and the row is left out |
+| A page without a body container | No blocks; the use case turns that into a `ParseFailure` (`looksEmpty`) |
+| An empty page | An empty list |
+| A malformed stored entry | `fromJson` throws, and the repository skips the entry |
 
-Parsers MUST never throw — always return a valid result.
+Parsers never throw for missing markup.
 
 ## Test Anti-Patterns
 
-- **Skipping tests** (`skip:`, `@Skip`) in unit/widget/integration — banned by the No-Skip Rule. Fix or delete; never gate out.
-- **Mock echo**: Asserting the exact value set up in `when(...)`. Tests the mock.
+- **Skipping tests** (`it.skip`, `describe.skip`, `it.todo`), or a `test.only` left in — banned by the No-Skip Rule. Fix or delete; never gate out.
+- **Reaching the network**: a test depends on a live site.
+- **Mock echo**: Asserting the exact value set up in `mockResolvedValue`. Tests the mock.
 - **No assertions**: A test without `expect`.
 - **Tautology**: Asserting always-true conditions.
 - **Code duplication**: Copying implementation logic into test code.
 - **Testing private members**: Only test public API behavior.
+- **A stub left behind**: A `vi.stubGlobal` or `vi.spyOn` with no `afterEach` to undo it.
 
 ## Commands
 
 | Command | Purpose |
 |---------|---------|
-| `flutter test` | Run all tests (smoke skipped) |
-| `SMOKE=1 flutter test` | All tests including smoke |
-| `SMOKE=1 flutter test test/smoke/` | Only smoke tests |
-| `flutter test test/unit/` | Only unit tests |
-| `flutter test test/widget/` | Only widget tests |
-| `flutter test test/integration/` | Only integration tests |
-| `flutter analyze` | Static analysis (0 errors required) |
+| `make check` | Lint, format check, typecheck, all tests and the build — what the hooks run |
+| `npm run test --prefix web` | All tests once (`vitest run`) |
+| `npx vitest run test/widgets/feed_card.test.tsx` (from `web/`) | One test file |
+| `npx vitest run test/provider` (from `web/`) | One folder |
+| `npm run lint --prefix web`, `npm run format:check --prefix web`, `npm run typecheck --prefix web`, `npm run build --prefix web` | The checks one by one |
+| `make fix` | Format, and apply ESLint's fixes |
+
+There is no coverage report: no coverage provider is installed and no target produces one.
