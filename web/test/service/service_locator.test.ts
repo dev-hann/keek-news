@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { communityIds } from '../../src/model/community';
 import { desktopUserAgent, mobileUserAgent } from '../../src/service/community_headers';
-import { htmlClientOptions } from '../../src/service/service_locator';
+import { gitHubClientOptions, htmlClientOptions } from '../../src/service/service_locator';
 
 describe('htmlClientOptions', () => {
   it('names a client for every community', () => {
@@ -38,5 +38,16 @@ describe('htmlClientOptions', () => {
       .filter(([, options]) => options.jar !== undefined)
       .map(([id]) => id);
     expect(withJar.sort()).toEqual(['dogdrip', 'fmkorea', 'humoruniv', 'ppomppu', 'todayhumor']);
+  });
+});
+
+describe('gitHubClientOptions', () => {
+  it('asks the releases API of GitHub as an app that says who it is, with no session of a site', () => {
+    // GitHub answers 403 to a request that has no User-Agent.
+    expect(gitHubClientOptions.baseUrl).toBe('https://api.github.com');
+    expect(gitHubClientOptions.headers['User-Agent']).not.toBe('');
+    expect(gitHubClientOptions.headers.Accept).toContain('json');
+    expect(gitHubClientOptions.encoding).toBe('utf-8');
+    expect(gitHubClientOptions.jar).toBeUndefined();
   });
 });

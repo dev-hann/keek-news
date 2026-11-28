@@ -1,7 +1,9 @@
 package gyo.plugins.bridge
 
 import android.content.Context
+import gyo.plugins.app_launcher.AppLauncherBridge
 import gyo.plugins.bridge.BridgeRegistry
+import gyo.plugins.device_info.DeviceInfoBridge
 import gyo.plugins.http.HttpBridge
 import gyo.plugins.media.MediaBridge
 
@@ -11,6 +13,8 @@ import gyo.plugins.media.MediaBridge
  */
 object PluginRegistry {
     fun registerAll(context: Context) {
+        BridgeRegistry.register("app_launcher", AppLauncherBridge(context))
+        BridgeRegistry.register("device_info", DeviceInfoBridge(context))
         BridgeRegistry.register("http", HttpBridge(context))
         BridgeRegistry.register("media", MediaBridge(context))
     }

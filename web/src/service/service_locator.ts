@@ -1,4 +1,6 @@
-import { Http } from '@gyo-community/http';
+import { ApkInstaller } from '@gyo-community/app-launcher';
+import { PackageInfo } from '@gyo-community/device-info';
+import { Downloader, Http } from '@gyo-community/http';
 import { Media } from '@gyo-community/media';
 import {
   registeredCommunityIds,
@@ -10,6 +12,7 @@ import { BlockedImageImpl } from '../repository/blocked_image/blocked_image_impl
 import { HumorunivImpl } from '../repository/community/humoruniv/humoruniv_impl';
 import type { CommunityRepo } from '../repository/community/community_repo';
 import { FeedImpl } from '../repository/feed/feed_impl';
+import { UpdateImpl } from '../repository/update/update_impl';
 import type { MediaSaveRepo } from '../repository/media_save/media_save_repo';
 import { MediaSaveImpl } from '../repository/media_save/media_save_impl';
 import { BlockImageUseCase } from '../use_case/block_image_use_case';
@@ -17,9 +20,11 @@ import { BookmarkUseCase } from '../use_case/bookmark_use_case';
 import { FeedUseCase } from '../use_case/feed_use_case';
 import { SaveMediaUseCase } from '../use_case/save_media_use_case';
 import { ShareMediaUseCase } from '../use_case/share_media_use_case';
+import { UpdateUseCase } from '../use_case/update_use_case';
 import { browserHeaders, desktopUserAgent, mobileUserAgent } from './community_headers';
 import { BrowserLocalStorageService } from './browser_local_storage_service';
 import { HtmlClient, type HtmlClientOptions } from './html_client';
+import { GitHubRemoteService } from './github_remote_service';
 import { FlutterImageHashService } from './image_hash_service';
 
 function pageClient(
@@ -94,6 +99,20 @@ export const htmlClientOptions: Record<CommunityId, HtmlClientOptions> = {
     'https://pann.nate.com/talk',
     'utf-8'
   ),
+};
+
+/**
+ * The releases of the app on GitHub, asked without an account: sixty times an hour from one
+ * address. The API wants a `User-Agent`, and answers JSON in UTF-8.
+ */
+export const gitHubClientOptions: HtmlClientOptions = {
+  baseUrl: 'https://api.github.com',
+  headers: {
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'dev-hann/keek-news',
+    'X-GitHub-Api-Version': '2022-11-28',
+  },
+  encoding: 'utf-8',
 };
 
 let relay: Http | undefined;
@@ -172,4 +191,20 @@ let shareMedia: ShareMediaUseCase | undefined;
 export function shareMediaUseCase(): ShareMediaUseCase {
   shareMedia ??= new ShareMediaUseCase(mediaSaveRepo());
   return shareMedia;
+}
+
+let update: UpdateUseCase | undefined;
+
+/** The one update use case of the app, made the first time the settings show the version. */
+export function updateUseCase(): UpdateUseCase {
+  update ??= new UpdateUseCase(
+    new UpdateImpl(
+      http(),
+      new GitHubRemoteService(new HtmlClient(http(), gitHubClientOptions)),
+      new PackageInfo(),
+      new Downloader(),
+      new ApkInstaller()
+    )
+  );
+  return update;
 }

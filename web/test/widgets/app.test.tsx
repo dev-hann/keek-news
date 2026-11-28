@@ -23,7 +23,11 @@ let App: typeof import('../../src/app').App;
 /** The app over nothing saved and nothing blocked. */
 async function loadApp(): Promise<void> {
   vi.resetModules();
-  vi.doMock('../../src/service/service_locator', () => ({ feedUseCase: () => fake }));
+  // Outside a shell, the version row of the settings asks nothing about a new version.
+  vi.doMock('../../src/service/service_locator', () => ({
+    feedUseCase: () => fake,
+    updateUseCase: () => ({ canCheck: () => false }),
+  }));
   vi.doMock('../../src/provider/bookmark_provider', () => ({
     bookmarkNotifier: () => ({ isBookmarked: () => false, toggle: async () => false }),
     useBookmarks: () => [],

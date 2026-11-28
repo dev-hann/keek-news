@@ -4,7 +4,7 @@
 
 Unofficial mobile app for [humoruniv.com](https://m.humoruniv.com), a Korean humor community since 1998. A web app (React 19, Vite, TypeScript, Tailwind 4, shadcn/ui) inside an Android WebView shell (gyo). No iOS; Android from 7.0 (API 24).
 
-The app is `web/`. Its shell is `shell/` (package `com.keek_news.app`): the WebView that opens the web app where it is served, holding the Android modules of the native plugins the page uses (`@gyo-community/http`, `@gyo-community/media`). The version of the app is `version` in `shell/gyo.config.json` — 4.0.0, the first above the Flutter app's last, 3.14.3 (§9).
+The app is `web/`. Its shell is `shell/` (package `com.keek_news.app`): the WebView that opens the web app where it is served, holding the Android modules of the native plugins the page uses (`@gyo-community/http`, `@gyo-community/media`, `@gyo-community/device-info`, `@gyo-community/app-launcher`). The version of the app is `version` in `shell/gyo.config.json`: 4.0.0 was the first above the Flutter app's last, 3.14.3; 4.1.0 is the first that updates itself (§9).
 
 - No backend server. The page cannot fetch `m.humoruniv.com` itself: CORS, the WebView's own user agent and its Referer get in the way. The native relay (`@gyo-community/http`) fetches the HTML with the site's mobile user agent, Referer, cookie jar and charset; the page decodes UTF-8 (the site served EUC-KR until 2026-10), parses the DOM, and presents structured data. Images and videos are loaded by the WebView straight from the community CDNs; the document sends no Referer.
 - Clean Architecture: Presentation / Domain / Data layers with strict dependency direction: `service/` → `repository/` → `use_case/` → `provider/` under `web/src/`.
@@ -104,10 +104,35 @@ Single-screen IA. Home is the only primary destination. The other pages are reac
 
 - Community switches — persisted locally. There is one, 웃긴대학, and it is on: the switch cannot be switched off, since the last community that is on is locked to keep the feed from going empty.
 - Groups, in this order: 커뮤니티, 저장함, 미디어 & 데이터, 정보. 저장함 holds 저장한 게시물, which opens `/bookmarks`; 미디어 & 데이터 holds 차단된 이미지, with the count `N개`, which opens `/blocked-images`.
-- 정보 holds 버전 and 소스 코드. 버전 is the version of the web app (`version` in `web/package.json`), not the version of the shell. 소스 코드 opens the repository on GitHub, in the browser.
-- No update check: nothing in the app looks for a newer version (§9).
+- 정보 holds 버전 and 소스 코드. 버전 names the version that is installed and says whether a newer one is there (below). 소스 코드 opens the repository on GitHub, in the browser.
 - Dark mode: the app is dark only.
 - No first-launch warning about adult content, and no setting for one (owner decision, 2026-11-28).
+
+#### The 버전 row, and the update of the app
+
+The app is not in a store. It updates itself from this row, which is the only place in the app where a new version is mentioned: nothing is said about one on another page, and no badge or toast interrupts the reading. A new version is never forced.
+
+- **When it looks.** Each time Settings opens, the newest release on GitHub (`releases/latest`) is asked for through the relay. On a browser's page, which has no relay, nothing is asked. What the row says stays until the answer lands, so it does not blink on every visit. While a version is on its way — downloading, downloaded, or waiting for the reader — Settings asks nothing again, and the row is left as it is.
+- **What it names.** `v<installed> · <status>`. The installed version is the one the shell reads from Android, never the version the web app was built with: the shell loads the web app from the deployed address, so a 4.0.0 shell runs a web app built later. Until the shell has answered, the row shows its title and holds the second line empty; it never names a number it does not know.
+- **The statuses**, each said in words to a screen reader:
+
+  | Status | The row says | The button | `업데이트 내용` |
+  |--------|--------------|------------|-----------------|
+  | Looking, nothing known yet | `v4.0.0 · 확인 중…` | — | — |
+  | Nothing newer | `v4.0.0 · 최신 버전` | — | — |
+  | A newer release | `v4.0.0 · v4.1.0 사용 가능` | `업데이트` | shown |
+  | Downloading | `v4.0.0 · 다운로드 중 45%` — `다운로드 중…` while the size is unknown, and never 100 before the file is whole | `취소` | shown |
+  | The download failed | `v4.0.0 · 다운로드 실패` | `다시 시도` | shown |
+  | Downloaded | `v4.0.0 · 다운로드 완료` | `설치` | shown |
+  | The app may not install yet | `v4.0.0 · 설치 권한 필요` | `설정 열기` | shown |
+  | The installer could not be started | `v4.0.0 · 설치 실패` | `다시 시도` | shown |
+  | The look failed | `v4.0.0 · 확인 실패` | `다시 시도` | — |
+
+- **One button**, whose label and act follow the status: `업데이트` becomes `취소` the moment the download starts, so nothing moves under the finger. No control that does nothing: a step that failed offers `다시 시도`, which repeats that step. After `설치 실패` it downloads the file again, since no file is held that a tap could install.
+- **A cancel is not a failure.** `취소` returns the row to `사용 가능`, and the file that did not arrive whole is not kept. Coming back from the system's installer leaves `다운로드 완료`; coming back from the installer's settings reads the permission again and nothing else. On the way back, GitHub is not asked.
+- **`업데이트 내용`** opens the page of the release on GitHub, in the browser.
+- **The install itself is Android's.** The app asks to be allowed to install apps (a system screen), hands the APK to the system's installer, and the reader confirms there. What Android says of the package, Android says.
+- **On a 4.0.0 shell**, which can neither read its own version nor download or install, the row names 4.0.0 and, when a newer release is there, offers `GitHub에서 받기`, which opens the Release page. The update from 4.0.0 is installed by hand: the last one that is.
 
 ### 저장함 (pushed route `/bookmarks`, from the 저장한 게시물 row of Settings)
 
@@ -282,6 +307,7 @@ Home → ⋯ or long-press on a picture → 이미지 차단
   - `공유`: `준비 중…` in the row while it prepares; the sheet closes once the media is offered, and nothing is said. A share that was canceled, or is already running, puts the row back to idle.
   - Any other failure of a save or a share stays in its row, to be tapped to try again: `저장에 실패했어요 · 탭하여 재시도`, `공유에 실패했어요 · 탭하여 재시도`.
 - Saving a post: when the write failed, `저장하지 못했어요` or `저장을 취소하지 못했어요`; otherwise only the button changes.
+- The update of the app (§4): every step is said in the 버전 row itself, as a status or as an alert with `다시 시도`. The one toast is `설정을 열지 못했어요`, when the installer's settings screen cannot be opened.
 - `오류 정보 복사`: `오류 정보를 복사했어요`; when it failed, `오류 정보를 복사하지 못했습니다`.
 - 차단 해제: `차단을 해제했어요`; when it failed, `차단 해제에 실패했어요`, and the picture stays blocked.
 - Offline: no cached content and no "Last updated" banner; neither is planned unless the user asks (§9).
@@ -299,12 +325,13 @@ Home → ⋯ or long-press on a picture → 이미지 차단
 | Media of a card and of a comment | Image carousel; inline video, one at a time; the media menu (save to the gallery, share, copy the address, block an image); a comment's video opens full screen; a long-press on a comment's picture or video opens the menu |
 | Saving a post | `저장` / `저장 취소` and `링크 복사` on a card; 저장함 lists the saved posts |
 | Blocked images | `이미지 차단` in the media menu; 차단된 이미지 lists them, each with `차단 해제` |
-| Settings | The community switch, the version, the source link |
-| Shell | `shell/`: the WebView shell, with the relay (`@gyo-community/http`) and the media plugin (`@gyo-community/media`) |
+| Settings | The community switch, the version row, the source link |
+| Update of the app | The 버전 row of Settings: the newest release on GitHub, downloaded into the app and handed to the system's installer (§4) |
+| Shell | `shell/`: the WebView shell, with the relay (`@gyo-community/http`), the media plugin (`@gyo-community/media`), and — from 4.1.0 — the installed app's version (`@gyo-community/device-info`) and the installer of an APK (`@gyo-community/app-launcher`) |
 | Relay check | `/relay-check`, a development aid: checks of the native relay on a device |
 | Deploy and build | `deploy-web.yml` and `build-shell.yml` (below) |
 
-Checked on an emulator's WebView (Android 14) and on a phone (Galaxy Z Flip6, Android 16, WebView 157). On both the page was read and driven through the WebView's debug protocol, on the phone its touches as well; saving to the gallery and the share chooser went through the native plugin on both. Not checked yet: a finger on the glass (how a pinch, a fling or a long-press feel), a screen reader, and Android 9 and earlier.
+Checked on an emulator's WebView (Android 14) and on a phone (Galaxy Z Flip6, Android 16, WebView 157). On both the page was read and driven through the WebView's debug protocol, on the phone its touches as well; saving to the gallery and the share chooser went through the native plugin on both. The update of the app (4.1.0) was checked on the emulator alone: the look on GitHub, the download with its progress, a cancel, the two failures, the install permission, and the install over the app through the system's installer — and, on a shell built without the two newer plugins, the row as a 4.0.0 shell shows it. Not on a phone. Not checked yet: a finger on the glass (how a pinch, a fling or a long-press feel), a screen reader, and Android 9 and earlier.
 
 ### Where it is served
 
@@ -326,11 +353,11 @@ The web app replaced the Flutter app in place — same package `com.keek_news.ap
 Two things are known to be lost or missing there. Both are open items, not promises:
 
 1. The web app does not read what the Flutter app saved: bookmarks, settings and blocked images start empty.
-2. The web app has no in-app check for a new version, so later updates are installed by hand from GitHub Releases until that exists.
+2. From 4.1.0 on, the web app updates itself from the 버전 row of Settings (§4). A 4.0.0 shell cannot: it names the newer version and sends the reader to the Release page, so the step from 4.0.0 to 4.1.0 is installed by hand — the last one that is.
 
 ### Open
 
-- **The in-app check for a new version.** Until it exists, an update is an APK to install by hand.
+- **A package the system refuses.** When the installer starts and Android refuses the package — a file damaged after its download, or an asset broken on the release — the row comes back to `다운로드 완료`, since the page cannot see what the system said. The reader has `업데이트 내용` and Android's own dialog. A plugin that tells a refusal from a cancel would close it.
 - **Reading what the Flutter app saved.** The web app keeps its own bookmarks, settings and blocked images in the storage of its page (`localStorage`), and starts empty.
 - **An offline cache with a "Last updated" banner.** Not planned unless the user asks; the Flutter app never had one either.
 
@@ -351,7 +378,9 @@ iOS (there is no iOS shell), and an image cache of the app's own.
 | Aggressive scraping triggers IP ban | App stops working | Requests come from the device, through the relay, under the site's own user agent: one list request per page and one per post shown for its body, which is not asked for again while it is loading or already here. A 503 is tried again up to three times, waiting 1, 4 and 10 seconds — or what the site's `Retry-After` names, when that is 30 seconds or less. If the site signals throttling, a hard minimum pause between requests is the fallback. |
 | Store rejection | Cannot list in a store | The app is not put forward for a listing: it is distributed as an APK from GitHub Releases. It is a web page in a native shell, whose native parts are the relay and the media plugin. Non-commercial use stated. |
 | Content copyright issues | Legal risk | App is a viewer. Content belongs to original authors. App does not modify or create content. |
-| A `v*` tag reaches every user | Whatever APK the Release holds is offered at once to every user of the Flutter app, since it checks `releases/latest`; and once they are on the web app, nothing checks for the next version, so they update by hand | A push to `master` never releases; the tag is pushed only when the user decides, and it releases nothing without its section in `RELEASE_NOTES.md`. The shell is built and signed on every change to `shell/` or the plugins, so a shell that does not build shows before any tag. The APK holds the shell alone: the web app it opens keeps deploying from `master`, so a fault in the web app is fixed without a release. |
+| A `v*` tag reaches every user | Whatever APK the Release holds is offered at once to every user: of the Flutter app, which checks `releases/latest`, and of the web app from 4.1.0, on the 버전 row when Settings opens. A 4.0.0 shell sends its reader to the Release page |
+| GitHub's API refuses | The row says `확인 실패` | GitHub is asked without an account, sixty times an hour from one address: once each time Settings opens, and never while a version is on its way. `다시 시도` asks again. Nothing else in the app depends on that API |
+| A release without its APK, or with a broken one | Nothing can be installed | The look fails, or the download does, or Android refuses the package. In each case nothing is installed over the user's app | A push to `master` never releases; the tag is pushed only when the user decides, and it releases nothing without its section in `RELEASE_NOTES.md`. The shell is built and signed on every change to `shell/` or the plugins, so a shell that does not build shows before any tag. The APK holds the shell alone: the web app it opens keeps deploying from `master`, so a fault in the web app is fixed without a release. |
 | The address the shell opens changes | Bookmarks, settings and blocked images stay behind: they live in the storage of the page, which belongs to one address | The address is fixed in the shell at build (`standalone` in `shell/gyo.config.json`), so it cannot change without a new APK. Moving it means moving the saved data too. |
 
 ## 11. Success Metrics

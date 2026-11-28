@@ -75,7 +75,8 @@ cd ../shell && ANDROID_SERIAL=emulator-5554 mise exec node@24 -- \
 
 ## 플러그인
 
-gyo 플러그인은 npm에서 받는다(`web/package.json`의 `@gyo-community/http`, `@gyo-community/media`).
+gyo 플러그인은 npm에서 받는다(`web/package.json`의 `@gyo-community/http`, `@gyo-community/media`,
+`@gyo-community/device-info`, `@gyo-community/app-launcher`).
 플러그인의 `android/`는 Gradle 라이브러리 모듈이라서, `gyo run`·`gyo build`·`gyo install`은 그
 모듈을 앱 빌드에 포함하고 등록 코드를 만든다. 소스를 앱으로 복사하지는 않으므로 플러그인을
 바꾸면 빌드에 바로 반영된다. 플러그인을 추가한 뒤에는 셸을 다시 빌드해야 한다.
@@ -88,3 +89,7 @@ gyo 플러그인은 npm에서 받는다(`web/package.json`의 `@gyo-community/ht
 권한은 앱의 매니페스트에 직접 적는다(`android/app/src/main/AndroidManifest.xml`). gyo는
 플러그인이 요구하는 권한이 거기 있는지만 살펴보고 없으면 경고한다. 갤러리 저장이 쓰는
 `WRITE_EXTERNAL_STORAGE`는 Android 9 이하에서만 필요하므로 `maxSdkVersion="28"`과 함께 있다.
+앱 업데이트가 쓰는 `REQUEST_INSTALL_PACKAGES`는 Android 8 이상에서 `app-launcher`의 설치에 필요하다.
+
+`android/gyo-bridge/`는 gyo CLI의 템플릿에서 온 모듈이다. gyo가 덮어쓰지 않으므로, 템플릿이 바뀌면
+셸의 `MainActivity.kt`와 함께 손으로 맞춘다(핸들러의 이벤트 훅: `BridgeHandler.attachEvents`).

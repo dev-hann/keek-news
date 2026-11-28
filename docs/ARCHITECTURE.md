@@ -10,8 +10,8 @@ Service → Repository → UseCase → Provider
 
 | Layer | Role | State |
 |------------|-----------------------------------|----------------|
-| **Service** | Fetching pages through the native relay and decoding them, parsing helpers, the page's storage, image fingerprints — and `service_locator.ts`, where the dependencies are assembled | Caches only |
-| **Repository** | Reading one community's list and post pages; the stored bookmarks, blocked images and switched-on communities; saving and sharing media through the native plugin | Caches only |
+| **Service** | Fetching pages through the native relay and decoding them, the newest release of the app on GitHub, parsing helpers, the page's storage, image fingerprints — and `service_locator.ts`, where the dependencies are assembled | Caches only |
+| **Repository** | Reading one community's list and post pages; the stored bookmarks, blocked images and switched-on communities; saving and sharing media through the native plugin; the update of the app: what is installed, the download and the install | Caches only |
 | **UseCase** | Business rules, the error boundary, asking every community that is on at once | None |
 | **Provider** | The state of the screens: notifier classes on `StateNotifier`, the hooks that bind them, the actions a page hands to its widgets | **Sole holder** |
 
@@ -86,7 +86,7 @@ export class BookmarkUseCase extends BaseUseCase {
 
 ## UseCase Rules
 
-1. **One use case per domain concept**, named after the noun: `FeedUseCase`, `BookmarkUseCase`, `BlockImageUseCase`, `SaveMediaUseCase`, `ShareMediaUseCase` (`Feed` ✅, `GetFeed` ❌).
+1. **One use case per domain concept**, named after the noun: `FeedUseCase`, `BookmarkUseCase`, `BlockImageUseCase`, `SaveMediaUseCase`, `ShareMediaUseCase`, `UpdateUseCase` (`Feed` ✅, `GetFeed` ❌).
 2. **Several named methods, one per operation** — `getMergedFeed()`, `getPostDetail()` — and no `call()`. The code has one exception: the two media use cases have a single operation each, named `call(target)`, and extend nothing.
 3. **A method that can fail answers a `Result`** (`model/result.ts`) — the error boundary lives here, not in the Repository.
 4. **Repositories answer raw values and throw**; the use case catches with `guard()`.
@@ -121,6 +121,7 @@ export class BookmarkUseCase extends BaseUseCase {
 | Repository method over pages | Raw value. `HtmlClient.get()` throws `ServerFailure` or `NetworkFailure`, and the repository lets it propagate |
 | Repository method over stored data | Raw value. An entry that cannot be read is skipped (`BookmarkImpl.getAll()`) |
 | Repository method over the media plugin | `MediaSaveResult` (`model/media_save_failure.ts`): `{ ok: true }`, or a failure of the plugin's kinds — `network`, `permission`, `canceled`, `inProgress`, `unexpected` |
+| `UpdateRepo.download()` | `DownloadOutcome` (`model/app_update.ts`): the path of the file, `cancelled`, or a `failure`. A download the page cancelled is neither a success nor a failure. The other methods of `UpdateRepo` throw |
 | Failure types | `ServerFailure` (the server answered, but not with the page), `NetworkFailure` (no answer arrived), `ParseFailure` (the page came, but nothing in it could be read) — `model/failures.ts` |
 
 `Failure` extends `Error`, and `instanceof` a subclass tells the kinds apart. `failure.http` carries what a page fetch could see about a refusal: `statusCode`, a few response `headers`, the start of the `bodySnippet`, and the `requestPath`.
@@ -183,6 +184,7 @@ new MediaSaveImpl(new Media()); // a provider making a repository
 | `BookmarkNotifier` | The saved posts | `useBookmarks()` |
 | `BlockedImagesNotifier` | The blocked images, read again whenever the repository's `changes` stream fires | `useBlockedImages()` |
 | `FeedVideoPlaybackNotifier` | The one video of the feed that may be playing | `useActiveVideo()` |
+| `UpdateNotifier` | What the version row of Settings says: the status, the installed version, the release that can be installed, how far its download is. Looks on GitHub when Settings opens, and again on the way back from the system's installer | `useUpdate()` |
 
 ### Provider files without a notifier
 
@@ -282,6 +284,7 @@ function BookmarkRow({ bookmark }: BookmarkRowProps) {
 | `BookmarkRepo` — `BookmarkImpl` | The saved posts (`bookmarks`) |
 | `BlockedImageRepo` — `BlockedImageImpl` | The blocked images (`blocked_images`); `changes` fires after every write |
 | `MediaSaveRepo` — `MediaSaveImpl` | The native media plugin: save to the gallery, share; one download per file at a time |
+| `UpdateRepo` — `UpdateImpl` | The installed version (`PackageInfo`), a download into the cache (`Downloader`), the installer of an APK (`ApkInstaller`), and — through `GitHubRemoteService` — the newest release on GitHub |
 
 ```ts
 // ✅ Do
@@ -324,6 +327,7 @@ A service knows `model/` and the gyo plugins (`@gyo-community/http`, `@gyo-commu
 | File | Kind | Role |
 |---------|------|------|
 | `html_client.ts` | class `HtmlClient` | Fetches the pages of one site through the native relay: retries, decodes, throws a `Failure` |
+| `github_remote_service.ts` | class `GitHubRemoteService` | The newest release of the app: asks the releases API of GitHub through an `HtmlClient`, and reads the tag, the page and the APK out of the answer, or throws a `ParseFailure` |
 | `community_headers.ts` | constants | The two user agents and the browser headers shared by page fetches |
 | `service_locator.ts` | functions | The request settings of every known site; the factory of every use case and repository |
 | `html_service.ts` | functions | `parseHtml` and the DOM helpers the parsers use: `tryParseInt`, `extractNumber`, `textOf`, `attrOf`, `statOf`, `statOfAny`, `queryFirst`, `textOfAny` |
@@ -350,11 +354,24 @@ There is no DI container. `web/src/service/service_locator.ts` exports one facto
 | `bookmarkUseCase()` | `BookmarkUseCase` over a `BookmarkImpl` |
 | `blockImageUseCase()` | `BlockImageUseCase` over a `BlockedImageImpl` and a `FlutterImageHashService` |
 | `saveMediaUseCase()`, `shareMediaUseCase()` | The two media use cases over the one `MediaSaveImpl` |
+| `updateUseCase()` | `UpdateUseCase` over an `UpdateImpl`, which holds the one relay, a `GitHubRemoteService` and the three plugins of the update |
 
 - Each factory of a use case or a repository keeps its object in a module-level variable and makes it the first time it is asked (`??=`). `htmlClient(id)` makes a client over the one relay, which is itself made once. No object is made when the module is imported: a repository holds the relay, which exists only in the WebView.
 - A factory names interfaces where it can (`Record<RegisteredCommunityId, CommunityRepo>`), and is the only code that names an impl class.
 - A provider imports the factory of its use case. A page never sees a use case.
 - Tests do not swap registrations. A notifier or a use case under test is constructed with fakes; a page under test gets fakes by replacing the module with `vi.doMock('../../src/service/service_locator', …)` — see [TESTING_POLICY.md](TESTING_POLICY.md).
+
+---
+
+## The Update of the App
+
+The app is not in a store: the 버전 row of Settings looks for a newer release on GitHub, downloads it and hands it to the system's installer (`PRODUCT_PLAN.md` §4). It is the one feature that asks the native side about the app itself, and three things in it are not what they look like.
+
+- **`__APP_VERSION__` is the version of the build, never the one that is installed.** The shell loads the web app from the deployed address, so a 4.0.0 shell runs a web app built later. The installed version is what the shell reads from Android (`PackageInfo` of `@gyo-community/device-info`). The constant is shown in one place only: a page in a browser, which has no shell to ask.
+- **A 4.0.0 shell is told by one sentence.** `isAvailable()` of a gyo plugin says only that a native bridge exists; it is true on every shell. The bridge core answers `Bridge 'device_info' not found` when the shell has no handler for that bridge, and only a shell from before the updater has none. `UpdateImpl.getInstalledVersion()` answers `null` for that sentence and rethrows everything else. So a plugin that fails is a failed reading — `확인 실패`, never a number made up — and the 4.0.0 shell is 4.0.0, in what the row shows and in what it compares. A change to that sentence in the bridge core (`shell/android/gyo-bridge/`) is a change here.
+- **A version on its way is left alone.** `UpdateNotifier` asks GitHub when Settings opens, and only from a status where nothing is on its way (`upToDate`, `available`, `checkFailed`). While a release is downloading, downloaded or waiting for the reader, the row is not looked at again, so the release does not change under the reader's hand. On the way back from the system's installer or its settings (`visibilitychange`), the installed version or the permission is read again, and GitHub is not asked.
+
+The chain is `model/app_update.ts` → `repository/update/` (`UpdateRepo`; `UpdateImpl` over the three plugins) → `service/github_remote_service.ts` → `use_case/update_use_case.ts` → `provider/update_provider.ts` → `widgets/update_row.tsx`. A download the page cancelled is a `DownloadOutcome` of its own, not a failure. The percent is capped at 99 until the file is whole.
 
 ---
 

@@ -2,6 +2,10 @@
 
 // Every plugin installed in lib/ is one Gradle module, included from where node_modules keeps it.
 
+include ':gyo-plugin-app-launcher'
+project(':gyo-plugin-app-launcher').projectDir = file('../../web/node_modules/@gyo-community/app-launcher/android')
+include ':gyo-plugin-device-info'
+project(':gyo-plugin-device-info').projectDir = file('../../web/node_modules/@gyo-community/device-info/android')
 include ':gyo-plugin-http'
 project(':gyo-plugin-http').projectDir = file('../../web/node_modules/@gyo-community/http/android')
 include ':gyo-plugin-media'

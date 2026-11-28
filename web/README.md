@@ -47,6 +47,7 @@ npm run build && npx wrangler deploy
 
 ## gyo 플러그인
 
-페이지는 `@gyo-community/http`(npm)로 받는다. 이 플러그인의 peer 의존성인 `@gyo-framework/bridge`는
-npm이 함께 설치한다. 플러그인을 더 쓰게 되면 여기서 설치하고, 셸이 빌드 전에 Android 모듈을
+페이지는 `@gyo-community/http`(npm)로 받는다. 설정의 버전 행은 `@gyo-community/device-info`(설치된 버전)와
+`@gyo-community/app-launcher`(APK 설치)를, 내려받기는 `http`의 `Downloader`를 쓴다. `@gyo-framework/bridge`는
+이 플러그인들의 peer 의존성으로 npm이 함께 설치한다. 플러그인을 더 쓰게 되면 여기서 설치하고, 셸이 빌드 전에 Android 모듈을
 포함한다(`shell/README.md` 참고).

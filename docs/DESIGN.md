@@ -140,6 +140,7 @@ Components live in `web/src/widgets/`. Flat directory (no atoms/molecules/organi
 | `ScrollToTopButton` | `Button` outline, icon size |
 | `SettingsGroup` | `Separator` dividers |
 | `SettingsTile` | shadcn tokens (no list primitive) |
+| `UpdateRow` | the version row of Settings: laid out as `SettingsTile`, but a `div` since it carries controls. A Lucide icon (`Info`; `LoaderCircle` while it looks; `CircleAlert` for a failure), a line whose status words sit in a `role="status"` element — or in a new `role="alert"` element for a failure — a plain `<a>` for `업데이트 내용` (`min-h-11`), and one `Button` outline (`h-11`) whose label follows the status. On a shell that cannot install, that button is `Button` outline `asChild` over an `<a>`, `GitHub에서 받기` |
 | `FeedCard` | `Card` + composition; ends its counts row with two `ActionButton`s, `링크 복사` and `저장` / `저장 취소` |
 | `FeedDetailCard` | composes `FeedCard` and `FeedErrorCard`; `keepOnBodyError` keeps a body that failed inside the card |
 | `CardBodyError` | why the body of a saved post is missing, inside its card: a `role="alert"` block, with `Button` outline (`다시 시도`) where there is something to try again |
@@ -181,7 +182,8 @@ Components live in `web/src/widgets/`. Flat directory (no atoms/molecules/organi
 - **An error** is said where it happened, as `role="alert"`: a Lucide icon (`CircleAlert`, `ImageOff`) — in `text-destructive` on a surface — the reason as text, and a `Button` outline (`다시 시도`) where there is something to try again. A failed row of the media menu is itself the alert, named for what to do (`저장 실패, 탭하여 재시도`).
 - **What came of an action** is a toast, never a dialog: `Toaster` (sonner) at the top centre, on the `popover` surface, gone after 2500ms; it carries an action only where one exists (`취소` after an image was blocked).
 - **Nothing to show** is `EmptyStateView`: a Lucide icon (`size-12`, `muted-foreground`), a message, and a hint of what there is to do about it.
-- **A state that toggles** changes the control itself and says so: `저장` becomes `저장 취소` with `aria-pressed`, `확대` becomes `원래 크기`.
+- **A state that toggles** changes the control itself and says so: `저장` becomes `저장 취소` with `aria-pressed`, `확대` becomes `원래 크기`, and on the version row `업데이트` becomes `취소`.
+- **The version row** (`UpdateRow`) says each step where it happens. Its status words are the whole announcement: `v4.0.0 · ` before them and the percent after them stay outside the `role="status"` element. A failure is a new `role="alert"` element, since changing the role of an element already on screen is not announced reliably. The line is held while it is empty, so the row keeps its height from its first frame. A toast only for what has no row to live in: `설정을 열지 못했어요`.
 
 ## Icon System
 
@@ -206,7 +208,8 @@ Icons are Lucide (`lucide-react`).
   - Viewer: `닫기`; `확대` / `원래 크기` (with `aria-pressed`); `이전` and `다음`, switched off at the ends; `더보기`, with `aria-haspopup="dialog"`; the position `이미지 N / M` as a status; `N번째 이미지` as the `alt` of each picture.
   - Media menu: `갤러리에 저장`, `공유`, `URL 복사`, `이미지 차단`; a running row `저장 중…` / `준비 중…` as a status; a failed row `저장 실패, 탭하여 재시도` / `공유 실패, 탭하여 재시도` as an alert.
   - 차단된 이미지: `차단 해제`. The picture has no name of its own: the address next to it says what it is. `전체화면으로 보기` is not used yet — `BlockedImageTile` has that name ready for a preview button, but no page gives it one, so there the thumbnail is not a button.
-- **The bars and the settings**, also in Korean: `뒤로` for the back arrow of the app bar, `설정` for the gear of Home, `맨 위로` for the floating button, `웃긴대학 보기` for the community switch, and the text of a settings row for the row itself.
+- **The bars and the settings**, also in Korean: `뒤로` for the back arrow of the app bar, `설정` for the gear of Home, `맨 위로` for the floating button, `웃긴대학 보기` for the community switch, and the text of a settings row for the row itself. The version row: `업데이트`, `취소`, `다시 시도`, `설치`, `설정 열기`, `업데이트 내용`, and on a 4.0.0 shell `GitHub에서 받기`; what it says of a status is heard as `확인 중…`, `최신 버전`, `v4.1.0 사용 가능`, `다운로드 중`, `다운로드 실패`, `다운로드 완료`, `설치 권한 필요`, `설치 실패` or `확인 실패`.
+- **The version row keeps its focus and its number to itself:** one button, 44px, that changes its label instead of being replaced, so the focus stays on it through `업데이트`, `취소` and `다시 시도`. Before the shell has said what is installed, the row shows no number rather than one the reader may not have.
 - **The media menu has a way that is not a gesture:** the `⋯` button is a button, so the keyboard reaches it too (Tab, then Enter). The long-press only adds to that.
 
 ## Reference: Code File Locations
@@ -224,5 +227,6 @@ Icons are Lucide (`lucide-react`).
 | Providers | `web/src/provider/` |
 | Widgets | `web/src/widgets/` |
 | Pages | `web/src/pages/` |
+| The version row and the update of the app | `web/src/widgets/update_row.tsx`, `web/src/provider/update_provider.ts` |
 | Communities and their colour | `web/src/model/community.ts` |
 | Test setup | `web/test/setup.ts` (Testing Library cleanup) |

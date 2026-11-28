@@ -18,6 +18,7 @@ Current scope: **웃긴자료 (pds) board only.** The app is the web app (`web/`
 - `web/src/service/service_locator.ts` — where the dependencies are assembled (`communityRepos()`, `feedUseCase()`, …), and each site's headers, charset and cookie jar
 - `web/src/model/community.ts` — the registry: `registeredCommunityIds`, `communities`
 - `web/src/provider/state_notifier.ts` — `StateNotifier` and `useNotifierState`, the base of every provider
+- `web/src/provider/update_provider.ts` — the update of the app: when GitHub is asked, what a 4.0.0 shell is, and why `__APP_VERSION__` is never the installed version ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), The Update of the App)
 - `web/src/utils/router.ts`, `web/src/app.tsx` — the paths, the navigation, and the page shown for a path
 - `web/src/index.css` — the tokens of the theme
 - `web/wrangler.jsonc` — how the web app is deployed (`web/README.md`, 배포)

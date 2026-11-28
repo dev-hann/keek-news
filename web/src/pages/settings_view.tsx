@@ -1,11 +1,14 @@
-import { Bookmark, Code, ImageOff, Info } from 'lucide-react';
+import { useEffect } from 'react';
+import { Bookmark, Code, ImageOff } from 'lucide-react';
 import { Switch } from '../components/ui/switch';
 import { registeredCommunities } from '../model/community';
 import { useBlockedImages } from '../provider/blocked_images_provider';
+import { updateNotifier, useUpdate } from '../provider/update_provider';
 import { settingsNotifier, useSettings } from '../provider/settings_provider';
 import { AppBar } from '../widgets/app_bar';
 import { SettingsGroup } from '../widgets/settings_group';
 import { SettingsTile } from '../widgets/settings_tile';
+import { UpdateRow } from '../widgets/update_row';
 
 const REPO_URL = 'https://github.com/dev-hann/keek-news';
 
@@ -19,6 +22,13 @@ export function SettingsView({ onBack, onOpenBookmarks, onOpenBlockedImages }: S
   const enabled = useSettings();
   const settings = settingsNotifier();
   const images = useBlockedImages();
+  const update = useUpdate();
+  const updater = updateNotifier();
+
+  // A new version is looked for each time the settings open.
+  useEffect(() => {
+    updater.enter();
+  }, [updater]);
 
   return (
     <>
@@ -74,10 +84,13 @@ export function SettingsView({ onBack, onOpenBookmarks, onOpenBlockedImages }: S
         </SettingsGroup>
 
         <SettingsGroup title="정보">
-          <SettingsTile
-            title="버전"
-            subtitle={`v${__APP_VERSION__}`}
-            leading={<Info className="size-5" />}
+          <UpdateRow
+            state={update}
+            onDownload={() => updater.download()}
+            onCancel={() => updater.cancel()}
+            onRetry={() => updater.retry()}
+            onInstall={() => void updater.install()}
+            onOpenInstallSettings={() => void updater.openInstallSettings()}
           />
           <SettingsTile
             title="소스 코드"

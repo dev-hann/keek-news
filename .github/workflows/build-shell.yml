@@ -75,7 +75,7 @@ jobs:
           GYO_ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GYO_ANDROID_KEYSTORE_PATH"
-          npx --yes @gyo-framework/cli@0.3.0 build android -p standalone -r
+          npx --yes @gyo-framework/cli@0.4.0 build android -p standalone -r
       - name: Keep the APK
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

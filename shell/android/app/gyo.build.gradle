@@ -3,6 +3,8 @@
 // The app depends on the module of every plugin installed in lib/.
 
 dependencies {
+    implementation project(':gyo-plugin-app-launcher')
+    implementation project(':gyo-plugin-device-info')
     implementation project(':gyo-plugin-http')
     implementation project(':gyo-plugin-media')
 }

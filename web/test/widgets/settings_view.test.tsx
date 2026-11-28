@@ -139,6 +139,44 @@ describe('SettingsView', () => {
     expect(source).toHaveProperty('target', '_blank');
   });
 
+  it('asks about a new version each time the settings open, and gives the version row its taps', async () => {
+    vi.resetModules();
+    const updater = {
+      enter: vi.fn(),
+      download: vi.fn(),
+      cancel: vi.fn(),
+      retry: vi.fn(),
+      install: vi.fn(async () => undefined),
+      openInstallSettings: vi.fn(async () => undefined),
+    };
+    vi.doMock('../../src/provider/update_provider', () => ({
+      updateNotifier: () => updater,
+      useUpdate: () => ({
+        status: 'available',
+        version: '4.0.0',
+        support: 'native',
+        release: {
+          tag: 'v4.1.0',
+          version: '4.1.0',
+          pageUrl: 'https://github.com/dev-hann/keek-news/releases/tag/v4.1.0',
+          apkUrl: 'https://github.com/dev-hann/keek-news/releases/download/v4.1.0/keek-news.apk',
+        },
+        percent: null,
+      }),
+    }));
+    const { SettingsView } = await loadSettings();
+
+    const first = show(SettingsView);
+    expect(updater.enter).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: '업데이트' }));
+    expect(updater.download).toHaveBeenCalledTimes(1);
+
+    first.unmount();
+    show(SettingsView);
+    expect(updater.enter).toHaveBeenCalledTimes(2);
+    vi.doUnmock('../../src/provider/update_provider');
+  });
+
   it('groups the settings as 저장함 and 미디어 & 데이터 between the communities and 정보', async () => {
     vi.resetModules();
     const { SettingsView } = await loadSettings();
