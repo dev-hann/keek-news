@@ -4,78 +4,63 @@ Guidelines for AI coding agents working on this project.
 
 ## Architecture & Conventions
 
-- Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 4-layer rules (Service → Repository → UseCase → Provider)
-- Naming: [docs/NAMING_CONVENTIONS.md](docs/NAMING_CONVENTIONS.md) — `*_repo`/`*_impl`, `*_use_case`, `*_view`, `*_dto`
-- Code style: [docs/CODE_STYLE.md](docs/CODE_STYLE.md) — Equatable models, dartz Either, parser rules
-- Testing: [docs/TESTING_POLICY.md](docs/TESTING_POLICY.md)
+- Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 4-layer rules (Service → Repository → UseCase → Provider) under `web/src/`
+- Naming: [docs/NAMING_CONVENTIONS.md](docs/NAMING_CONVENTIONS.md) — `*_repo`/`*_impl`, `*_use_case`, `*_provider`, `*_view`
+- Code style: [docs/CODE_STYLE.md](docs/CODE_STYLE.md) — TypeScript, `Result` instead of thrown errors, parser rules
+- Testing: [docs/TESTING_POLICY.md](docs/TESTING_POLICY.md) — Vitest; tests mirror `web/src/`
+- Development: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 - Product scope: [docs/PRODUCT_PLAN.md](docs/PRODUCT_PLAN.md), [docs/DESIGN.md](docs/DESIGN.md)
 
-Current scope: **웃긴자료 (pds) board only.** Active communities: dogdrip, ppomppu, todayhumor, humoruniv, bobaedream, ruliweb, natepann. Hidden (compiled in, UI-hidden): fmkorea.
+Current scope: **웃긴자료 (pds) board only.** The app is the web app (`web/`) shown by its Android shell (`shell/`), and it serves one community, 웃대 (humoruniv), by decision of the user (2026-11-28). Until that day the app was a Flutter app: its last version is the tag `v3.14.3`, and nothing of it is in the repository any more. Do not add another community, and do not bring Flutter back, unless the user asks for it.
 
 ## Key Files
 
-- `lib/service/service_locator.dart` — DI registration (GetIt: `configureDependencies()` + `sl`)
-- `lib/app.dart` — `KeekNewsApp` (ShadApp.router) + inlined `appRouter` (GoRouter) + ScaffoldMessenger injection
-- `lib/theme/shad_theme.dart` — `AppShadTheme.dark()` (ShadThemeData with orange color scheme)
-- `lib/main.dart` — entry, boots DI
-- `test/helpers/shad_harness.dart` — `shadHarness(body)` / `shadApp({home, navigatorKey})` widget test helpers
-- `web/` — the web app the Android shell shows (React + Vite + TypeScript); `web/src/service/` is the port of `lib/service/`, tests mirror `web/src/` under `web/test/`; `web/wrangler.jsonc` is how it is deployed (`web/README.md`, 배포)
-- `shell/` — the gyo WebView shell; `lib/` is a symlink to `../web`. See `shell/README.md
+- `web/src/service/service_locator.ts` — where the dependencies are assembled (`communityRepos()`, `feedUseCase()`, …), and each site's headers, charset and cookie jar
+- `web/src/model/community.ts` — the registry: `registeredCommunityIds`, `communities`
+- `web/src/provider/state_notifier.tsx` — `StateNotifier` and `useNotifierState`, the base of every provider
+- `web/src/utils/router.ts`, `web/src/app.tsx` — the paths, the navigation, and the page shown for a path
+- `web/src/index.css` — the tokens of the theme, and the only place with a raw colour value
+- `web/wrangler.jsonc` — how the web app is deployed (`web/README.md`, 배포)
+- `web/test/helpers/fixtures.ts` — reads the page samples in `web/test/fixtures/`
+- `shell/` — the gyo WebView shell; its `lib/` is a symlink to `../web`; `shell/gyo.config.json` holds its profiles, package name, version and icon. See `shell/README.md`
+- `.github/workflows/` — `deploy-web.yml` (the web app to Cloudflare), `build-shell.yml` (the signed APK; a Release on a `v*` tag)
 
-## Web App (migration in progress)
+## Layers
 
-The Flutter app is being moved to a web app shown in a gyo WebView shell. Until that is done both live here: `web/` is the web app, `shell/` the Android project that shows it.
-
-- The four layers carry over under `web/src/`: `service/` → `repository/` → `use_case/` → `provider/`, with `model/`, `utils/`, `pages/` and `widgets/`. Files are named as in Dart (`*_repo.ts`, `*_impl.ts`, `*_use_case.ts`, `*_provider.ts`, `*_view.tsx`); a widget's file is its description.
-- Tests mirror `web/src/` under `web/test/` (`*.test.ts`, Vitest). Port a Dart test with its code. The HTML fixtures in `test/fixtures/` are shared; `test/helpers/fixtures.ts` reads them. A test that needs the DOM starts with `// @vitest-environment jsdom`.
-- Community pages are fetched through the native relay (`@gyo-community/http`), never by the WebView: CORS, the WebView's own user agent and its Referer get in the way. `web/src/service/service_locator.ts` holds each site's headers, charset and cookie jar and stays in step with `lib/service/service_locator.dart` as long as the Flutter app exists.
-- **One community: 웃대 (humoruniv) only.** By decision (2026-11-28) the web app serves no other community: do not port or register one, or restart W-09, unless the user asks for it ([docs/PRODUCT_PLAN.md](docs/PRODUCT_PLAN.md), §9). The feed, the settings switches and the tabs take every registered community, so one joins in three places that the compiler keeps in step: `registeredCommunityIds` and `communities` in `web/src/model/community.ts`, and its repository in `communityRepos()` of `web/src/service/service_locator.ts`. Write nothing per community anywhere else.
-- A provider is a notifier class on `StateNotifier` (`web/src/provider/`), tested without React, and a hook next to it that binds the notifier to a screen. Only a `*_view.tsx` page reads providers; a widget receives data and `on*` callbacks.
-
-## Web Design System
-
-The web app uses shadcn/ui for React with Tailwind (`web/src/components/ui/`, added with the shadcn CLI) and `lucide-react` icons. The rules of [docs/DESIGN.md](docs/DESIGN.md) carry over:
-
-- Dark only, orange primary, semantic tokens only (`primary`, `foreground`, `mutedForeground`, `muted`, `border`, `destructive`) — no raw color values outside the theme.
-- 8pt grid (multiples of 4), screen padding 16, touch targets 44px, thumbnails 48/72/120.
-- Color is never the only signal of a state; every interactive element has an accessible name.
+- `service/` → `repository/` → `use_case/` → `provider/`, with `model/`, `utils/`, `pages/` and `widgets/`, all under `web/src/`. A widget's file is its description.
+- Community pages are fetched through the native relay (`@gyo-community/http`), never by the WebView: CORS, the WebView's own user agent and its Referer get in the way.
+- The feed, the settings switches and the tabs take every registered community, so one joins in three places that the compiler keeps in step: `registeredCommunityIds` and `communities` in `web/src/model/community.ts`, and its repository in `communityRepos()` of `web/src/service/service_locator.ts`. Write nothing per community anywhere else, and add none unless the user asks.
+- A provider is a notifier class on `StateNotifier`, tested without React, and a hook next to it that binds the notifier to a screen. Only a `pages/*_view.tsx` reads providers; a widget receives data and `on*` callbacks.
+- A parser lives in its community's `*_impl.ts`, written against the page sample in `web/test/fixtures/` that its tests read.
 
 ## Design System
 
-This project uses `shadcn_ui` (^0.56.0) as its design system. See [docs/DESIGN.md](docs/DESIGN.md) for the full guide. Highlights:
+shadcn/ui for React with Tailwind (`web/src/components/ui/`, added with the shadcn CLI) and `lucide-react` icons. [docs/DESIGN.md](docs/DESIGN.md) is the guide:
 
-- App root: `ShadApp.router` (NOT `MaterialApp`). Material ThemeData is auto-derived.
-- Theme access: `ShadTheme.of(context).colorScheme.*` and `textTheme.*`.
-- Icons: `LucideIcons.foo` (via `package:shadcn_ui`). No Material `Icons.*`.
-- Spacing: raw literals (`EdgeInsets.all(16)`). No central spacing tokens.
-- Prefer shadcn primitives (`ShadCard`, `ShadButton`, `ShadBadge`, etc.) for new widgets.
-- For widget tests, use `shadHarness(body)` or `shadApp({home})` — plain `MaterialApp` lacks `ShadTheme`.
+- Dark only, orange primary, semantic tokens only (`primary`, `foreground`, `mutedForeground`, `muted`, `border`, `destructive`) — no raw colour values outside `web/src/index.css`.
+- 8pt grid (multiples of 4), screen padding 16, touch targets 44px, thumbnails 48/72/120.
+- Color is never the only signal of a state; every interactive element has an accessible name.
 
 ## Mandatory Checks Before Committing
 
-Pre-commit hook (husky) enforces:
+The pre-commit and the pre-push hooks (husky) run:
 
 ```bash
-npm run check --prefix web   # web/: lint, format check, typecheck, test, build
-dart format --set-exit-if-changed .
-flutter analyze
-flutter test
+npm run check --prefix web   # lint, format check, typecheck, test, build
 ```
 
-All must pass. `flutter analyze` runs with **all severities fatal** — any info, warning, or error fails the commit. `flutter test` must show **zero skipped outside smoke** — every test in the `~N` count must be a gated test under `test/smoke/`; unit/widget/integration tests are never skipped. The only opt-in category is smoke (`test/smoke/`, gated by `SMOKE=1`, run via `make smoke`). Or use: `make check`
+All must pass, and every test passes: none is skipped (`it.skip`, `describe.skip`, `it.todo` and `test.only` are not used). Or run `make check`. Commit messages follow Conventional Commits; the `commit-msg` hook enforces them.
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `make check` | format check + analyze + test + web checks (run before commit) |
-| `make check-web` | web app only: lint + format check + typecheck + test + build |
-| `make analyze` | lint check only |
-| `make test` | all tests |
-| `make coverage` | tests with coverage report |
-| `make smoke` | Smoke tests — real network (needs internet) |
-| `make fix` | dart format + auto-fix lint |
-| `make clean` | clean and re-fetch dependencies |
+| Command                    | Description                                                                        |
+|----------------------------|------------------------------------------------------------------------------------|
+| `make check`               | lint + format check + typecheck + test + build of the web app (run before a commit) |
+| `make fix`                 | format + auto-fix lint                                                             |
+| `make clean`               | remove what a check leaves behind                                                  |
+| `npm run dev --prefix web` | the dev server, on port 3000                                                       |
+| `cd shell && … gyo run`    | the shell on a device: `shell/README.md`                                           |
+| deploy, release            | `web/README.md` (배포), `README.md` (배포)                                         |
 
 ## Feature Consensus Protocol
 
@@ -90,42 +75,45 @@ skill({ name: "feature-consensus" })
 
 ## Prohibited Actions
 
-- Using `late` keyword (use nullable types or constructor injection)
-- "what" comments that restate what the code already expresses (allowed: concise "why" comments for non-obvious behavior, design intent, or regression rationale; public APIs keep `///` dartdoc)
-- Committing code with failing tests or analyze errors
+- "what" comments that restate what the code already expresses (allowed: concise "why" comments for non-obvious behavior, design intent, or regression rationale; public APIs keep a `/** */` doc comment)
+- Committing code with failing tests, or with lint or type errors
 - Skipping `make check` before committing
-- Skipping tests (`skip:`, `@Skip`) in unit/widget/integration tests — every test must pass. The only opt-in category is smoke tests under `test/smoke/` (gated by `SMOKE=1`, run via `make smoke`).
-- Adding a new community parser without fixture HTML + tests
+- Skipping tests: every test must pass
+- Changing or adding a parser without the page sample in `web/test/fixtures/` and the tests that read it
 - Provider calling Repository/Service directly (skip UseCase)
-- Registering impl class in DI instead of abstract interface
-- Widget extending `ConsumerWidget`/`ConsumerStatefulWidget` (use `StatelessWidget`/`StatefulWidget`; inject data + `on*` callbacks)
-- `ref.watch`/`ref.read`/`ref.listen` or provider imports inside `lib/widgets/` or page-private widgets (provider access confined to `*_view.dart` page build)
-- Additional widget classes (besides the View + State pair) in a `*_view.dart` file (extract to `lib/widgets/`)
-- Non-`on*` callback names on widget constructors
+- Depending on an impl class where the abstract interface exists (`*_repo.ts`)
+- Provider imports or provider hooks inside `web/src/widgets/` or in a page's private components (provider access is confined to `pages/*_view.tsx`)
+- Additional page-level components, besides the page itself, in a `*_view.tsx` file (extract to `web/src/widgets/`)
+- Non-`on*` callback names on widget props
+- Raw colour values outside `web/src/index.css`
+- Writing anything per community outside the three registry places
+- Pushing a `v*` tag: it publishes the Release that every user of the app is offered. The user decides a release.
+- Putting a secret or a private address in the repository: the release keys and the Cloudflare token are GitHub secrets, and this machine's Tailscale address stays out
 
 ## Commit Convention
 
 Use Conventional Commits:
 
 ```
-feat: add ppomppu detail parser
-fix: fix EUC-KR decoding edge case
-refactor: extract common parser utility
-test: add post detail parser tests
-docs: update architecture guide
+feat: add a notice for a post whose body failed
+fix(parser): decode a date without a leading zero
+refactor: extract the common selector helper
+test: add page samples for the comment list
+docs: update the architecture guide
+ci: deploy the web app on a change
 chore: update dependencies
 ```
 
 ## When Adding a New Feature
 
 1. **Feature Consensus** — run `skill({ name: "feature-consensus" })` for screens/significant features
-2. **model/** — entity (`extends Equatable`) + DTO (`*_dto.dart`, `toEntity()`) + failure if needed
-3. **service/parser/** — HTML parser (`*_parser.dart`, static, fixture in `test/fixtures/`)
-4. **repository/** — `repository/<feature>/<feature>_repo.dart` + `<feature>_impl.dart`
-5. **use_case/** — `*_use_case.dart` (`XxxUseCase` class, private deps)
-6. **service/service_locator.dart** — register (abstract ← impl)
-7. **provider/** — Riverpod provider
-8. **pages/** — `*_view.dart`
-9. **widgets/** — reusable UI if needed
-10. **Tests** — mirror `lib/` under `test/`; run `flutter test`
+2. **model/** — the types in `web/src/model/`, and a failure if one is needed
+3. **parser** — in the community's `*_impl.ts` (`web/src/repository/community/<id>/`), with the page sample in `web/test/fixtures/`
+4. **repository/** — `web/src/repository/<feature>/<feature>_repo.ts` + `<feature>_impl.ts`
+5. **use_case/** — `*_use_case.ts` (`XxxUseCase` class, private deps, a `Result` back)
+6. **service/service_locator.ts** — assemble it (interface ← impl)
+7. **provider/** — a notifier class on `StateNotifier`, and the hook next to it
+8. **pages/** — `*_view.tsx`, the only place that reads providers
+9. **widgets/** — reusable UI, if needed: data and `on*` callbacks
+10. **Tests** — mirror `web/src/` under `web/test/`; run `make check`
 11. **Final check** — `make check` passes, then commit
