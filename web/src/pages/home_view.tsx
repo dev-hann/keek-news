@@ -1,12 +1,10 @@
 import { LoaderCircle, RefreshCw, Settings } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { toast } from 'sonner';
 import { cn } from 'cn';
 import { Button } from '../components/ui/button';
-import { findCommunity, registeredCommunities, type CommunityId } from '../model/community';
-import { feedItemKey, type FeedItem } from '../model/feed_item';
-import type { ErrorPostDetail } from '../model/post_detail';
-import { resolveAbsolute } from '../model/url_builder';
+import { registeredCommunities, type CommunityId } from '../model/community';
+import { feedItemKey } from '../model/feed_item';
+import { useBookmarks } from '../provider/bookmark_provider';
 import {
   mergedDetailNotifier,
   mergedFeedNotifier,
@@ -14,9 +12,8 @@ import {
   useMergedDetail,
   useMergedFeed,
 } from '../provider/merged_feed_provider';
+import { copyPostError, copyPostLink, toggleBookmark } from '../provider/post_actions';
 import { useSettings } from '../provider/settings_provider';
-import { copyText } from '../utils/clipboard';
-import { formatErrorReport } from '../utils/error_report';
 import { AppBar } from '../widgets/app_bar';
 import { CommunityTabBar } from '../widgets/community_tab_bar';
 import { EmptyStateView } from '../widgets/empty_state_view';
@@ -57,6 +54,7 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
       ? feed.items.filter((item) => item.community === selected.id)
       : feed.items;
   const detail = mergedDetailNotifier();
+  const bookmarks = useBookmarks();
 
   const refreshSilently = useCallback(async () => {
     if (refreshingNow.current) return;
@@ -115,26 +113,6 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
     void refreshSilently();
   };
 
-  const onCopyLink = async (post: FeedItem) => {
-    const copied = await copyText(resolveAbsolute(post.community, post.url));
-    if (copied) toast.success('링크를 복사했어요');
-    else toast.error('링크를 복사하지 못했습니다');
-  };
-
-  const onCopyError = async (post: FeedItem, error: ErrorPostDetail) => {
-    const report = formatErrorReport({
-      communityLabel: findCommunity(post.community)?.displayName ?? post.community,
-      postId: post.id,
-      url: resolveAbsolute(post.community, post.url),
-      title: post.title,
-      failure: error.failure,
-      appVersion: __APP_VERSION__,
-    });
-    const copied = await copyText(report);
-    if (copied) toast.success('오류 정보를 복사했어요');
-    else toast.error('오류 정보를 복사하지 못했습니다');
-  };
-
   let content: ReactNode;
   if (feed.isLoading) {
     content = Array.from({ length: SKELETON_CARDS }, (_, index) => (
@@ -162,8 +140,12 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
               detail={entry?.status === 'loaded' ? entry.detail : undefined}
               detailLoading={entry?.status === 'loading'}
               onRetry={() => void detail.retryDetail(key)}
-              onCopyLink={() => void onCopyLink(item)}
-              onCopyError={(error) => void onCopyError(item, error)}
+              onCopyLink={() => void copyPostLink(item)}
+              onCopyError={(error) => void copyPostError(item, error)}
+              bookmarked={bookmarks.some(
+                (bookmark) => bookmark.community === item.community && bookmark.id === item.id
+              )}
+              onToggleBookmark={() => void toggleBookmark(item)}
             />
           );
         })}

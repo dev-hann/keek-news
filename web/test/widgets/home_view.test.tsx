@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Bookmark } from '../../src/model/bookmark';
 import type { CommunityId } from '../../src/model/community';
 import type { FeedItem } from '../../src/model/feed_item';
 import { NetworkFailure } from '../../src/model/failures';
@@ -14,6 +15,25 @@ const fake = {
   getEnabledCommunities: vi.fn(() => new Set<CommunityId>(['humoruniv'])),
   canDisableCommunity: vi.fn(() => false),
   toggleCommunity: vi.fn(),
+};
+
+/** What is saved, for the screens to see: the test reads and empties this list. */
+const saved: Bookmark[] = [];
+const bookmarkUseCase = {
+  getAll: vi.fn(async () => ({ ok: true, value: [...saved] })),
+  isBookmarked: vi.fn(
+    async (community: CommunityId, id: string) =>
+      ({ ok: true, value: saved.some((b) => b.community === community && b.id === id) }) as const
+  ),
+  add: vi.fn(async (bookmark: Bookmark) => {
+    saved.unshift(bookmark);
+    return { ok: true, value: undefined } as const;
+  }),
+  remove: vi.fn(async (community: CommunityId, id: string) => {
+    const at = saved.findIndex((b) => b.community === community && b.id === id);
+    if (at >= 0) saved.splice(at, 1);
+    return { ok: true, value: undefined } as const;
+  }),
 };
 
 const post = (id: string, extra: Partial<FeedItem> = {}): FeedItem => ({
@@ -57,7 +77,11 @@ async function loadHome(): Promise<void> {
   vi.resetModules();
   fake.getMergedFeed.mockReset();
   fake.getPostDetail.mockReset();
-  vi.doMock('../../src/service/service_locator', () => ({ feedUseCase: () => fake }));
+  saved.length = 0;
+  vi.doMock('../../src/service/service_locator', () => ({
+    feedUseCase: () => fake,
+    bookmarkUseCase: () => bookmarkUseCase,
+  }));
   ({ HomeView } = await import('../../src/pages/home_view'));
 }
 
@@ -263,5 +287,21 @@ describe('HomeView', () => {
     fireEvent.click(screen.getByRole('button', { name: '설정' }));
 
     expect(onOpenSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves a post from its card, and unsaves it from the same button', async () => {
+    fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+    fake.getPostDetail.mockResolvedValue(body('1'));
+    layout(5000);
+
+    render(<HomeView onOpenSettings={() => undefined} />);
+
+    fireEvent.click(await screen.findByRole('button', { name: '저장' }));
+    expect(await screen.findByRole('button', { name: '저장 취소' })).toBeTruthy();
+    expect(saved.map((bookmark) => bookmark.id)).toEqual(['1']);
+
+    fireEvent.click(screen.getByRole('button', { name: '저장 취소' }));
+    expect(await screen.findByRole('button', { name: '저장' })).toBeTruthy();
+    expect(saved).toEqual([]);
   });
 });

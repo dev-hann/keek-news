@@ -1,15 +1,37 @@
-import { Link as LinkIcon } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Link as LinkIcon } from 'lucide-react';
 import { Card } from '../components/ui/card';
 import { Skeleton } from '../components/ui/skeleton';
 import type { FeedItem } from '../model/feed_item';
+import type { Failure } from '../model/failures';
 import type { LoadedPostDetail } from '../model/post_detail';
 import { feedBodyText } from '../utils/body_text';
 import { formatTimeAgo } from '../utils/time_ago';
 import { ActionButton } from './action_button';
 import { Avatar } from './avatar';
+import { CardBodyError } from './card_body_error';
 import { BestBadge, CommentBadge, RecommendBadge, ViewBadge } from './count_badge';
 import { ExpandableText } from './expandable_text';
 import { FeedMedia } from './feed_media';
+import { useImageLoader } from '../utils/use_image_loader';
+
+/** What a saved post looked like in its listing, for a card whose body did not come. */
+function SavedThumbnail({ src }: { src: string }) {
+  const [state] = useImageLoader(src);
+  return (
+    <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+      {state === 'loaded' && (
+        <img
+          src={src}
+          alt="저장할 때의 미리보기 그림"
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          className="size-full object-cover"
+        />
+      )}
+    </span>
+  );
+}
 
 /** The box that waits for the media of a post: most of a screen, never more than 600px. */
 const MEDIA_BOX_HEIGHT = 'min(600px, 66vh)';
@@ -19,14 +41,33 @@ interface FeedCardProps {
   /** The body of the post, once it has arrived. */
   detail?: LoadedPostDetail;
   detailLoading?: boolean;
+  /**
+   * Why the body could not be read, shown inside the card. The card keeps
+   * what the listing knows about the post: for a saved post, which must not
+   * turn into an error card.
+   */
+  bodyError?: Failure;
+  onRetry?: () => void;
   onCopyLink?: () => void;
+  /** Whether the post is saved, and what saves or unsaves it. */
+  bookmarked?: boolean;
+  onToggleBookmark?: () => void;
 }
 
 /**
  * One post, read in the feed: who wrote it, its images, its counts, its title
  * and text, a first comment and when it was written.
  */
-export function FeedCard({ post, detail, detailLoading = false, onCopyLink }: FeedCardProps) {
+export function FeedCard({
+  post,
+  detail,
+  detailLoading = false,
+  bodyError,
+  onRetry,
+  onCopyLink,
+  bookmarked = false,
+  onToggleBookmark,
+}: FeedCardProps) {
   const body = detail ? feedBodyText(detail) : null;
   const hasMedia =
     detail !== undefined &&
@@ -39,6 +80,7 @@ export function FeedCard({ post, detail, detailLoading = false, onCopyLink }: Fe
         <Avatar />
         <span className="min-w-0 flex-1 truncate font-semibold">{post.author ?? ''}</span>
         {post.recommendCount >= 500 && <BestBadge />}
+        {bodyError && post.thumbnailUrl && <SavedThumbnail src={post.thumbnailUrl} />}
       </div>
 
       {detailLoading && !hasMedia && (
@@ -57,10 +99,18 @@ export function FeedCard({ post, detail, detailLoading = false, onCopyLink }: Fe
           count={post.commentCount !== 0 ? post.commentCount : (detail?.commentCount ?? 0)}
         />
         <ViewBadge count={post.viewCount} />
-        {onCopyLink && (
+        {(onCopyLink || onToggleBookmark) && (
           <>
             <span className="flex-1" />
-            <ActionButton icon={LinkIcon} label="링크 복사" onClick={onCopyLink} />
+            {onCopyLink && <ActionButton icon={LinkIcon} label="링크 복사" onClick={onCopyLink} />}
+            {onToggleBookmark && (
+              <ActionButton
+                icon={bookmarked ? BookmarkCheck : Bookmark}
+                label={bookmarked ? '저장 취소' : '저장'}
+                pressed={bookmarked}
+                onClick={onToggleBookmark}
+              />
+            )}
           </>
         )}
       </div>
@@ -74,6 +124,7 @@ export function FeedCard({ post, detail, detailLoading = false, onCopyLink }: Fe
             className="pt-1 text-sm break-words whitespace-pre-line text-muted-foreground"
           />
         )}
+        {bodyError && <CardBodyError failure={bodyError} onRetry={onRetry} />}
       </div>
 
       {detail && firstComment && (

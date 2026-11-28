@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FeedItem } from '../../src/model/feed_item';
+import { NetworkFailure, ServerFailure } from '../../src/model/failures';
 import type { LoadedPostDetail } from '../../src/model/post_detail';
 import { FeedCard } from '../../src/widgets/feed_card';
 
@@ -148,5 +149,108 @@ describe('FeedCard', () => {
     render(<FeedCard post={post()} detailLoading />);
 
     expect(screen.getByRole('progressbar', { name: '이미지 불러오는 중' })).toBeTruthy();
+  });
+
+  it('saves from a button named by whether the post is saved', () => {
+    const onToggleBookmark = vi.fn();
+    const { rerender } = render(<FeedCard post={post()} onToggleBookmark={onToggleBookmark} />);
+
+    const save = screen.getByRole('button', { name: '저장' });
+    expect(save.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(save);
+    expect(onToggleBookmark).toHaveBeenCalledTimes(1);
+
+    rerender(<FeedCard post={post()} bookmarked onToggleBookmark={onToggleBookmark} />);
+    expect(screen.getByRole('button', { name: '저장 취소' }).getAttribute('aria-pressed')).toBe(
+      'true'
+    );
+  });
+
+  it('has no save button when nothing can save, and the copy button is no toggle', () => {
+    render(<FeedCard post={post()} onCopyLink={() => undefined} />);
+
+    expect(screen.queryByRole('button', { name: '저장' })).toBeNull();
+    expect(
+      screen.getByRole('button', { name: '링크 복사' }).getAttribute('aria-pressed')
+    ).toBeNull();
+  });
+
+  it('keeps the card and says why the body is missing, with a way to try again', () => {
+    const onRetry = vi.fn();
+    render(<FeedCard post={post()} bodyError={new ServerFailure('x')} onRetry={onRetry} />);
+
+    expect(screen.getByRole('heading', { level: 2, name: '제목입니다' })).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toContain('불러오기 실패 — 서버 오류');
+    fireEvent.click(screen.getByText('다시 시도'));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it('says that it cannot connect, and that what is shown was saved earlier', () => {
+    render(
+      <FeedCard post={post()} bodyError={new NetworkFailure('x')} onRetry={() => undefined} />
+    );
+
+    expect(screen.getByRole('alert').textContent).toContain(
+      '연결할 수 없어 본문을 불러올 수 없어요'
+    );
+    expect(screen.getByText('저장한 때의 글만 보여요')).toBeTruthy();
+  });
+
+  it('says the post is gone, and offers no way to try again', () => {
+    const gone = new ServerFailure('x', { statusCode: 404, headers: {}, bodySnippet: '' });
+    const onRetry = vi.fn();
+    render(<FeedCard post={post()} bodyError={gone} onRetry={onRetry} />);
+
+    expect(screen.getByRole('alert').textContent).toContain('삭제되었거나 비공개된 게시물이에요');
+    expect(screen.queryByText('다시 시도')).toBeNull();
+  });
+
+  describe('the saved picture of a post', () => {
+    /** The image loads of the test: nothing loads here unless the test says it did. */
+    const loads: FakeImage[] = [];
+
+    class FakeImage {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      referrerPolicy = '';
+      readonly src: string;
+
+      constructor(src: string) {
+        this.src = src;
+        loads.push(this);
+      }
+    }
+
+    beforeEach(() => {
+      loads.length = 0;
+      vi.stubGlobal('Image', FakeImage);
+    });
+    afterEach(() => vi.unstubAllGlobals());
+
+    it('shows what a saved post looked like in its listing when its body did not come', async () => {
+      render(
+        <FeedCard
+          post={post({ thumbnailUrl: 'https://e.com/a.jpg' })}
+          bodyError={new ServerFailure('x')}
+        />
+      );
+      expect(loads[0]).toMatchObject({ src: 'https://e.com/a.jpg', referrerPolicy: 'no-referrer' });
+      expect(screen.queryByRole('img')).toBeNull();
+
+      await act(() => loads[0].onload?.());
+
+      expect(screen.getByRole('img', { name: '저장할 때의 미리보기 그림' })).toBeTruthy();
+    });
+
+    it('asks for no saved picture next to a post whose body did come', () => {
+      render(
+        <FeedCard
+          post={post({ thumbnailUrl: 'https://e.com/a.jpg' })}
+          detail={detail({ contentBlocks: [{ type: 'text', text: '본문' }] })}
+        />
+      );
+
+      expect(loads).toHaveLength(0);
+    });
   });
 });

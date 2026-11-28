@@ -3,20 +3,7 @@ import { Button } from '../components/ui/button';
 import { findCommunity } from '../model/community';
 import type { Failure } from '../model/failures';
 import type { FeedItem } from '../model/feed_item';
-
-/** Why the body of a post could not be read, in a reader's words. */
-function failureReason(failure: Failure): string {
-  switch (failure.kind) {
-    case 'NetworkFailure':
-      return '네트워크 오류';
-    case 'ServerFailure':
-      return '서버 오류';
-    case 'ParseFailure':
-      return '차단 또는 구조 변경 가능성';
-    default:
-      return failure.message;
-  }
-}
+import { failureReason } from '../utils/failure_reason';
 
 interface FeedErrorCardProps {
   post: FeedItem;

@@ -7,20 +7,21 @@ interface ActionButtonProps {
   /** What the button does, for a screen reader. */
   label: string;
   onClick?: () => void;
-  active?: boolean;
+  /** For a button that is in one of two states, saved or not: which one it is in. */
+  pressed?: boolean;
 }
 
 /** An icon-only button with a 44px target. */
-export function ActionButton({ icon: Icon, label, onClick, active = false }: ActionButtonProps) {
+export function ActionButton({ icon: Icon, label, onClick, pressed }: ActionButtonProps) {
   return (
     <Button
       type="button"
       variant="ghost"
       size="icon"
       aria-label={label}
-      aria-pressed={active}
+      aria-pressed={pressed}
       onClick={onClick}
-      className={cn('size-11', active ? 'text-primary' : 'text-muted-foreground')}
+      className={cn('size-11', pressed ? 'text-primary' : 'text-muted-foreground')}
     >
       <Icon aria-hidden="true" className="size-4" />
     </Button>
