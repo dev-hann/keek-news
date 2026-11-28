@@ -249,8 +249,8 @@ The web app is built in slices. Each one is usable on its own and leaves no cont
 | ID | Slice | Status |
 |----|-------|--------|
 | W-00 | Web app skeleton, native relay (`@gyo-community/http`), Android shell | Done |
-| W-01 | Home: feed of 웃대 with inline cards (text and images), body fetched per post, paging, refresh by pull and by button, loading / error / empty states | In progress |
-| W-02 | Settings: community switches, version, source link | In progress |
+| W-01 | Home: feed of 웃대 with inline cards (text and images), body fetched per post, paging, refresh by pull and by button, loading / error / empty states | Built. Checked on an emulator; not yet looked at on a phone |
+| W-02 | Settings: community switches, version, source link | Built. Checked on an emulator |
 | W-03 | Image viewer: fullscreen, swipe, pinch-zoom | Deferred |
 | W-04 | Comments sheet | Deferred |
 | W-05 | Image carousel and inline video (one at a time) | Deferred |
