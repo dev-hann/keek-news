@@ -1,21 +1,12 @@
 {
-  "name": "humoruniv-app",
-  "version": "1.0.0",
-  "description": "An unofficial Flutter mobile app for [humoruniv.com](https://m.humoruniv.com), a Korean humor community since 1998.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "lib": "lib",
-    "test": "test"
-  },
+  "name": "keek-news",
+  "version": "0.0.0",
+  "private": true,
+  "description": "웃긴대학 웃긴자료 게시판을 보는 비공식 Android 앱: 웹 앱(web/)을 gyo WebView 셸(shell/)이 보여 준다.",
+  "license": "ISC",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
     "husky": "^9.1.7"
   }

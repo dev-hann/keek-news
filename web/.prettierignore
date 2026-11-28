@@ -1,3 +1,5 @@
 dist
 coverage
 package-lock.json
+# Pages as their sites sent them: never reformatted.
+test/fixtures

@@ -1,3 +1,1 @@
-make check-web || exit 1
-flutter analyze || exit 1
-flutter test || exit 1
+make check || exit 1

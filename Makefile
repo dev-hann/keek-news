@@ -1,33 +1,15 @@
-.PHONY: check check-web analyze test coverage smoke fix format clean
+.PHONY: check check-web fix clean
 
+# What the pre-push hook runs: lint, format check, typecheck, tests and the build of the web app.
 check: check-web
-	dart format --set-exit-if-changed .
-	flutter analyze
-	flutter test
 
 check-web:
 	npm run check --prefix web
 
-analyze:
-	flutter analyze
-
-test:
-	flutter test
-
-coverage:
-	flutter test --coverage
-	@echo "Coverage report: coverage/lcov.info"
-
-smoke:
-	SMOKE=1 flutter test test/smoke/
-
-format:
-	dart format .
-
 fix:
-	dart fix --apply
-	dart format .
+	npm run format --prefix web
+	npm run lint --prefix web -- --fix
 
+# What a check leaves behind. node_modules stays.
 clean:
-	flutter clean
-	flutter pub get
+	rm -rf web/dist web/coverage web/node_modules/.vite
