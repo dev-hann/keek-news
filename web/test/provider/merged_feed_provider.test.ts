@@ -287,14 +287,58 @@ describe('MergedDetailNotifier', () => {
     expect(getPostDetail).toHaveBeenCalledTimes(1);
   });
 
-  it('drops what was cleared while a post was loading', async () => {
+  it('forgets the bodies that have arrived when cleared, and keeps the ones on their way', async () => {
+    const other = 'humoruniv:2' as const;
+    const getPostDetail = vi.fn().mockResolvedValue(loaded);
+    const notifier = new MergedDetailNotifier(useCaseWith({ getPostDetail }));
+
+    await notifier.fetchDetail(key);
+    const pending = notifier.fetchDetail(other);
+    notifier.clear();
+
+    expect([...notifier.getState().keys()]).toEqual([other]);
+    expect(notifier.getState().get(other)).toEqual({ status: 'loading' });
+
+    await pending;
+
+    expect(notifier.getState().get(other)).toMatchObject({ status: 'loaded' });
+    expect(notifier.getState().has(key)).toBe(false);
+  });
+
+  it('asks again for a post whose body was forgotten, and not for one still on its way', async () => {
+    const other = 'humoruniv:2' as const;
+    let arrive: (value: LoadedPostDetail) => void = () => undefined;
+    const getPostDetail = vi
+      .fn()
+      .mockResolvedValueOnce(loaded)
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          arrive = resolve;
+        })
+      );
+    const notifier = new MergedDetailNotifier(useCaseWith({ getPostDetail }));
+
+    await notifier.fetchDetail(key);
+    const pending = notifier.fetchDetail(other);
+    notifier.clear();
+    await notifier.fetchDetail(key);
+    await notifier.fetchDetail(other);
+
+    expect(getPostDetail.mock.calls.map(([, id]) => id)).toEqual(['1', '2', '1']);
+
+    arrive(loaded);
+    await pending;
+  });
+
+  it('does not retry a post whose body is still on its way: it is neither asked for again nor dropped', async () => {
     const getPostDetail = vi.fn().mockResolvedValue(loaded);
     const notifier = new MergedDetailNotifier(useCaseWith({ getPostDetail }));
 
     const pending = notifier.fetchDetail(key);
-    notifier.clear();
+    await notifier.retryDetail(key);
     await pending;
 
-    expect(notifier.getState().has(key)).toBe(false);
+    expect(getPostDetail).toHaveBeenCalledTimes(1);
+    expect(notifier.getState().get(key)).toMatchObject({ status: 'loaded' });
   });
 });

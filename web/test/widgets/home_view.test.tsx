@@ -314,6 +314,43 @@ describe('HomeView', () => {
     expect(screen.queryByText('제목 1')).toBeNull();
   });
 
+  it('asks again for the body of a post that the new page still holds, so no card is left without one', async () => {
+    // The usual refresh: the first page has hardly changed, and the same posts are shown again.
+    fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+    fake.getPostDetail.mockImplementation(async (_community, id) => body(id));
+    layout(5000);
+    render(<HomeView onOpenSettings={() => undefined} />);
+    expect(await screen.findAllByText('본문 내용', { exact: true })).toHaveLength(1);
+    expect(fake.getPostDetail).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: '맨 위로' }));
+
+    await waitFor(() => expect(fake.getPostDetail).toHaveBeenCalledTimes(2));
+    expect(fake.getPostDetail).toHaveBeenLastCalledWith('humoruniv', '1');
+    expect(await screen.findAllByText('본문 내용', { exact: true })).toHaveLength(1);
+  });
+
+  it('does not ask twice for a post whose body is still on its way when the page is refreshed', async () => {
+    fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+    let arrive: (value: LoadedPostDetail) => void = () => undefined;
+    fake.getPostDetail.mockReturnValueOnce(
+      new Promise((resolve) => {
+        arrive = resolve;
+      })
+    );
+    layout(5000);
+    render(<HomeView onOpenSettings={() => undefined} />);
+    expect(await screen.findByText('제목 1')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: '맨 위로' }));
+    await waitFor(() => expect(fake.getMergedFeed).toHaveBeenCalledTimes(2));
+
+    expect(fake.getPostDetail).toHaveBeenCalledTimes(1);
+    await act(async () => arrive(body('1')));
+    expect(await screen.findByText('본문 내용', { exact: true })).toBeTruthy();
+    expect(fake.getPostDetail).toHaveBeenCalledTimes(1);
+  });
+
   it('asks for the next page at 85% of the list', async () => {
     const next = { perSourceTokens: { humoruniv: '1' as const } };
     fake.getMergedFeed.mockResolvedValueOnce(ok(page([post('1')], next)));

@@ -138,23 +138,36 @@ export class MergedDetailNotifier extends StateNotifier<MergedDetailMap> {
     this.state = new Map(this.state).set(key, { status: 'loading' });
     const { community, id } = parseFeedItemKey(key);
     const detail = await this.useCase.getPostDetail(community, id);
-    // Cleared while the body was loading: the entry is not wanted any more.
-    if (!this.state.has(key)) return;
+    // A loading entry is never taken away while its body is on its way (see
+    // clear), so this is the entry this request made.
     this.state = new Map(this.state).set(key, { status: 'loaded', detail });
   }
 
-  /** Drops the cached body of a post, an error card for instance, and fetches it again. */
+  /**
+   * Drops the body of a post that has arrived, an error card for instance,
+   * and fetches it again. Nothing is done for a post whose body has not
+   * arrived: one still on its way is left to come.
+   */
   async retryDetail(key: FeedItemKey): Promise<void> {
-    if (!this.state.has(key)) return;
+    if (this.state.get(key)?.status !== 'loaded') return;
     const without = new Map(this.state);
     without.delete(key);
     this.state = without;
     await this.fetchDetail(key);
   }
 
-  /** Drops every cached body, so error cards get a fresh fetch on the next load. */
+  /**
+   * Forgets every body that has arrived, so that an error card gets a fresh
+   * fetch when its post is shown again. A body still on its way is kept: the
+   * site is not asked for it a second time, and it is not dropped when it
+   * comes.
+   */
   clear(): void {
-    this.state = new Map();
+    const onTheirWay = new Map<FeedItemKey, DetailEntry>();
+    for (const [key, entry] of this.state) {
+      if (entry.status === 'loading') onTheirWay.set(key, entry);
+    }
+    this.state = onTheirWay;
   }
 }
 
@@ -196,8 +209,9 @@ export function useMergedDetail(): MergedDetailMap {
 
 /**
  * Loads the feed again from its first page. Silently, what is shown stays
- * until the new page has arrived. Cached bodies are dropped too, so an error
- * card gets a fresh fetch instead of staying.
+ * until the new page has arrived. The bodies that have arrived are dropped
+ * too, so that an error card gets a fresh fetch instead of staying; the posts
+ * shown ask for theirs again as soon as the page has.
  */
 export async function reloadFeed({ silent }: { silent: boolean }): Promise<void> {
   const detail = mergedDetailNotifier();

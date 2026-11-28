@@ -211,6 +211,21 @@ describe('BookmarksView', () => {
     expect(fake.getPostDetail).toHaveBeenCalledTimes(2);
   });
 
+  it('asks again for the body of a saved post when the bodies that were here are dropped', async () => {
+    await loadBookmarks([saved('1')]);
+
+    render(<BookmarksView onBack={() => undefined} />);
+    expect(await screen.findByText('본문 1')).toBeTruthy();
+    expect(fake.getPostDetail).toHaveBeenCalledTimes(1);
+
+    // What a refresh of the feed does to the bodies that have arrived.
+    const { mergedDetailNotifier } = await import('../../src/provider/merged_feed_provider');
+    act(() => mergedDetailNotifier().clear());
+
+    await waitFor(() => expect(fake.getPostDetail).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText('본문 1')).toBeTruthy();
+  });
+
   it('says of every card that the post is saved', async () => {
     await loadBookmarks([saved('1'), saved('2')]);
 

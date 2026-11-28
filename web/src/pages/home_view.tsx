@@ -101,11 +101,14 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
     void mergedFeedNotifier().fetchNextPage();
   }, [feed.isLoading, feed.hasMore, feed.items.length]);
 
+  // The body of each post shown is asked for unless it is already here: when
+  // the list changes, and when bodies that were here are dropped, as a refresh
+  // drops them.
   useEffect(() => {
     visibleItems.forEach((item) => {
       void detail.fetchDetail(feedItemKey(item));
     });
-  }, [detail, visibleItems]);
+  }, [detail, visibleItems, details]);
 
   // Back to the top, and the first page loads again: what was scrolled away may be old by now.
   const onScrollToTopTap = () => {

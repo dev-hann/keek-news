@@ -30,11 +30,13 @@ export function BookmarksView({ onBack }: BookmarksViewProps) {
   const sheet = useCommentsSheet(details, blockedUrls);
   const media = useMediaOverlays(blockedUrls);
 
+  // As on the feed: a body is asked for unless it is already here, which is
+  // read again when the bodies that were here are dropped.
   useEffect(() => {
     bookmarks.forEach((bookmark) => {
       void detail.fetchDetail(feedItemKey(feedItemFromBookmark(bookmark)));
     });
-  }, [detail, bookmarks]);
+  }, [detail, bookmarks, details]);
 
   return (
     <div className="min-h-dvh bg-background">
