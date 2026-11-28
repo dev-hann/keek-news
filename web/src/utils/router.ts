@@ -45,4 +45,6 @@ export function usePathname(): string {
 
 export const homePath = '/';
 export const settingsPath = '/settings';
+export const bookmarksPath = '/bookmarks';
+export const blockedImagesPath = '/blocked-images';
 export const relayCheckPath = '/relay-check';
