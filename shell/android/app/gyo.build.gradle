@@ -4,4 +4,5 @@
 
 dependencies {
     implementation project(':gyo-plugin-http')
+    implementation project(':gyo-plugin-media')
 }

@@ -17,12 +17,17 @@ function recommendClassName(count: number): string {
 interface CountBadgeProps {
   count: number;
   icon: LucideIcon;
+  /** What is counted, for a screen reader: the icon alone does not say. */
+  what: string;
   className?: string;
 }
 
-function CountBadge({ count, icon: Icon, className }: CountBadgeProps) {
+function CountBadge({ count, icon: Icon, what, className }: CountBadgeProps) {
   return (
-    <span className={cn('inline-flex items-center gap-1 text-sm tabular-nums', className)}>
+    <span
+      aria-label={`${what} ${count}`}
+      className={cn('inline-flex items-center gap-1 text-sm tabular-nums', className)}
+    >
       <Icon aria-hidden="true" className="size-4" />
       {count}
     </span>
@@ -30,15 +35,19 @@ function CountBadge({ count, icon: Icon, className }: CountBadgeProps) {
 }
 
 export function RecommendBadge({ count }: { count: number }) {
-  return <CountBadge count={count} icon={ThumbsUp} className={recommendClassName(count)} />;
+  return (
+    <CountBadge count={count} icon={ThumbsUp} what="추천" className={recommendClassName(count)} />
+  );
 }
 
 export function CommentBadge({ count }: { count: number }) {
-  return <CountBadge count={count} icon={MessageCircle} className="text-muted-foreground" />;
+  return (
+    <CountBadge count={count} icon={MessageCircle} what="댓글" className="text-muted-foreground" />
+  );
 }
 
 export function ViewBadge({ count }: { count: number }) {
-  return <CountBadge count={count} icon={Eye} className="text-muted-foreground" />;
+  return <CountBadge count={count} icon={Eye} what="조회" className="text-muted-foreground" />;
 }
 
 /** A post with 500 recommends or more. */

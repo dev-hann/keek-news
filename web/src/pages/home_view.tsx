@@ -1,10 +1,11 @@
-import { LoaderCircle, RefreshCw, Settings } from 'lucide-react';
+import { LoaderCircle, Settings } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { cn } from 'cn';
 import { Button } from '../components/ui/button';
 import { registeredCommunities, type CommunityId } from '../model/community';
 import { feedItemKey } from '../model/feed_item';
+import { useBlockedImages } from '../provider/blocked_images_provider';
 import { useBookmarks } from '../provider/bookmark_provider';
+import { useCommentsSheet } from '../provider/comments_sheet';
 import {
   mergedDetailNotifier,
   mergedFeedNotifier,
@@ -12,9 +13,14 @@ import {
   useMergedDetail,
   useMergedFeed,
 } from '../provider/merged_feed_provider';
+import { useMediaOverlays } from '../provider/media_actions';
 import { copyPostError, copyPostLink, toggleBookmark } from '../provider/post_actions';
 import { useSettings } from '../provider/settings_provider';
+import { filterBlockedPostDetail } from '../utils/blocked_image_filter';
+import { CommentsSheet } from '../widgets/comments_sheet';
 import { AppBar } from '../widgets/app_bar';
+import { ImageViewer } from '../widgets/image_viewer';
+import { MediaActionSheet } from '../widgets/media_action_sheet';
 import { CommunityTabBar } from '../widgets/community_tab_bar';
 import { EmptyStateView } from '../widgets/empty_state_view';
 import { ErrorStateView } from '../widgets/error_state_view';
@@ -42,7 +48,6 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
   const enabled = useSettings();
   const [tabId, setTabId] = useState<CommunityId | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const refreshingNow = useRef(false);
   const loadingMore = useRef(false);
 
@@ -55,16 +60,17 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
       : feed.items;
   const detail = mergedDetailNotifier();
   const bookmarks = useBookmarks();
+  const blockedUrls = new Set(useBlockedImages().map((image) => image.url));
+  const sheet = useCommentsSheet(details, blockedUrls);
+  const media = useMediaOverlays(blockedUrls);
 
   const refreshSilently = useCallback(async () => {
     if (refreshingNow.current) return;
     refreshingNow.current = true;
-    setRefreshing(true);
     try {
       await reloadFeed({ silent: true });
     } finally {
       refreshingNow.current = false;
-      setRefreshing(false);
     }
   }, []);
 
@@ -99,15 +105,7 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
     });
   }, [detail, visibleItems]);
 
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const scrollToTop = () =>
-    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
-
-  const onTitleTap = () => {
-    if (window.scrollY > 0) scrollToTop();
-    else void refreshSilently();
-  };
-
+  // Back to the top, and the first page loads again: what was scrolled away may be old by now.
   const onScrollToTopTap = () => {
     window.scrollTo(0, 0);
     void refreshSilently();
@@ -133,11 +131,15 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
         {visibleItems.map((item) => {
           const key = feedItemKey(item);
           const entry = details.get(key);
+          const shown =
+            entry?.status === 'loaded'
+              ? (filterBlockedPostDetail(entry.detail, blockedUrls) ?? undefined)
+              : undefined;
           return (
             <FeedDetailCard
               key={key}
               post={item}
-              detail={entry?.status === 'loaded' ? entry.detail : undefined}
+              detail={shown}
               detailLoading={entry?.status === 'loading'}
               onRetry={() => void detail.retryDetail(key)}
               onCopyLink={() => void copyPostLink(item)}
@@ -146,6 +148,11 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
                 (bookmark) => bookmark.community === item.community && bookmark.id === item.id
               )}
               onToggleBookmark={() => void toggleBookmark(item)}
+              onOpenComments={() => sheet.open(key)}
+              onOpenImage={(index) =>
+                media.openImage(shown?.status === 'loaded' ? shown.imageUrls : [], index)
+              }
+              onMore={media.openMore}
             />
           );
         })}
@@ -168,36 +175,18 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
     <div className="min-h-dvh bg-background">
       <AppBar
         title={selected?.displayName ?? ''}
-        onTitleTap={onTitleTap}
         actions={
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="새로고침"
-              title="새로고침"
-              disabled={refreshing}
-              onClick={() => void refreshSilently()}
-              className="size-11"
-            >
-              <RefreshCw
-                aria-hidden="true"
-                className={cn('size-5', refreshing && 'animate-spin motion-reduce:animate-none')}
-              />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="설정"
-              title="설정"
-              onClick={onOpenSettings}
-              className="size-11"
-            >
-              <Settings aria-hidden="true" className="size-5" />
-            </Button>
-          </>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label="설정"
+            title="설정"
+            onClick={onOpenSettings}
+            className="size-11"
+          >
+            <Settings aria-hidden="true" className="size-5" />
+          </Button>
         }
       />
       {hasTabs && (
@@ -216,6 +205,9 @@ export function HomeView({ onOpenSettings }: HomeViewProps) {
       />
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-3 pt-3 pb-16">{content}</main>
       <ScrollToTopButton visible={showScrollTop} onClick={onScrollToTopTap} />
+      <CommentsSheet comments={sheet.comments} open={sheet.isOpen} onClose={sheet.close} />
+      <ImageViewer {...media.viewer} />
+      <MediaActionSheet {...media.menu} />
     </div>
   );
 }

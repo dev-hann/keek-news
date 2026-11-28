@@ -4,3 +4,5 @@
 
 include ':gyo-plugin-http'
 project(':gyo-plugin-http').projectDir = file('../../web/node_modules/@gyo-community/http/android')
+include ':gyo-plugin-media'
+project(':gyo-plugin-media').projectDir = file('../../web/node_modules/@gyo-community/media/android')

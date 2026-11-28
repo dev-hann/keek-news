@@ -22,17 +22,36 @@ mise exec node@24 -- node ~/Documents/gyo/cli/dist/index.js run
 네트워크에 있어도 개발 서버에 닿게 하기 위해서라서, 폰도 Tailscale에 연결돼 있어야 한다. 같은
 와이파이에서만 쓴다면 `http://localhost:3000`으로 두면 gyo가 PC의 LAN 주소를 찾아 쓴다.
 
+### 서버를 따로 띄워 두고 셸만 설치하기
+
+`gyo run`이 띄운 서버는 그 `gyo run`과 함께 죽는다. 서버를 오래 살려 두려면 따로 띄우고
+`standalone` 프로필로 셸만 빌드해 설치한다. `gyo run`이 서버를 직접 띄우는 것은
+`development` 프로필일 때뿐이다.
+
+```bash
+cd ../web && setsid nohup npx vite > /tmp/opencode/vite.log 2>&1 &
+cd ../shell && ANDROID_SERIAL=emulator-5554 mise exec node@24 -- \
+  node ~/Documents/gyo/cli/dist/index.js run -p standalone -d emulator-5554
+```
+
+`-d`는 *실행*과 로그가 갈 기기만 고른다. 설치(`installDebug`)는 연결된 모든 기기에 가므로,
+폰을 건드리지 않으려면 `ANDROID_SERIAL`로 한 기기를 정한다.
+
 ## 플러그인
 
-gyo 플러그인은 npm에서 받는다(`web/package.json`의 `@gyo-community/http`). 플러그인의
-`android/`는 Gradle 라이브러리 모듈이라서, `gyo run`·`gyo build`·`gyo install`은 그 모듈을
-앱 빌드에 포함하고 등록 코드를 만든다. 소스를 앱으로 복사하지는 않으므로 플러그인을
-바꾸면 빌드에 바로 반영된다.
+gyo 플러그인은 npm에서 받는다(`web/package.json`의 `@gyo-community/http`, `@gyo-community/media`).
+플러그인의 `android/`는 Gradle 라이브러리 모듈이라서, `gyo run`·`gyo build`·`gyo install`은 그
+모듈을 앱 빌드에 포함하고 등록 코드를 만든다. 소스를 앱으로 복사하지는 않으므로 플러그인을
+바꾸면 빌드에 바로 반영된다. 플러그인을 추가한 뒤에는 셸을 다시 빌드해야 한다.
 
 - 커밋되는 것: `android/gyo.settings.gradle`, `android/app/gyo.build.gradle`,
   `android/app/src/main/java/gyo/plugins/bridge/PluginRegistry.kt`. 셋 다 gyo가 다시 쓴다.
 - 커밋되지 않는 것: `.gyo-plugins`(마지막 동기화 기록), `gyo-config.json`,
   `local.properties`.
+
+권한은 앱의 매니페스트에 직접 적는다(`android/app/src/main/AndroidManifest.xml`). gyo는
+플러그인이 요구하는 권한이 거기 있는지만 살펴보고 없으면 경고한다. 갤러리 저장이 쓰는
+`WRITE_EXTERNAL_STORAGE`는 Android 9 이하에서만 필요하므로 `maxSdkVersion="28"`과 함께 있다.
 
 ## 패키지 이름
 

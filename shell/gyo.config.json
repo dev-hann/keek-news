@@ -5,6 +5,9 @@
   "profiles": {
     "development": {
       "serverUrl": "http://100.71.158.16:3000"
+    },
+    "standalone": {
+      "serverUrl": "http://100.71.158.16:3000"
     }
   },
   "platforms": {

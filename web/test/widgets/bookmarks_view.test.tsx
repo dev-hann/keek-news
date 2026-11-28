@@ -2,9 +2,10 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BlockedImage } from '../../src/model/blocked_image';
 import type { Bookmark } from '../../src/model/bookmark';
+import type { Comment } from '../../src/model/comment';
 import type { CommunityId } from '../../src/model/community';
 import { NetworkFailure, ServerFailure, type Failure } from '../../src/model/failures';
 import type { LoadedPostDetail, PostDetail } from '../../src/model/post_detail';
@@ -51,21 +52,6 @@ class Blocklist extends StateNotifier<BlockedImage[]> {
   }
 }
 
-/** The image loads of the test: nothing loads here unless the test says it did. */
-const loads: FakeImage[] = [];
-
-class FakeImage {
-  onload: (() => void) | null = null;
-  onerror: (() => void) | null = null;
-  referrerPolicy = '';
-  readonly src: string;
-
-  constructor(src: string) {
-    this.src = src;
-    loads.push(this);
-  }
-}
-
 const saved = (id: string, extra: Partial<Bookmark> = {}): Bookmark => ({
   community: 'humoruniv',
   id,
@@ -93,6 +79,18 @@ const body = (id: string, extra: Partial<LoadedPostDetail> = {}): LoadedPostDeta
   viewCount: 20,
   commentCount: 1,
   comments: [],
+  ...extra,
+});
+
+const comment = (id: number, extra: Partial<Comment> = {}): Comment => ({
+  id,
+  author: '댓글러',
+  content: '첫 댓글',
+  date: new Date(2026, 10, 1),
+  recommendCount: 0,
+  isBest: false,
+  mediaBlocks: [],
+  replies: [],
   ...extra,
 });
 
@@ -157,10 +155,6 @@ const titles = (): (string | null)[] =>
 const tick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('BookmarksView', () => {
-  beforeEach(() => {
-    loads.length = 0;
-  });
-
   afterEach(() => {
     vi.unstubAllGlobals();
   });
@@ -305,19 +299,19 @@ describe('BookmarksView', () => {
   it('hides an image the user blocked from the body of a saved post', async () => {
     const A = 'https://example.com/uploads/a.jpg';
     const B = 'https://example.com/uploads/b.jpg';
-    vi.stubGlobal('Image', FakeImage);
     await loadBookmarks([saved('1')], {
       blocked: [{ url: A, blockedAt: new Date(2026, 10, 27) }],
       getPostDetail: (id) => body(id, { imageUrls: [A, B] }),
     });
 
     const { container } = render(<BookmarksView onBack={() => undefined} />);
-    await waitFor(() => expect(loads.length).toBeGreaterThan(0));
-    await act(async () => loads[0].onload?.());
 
-    // The blocked picture is not even asked for.
-    expect(loads.map((load) => load.src)).toEqual([B]);
-    expect([...container.querySelectorAll('img')].map((picture) => picture.src)).toEqual([B]);
+    // The pager asks for the picture it shows, and never for the blocked one.
+    await waitFor(() =>
+      expect(
+        [...container.querySelectorAll('img')].map((picture) => picture.getAttribute('src'))
+      ).toEqual([B])
+    );
     expect(fake.getPostDetail).toHaveBeenCalledExactlyOnceWith('humoruniv', '1');
   });
 
@@ -359,5 +353,58 @@ describe('BookmarksView', () => {
     observer.disconnect();
     await act(() => root.unmount());
     host.remove();
+  });
+
+  it('opens the comments of a saved post from its preview, and closes them with 닫기', async () => {
+    await loadBookmarks([saved('1')], {
+      getPostDetail: (id) =>
+        body(id, {
+          comments: [comment(1, { replies: [comment(11, { content: '답글' })] })],
+        }),
+    });
+
+    render(<BookmarksView onBack={() => undefined} />);
+
+    // Two comments listed: the comment and its reply, whatever the site counted.
+    fireEvent.click(await screen.findByRole('button', { name: /댓글 2개 모두 보기/ }));
+
+    const sheet = await screen.findByRole('dialog', { name: '댓글 2개' });
+    expect(within(sheet).getByText('답글')).toBeTruthy();
+
+    fireEvent.click(within(sheet).getByRole('button', { name: '닫기' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  });
+
+  it('opens a picture of a saved post full screen, and offers the media menu, as the feed does', async () => {
+    await loadBookmarks([saved('1')], {
+      getPostDetail: (id) => body(id, { imageUrls: ['https://example.com/uploads/a.jpg'] }),
+    });
+    Object.defineProperty(Element.prototype, 'scrollTo', {
+      configurable: true,
+      value: vi.fn(),
+    });
+
+    try {
+      render(<BookmarksView onBack={() => undefined} />);
+
+      fireEvent.click(await screen.findByRole('button', { name: '1번째 이미지' }));
+      await waitFor(() =>
+        expect(document.querySelector('[role="dialog"][aria-label="이미지 보기"]')).toBeTruthy()
+      );
+      expect(window.history.state).toMatchObject({ overlay: true });
+      await act(async () => {
+        window.history.back();
+        await waitFor(() => expect(document.querySelector('[role="dialog"]')).toBeNull());
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: '더보기' }));
+      const menu = (await waitFor(() =>
+        document.querySelector('[role="dialog"][aria-label="미디어 메뉴"]')
+      )) as HTMLElement;
+      expect(within(menu).getByRole('button', { name: '갤러리에 저장' })).toBeTruthy();
+    } finally {
+      delete (Element.prototype as Partial<Element>).scrollTo;
+    }
   });
 });

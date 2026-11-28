@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@gyo-community/http": "^0.1.0",
+    "@gyo-community/media": "^0.1.0",
     "@tailwindcss/vite": "^4.3.5",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",

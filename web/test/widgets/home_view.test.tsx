@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { BlockedImage } from '../../src/model/blocked_image';
 import type { Bookmark } from '../../src/model/bookmark';
+import type { Comment } from '../../src/model/comment';
 import type { CommunityId } from '../../src/model/community';
 import type { FeedItem } from '../../src/model/feed_item';
 import { NetworkFailure } from '../../src/model/failures';
@@ -36,6 +38,38 @@ const bookmarkUseCase = {
   }),
 };
 
+/** The blocklist use case the screens see, over a list the test controls. */
+const blocked: BlockedImage[] = [];
+/** Told when the list changed, as the repository tells the notifier. */
+const blocklistListeners = new Set<() => void>();
+const blockImageUseCase = {
+  changes: {
+    subscribe: (listener: () => void) => {
+      blocklistListeners.add(listener);
+      return () => blocklistListeners.delete(listener);
+    },
+  },
+  isHashBlocked: () => false,
+  getAll: vi.fn(async () => ({ ok: true, value: [...blocked] })),
+  add: vi.fn(async (url: string) => {
+    blocked.push({ url, blockedAt: new Date(0) });
+    blocklistListeners.forEach((listener) => listener());
+    return { ok: true, value: undefined } as const;
+  }),
+  remove: vi.fn(async (url: string) => {
+    const at = blocked.findIndex((image) => image.url === url);
+    if (at >= 0) blocked.splice(at, 1);
+    blocklistListeners.forEach((listener) => listener());
+    return { ok: true, value: undefined } as const;
+  }),
+};
+const savedMedia = { call: vi.fn() };
+const sharedMedia = { call: vi.fn() };
+const copyText = vi.fn();
+const dialogs = (): Element[] => [...document.querySelectorAll('[role="dialog"]')];
+const dialogNamed = (name: string): Element | null =>
+  document.querySelector(`[role="dialog"][aria-label="${name}"]`);
+
 const post = (id: string, extra: Partial<FeedItem> = {}): FeedItem => ({
   community: 'humoruniv',
   id,
@@ -64,6 +98,18 @@ const body = (id: string, text = '본문 내용'): LoadedPostDetail => ({
   comments: [],
 });
 
+const comment = (id: number, extra: Partial<Comment> = {}): Comment => ({
+  id,
+  author: '댓글러',
+  content: '첫 댓글',
+  date: new Date(2026, 10, 1),
+  recommendCount: 0,
+  isBest: false,
+  mediaBlocks: [],
+  replies: [],
+  ...extra,
+});
+
 const page = (items: FeedItem[], next: MergedPage['next'] = null): MergedPage => ({
   items,
   next,
@@ -77,10 +123,24 @@ async function loadHome(): Promise<void> {
   vi.resetModules();
   fake.getMergedFeed.mockReset();
   fake.getPostDetail.mockReset();
+  // A post always has a body to fetch: a test that cares replaces it for its own calls.
+  fake.getPostDetail.mockImplementation(async (_community, id) => body(String(id)));
   saved.length = 0;
+  blocked.length = 0;
+  blocklistListeners.clear();
+  savedMedia.call.mockReset();
+  savedMedia.call.mockResolvedValue({ ok: true });
+  sharedMedia.call.mockReset();
+  sharedMedia.call.mockResolvedValue({ ok: true });
+  copyText.mockReset();
+  copyText.mockResolvedValue(true);
+  vi.doMock('../../src/utils/clipboard', () => ({ copyText }));
   vi.doMock('../../src/service/service_locator', () => ({
     feedUseCase: () => fake,
     bookmarkUseCase: () => bookmarkUseCase,
+    blockImageUseCase: () => blockImageUseCase,
+    saveMediaUseCase: () => savedMedia,
+    shareMediaUseCase: () => sharedMedia,
   }));
   ({ HomeView } = await import('../../src/pages/home_view'));
 }
@@ -109,6 +169,10 @@ async function serveTwoCommunities(): Promise<void> {
 function layout(documentHeight: number): void {
   vi.spyOn(document.documentElement, 'scrollHeight', 'get').mockReturnValue(documentHeight);
 }
+
+/** What the pictures of the page are asked for, as `src`, in the order of the page. */
+const pictureSources = (container: HTMLElement): (string | null)[] =>
+  [...container.querySelectorAll('img')].map((image) => image.getAttribute('src'));
 
 describe('HomeView', () => {
   beforeEach(async () => {
@@ -212,7 +276,20 @@ describe('HomeView', () => {
     expect(fake.getPostDetail).toHaveBeenCalledTimes(2);
   });
 
-  it('refreshes without the skeleton and keeps the posts until the new page has arrived', async () => {
+  it('offers no refresh button, and its title is plain text', async () => {
+    fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+    layout(5000);
+
+    render(<HomeView onOpenSettings={() => undefined} />);
+
+    expect(screen.queryByRole('button', { name: '새로고침' })).toBeNull();
+    const title = screen.getByRole('heading', { level: 1, name: '웃긴대학' });
+    expect(title.querySelector('button')).toBeNull();
+    fireEvent.click(title);
+    expect(fake.getMergedFeed).toHaveBeenCalledTimes(1);
+  });
+
+  it('loads the first page again from the way up, without the skeleton, and keeps the posts until it has arrived', async () => {
     fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
     fake.getPostDetail.mockImplementation(async (_community, id) => body(id));
     layout(5000);
@@ -225,11 +302,12 @@ describe('HomeView', () => {
         arrive = (value: MergedPage) => resolve(ok(value));
       })
     );
-    fireEvent.click(screen.getByRole('button', { name: '새로고침' }));
+    // The way up loads the first page again.
+    fireEvent.click(screen.getByRole('button', { name: '맨 위로' }));
 
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
     expect(screen.getByText('제목 1')).toBeTruthy();
     expect(screen.queryByRole('progressbar', { name: '게시글 불러오는 중' })).toBeNull();
-    expect(screen.getByRole('button', { name: '새로고침' })).toHaveProperty('disabled', true);
 
     await act(async () => arrive(page([post('2')])));
     expect(await screen.findByText('제목 2')).toBeTruthy();
@@ -303,5 +381,160 @@ describe('HomeView', () => {
     fireEvent.click(screen.getByRole('button', { name: '저장 취소' }));
     expect(await screen.findByRole('button', { name: '저장' })).toBeTruthy();
     expect(saved).toEqual([]);
+  });
+
+  it('opens the comments of a post from its card, and closes them with 닫기', async () => {
+    fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+    fake.getPostDetail.mockResolvedValue({
+      ...body('1'),
+      comments: [comment(1, { replies: [comment(11, { content: '답글' })] })],
+    });
+    layout(5000);
+
+    render(<HomeView onOpenSettings={() => undefined} />);
+
+    // Two comments listed: the comment and its reply, whatever the site counted.
+    fireEvent.click(await screen.findByRole('button', { name: /댓글 2개 모두 보기/ }));
+
+    const sheet = await screen.findByRole('dialog', { name: '댓글 2개' });
+    expect(within(sheet).getByText('답글')).toBeTruthy();
+
+    fireEvent.click(within(sheet).getByRole('button', { name: '닫기' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(screen.getByRole('button', { name: /댓글 2개 모두 보기/ })).toBeTruthy();
+  });
+
+  it('leaves a blocked image out of the post that shows it', async () => {
+    blocked.push({ url: 'https://e.com/blocked.jpg', blockedAt: new Date(0) });
+    fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+    fake.getPostDetail.mockResolvedValue({
+      ...body('1'),
+      contentBlocks: [],
+      imageUrls: ['https://e.com/blocked.jpg', 'https://e.com/shown.jpg'],
+    });
+    layout(5000);
+
+    const { container } = render(<HomeView onOpenSettings={() => undefined} />);
+
+    // The pager asks for the picture it shows, and never for the blocked one.
+    await waitFor(() => expect(pictureSources(container)).toEqual(['https://e.com/shown.jpg']));
+  });
+
+  describe('the media of a post', () => {
+    beforeAll(() => {
+      // The viewer pages by scrolling its own element, and jsdom does not scroll.
+      Object.defineProperty(Element.prototype, 'scrollTo', { configurable: true, value: vi.fn() });
+    });
+    afterAll(() => {
+      delete (Element.prototype as Partial<Element>).scrollTo;
+    });
+    const pictures = (urls: string[]): LoadedPostDetail => ({
+      ...body('1'),
+      contentBlocks: [],
+      imageUrls: urls,
+    });
+    const shown = async () => {
+      fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+      layout(5000);
+      const view = render(<HomeView onOpenSettings={() => undefined} />);
+      await screen.findByRole('button', { name: '1번째 이미지' });
+      return view;
+    };
+
+    it('opens an image full screen from a tap on it, and Back closes the viewer before the page', async () => {
+      fake.getPostDetail.mockResolvedValue(
+        pictures(['https://e.com/a.jpg', 'https://e.com/b.jpg'])
+      );
+      await shown();
+
+      fireEvent.click(screen.getByRole('button', { name: '1번째 이미지' }));
+
+      expect(await waitFor(() => dialogNamed('이미지 보기'))).toBeTruthy();
+      expect(window.history.state).toMatchObject({ overlay: true });
+
+      // The system Back: the entry of the overlay is left.
+      await act(async () => {
+        window.history.back();
+        await waitFor(() => expect(dialogs()).toHaveLength(0));
+      });
+      expect(window.location.pathname).toBe('/');
+    });
+
+    it('offers the media menu from ⋯, with what an image is good for, and copies its address', async () => {
+      fake.getPostDetail.mockResolvedValue(pictures(['https://e.com/a.jpg']));
+      await shown();
+
+      fireEvent.click(screen.getByRole('button', { name: '더보기' }));
+
+      const sheet = (await waitFor(() => dialogNamed('미디어 메뉴'))) as HTMLElement;
+      expect(
+        [...sheet.querySelectorAll('button')].map((row) => row.textContent?.trim()).filter(Boolean)
+      ).toEqual(['갤러리에 저장', '공유', 'URL 복사', '이미지 차단']);
+
+      fireEvent.click(within(sheet).getByRole('button', { name: 'URL 복사' }));
+
+      await waitFor(() => expect(copyText).toHaveBeenCalledWith('https://e.com/a.jpg'));
+      await waitFor(() => expect(dialogs()).toHaveLength(0));
+    });
+
+    it('saves and shares the picture through the use cases, and closes the menu either way', async () => {
+      fake.getPostDetail.mockResolvedValue(pictures(['https://e.com/a.jpg']));
+      await shown();
+
+      fireEvent.click(screen.getByRole('button', { name: '더보기' }));
+      const sheet = (await waitFor(() => dialogNamed('미디어 메뉴'))) as HTMLElement;
+      fireEvent.click(within(sheet).getByRole('button', { name: '갤러리에 저장' }));
+
+      await waitFor(() => expect(savedMedia.call).toHaveBeenCalledTimes(1));
+      expect(savedMedia.call.mock.calls[0][0]).toEqual({
+        url: 'https://e.com/a.jpg',
+        kind: 'image',
+      });
+      await waitFor(() => expect(dialogs()).toHaveLength(0));
+
+      fireEvent.click(screen.getByRole('button', { name: '더보기' }));
+      const again = (await waitFor(() => dialogNamed('미디어 메뉴'))) as HTMLElement;
+      fireEvent.click(within(again).getByRole('button', { name: '공유' }));
+
+      await waitFor(() => expect(sharedMedia.call).toHaveBeenCalledTimes(1));
+      expect(sharedMedia.call.mock.calls[0][0].url).toBe('https://e.com/a.jpg');
+    });
+
+    it('blocks the picture from the menu of the viewer: the viewer, now empty, closes and the card loses it', async () => {
+      fake.getPostDetail.mockResolvedValue(pictures(['https://e.com/a.jpg']));
+      const { container } = await shown();
+      fireEvent.click(screen.getByRole('button', { name: '1번째 이미지' }));
+      const viewer = (await waitFor(() => dialogNamed('이미지 보기'))) as HTMLElement;
+
+      fireEvent.click(within(viewer).getByRole('button', { name: '더보기' }));
+      const sheet = (await waitFor(() => dialogNamed('미디어 메뉴'))) as HTMLElement;
+      fireEvent.click(within(sheet).getByRole('button', { name: '이미지 차단' }));
+
+      await waitFor(() =>
+        expect(blockImageUseCase.add).toHaveBeenCalledWith('https://e.com/a.jpg')
+      );
+      await waitFor(() => expect(dialogs()).toHaveLength(0));
+      expect(container.querySelector('img[src="https://e.com/a.jpg"]')).toBeNull();
+    });
+
+    it('offers no 차단 for a video, only its address', async () => {
+      fake.getPostDetail.mockResolvedValue({
+        ...body('1'),
+        contentBlocks: [
+          { type: 'video', url: 'https://e.com/v.mp4', thumbnailUrl: 'https://e.com/v.jpg' },
+        ],
+        imageUrls: [],
+      });
+      fake.getMergedFeed.mockResolvedValue(ok(page([post('1')])));
+      layout(5000);
+      render(<HomeView onOpenSettings={() => undefined} />);
+
+      fireEvent.click(await screen.findByRole('button', { name: '더보기' }));
+
+      const sheet = (await waitFor(() => dialogNamed('미디어 메뉴'))) as HTMLElement;
+      expect(within(sheet).queryByRole('button', { name: '이미지 차단' })).toBeNull();
+      expect(within(sheet).getByRole('button', { name: 'URL 복사' })).toBeTruthy();
+    });
   });
 });

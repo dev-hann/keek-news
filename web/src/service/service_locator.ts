@@ -1,4 +1,5 @@
 import { Http } from '@gyo-community/http';
+import { Media } from '@gyo-community/media';
 import {
   registeredCommunityIds,
   type CommunityId,
@@ -9,9 +10,13 @@ import { BlockedImageImpl } from '../repository/blocked_image/blocked_image_impl
 import { HumorunivImpl } from '../repository/community/humoruniv/humoruniv_impl';
 import type { CommunityRepo } from '../repository/community/community_repo';
 import { FeedImpl } from '../repository/feed/feed_impl';
+import type { MediaSaveRepo } from '../repository/media_save/media_save_repo';
+import { MediaSaveImpl } from '../repository/media_save/media_save_impl';
 import { BlockImageUseCase } from '../use_case/block_image_use_case';
 import { BookmarkUseCase } from '../use_case/bookmark_use_case';
 import { FeedUseCase } from '../use_case/feed_use_case';
+import { SaveMediaUseCase } from '../use_case/save_media_use_case';
+import { ShareMediaUseCase } from '../use_case/share_media_use_case';
 import { browserHeaders, desktopUserAgent, mobileUserAgent } from './community_headers';
 import { BrowserLocalStorageService } from './browser_local_storage_service';
 import { HtmlClient, type HtmlClientOptions } from './html_client';
@@ -145,4 +150,26 @@ export function blockImageUseCase(): BlockImageUseCase {
     new FlutterImageHashService(http())
   );
   return blockImage;
+}
+
+let mediaSave: MediaSaveRepo | undefined;
+
+/** Where a picture or a video is saved or shared: the native media plugin, made the first time a sheet asks for it. */
+export function mediaSaveRepo(): MediaSaveRepo {
+  mediaSave ??= new MediaSaveImpl(new Media());
+  return mediaSave;
+}
+
+let saveMedia: SaveMediaUseCase | undefined;
+
+export function saveMediaUseCase(): SaveMediaUseCase {
+  saveMedia ??= new SaveMediaUseCase(mediaSaveRepo());
+  return saveMedia;
+}
+
+let shareMedia: ShareMediaUseCase | undefined;
+
+export function shareMediaUseCase(): ShareMediaUseCase {
+  shareMedia ??= new ShareMediaUseCase(mediaSaveRepo());
+  return shareMedia;
 }

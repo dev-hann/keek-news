@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Comment } from '../../src/model/comment';
 import type { FeedItem } from '../../src/model/feed_item';
 import { NetworkFailure, ServerFailure } from '../../src/model/failures';
 import type { LoadedPostDetail } from '../../src/model/post_detail';
@@ -35,6 +36,18 @@ const detail = (extra: Partial<LoadedPostDetail> = {}): LoadedPostDetail => ({
   ...extra,
 });
 
+const comment = (id: number, extra: Partial<Comment> = {}): Comment => ({
+  id,
+  author: '댓글러',
+  content: '첫 댓글',
+  date: new Date(2026, 10, 1),
+  recommendCount: 0,
+  isBest: false,
+  mediaBlocks: [],
+  replies: [],
+  ...extra,
+});
+
 describe('FeedCard', () => {
   afterEach(() => vi.restoreAllMocks());
 
@@ -47,10 +60,33 @@ describe('FeedCard', () => {
     expect(screen.getByText('20')).toBeTruthy();
   });
 
-  it('takes the comment count from the body once the body has arrived', () => {
-    render(<FeedCard post={post({ commentCount: 0 })} detail={detail({ commentCount: 4 })} />);
+  it('counts the comments the body lists once it has arrived, replies included', () => {
+    render(
+      <FeedCard
+        post={post({ commentCount: 99, recommendCount: 5 })}
+        detail={detail({
+          commentCount: 99,
+          comments: [comment(1, { replies: [comment(11)] }), comment(2)],
+        })}
+      />
+    );
+
+    expect(screen.getByText('3')).toBeTruthy();
+    expect(screen.getByText('댓글 3개 모두 보기')).toBeTruthy();
+  });
+
+  it('keeps what the listing counted until the body arrives', () => {
+    render(<FeedCard post={post({ commentCount: 4 })} />);
 
     expect(screen.getByText('4')).toBeTruthy();
+    expect(screen.queryByText(/모두 보기/)).toBeNull();
+  });
+
+  it('counts no comment once the body arrived without one, whatever the site counted', () => {
+    render(<FeedCard post={post({ commentCount: 4 })} detail={detail({ commentCount: 4 })} />);
+
+    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.queryByText(/모두 보기/)).toBeNull();
   });
 
   it('marks a post with 500 recommends or more as BEST', () => {
@@ -93,7 +129,7 @@ describe('FeedCard', () => {
     );
 
     expect(screen.getByText('여기가 본문입니다.')).toBeTruthy();
-    expect(screen.getByText('댓글 4개 모두 보기')).toBeTruthy();
+    expect(screen.getByText('댓글 1개 모두 보기')).toBeTruthy();
     expect(
       screen.getByText(
         (_, element) => element?.tagName === 'P' && element.textContent === '댓글러 첫 댓글'
@@ -251,6 +287,31 @@ describe('FeedCard', () => {
       );
 
       expect(loads).toHaveLength(0);
+    });
+  });
+
+  describe('the way to the comments', () => {
+    afterEach(cleanup);
+
+    it('opens them from the preview, a button named by what it shows', () => {
+      const onOpenComments = vi.fn();
+      render(
+        <FeedCard
+          post={post()}
+          detail={detail({ comments: [comment(1), comment(2)] })}
+          onOpenComments={onOpenComments}
+        />
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /댓글 2개 모두 보기/ }));
+
+      expect(onOpenComments).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves the preview as text where nothing can open the comments', () => {
+      render(<FeedCard post={post()} detail={detail({ comments: [comment(1)] })} />);
+
+      expect(screen.getByText('댓글 1개 모두 보기').closest('button')).toBeNull();
     });
   });
 });

@@ -1,6 +1,6 @@
 import { ImageOff } from 'lucide-react';
-import { toast } from 'sonner';
-import { blockedImagesNotifier, useBlockedImages } from '../provider/blocked_images_provider';
+import { useBlockedImages } from '../provider/blocked_images_provider';
+import { unblockImage } from '../provider/media_actions';
 import { AppBar } from '../widgets/app_bar';
 import { BlockedImageTile } from '../widgets/blocked_image_tile';
 import { EmptyStateView } from '../widgets/empty_state_view';
@@ -12,12 +12,6 @@ interface BlockedImagesViewProps {
 /** The images the user blocked, each with a way to let it show again. */
 export function BlockedImagesView({ onBack }: BlockedImagesViewProps) {
   const images = useBlockedImages();
-
-  const unblock = async (url: string) => {
-    const result = await blockedImagesNotifier().unblock(url);
-    if (result.ok) toast.success('차단을 해제했어요');
-    else toast.error('차단 해제에 실패했어요');
-  };
 
   return (
     <div className="min-h-dvh bg-background">
@@ -34,7 +28,7 @@ export function BlockedImagesView({ onBack }: BlockedImagesViewProps) {
             <BlockedImageTile
               key={image.url}
               image={image}
-              onUnblock={() => void unblock(image.url)}
+              onUnblock={() => void unblockImage(image.url)}
             />
           ))
         )}
