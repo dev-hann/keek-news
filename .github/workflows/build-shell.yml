@@ -90,14 +90,30 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: keek-news-${{ github.ref_name }}
           path: apk
       - name: Release
+        # The notes are the tag's section of RELEASE_NOTES.md: a release is not published without them.
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
+          section=$(awk -v tag="$TAG" '/^## / { kept = ($0 ~ ("^## " tag "( |$)")) } kept' RELEASE_NOTES.md)
+          if [ -z "$section" ]; then
+            echo "::error::RELEASE_NOTES.md has no section whose heading starts with '## $TAG'. Write it, then move the tag."
+            exit 1
+          fi
+          summary=$(printf '%s\n' "$section" | head -n 1 | sed -E "s/^## $TAG[[:space:]]*([—-]+[[:space:]]*)?//")
+          notes=$(printf '%s\n' "$section" | tail -n +2 | sed '/./,$!d')
+          previous=$(gh release list --exclude-pre-releases --limit 1 --json tagName -q '.[0].tagName')
+          {
+            printf 'Release %s' "$TAG"
+            [ -z "$summary" ] || printf ' — %s' "$summary"
+            printf '\n\n%s\n' "$notes"
+            [ -z "$previous" ] || printf '\n**Full Changelog**: https://github.com/%s/compare/%s...%s\n' "$GITHUB_REPOSITORY" "$previous" "$TAG"
+          } > notes.md
           mv apk/app-release.apk "apk/keek-news-$TAG.apk"
-          gh release create "$TAG" "apk/keek-news-$TAG.apk" --title "$TAG" --generate-notes
+          gh release create "$TAG" "apk/keek-news-$TAG.apk" --title "$TAG" --notes-file notes.md

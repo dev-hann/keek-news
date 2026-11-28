@@ -28,5 +28,6 @@ make check                 # lint + 형식 + 타입 + 테스트 + 빌드. 커밋
   웹 변경은 앱을 다시 설치하지 않아도 반영된다.
 - **앱**: `shell/`이나 gyo 플러그인이 바뀌면 GitHub Actions(`build-shell.yml`)이 릴리스 키로 서명한
   APK를 빌드해 본다(릴리스는 하지 않는다). `v<버전>` 태그를 밀면 그 태그의 Release로 APK를 올린다.
-  버전은 `shell/gyo.config.json`의 `version`·`versionCode`다. 웹 앱을 손으로 배포하는 법은
+  버전은 `shell/gyo.config.json`의 `version`·`versionCode`다. 릴리즈 노트는 `RELEASE_NOTES.md`의
+  `## v<버전>` 절이고, 그 절이 없는 태그는 릴리즈되지 않는다. 웹 앱을 손으로 배포하는 법은
   `web/README.md`의 배포.

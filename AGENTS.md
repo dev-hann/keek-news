@@ -23,7 +23,7 @@ Current scope: **웃긴자료 (pds) board only.** The app is the web app (`web/`
 - `web/wrangler.jsonc` — how the web app is deployed (`web/README.md`, 배포)
 - `web/test/helpers/fixtures.ts` — reads the page samples in `web/test/fixtures/`
 - `shell/` — the gyo WebView shell; its `lib/` is a symlink to `../web`; `shell/gyo.config.json` holds its profiles, package name, version and icon. See `shell/README.md`
-- `.github/workflows/` — `deploy-web.yml` (the web app to Cloudflare), `build-shell.yml` (the signed APK; a Release on a `v*` tag)
+- `.github/workflows/` — `deploy-web.yml` (the web app to Cloudflare), `build-shell.yml` (the signed APK; a Release on a `v*` tag, with the notes of that tag's section of `RELEASE_NOTES.md`)
 
 ## Layers
 
