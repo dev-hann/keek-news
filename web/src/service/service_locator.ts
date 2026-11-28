@@ -5,14 +5,17 @@ import {
   type RegisteredCommunityId,
 } from '../model/community';
 import { BookmarkImpl } from '../repository/bookmark/bookmark_impl';
+import { BlockedImageImpl } from '../repository/blocked_image/blocked_image_impl';
 import { HumorunivImpl } from '../repository/community/humoruniv/humoruniv_impl';
 import type { CommunityRepo } from '../repository/community/community_repo';
 import { FeedImpl } from '../repository/feed/feed_impl';
+import { BlockImageUseCase } from '../use_case/block_image_use_case';
 import { BookmarkUseCase } from '../use_case/bookmark_use_case';
 import { FeedUseCase } from '../use_case/feed_use_case';
 import { browserHeaders, desktopUserAgent, mobileUserAgent } from './community_headers';
 import { BrowserLocalStorageService } from './browser_local_storage_service';
 import { HtmlClient, type HtmlClientOptions } from './html_client';
+import { FlutterImageHashService } from './image_hash_service';
 
 function pageClient(
   userAgent: string,
@@ -131,4 +134,15 @@ let bookmarks: BookmarkUseCase | undefined;
 export function bookmarkUseCase(): BookmarkUseCase {
   bookmarks ??= new BookmarkUseCase(new BookmarkImpl(new BrowserLocalStorageService()));
   return bookmarks;
+}
+
+let blockImage: BlockImageUseCase | undefined;
+
+/** The one blocklist use case of the app, made the first time a screen asks for it. */
+export function blockImageUseCase(): BlockImageUseCase {
+  blockImage ??= new BlockImageUseCase(
+    new BlockedImageImpl(new BrowserLocalStorageService()),
+    new FlutterImageHashService(http())
+  );
+  return blockImage;
 }
