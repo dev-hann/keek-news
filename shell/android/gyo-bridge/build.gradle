@@ -1,0 +1,29 @@
+// The native half of the bridge, as a module of its own: the app depends on
+// it and plugins compile against it.
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace = 'gyo.plugins.bridge'
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.17.0'
+    implementation 'androidx.webkit:webkit:1.16.0'
+
+    // Android's org.json is a stub in JVM unit tests; the real one answers
+    // JSONObject.quote for the bridge script tests.
+    testImplementation 'org.json:json:20260814'
+    testImplementation 'junit:junit:4.13.2'
+}

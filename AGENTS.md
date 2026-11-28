@@ -28,7 +28,7 @@ The Flutter app is being moved to a web app shown in a gyo WebView shell. Until 
 
 - The four layers carry over under `web/src/`: `service/` → `repository/` → `use_case/` → `provider/`, with `model/`, `pages/` and `widgets/`.
 - Tests mirror `web/src/` under `web/test/` (Vitest). The HTML fixtures in `test/fixtures/` are reused by the parser ports.
-- Community pages are fetched through the native relay (`@gyo-framework/http`), never by the WebView: CORS, the WebView's own user agent and its Referer get in the way. `web/src/service/service_locator.ts` holds each site's headers, charset and cookie jar and stays in step with `lib/service/service_locator.dart` as long as the Flutter app exists.
+- Community pages are fetched through the native relay (`@gyo-community/http`), never by the WebView: CORS, the WebView's own user agent and its Referer get in the way. `web/src/service/service_locator.ts` holds each site's headers, charset and cookie jar and stays in step with `lib/service/service_locator.dart` as long as the Flutter app exists.
 
 ## Design System
 

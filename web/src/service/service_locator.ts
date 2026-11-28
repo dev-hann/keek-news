@@ -1,4 +1,4 @@
-import { Http } from '@gyo-framework/http';
+import { Http } from '@gyo-community/http';
 import type { CommunityId } from '../model/community';
 import { browserHeaders, desktopUserAgent, mobileUserAgent } from './community_headers';
 import { HtmlClient, type HtmlClientOptions } from './html_client';

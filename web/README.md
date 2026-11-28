@@ -29,17 +29,8 @@ npm run check # lint + 형식 + 타입 + 테스트 + 빌드. 커밋 전에 `make
 
 "cookies survive a restart"는 앱을 재시작한 뒤 다시 열어야 PASS가 된다. 처음에는 PENDING이다.
 
-## gyo 플러그인 연결
+## gyo 플러그인
 
-`@gyo-framework/http`와 `@gyo-framework/bridge`는 형제 저장소 `../../gyo/plugins/`에서 가져온다.
-`.npmrc`의 `install-links=true` 때문에 심링크가 아니라 **복사본**으로 설치된다. gyo가 심링크로
-연결된 플러그인은 찾지 못하기 때문이다.
-
-복사본이므로 플러그인 소스를 고친 뒤에는 패키지 이름을 지정해 다시 설치해야 반영된다. 이름 없는
-`npm install`은 그대로 둔다.
-
-```bash
-npm install @gyo-framework/http@file:../../gyo/plugins/http
-```
-
-플러그인이 npm에 올라가면 버전 범위로 바꾸고, 이 절차는 없어진다.
+페이지는 `@gyo-community/http`(npm)로 받는다. 이 플러그인의 peer 의존성인 `@gyo-framework/bridge`는
+npm이 함께 설치한다. 플러그인을 더 쓰게 되면 여기서 설치하고, 셸이 빌드 전에 Android 모듈을
+포함한다(`shell/README.md` 참고).

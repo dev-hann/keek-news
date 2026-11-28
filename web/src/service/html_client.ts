@@ -4,7 +4,7 @@ import {
   type Http,
   type HttpRequest,
   type HttpResponse,
-} from '@gyo-framework/http';
+} from '@gyo-community/http';
 import { NetworkFailure, ServerFailure } from '../model/failures';
 
 /** The part of the HTTP relay a page fetch needs. Tests pass a fake. */

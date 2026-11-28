@@ -1,4 +1,4 @@
-import type { HttpRequest, HttpResponse } from '@gyo-framework/http';
+import type { HttpRequest, HttpResponse } from '@gyo-community/http';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NetworkFailure, ServerFailure } from '../../src/model/failures';
 import { HtmlClient } from '../../src/service/html_client';

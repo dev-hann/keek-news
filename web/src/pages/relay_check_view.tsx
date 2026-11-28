@@ -1,4 +1,4 @@
-import { Http, base64ToBytes, decodeText, type HttpRequest } from '@gyo-framework/http';
+import { Http, base64ToBytes, decodeText, type HttpRequest } from '@gyo-community/http';
 import { useEffect, useState } from 'react';
 import type { CommunityId } from '../model/community';
 import { Failure, NetworkFailure, ServerFailure } from '../model/failures';

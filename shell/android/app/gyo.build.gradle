@@ -1,0 +1,7 @@
+// Written by gyo. DO NOT EDIT: gyo run, gyo build and gyo install rewrite it before every build.
+
+// The app depends on the module of every plugin installed in lib/.
+
+dependencies {
+    implementation project(':gyo-plugin-http')
+}
